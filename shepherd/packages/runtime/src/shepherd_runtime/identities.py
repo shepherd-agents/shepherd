@@ -18,7 +18,7 @@ __all__ = [
 
 @dataclass(frozen=True)
 class VcsCoreExecutionLink:
-    """Identity bridge from an Shepherd ``RunRef`` to its vcs-core execution.
+    """Identity bridge from a Shepherd ``RunRef`` to its vcs-core execution.
 
     Pure data — no behavior, no vcs-core imports. Colocated with ``RunRef`` (per
     Phase 0a decision D-0a-1) so the one-way package dependency

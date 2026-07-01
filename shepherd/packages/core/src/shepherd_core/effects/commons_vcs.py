@@ -105,7 +105,7 @@ class _PendingStreamAppend:
 
 
 class ShepherdStreamConflictError(RuntimeError):
-    """Raised when an Shepherd commons stream head changed concurrently."""
+    """Raised when a Shepherd commons stream head changed concurrently."""
 
 
 class ShepherdStreamRecoveryError(RuntimeError):

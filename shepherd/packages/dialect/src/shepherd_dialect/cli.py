@@ -376,7 +376,7 @@ def _open_workspace(*, activate: bool = False) -> ShepherdWorkspace:
     workspace = os.path.abspath(".")
     repo_path = os.path.join(workspace, ".vcscore")  # noqa: PTH118
     if not os.path.exists(repo_path):  # noqa: PTH110
-        raise click.ClickException("not an Shepherd workspace. Run `sp init` first.")
+        raise click.ClickException("not a Shepherd workspace. Run `sp init` first.")
     return ShepherdWorkspace.discover(workspace, activate=activate)
 
 

@@ -315,7 +315,7 @@ def test_cli_refuses_outside_a_repo(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     result = CliRunner().invoke(main, ["run", "trace", "deadbeef"])
     assert result.exit_code == 1
-    assert "not an Shepherd workspace" in result.output
+    assert "not a Shepherd workspace" in result.output
 
 
 # --- the driver-plugin config (W3) ---

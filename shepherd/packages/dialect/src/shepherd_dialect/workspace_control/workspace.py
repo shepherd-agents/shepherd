@@ -740,7 +740,7 @@ class ShepherdWorkspace:
         workspace = Path(cwd).resolve()
         repo_path = workspace / ".vcscore"
         if not repo_path.exists():
-            raise WorkspaceControlError("not an Shepherd workspace. Run `sp init` first.")
+            raise WorkspaceControlError("not a Shepherd workspace. Run `sp init` first.")
         from vcs_core import FilesystemSubstrate, MarkerSubstrate, VcsCore, Store, build_builtin_substrate_context
 
         from shepherd_dialect.run_driver import ShepherdRunDriver

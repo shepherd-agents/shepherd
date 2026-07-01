@@ -39,7 +39,7 @@ def main() -> None:
             args={
                 "topic": "quickstart",
                 "output_path": "SHEPHERD_QUICKSTART.txt",
-                "output_text": "Hello from an Shepherd retained output.\\n",
+                "output_text": "Hello from a Shepherd retained output.\\n",
             },
             may="ReadWrite",
             placement="advisory",

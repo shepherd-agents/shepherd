@@ -1,4 +1,4 @@
-"""``sp init`` — initialize an Shepherd workspace."""
+"""``sp init`` — initialize a Shepherd workspace."""
 
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ def init(
     adopt: WorkspaceAdoptMode,
     init_git: bool,
 ) -> None:
-    """Initialize PATH as an Shepherd workspace.
+    """Initialize PATH as a Shepherd workspace.
 
     This creates or reuses ``.vcscore`` in PATH, validates the workspace-control
     substrate, and leaves ordinary Git history untouched. Use
