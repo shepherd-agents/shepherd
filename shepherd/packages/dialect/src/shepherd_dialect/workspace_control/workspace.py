@@ -156,7 +156,7 @@ if TYPE_CHECKING:
 JsonObject = dict[str, object]
 LaunchSurfaceValue = Literal["python", "cli", "model_tool", "sdk", "operator"]
 WorkspaceRunPlacement = Literal["auto", "advisory", "jail"]
-WorkspaceBackend = Literal["clonefile", "fuse", "kernel"]
+WorkspaceBackend = Literal["clonefile", "fuse", "kernel", "copy"]
 BindingPolicy = Literal["pinned", "once_per_run", "live"]
 TaskLibraryMutationKind = Literal["create", "derive"]
 DeclaredDependencyInput = Mapping[str, object] | str | DeclaredTaskDependency
@@ -725,7 +725,7 @@ class ShepherdWorkspace:
         cwd: str | Path = ".",
         *,
         activate: bool = True,
-        backend: WorkspaceBackend | None = "clonefile",
+        backend: WorkspaceBackend | None = None,
     ) -> ShepherdWorkspace:
         """Open an activated Shepherd workspace-control facade at ``cwd``.
 
@@ -733,9 +733,10 @@ class ShepherdWorkspace:
         facade is readable by default. ``activate=False`` is reserved for
         callers that only need an inert VcsCore handle.
 
-        ``backend`` selects the filesystem carrier. ``"clonefile"`` preserves
-        the current macOS-first default; pass ``"fuse"`` or ``"kernel"`` on
-        Linux, or ``None`` to delegate to vcs-core's platform auto-detection.
+        ``backend`` selects the filesystem carrier. The default ``None`` resolves
+        per platform (APFS clonefile on macOS, kernel/FUSE overlay on Linux, and
+        the portable copy carrier as a universal floor); pass ``"clonefile"``,
+        ``"fuse"``, ``"kernel"``, or ``"copy"`` to force one explicitly.
         """
         workspace = Path(cwd).resolve()
         repo_path = workspace / ".vcscore"

@@ -475,11 +475,12 @@ def test_substrate_context_config_is_accessible(tmp_path: Path) -> None:
 def test_auto_detect_backend_returns_none_on_non_linux(monkeypatch) -> None:
     from vcs_core.substrates import detect_overlay_backend
 
-    # macOS clonefile is opt-in via config for now (auto-detect deferred), so darwin auto-detect → None.
+    # The native overlay probe stays Linux-only (None off-Linux); the substrate
+    # resolver then floors to the macOS APFS clonefile carrier on darwin.
     monkeypatch.setattr("vcs_core.substrates.sys.platform", "darwin")
     assert detect_overlay_backend() is None
     fs = FilesystemSubstrate.__new__(FilesystemSubstrate)
-    assert fs._auto_detect_backend_name() is None
+    assert fs._auto_detect_backend_name() == "clonefile"
 
 
 def test_auto_detect_backend_returns_none_on_unsupported_platform(monkeypatch) -> None:

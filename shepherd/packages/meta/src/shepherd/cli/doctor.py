@@ -18,8 +18,8 @@ DoctorMode = Literal["core", "claude"]
 @click.option("--json", "json_output", is_flag=True, help="Emit machine-readable readiness JSON.")
 @click.option(
     "--backend",
-    type=click.Choice(["auto", "clonefile", "fuse", "kernel"]),
-    default="clonefile",
+    type=click.Choice(["auto", "clonefile", "fuse", "kernel", "copy"]),
+    default="auto",
     show_default=True,
     help="Workspace backend to validate.",
 )
@@ -35,8 +35,8 @@ def doctor(ctx: click.Context, json_output: bool, backend: str) -> None:
 @click.option("--json", "json_output", is_flag=True, help="Emit machine-readable readiness JSON.")
 @click.option(
     "--backend",
-    type=click.Choice(["auto", "clonefile", "fuse", "kernel"]),
-    default="clonefile",
+    type=click.Choice(["auto", "clonefile", "fuse", "kernel", "copy"]),
+    default="auto",
     show_default=True,
     help="Workspace backend to validate.",
 )

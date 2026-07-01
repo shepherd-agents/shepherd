@@ -104,7 +104,7 @@ def open( # noqa: A001
     cwd: str | Path = ".",
     *,
     activate: bool = True,
-    backend: str | None = "clonefile",
+    backend: str | None = None,
 ) -> ShepherdWorkspace:
     """Open the vcs-core-backed workspace and its handle surface.
 
@@ -112,9 +112,10 @@ def open( # noqa: A001
     and returns the substrate-backed:class:`ShepherdWorkspace`, wiring the run and
     ledger drivers internally so callers never touch them.
 
-    ``backend`` is forwarded to:meth:`ShepherdWorkspace.discover`: ``"clonefile"``
-    preserves the macOS-first default, ``"fuse"``/``"kernel"`` select Linux
-    carriers, and ``None`` asks vcs-core to auto-detect where supported.
+    ``backend`` is forwarded to:meth:`ShepherdWorkspace.discover`: the default
+    ``None`` auto-selects a working carrier per platform (clonefile on macOS,
+    kernel/FUSE overlay on Linux, portable copy carrier as the floor);
+    ``"clonefile"``/``"fuse"``/``"kernel"``/``"copy"`` force one explicitly.
 
     This is deliberately distinct from:func:`workspace`, the offline,
     process-local context manager used for the first-run ``@task``: ``workspace``

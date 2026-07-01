@@ -10,15 +10,15 @@ import click
 from click.core import ParameterSource
 
 WorkspaceAdoptMode = Literal["none", "git-head", "worktree"]
-WorkspaceBackendOption = Literal["auto", "clonefile", "fuse", "kernel"]
+WorkspaceBackendOption = Literal["auto", "clonefile", "fuse", "kernel", "copy"]
 
 
 @click.command()
 @click.argument("path", default=".", required=False, type=click.Path(file_okay=False, path_type=Path))
 @click.option(
     "--backend",
-    type=click.Choice(["auto", "clonefile", "fuse", "kernel"]),
-    default="clonefile",
+    type=click.Choice(["auto", "clonefile", "fuse", "kernel", "copy"]),
+    default="auto",
     show_default=True,
     help="Filesystem carrier backend to validate with.",
 )

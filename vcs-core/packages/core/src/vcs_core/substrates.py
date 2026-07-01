@@ -177,11 +177,11 @@ def detect_overlay_backend() -> str | None:
     Usable without instantiating a substrate — the ``configure`` command
     calls this directly to determine platform capabilities.
 
-    macOS clonefile is **opt-in** via config ``backend="clonefile"`` for now; auto-detect
-    is deferred. Auto-enabling it would render a base snapshot on every macOS session, and
-    ``render_workspace_snapshot``'s internal cleanup ``shutil.rmtree`` trips the unscoped-
-    mutation patch guard — a real interaction to resolve before clonefile becomes the macOS
-    default (clonefile-auto follow-up).
+    Native overlays only — this stays the low-level platform probe, so ``configure``
+    keeps a truthful view of native overlay capability. The macOS APFS clonefile
+    default and the portable copy-carrier floor are layered on top in
+    ``FilesystemSubstrate._auto_detect_backend_name``, which is what lets
+    ``backend=None`` resolve to a working carrier on every platform.
     """
     if _platform_name() != "linux":
         return None
@@ -523,19 +523,26 @@ class FilesystemSubstrate:
         # Keep upper/work dirs outside the workspace lowerdir so overlay mounts remain valid by default.
         return Path(tempfile.gettempdir()) / "vcs-core-overlay" / f"{workspace_name}-{digest}"
 
-    def _auto_detect_backend_name(self) -> str | None:
-        """Probe the platform for available overlay backends.
+    def _auto_detect_backend_name(self) -> str:
+        """Resolve the carrier backend for this platform (never ``None``).
 
-        Delegates to the module-level ``detect_overlay_backend()``.
+        Prefers a native overlay when present (``detect_overlay_backend()`` →
+        kernel/FUSE on Linux), then the macOS APFS clonefile carrier, then the
+        portable copy carrier as a universal floor — so an isolated run always
+        has a working carrier, including on bare Linux / WSL with no overlay
+        support configured.
         """
-        return detect_overlay_backend()
+        native = detect_overlay_backend()
+        if native is not None:
+            return native
+        if _platform_name() == "darwin":
+            return "clonefile"
+        return "copy"
 
     def _build_overlay_backend(self, ctx: BuiltInSubstrateContext) -> CarrierBackend | None:
         backend_name = ctx.config.get("backend")
         if backend_name is None:
             backend_name = self._auto_detect_backend_name()
-            if backend_name is None:
-                return None
         state_root = self._resolve_overlay_state_root(ctx)
         from vcs_core._workspace_snapshot import render_workspace_snapshot
         from vcs_core.store import GROUND_REF
@@ -566,6 +573,15 @@ class FilesystemSubstrate:
             from vcs_core._clonefile_carrier import ClonefileCarrierBackend
 
             return ClonefileCarrierBackend(
+                workspace=ctx.workspace,
+                state_root=state_root,
+                base_lowerdir=base_lowerdir,
+                base_tree_oid=snapshot.tree_oid,
+            )
+        if backend_name == "copy":
+            from vcs_core._copy_carrier import CopyCarrierBackend
+
+            return CopyCarrierBackend(
                 workspace=ctx.workspace,
                 state_root=state_root,
                 base_lowerdir=base_lowerdir,
@@ -923,7 +939,10 @@ class FilesystemSubstrate:
         if not wants_isolation:
             return
         if self._backend is None:
-            raise RuntimeError("Scope requested isolated=True but no overlay backend is available.")
+            raise RuntimeError(
+                "Scope requested isolated=True but no overlay backend is available. "
+                'Use backend="copy" (the portable carrier) or backend=None (auto).'
+            )
         restoring = bool(hints and hints.get("__restore__"))
         if restoring and self._backend.has_layer(scope_id):
             self._overlay_scopes.add(scope_id)

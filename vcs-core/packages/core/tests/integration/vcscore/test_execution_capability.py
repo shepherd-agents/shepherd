@@ -744,14 +744,19 @@ def test_authority_merge_settlement_failure_leaves_recoverable_pending(
     assert mg.list_authority_settlement_pending() == ()
 
 
-def test_reversible_refuses_fail_closed_without_isolation_capable_carrier(tmp_path: Path) -> None:
+def test_reversible_run_isolates_via_copy_floor_without_native_carrier(tmp_path: Path) -> None:
+    """With the portable copy-carrier floor a reversible run no longer fails
+    closed when no native overlay/clonefile carrier is configured: the copy
+    carrier provides isolation on every platform, so the fork succeeds and the
+    body runs bound to an execution capability. (Before the floor this raised
+    "no overlay backend is available"; the branch-level guard in
+    ``test_filesystem_runtime`` still covers the truly carrier-less substrate.)"""
     mg, driver, _ = _make_env(tmp_path / "ws", isolation_capable=False)
     try:
-        with pytest.raises(RuntimeError, match="no overlay backend"):
-            mg.execute_recorded("runprobe", "run", scope=mg.ground, behavior="noop")
-        # Fail-closed: the fork refused, so the body never ran and no
-        # capability was ever constructed.
-        assert driver.seen == []
+        mg.execute_recorded("runprobe", "run", scope=mg.ground, behavior="noop")
+        # The copy floor supplied an isolation-capable carrier, so the driver ran
+        # bound to an execution capability instead of the fork refusing.
+        assert any(s.get("entry") == "prepare_bound" for s in driver.seen)
     finally:
         mg.deactivate()
 
