@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import sys
 from pathlib import Path
@@ -93,8 +92,20 @@ def _claude_checks() -> list[dict[str, object]]:
 
     claude_path = shutil.which("claude")
     checks.append(_check("claude-cli", claude_path is not None, claude_path or "`claude` not found on PATH"))
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    checks.append(_check("anthropic-key", bool(api_key), "ANTHROPIC_API_KEY set" if api_key else "ANTHROPIC_API_KEY unset"))
+    try:
+        from shepherd_dialect import claude_auth_mode
+
+        mode = claude_auth_mode()
+    except Exception as exc:  # noqa: BLE001
+        checks.append(_check("claude-auth", False, f"could not check Claude auth: {exc}"))
+    else:
+        messages = {
+            "api_key": "ANTHROPIC_API_KEY set",
+            "oauth_token": "CLAUDE_CODE_OAUTH_TOKEN set",
+            "subscription_login": "signed-in `claude` CLI (login is seeded into jailed runs)",
+        }
+        missing = "set ANTHROPIC_API_KEY, or sign in with `claude login`"
+        checks.append(_check("claude-auth", mode is not None, messages.get(mode or "", missing)))
     return checks
 
 

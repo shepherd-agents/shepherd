@@ -9,7 +9,9 @@ events are semantic evidence only, not workspace authority.
 from __future__ import annotations
 
 import json
+import os
 import shutil
+import subprocess
 import sys
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -65,6 +67,66 @@ class ClaudeProviderOutputError(RuntimeError):
 
 class CodexProviderError(RuntimeError):
     """Raised when Codex SDK output cannot be used by this integration path."""
+
+
+_CLAUDE_KEYCHAIN_SERVICE = "Claude Code-credentials"
+
+
+def claude_auth_mode() -> str | None:
+    """Return how the jailed Claude lane can authenticate on this host, or ``None``.
+
+    - ``"api_key"``: ``ANTHROPIC_API_KEY`` is set (passes through the jail's env block).
+    - ``"oauth_token"``: ``CLAUDE_CODE_OAUTH_TOKEN`` is set (same passthrough).
+    - ``"subscription_login"``: the host's ``claude`` CLI is signed in and credential
+      seeding is enabled; the provider copies the login into the scrubbed scratch
+      config at launch. Set ``SHEPHERD_NO_CREDENTIAL_SEEDING=1`` to disable.
+    """
+    mode, _ = _resolve_claude_auth()
+    return mode
+
+
+def _resolve_claude_auth() -> tuple[str | None, bytes | None]:
+    """Return ``(auth_mode, login_blob)``; the blob is set only when seeding applies."""
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return "api_key", None
+    if os.environ.get("CLAUDE_CODE_OAUTH_TOKEN"):
+        return "oauth_token", None
+    if os.environ.get("SHEPHERD_NO_CREDENTIAL_SEEDING"):
+        return None, None
+    blob = _read_host_claude_login()
+    if blob is not None:
+        return "subscription_login", blob
+    return None, None
+
+
+def _read_host_claude_login() -> bytes | None:
+    """Return the host ``claude`` CLI's login credentials, or ``None``. Never raises.
+
+    The jail redirects ``CLAUDE_CONFIG_DIR`` into an empty scratch, which strips the
+    CLI's sign-in state; these credentials are re-seeded into that scratch so a
+    subscription login works exactly like an env-carried key. Locations are Claude
+    Code internals and may shift across CLI versions — every path here fails soft
+    (the run then proceeds keyless and the CLI reports not-logged-in).
+    """
+    try:
+        config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
+        candidates = [Path(config_dir) / ".credentials.json"] if config_dir else []
+        candidates.append(Path.home() / ".claude" / ".credentials.json")
+        for candidate in candidates:
+            if candidate.is_file():
+                return candidate.read_bytes()
+        if sys.platform == "darwin":
+            proc = subprocess.run(
+                ["security", "find-generic-password", "-s", _CLAUDE_KEYCHAIN_SERVICE, "-w"],
+                capture_output=True,
+                timeout=10,
+                check=False,
+            )
+            if proc.returncode == 0 and proc.stdout.strip():
+                return bytes(proc.stdout.strip())
+    except Exception:  # noqa: BLE001 — fail soft: no login state means env auth or a clean CLI error
+        return None
+    return None
 
 
 def _signals_max_turns_exhaustion(signal: str) -> bool:
@@ -653,6 +715,7 @@ class ClaudeHeadlessProvider:
             raise RuntimeError("claude CLI not found on PATH — see the package README runbook note")
         invocation_id = _invocation_id(self.provider_id, execution)
         sequence = count()
+        auth_mode, login_blob = _resolve_claude_auth()
         started = ProviderEvent(
             kind=PROVIDER_INVOCATION_STARTED,
             provider_id=self.provider_id,
@@ -665,11 +728,20 @@ class ClaudeHeadlessProvider:
                 "permission_mode": "bypassPermissions",
                 "tools": "default",
                 "max_turns": self.max_turns,
+                "auth_mode": auth_mode or "none",
             },
         )
         scratch = Path(execution.working_path) / self._SCRATCH
         for sub in ("home", "config", "tmp"):
             (scratch / sub).mkdir(parents=True, exist_ok=True)
+        if login_blob is not None:
+            # Re-seed the host CLI's sign-in into the redirected config so a
+            # subscription login authenticates the jailed body. The scratch is
+            # scrubbed below before the delta is captured, so the credential
+            # never enters a retained output.
+            cred_path = scratch / "config" / ".credentials.json"
+            cred_path.write_bytes(login_blob)
+            cred_path.chmod(0o600)
         try:
             proc = execution.launch_confined(self.command_argv(execution.working_path, cli, prompt), confinement)
         finally:

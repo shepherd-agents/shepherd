@@ -29,7 +29,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 STAGE = HERE / "build" / "stage"
-DEFAULT_VERSION = "0.1.2"
+DEFAULT_VERSION = "0.1.3"
 
 # Bundled import package  ->  its src/ directory in the workspace.
 # This is the runtime install closure of `shepherd[providers,contexts]`:

@@ -8,7 +8,6 @@ Run from an initialized Shepherd workspace on a jail-capable host:
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import sys
 
@@ -27,10 +26,12 @@ def update_readme(repo, goal: str, output_path: str = "README.md"):
 
 
 def _live_ready() -> tuple[bool, str]:
+    from shepherd_dialect import claude_auth_mode
+
     if shutil.which("claude") is None:
         return False, "`claude` is not on PATH"
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        return False, "ANTHROPIC_API_KEY is unset"
+    if claude_auth_mode() is None:
+        return False, "no ANTHROPIC_API_KEY and no signed-in `claude` CLI"
     try:
         from vcs_core.runtime_api import native_jail_available
     except (ImportError, OSError, RuntimeError, ValueError) as exc:

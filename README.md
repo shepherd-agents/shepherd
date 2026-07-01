@@ -26,32 +26,13 @@ they are selected, released, or discarded.
 
 ## Installation
 
-Once the public package is published:
-
 ```bash
 pip install shepherd-ai
 ```
 
-For the current pre-launch checkout, install the local editable closure from the
-repository root:
-
-```bash
-python -m venv .venv
-. .venv/bin/activate
-pip install -r requirements-dev.txt
-```
-
-The Python import is:
-
-```python
-import shepherd as sp
-```
-
-The CLI is:
-
-```bash
-shepherd --help
-```
+Working on Shepherd itself? Install the local editable closure instead:
+`python -m venv .venv && . .venv/bin/activate && pip install -r requirements-dev.txt`
+(see [CONTRIBUTING.md](https://github.com/shepherd-agents/shepherd/blob/main/CONTRIBUTING.md)).
 
 ## Quickstart
 
@@ -60,7 +41,8 @@ agent, and its work comes back as a **reviewable proposal** — nothing touches
 your files until you accept it. Here the whole body of a task *is* a Claude
 agent.
 
-> Needs the `claude` CLI and an `ANTHROPIC_API_KEY`. No key? Jump to the
+> Needs the `claude` CLI — signed in (a Claude subscription works) or with an
+> `ANTHROPIC_API_KEY`. Neither? Jump to the
 > [Offline Quickstart](#offline-quickstart) — it runs anywhere, keyless.
 
 A task is a plain Python function with **no body**; the signature and docstring
@@ -80,7 +62,7 @@ Set up a scratch workspace and check the agent lane is ready:
 ```bash
 mkdir /tmp/agent-task && cd /tmp/agent-task
 shepherd init             # turn this directory into a Shepherd workspace
-shepherd doctor claude    # confirm claude CLI, API key, and sandbox are ready
+shepherd doctor claude    # confirm claude CLI, sign-in/key, and sandbox are ready
 ```
 
 Fetch the demo and let the agent work (about a minute):
@@ -132,54 +114,13 @@ read command for the durable machine payload); see the
 [docs](https://docs.shepherd-agents.ai/) for backend selection and the complete
 `run` surface.
 
-## Python Surface
-
-Shepherd's day-one public Python surface is deliberately small:
-
-```python
-import shepherd as sp
-
-
-@sp.task
-def draft_release_note(component: str, change: str) -> str:
-    return f"{component}: {change}"
-
-
-sp.workspace(model={"name": "offline-demo"}, root=".")
-print(draft_release_note("world channel", "retained outputs are inspectable"))
-```
-
-For provenance-backed workspace runs, open an initialized workspace:
-
-```python
-import shepherd as sp
-
-workspace = sp.open(".")
-try:
-    repo = workspace.git_repo()
-    # Register and run workspace-control tasks against repo handles.
-finally:
-    workspace.close()
-```
-
 ## Examples
 
-Checked-in quickstart examples live in:
-
-- [`examples/quickstart/offline_task.py`](https://github.com/shepherd-agents/shepherd/blob/main/examples/quickstart/offline_task.py)
-- [`examples/quickstart/world_channel.py`](https://github.com/shepherd-agents/shepherd/blob/main/examples/quickstart/world_channel.py)
-- [`examples/quickstart/agent_task.py`](https://github.com/shepherd-agents/shepherd/blob/main/examples/quickstart/agent_task.py)
-- [`examples/quickstart/claude_readme.py`](https://github.com/shepherd-agents/shepherd/blob/main/examples/quickstart/claude_readme.py)
-
-The visual-artifact notebooks live in:
-
-- [`examples/notebooks/visual_artifact/notebooks/`](https://github.com/shepherd-agents/shepherd/tree/main/examples/notebooks/visual_artifact/notebooks)
-
-Launch them with:
-
-```bash
-make notebooks
-```
+The demo scripts above are the Python surface in miniature — checked-in copies
+live in [`examples/quickstart/`](https://github.com/shepherd-agents/shepherd/tree/main/examples/quickstart).
+The visual-artifact notebooks live in
+[`examples/notebooks/visual_artifact/notebooks/`](https://github.com/shepherd-agents/shepherd/tree/main/examples/notebooks/visual_artifact/notebooks)
+— launch them with `make notebooks`.
 
 ## Development
 
@@ -193,12 +134,9 @@ make baseline
 
 ## Documentation
 
-Full documentation lives at **[docs.shepherd-agents.ai](https://docs.shepherd-agents.ai/)**. In this repository the docs are authored under [`docs/shepherd/`](https://github.com/shepherd-agents/shepherd/tree/main/docs/shepherd):
-
-- [Quickstart guide](https://github.com/shepherd-agents/shepherd/blob/main/docs/shepherd/start/quickstart.md)
-- [Runtime substrate and the world channel](https://github.com/shepherd-agents/shepherd/blob/main/docs/shepherd/concepts/runtime-substrate.md)
-- [Concepts](https://github.com/shepherd-agents/shepherd/blob/main/docs/shepherd/concepts/index.md) — tasks, effects, scopes, permissions, and the trace
-- [Examples](https://github.com/shepherd-agents/shepherd/blob/main/examples/README.md)
+Full documentation lives at **[docs.shepherd-agents.ai](https://docs.shepherd-agents.ai/)**. In this repository the docs are authored under [`docs/shepherd/`](https://github.com/shepherd-agents/shepherd/tree/main/docs/shepherd), starting with the
+[Quickstart guide](https://github.com/shepherd-agents/shepherd/blob/main/docs/shepherd/start/quickstart.md) and
+[Concepts](https://github.com/shepherd-agents/shepherd/blob/main/docs/shepherd/concepts/index.md) — tasks, effects, scopes, permissions, and the trace.
 
 ## Reproducing Paper Results
 

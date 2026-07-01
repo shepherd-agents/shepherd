@@ -16,7 +16,8 @@ import pytest
 from vcs_core.spi import ExecutionAuthorityRequired
 
 from shepherd_dialect import ClaudeAgentProvider, DeterministicFakeProvider
-from shepherd_dialect.providers import ClaudeHeadlessProvider
+from shepherd_dialect import providers as providers_module
+from shepherd_dialect.providers import ClaudeHeadlessProvider, claude_auth_mode
 
 
 @pytest.mark.parametrize("provider", [DeterministicFakeProvider(), ClaudeAgentProvider(prompt="x")])
@@ -42,6 +43,96 @@ def test_command_argv_is_the_s1_shape(tmp_path) -> None:
     assert body[1:3] == ["-p", "do the thing"]
     assert body[body.index("--allowed-tools") + 1] == "Write,Edit,Read"
     assert body[body.index("--max-turns") + 1] == "3"
+
+
+def _clear_claude_auth_env(monkeypatch) -> None:
+    for var in ("ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "SHEPHERD_NO_CREDENTIAL_SEEDING"):
+        monkeypatch.delenv(var, raising=False)
+
+
+def test_claude_auth_prefers_env_credentials(monkeypatch) -> None:
+    """Env-carried credentials win; no host login is read."""
+    _clear_claude_auth_env(monkeypatch)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b"{}")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+    assert claude_auth_mode() == "api_key"
+    monkeypatch.delenv("ANTHROPIC_API_KEY")
+    monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "t")
+    assert claude_auth_mode() == "oauth_token"
+
+
+def test_claude_auth_uses_host_login_with_opt_out(monkeypatch) -> None:
+    """Keyless + signed-in CLI → subscription seeding; opt-out env disables it."""
+    _clear_claude_auth_env(monkeypatch)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b"{}")
+    assert claude_auth_mode() == "subscription_login"
+    monkeypatch.setenv("SHEPHERD_NO_CREDENTIAL_SEEDING", "1")
+    assert claude_auth_mode() is None
+
+
+def test_claude_auth_none_without_any_credentials(monkeypatch) -> None:
+    _clear_claude_auth_env(monkeypatch)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: None)
+    assert claude_auth_mode() is None
+
+
+def test_headless_execute_seeds_login_into_scratch_and_scrubs(tmp_path, monkeypatch) -> None:
+    """Keyless launch seeds .credentials.json (0600) into the scratch config; scrub removes it."""
+    _clear_claude_auth_env(monkeypatch)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b'{"probe": true}')
+    monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
+    seen = {}
+
+    class _Proc:
+        returncode = 1
+        stderr = "refused for the probe"
+        stdout = ""
+
+    class _Cap:
+        working_path = str(tmp_path)
+
+        def launch_confined(self, command, confinement):
+            cred = tmp_path / ".claude-scratch" / "config" / ".credentials.json"
+            seen["present"] = cred.is_file()
+            seen["mode"] = cred.stat().st_mode & 0o777 if cred.is_file() else None
+            return _Proc()
+
+    provider = ClaudeHeadlessProvider(prompt="x")
+    with pytest.raises(RuntimeError):
+        provider.execute(None, None, None, {}, execution=_Cap(), confinement=object())
+    assert seen["present"] is True
+    assert seen["mode"] == 0o600
+    assert not (tmp_path / ".claude-scratch").exists()
+
+
+def test_headless_execute_does_not_seed_when_env_key_present(tmp_path, monkeypatch) -> None:
+    """With an env credential the scratch config stays empty — no host login is touched."""
+    _clear_claude_auth_env(monkeypatch)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+    monkeypatch.setattr(
+        providers_module,
+        "_read_host_claude_login",
+        lambda: (_ for _ in ()).throw(AssertionError("host login must not be read")),
+    )
+    monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
+    seen = {}
+
+    class _Proc:
+        returncode = 1
+        stderr = "refused for the probe"
+        stdout = ""
+
+    class _Cap:
+        working_path = str(tmp_path)
+
+        def launch_confined(self, command, confinement):
+            seen["cred_absent"] = not (tmp_path / ".claude-scratch" / "config" / ".credentials.json").exists()
+            return _Proc()
+
+    provider = ClaudeHeadlessProvider(prompt="x")
+    with pytest.raises(RuntimeError):
+        provider.execute(None, None, None, {}, execution=_Cap(), confinement=object())
+    assert seen["cred_absent"] is True
 
 
 def test_headless_argv_is_uncapped_by_default(tmp_path) -> None:

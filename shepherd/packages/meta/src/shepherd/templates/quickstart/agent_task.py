@@ -5,9 +5,10 @@ checks readiness). The agent's work is kept as a retained output for you to
 review — nothing touches your files unless you `shepherd run select` it.
 """
 
-import os
 import shutil
 import sys
+
+from shepherd_dialect import claude_auth_mode
 
 import shepherd as sp
 
@@ -23,7 +24,7 @@ def write_program(repo, prompt: str, output_path: str = "program.py") -> None:
     """
 
 
-if shutil.which("claude") is None or not os.environ.get("ANTHROPIC_API_KEY"):
+if shutil.which("claude") is None or claude_auth_mode() is None:
     sys.exit("not ready — run `shepherd doctor claude` to see what's missing")
 
 workspace = sp.open(".")
