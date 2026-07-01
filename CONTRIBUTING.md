@@ -56,6 +56,44 @@ make typecheck    # static type checks
 - If you change project structure, import boundaries, or docs paths, rerun the
   corresponding repo-level checks.
 
+## Releasing
+
+`shepherd-ai` is published to PyPI as a single bundled wheel assembled by
+[`packaging/shepherd-ai/build.py`](packaging/shepherd-ai/build.py). Releases are
+automated with GitHub Actions and PyPI **Trusted Publishing** — there are no API
+tokens to manage.
+
+**Versioning.** The git tag is the single source of truth: a tag `vX.Y.Z`
+publishes version `X.Y.Z` (the workflow strips the leading `v` and passes the
+rest to `build.py --version`). Follow [PEP 440](https://peps.python.org/pep-0440/);
+while the project is in early alpha, prefer pre-releases such as `0.1.3a1` so a
+plain `pip install shepherd-ai` stays a deliberate choice (`--pre` opts in). Tags
+are immutable — PyPI accepts each version exactly once.
+
+**Cut a release.** With `main` green and holding what you want to ship:
+
+```bash
+gh release create v0.1.3a1 --target main --generate-notes --prerelease
+```
+
+Publishing the release runs [`.github/workflows/release.yml`](.github/workflows/release.yml),
+which builds the wheel and uploads it to PyPI (gated by the `pypi` environment
+reviewer). Do **not** publish from a branch push — releases are keyed to the tag.
+
+**One-time setup (maintainers).** Before the first automated release:
+
+1. On [PyPI](https://pypi.org), add a **Trusted Publisher** (or *pending
+   publisher*) for `shepherd-ai` → repo `shepherd-agents/shepherd`, workflow
+   `release.yml`, environment `pypi`.
+2. In **Settings → Environments**, create a `pypi` environment with a required
+   reviewer.
+
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs `ruff check` on
+Linux plus `make baseline` and the quickstart test on macOS for every PR and push
+to `main`; add a Linux test lane once the portable "copy" carrier lands. For
+bleeding-edge installs between releases, a follow-up workflow can publish PEP 440
+dev builds (`X.Y.Z.devN`) to TestPyPI.
+
 ## Package-specific notes
 
 Some packages carry their own contributing notes with local command summaries
