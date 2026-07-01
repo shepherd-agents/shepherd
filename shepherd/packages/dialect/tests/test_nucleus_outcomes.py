@@ -99,14 +99,13 @@ def test_exhausted_maps_budget_exhausted(tmp_path) -> None:
     assert "max turns" in run.outcome.reason
 
 
-@pytest.mark.skipif(__import__("shutil").which("claude") is None, reason="needs the claude CLI on PATH")
-def test_provider_max_turns_signal_raises_budget_exhausted(tmp_path) -> None:
-    """The emitter: the CLI's distinguishable signal becomes the typed stop."""
-
+def _fake_cap_returning(tmp_path, *, returncode: int, signal: str):
     class _Proc:
-        returncode = 1
-        stderr = "Error: Reached max turns (4)"
-        stdout = ""
+        pass
+
+    _Proc.returncode = returncode
+    _Proc.stderr = signal
+    _Proc.stdout = ""
 
     class _Cap:
         working_path = str(tmp_path)
@@ -114,9 +113,41 @@ def test_provider_max_turns_signal_raises_budget_exhausted(tmp_path) -> None:
         def launch_confined(self, command, confinement):
             return _Proc()
 
+    return _Cap()
+
+
+@pytest.mark.skipif(__import__("shutil").which("claude") is None, reason="needs the claude CLI on PATH")
+@pytest.mark.parametrize(
+    "signal",
+    [
+        # The two forms the real CLI actually emits on turn exhaustion.
+        "Error: Reached maximum number of turns (4)",
+        '{"type":"result","terminal_reason":"max_turns","errors":["Reached maximum number of turns (4)"]}',
+    ],
+)
+def test_provider_max_turns_signal_raises_budget_exhausted(tmp_path, signal: str) -> None:
+    """The CLI's real turn-limit signal becomes the typed budget stop.
+
+    Regression: the earlier probe matched ``"Reached max turns"`` — a string the
+    CLI never emits — so real turn exhaustion fell through to a hard refusal.
+    """
+    cap = _fake_cap_returning(tmp_path, returncode=1, signal=signal)
     provider = ClaudeAgentProvider(prompt="x")
     with pytest.raises(BudgetExhausted, match="max turns"):
-        provider.execute(None, None, None, {}, execution=_Cap(), confinement=object())
+        provider.execute(None, None, None, {}, execution=cap, confinement=object())
+
+
+@pytest.mark.skipif(__import__("shutil").which("claude") is None, reason="needs the claude CLI on PATH")
+def test_provider_ambiguous_stop_stays_a_refusal(tmp_path) -> None:
+    """A nonzero exit that isn't a turn-limit signal stays a refusal, not Exhausted.
+
+    ``BudgetExhausted`` is not a ``RuntimeError``, so this pins that ambiguous
+    stops (e.g. alarm kills) do not get miscategorized as a budget outcome.
+    """
+    cap = _fake_cap_returning(tmp_path, returncode=1, signal="some other failure")
+    provider = ClaudeAgentProvider(prompt="x")
+    with pytest.raises(RuntimeError):
+        provider.execute(None, None, None, {}, execution=cap, confinement=object())
 
 
 def test_emit_artifact_lands_in_run_artifacts(tmp_path) -> None:

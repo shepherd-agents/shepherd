@@ -16,6 +16,7 @@ import pytest
 from vcs_core.spi import ExecutionAuthorityRequired
 
 from shepherd_dialect import ClaudeAgentProvider, DeterministicFakeProvider
+from shepherd_dialect.providers import ClaudeHeadlessProvider
 
 
 @pytest.mark.parametrize("provider", [DeterministicFakeProvider(), ClaudeAgentProvider(prompt="x")])
@@ -41,6 +42,24 @@ def test_command_argv_is_the_s1_shape(tmp_path) -> None:
     assert body[1:3] == ["-p", "do the thing"]
     assert body[body.index("--allowed-tools") + 1] == "Write,Edit,Read"
     assert body[body.index("--max-turns") + 1] == "3"
+
+
+def test_headless_argv_is_uncapped_by_default(tmp_path) -> None:
+    """No ``max_turns`` set → no ``--max-turns`` flag; the budget alarm is the bound."""
+    argv = ClaudeHeadlessProvider(prompt="do the thing").command_argv(tmp_path, "/somewhere/claude")
+    assert "--max-turns" not in argv
+    # The wall-clock alarm still rides the argv as the always-on guardrail.
+    assert argv[0] == "/usr/bin/perl"
+    assert argv[3] == "240"
+
+
+def test_headless_argv_passes_explicit_turn_cap(tmp_path) -> None:
+    """An explicit ``max_turns`` opts into a hard turn cap via ``--max-turns``."""
+    argv = ClaudeHeadlessProvider(prompt="do the thing", max_turns=8, budget_seconds=90).command_argv(
+        tmp_path, "/somewhere/claude"
+    )
+    assert argv[argv.index("--max-turns") + 1] == "8"
+    assert argv[3] == "90"
 
 
 def test_provider_requires_a_prompt() -> None:

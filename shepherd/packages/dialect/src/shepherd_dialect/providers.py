@@ -67,6 +67,20 @@ class CodexProviderError(RuntimeError):
     """Raised when Codex SDK output cannot be used by this integration path."""
 
 
+def _signals_max_turns_exhaustion(signal: str) -> bool:
+    """True when a nonzero-exit ``signal`` is the CLI's turn-limit stop.
+
+    The headless CLI reports turn exhaustion two ways in its combined
+    stdout+stderr: the human-readable ``Reached maximum number of turns (N)``
+    and the structured stream-json ``"terminal_reason":"max_turns"``. Match
+    either so the stop maps to a semantic ``BudgetExhausted`` (→ ``Exhausted``
+    outcome, trace and retained artifacts preserved) rather than an ambiguous
+    ``Failed`` refusal. (The earlier ``"Reached max turns"`` probe matched
+    neither real form, so turn exhaustion was silently misclassified.)
+    """
+    return "maximum number of turns" in signal or '"terminal_reason":"max_turns"' in signal
+
+
 def _codex_runner_source() -> str:
     """Return the jailed Codex SDK worker source copied into run scratch."""
     return resources.files("shepherd_dialect.workers").joinpath("codex_runner.mjs").read_text(encoding="utf-8")
@@ -516,7 +530,7 @@ class ClaudeAgentProvider:
             shutil.rmtree(scratch, ignore_errors=True)
         if proc.returncode != 0:
             signal = ((proc.stderr or "") + (proc.stdout or "")).strip()
-            if "Reached max turns" in signal:
+            if _signals_max_turns_exhaustion(signal):
                 from shepherd_dialect.nucleus import BudgetExhausted
 
                 raise BudgetExhausted(f"max turns reached ({self.max_turns})")
@@ -559,8 +573,12 @@ class ClaudeHeadlessProvider:
 
     provider_id: str = "claude-headless"
     prompt: str = ""
-    max_turns: int = 4
-    budget_seconds: int = 120
+    # ``max_turns=None`` runs the agent uncapped: the ``budget_seconds`` alarm
+    # (below) is the always-on guardrail that bounds runaway cost/loops, so a
+    # turn cap is an optional refinement rather than the primary stop. When set,
+    # ``--max-turns`` is passed through to the CLI.
+    max_turns: int | None = None
+    budget_seconds: int = 240
     model: str | None = None  # passed to `claude --model`; None keeps the account default
 
     _SCRATCH = ".claude-scratch"
@@ -604,9 +622,11 @@ class ClaudeHeadlessProvider:
             "bypassPermissions",
             "--tools",
             "default",
-            "--max-turns",
-            str(self.max_turns),
         ]
+        # Omit ``--max-turns`` entirely when uncapped so the run is bounded only
+        # by the ``budget_seconds`` alarm; pass it through when a cap is set.
+        if self.max_turns is not None:
+            argv += ["--max-turns", str(self.max_turns)]
         if self.model is not None:
             argv += ["--model", self.model]
         return argv
@@ -658,10 +678,11 @@ class ClaudeHeadlessProvider:
             shutil.rmtree(scratch, ignore_errors=True)
         if proc.returncode != 0:
             signal = ((proc.stderr or "") + (proc.stdout or "")).strip()
-            # The one positively identified budget stop (quickstart-probe a):
-            # the CLI reports turn exhaustion distinguishably — D3's Exhausted
-            # emitter. Ambiguous stops (incl. alarm kills, rc -14) stay refusals.
-            if "Reached max turns" in signal:
+            # The one positively identified budget stop: the CLI reports turn
+            # exhaustion distinguishably (prose + structured terminal_reason) —
+            # D3's Exhausted emitter. Ambiguous stops (incl. alarm kills, rc -14)
+            # stay refusals.
+            if _signals_max_turns_exhaustion(signal):
                 from shepherd_dialect.nucleus import BudgetExhausted
 
                 raise BudgetExhausted(f"max turns reached ({self.max_turns})")
