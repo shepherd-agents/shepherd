@@ -8,8 +8,8 @@
 ---
 
 > [!IMPORTANT]
-> **Shepherd is in early alpha.** APIs may still change between releases.
-> Feedback and issues are welcome.
+> **Shepherd is in early alpha** and under active development.
+> APIs may still change between releases. Feedback and issues are very welcome!
 
 <p align="center">
   <a href="#installation">Install</a> |
