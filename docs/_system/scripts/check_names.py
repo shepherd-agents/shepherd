@@ -14,6 +14,7 @@ page must be enumerated in the allowlist) and allowlist path patterns. Exit
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 from check_shepherd_docs import load_config, parse_meta  # tolerant-but-inert loader (see its docstring)
@@ -47,7 +48,7 @@ def main() -> int:
             continue  # not in the public build
         text = md.read_text(encoding="utf-8")
         marked = "Stale-names: migration-context" in parse_meta(text).get("Stale-names", "") or \
-                 re.search(r"^> Stale-names: migration-context", text, re.MULTILINE)
+                 re.search(r"^> Stale-names: migration-context", text, re.M)
         enumerated = bool(allow_spec and allow_spec.match_file(rel))
         if marked and not enumerated:
             errors.append(f"[NAMES] {rel}: carries migration-context marker but is not enumerated in _expected-forward.txt")

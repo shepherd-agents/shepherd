@@ -9,6 +9,7 @@ scaffold-phase definition of done. Exit 0 ok / 1 violation. ASCII output.
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import yaml
