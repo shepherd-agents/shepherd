@@ -1,7 +1,6 @@
 """The DESIGN Phase-1 negative tests, as a permanent module: the gate and
 drift checks must FAIL on seeded violations (a green gate is meaningless
-otherwise).
-"""
+otherwise)."""
 
 import shutil
 import subprocess

@@ -24,8 +24,8 @@ HERE = Path(__file__).resolve().parent  # scripts/
 PROTO = HERE.parent
 sys.path.insert(0, str(HERE))  # so we can reuse the gate + facade helpers
 
-import yaml
-from check_shepherd_docs import load_config, nav_files, parse_meta
+import yaml  # noqa: E402
+from check_shepherd_docs import load_config, nav_files, parse_meta  # noqa: E402
 
 DOCS = PROTO.parent.parent / "docs/shepherd"  # content at repo root; PROTO (docs_system/) holds mkdocs.yml + pages.yml
 

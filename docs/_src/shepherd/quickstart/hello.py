@@ -1,9 +1,8 @@
 """Quickstart example (tested in CI against the simulated offline provider)."""
 
 # --8<-- [start:hello]
-from shepherd.providers import claude
-
 import shepherd as shp
+from shepherd.providers import claude
 
 
 @shp.task

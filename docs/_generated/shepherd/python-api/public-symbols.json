@@ -119,7 +119,7 @@
       "source": "shepherd._effect_facade.ask"
     },
     "current_binding": {
-      "doc_hash": "48e719da5f386473",
+      "doc_hash": "c09b0e6005849a9b",
       "kind": "function",
       "signature": "current_binding(target_type: type[T]) -> ContextRef[T]",
       "source": "shepherd_runtime.scope.current_binding"
