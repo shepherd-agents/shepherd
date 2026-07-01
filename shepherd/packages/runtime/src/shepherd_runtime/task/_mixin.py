@@ -6,8 +6,8 @@ from contextvars import ContextVar
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
-from shepherd_core.errors import ScopeNotConfiguredError
 from pydantic import BaseModel, PrivateAttr
+from shepherd_core.errors import ScopeNotConfiguredError
 
 from ..combinators.types import is_task_class
 from ..step._execution import run_sync

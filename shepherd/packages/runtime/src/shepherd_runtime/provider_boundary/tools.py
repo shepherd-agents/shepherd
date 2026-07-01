@@ -17,11 +17,14 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
-from shepherd_runtime.trace import Ref
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
 
-__all__ = ["ToolHandler", "ToolHandlerEntry", "StubToolHandler"]
+    from shepherd_runtime.trace import Ref
+
+__all__ = ["StubToolHandler", "ToolHandler", "ToolHandlerEntry"]
 
 
 @dataclass(frozen=True)
@@ -38,13 +41,12 @@ class ToolHandlerEntry:
     """
 
     handler_id: str
-    handler_frame_ref: "Ref"
+    handler_frame_ref: Ref
     invoke: Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
 class ToolHandler(Protocol):
-    """Lookup helper for ``tool.<name>`` handlers installed in the
-    active binding-env chain.
+    """Lookup helper for ``tool.<name>`` handlers in the binding-env chain.
 
     The implementation walks the binding-env chain per CONTRACTS C6:
 
@@ -54,7 +56,7 @@ class ToolHandler(Protocol):
 
     Per-class ``on_unhandled`` (tier 4) is the recorder's concern,
     not the lookup helper's. Returning ``None`` is the explicit
-    not-found signal; the recorder raises ``ToolHandlerNotFound``
+    not-found signal; the recorder raises ``ToolHandlerNotFoundError``
     when it receives ``None`` for a tool effect kind that the SDK
     invoked.
     """

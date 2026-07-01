@@ -7,13 +7,13 @@ import json
 from pathlib import Path
 from typing import Any
 
-from vcs_core._errors import InvalidRepositoryStateError
 from vcs_core._authority import (
     AUTHORITY_SETTLEMENT_PENDING_SCHEMA,
     PendingAuthoritySettlement,
     _authority_settlement_pending_path,
     _authority_settlement_pending_root,
 )
+from vcs_core._errors import InvalidRepositoryStateError
 from vcs_core._query_inventory import (
     Health,
     HealthIssue,

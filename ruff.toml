@@ -13,8 +13,8 @@ extend-exclude = [
     "shepherd/design/**",
     "shepherd/eval/**",
     "shepherd/examples/**",
-    "docs/design/**",
-    "docs/tools/**",
+    "docs/_system/**",
+    "docs/_src/**",
     "vcs-core/design/**",
     "vcs-core/scripts/**",
     "scripts/**",
@@ -147,6 +147,18 @@ ban-relative-imports = "parents"
 "integration-tests/**" = [
     "ANN",     # Type annotations not required in integration tests
     "N999",    # Hyphenated directory name is intentional
+]
+"shepherd/integration-tests/**" = [
+    "ANN",     # Type annotations not required in integration tests
+    "D",       # Docstrings not required in integration tests
+    "N999",    # Hyphenated directory name is intentional
+]
+"**/conftest.py" = [
+    "ANN",     # Type annotations not required in test plumbing
+    "INP001",  # conftest.py sits outside package trees by design
+]
+"packaging/**" = [
+    "T201",    # Print is the primary output mechanism in release tooling
 ]
 "**/tests/**" = [
     "A002",    # Shadowing builtins OK in tests

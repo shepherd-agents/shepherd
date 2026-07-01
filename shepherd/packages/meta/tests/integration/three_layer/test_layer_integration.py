@@ -7,7 +7,6 @@ work together correctly, including stream queries and reversibility composition.
 from __future__ import annotations
 
 import pytest
-
 from shepherd_core.effects import (
     TaskCompleted,
     TaskStarted,

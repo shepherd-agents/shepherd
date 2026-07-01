@@ -8,8 +8,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from vcs_core.vcscore import VcsCore
     from vcs_core.types import ScopeInfo
+    from vcs_core.vcscore import VcsCore
 
 
 class ScopeStack:

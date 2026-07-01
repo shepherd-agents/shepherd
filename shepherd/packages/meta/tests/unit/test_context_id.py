@@ -11,11 +11,11 @@ These tests validate the core context_id functionality:
 from shepherd_contexts import SessionState, WorkspaceRef
 from shepherd_core.context import is_execution_context
 from shepherd_core.effects import (
+    KERNEL_EFFECT_REGISTRY,
     DiffPatch,
     Effect,
     FileCreate,
     FilePatch,
-    KERNEL_EFFECT_REGISTRY,
     TaskStarted,
 )
 from shepherd_core.scope import Stream

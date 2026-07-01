@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from typing import Any, ClassVar
 
 import pytest
+from pydantic import BaseModel
 from shepherd_runtime.nucleus import reset_workspace_for_tests, workspace
 from shepherd_runtime.nucleus import task as nucleus_task
 from shepherd_runtime.scope import Scope
@@ -23,7 +24,6 @@ from shepherd_transform.grounding import (
     behavioral_grounding,
     ground_transformation,
 )
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Fixtures - Plain Task Classes (for behavioral grounding tests)

@@ -5,13 +5,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
+from pydantic import BaseModel
 from shepherd_runtime.cache import CacheHit, CacheStored
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, TaskRef, task
 from shepherd_runtime.task.output import TaskRefReconstructionPolicy
 from shepherd_tests import MockProvider
 from shepherd_transform.source import extract_task_source, reconstruct_task_class
-from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from pathlib import Path

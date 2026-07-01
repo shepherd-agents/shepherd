@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 from vcs_core._command_envelope import (
+    AuthorityMergeControl,
     CommandEnvelopeError,
     CommandExecutionOptions,
-    AuthorityMergeControl,
     command_execution_options_from_mapping,
     command_execution_options_to_mapping,
     validate_command_execution_options,

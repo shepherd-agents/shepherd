@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import TYPE_CHECKING, Any
 
-import vcs_core._retained_output_selection as selection_module
 import pygit2
 import pytest
+import vcs_core._retained_output_selection as selection_module
 from shepherd2.kernel.facts import TRUSTED_APPEND_CONTEXT, TRUSTED_READ_CONTEXT, AppendBatch, AppendGroup, FactDraft
 from shepherd2.schemas.execution import (
     create_execution_batch,
@@ -25,10 +25,10 @@ from shepherd2.schemas.run_outputs import (
     run_output_descriptor_locator_payload,
 )
 from shepherd2.trace_store import SQLiteTraceStore, TraceStoreError
-from shepherd2.vnext import skeleton as skeleton
+from shepherd2.vnext import skeleton
 from shepherd_dialect.workspace_control import RunOutputCitationRef, RunOutputResolver
 from shepherd_dialect.workspace_control import TraceRef as WorkspaceTraceRef
-from vcs_core import VcsCore, Store, build_builtin_substrate_context
+from vcs_core import Store, VcsCore, build_builtin_substrate_context
 from vcs_core._errors import InvalidRepositoryStateError
 from vcs_core._world_substrate_adapters import TaskTraceSubstrateDriver
 from vcs_core.git_store import create_or_update_reference

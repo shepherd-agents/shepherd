@@ -7,8 +7,8 @@ from vcs_core import _vcscore_runtime
 from vcs_core.recording import NestedParentAuthorization
 
 if TYPE_CHECKING:
-    from vcs_core.vcscore import VcsCore
     from vcs_core.types import ScopeInfo
+    from vcs_core.vcscore import VcsCore
 
 
 def _open_parent_operation(mg: VcsCore, *, child_name: str = "boundary-child") -> tuple[ScopeInfo, ScopeInfo]:

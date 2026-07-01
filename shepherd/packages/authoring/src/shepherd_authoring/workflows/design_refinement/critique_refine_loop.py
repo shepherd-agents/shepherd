@@ -5,10 +5,10 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
+from pydantic import BaseModel, Field
 from shepherd_contexts import WorkspaceRef  # noqa: TC002
 from shepherd_runtime.task.authoring import Context, Input, Output, task
 from shepherd_runtime.task.pipeline import OnError
-from pydantic import BaseModel, Field
 
 from shepherd_authoring.checks import check_file_exists
 from shepherd_authoring.models import CritiqueIssue, CritiqueOutput, IssueStatus

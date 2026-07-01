@@ -31,10 +31,10 @@ from pathlib import Path
 from typing import Any, TypeVar
 
 import yaml
+from pydantic import BaseModel, Field, ValidationError
 from shepherd_core.autoconfig import build_inference_model, extract_infer_fields
 from shepherd_runtime.task.decorator import _apply_task_decorator
 from shepherd_runtime.task.markers import Output
-from pydantic import BaseModel, Field, ValidationError
 
 logger = logging.getLogger(__name__)
 

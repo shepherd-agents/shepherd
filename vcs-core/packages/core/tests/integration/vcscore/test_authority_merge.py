@@ -3,11 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-import vcs_core._vcscore_lifecycle as lifecycle
 import pytest
+import vcs_core._vcscore_lifecycle as lifecycle
 from vcs_core import VcsCore
-from vcs_core._command_admission import CommandAdmissionError
-from vcs_core._errors import InvalidRepositoryStateError, WorkspaceAuthorityRecoveryRequiredError
 from vcs_core._authority import (
     AuthorityDecision,
     AuthzMatchView,
@@ -15,6 +13,8 @@ from vcs_core._authority import (
     _authority_settlement_pending_path,
     read_pending_authority_settlement,
 )
+from vcs_core._command_admission import CommandAdmissionError
+from vcs_core._errors import InvalidRepositoryStateError, WorkspaceAuthorityRecoveryRequiredError
 from vcs_core._permission_plan_evidence import permission_plan_digest
 from vcs_core._workspace_authority import (
     WorkspaceAuthorityPending,
@@ -23,8 +23,8 @@ from vcs_core._workspace_authority import (
 )
 from vcs_core.types import ScopeInfo
 
-from...support.builders import make_marker_filesystem_vcscore
-from...support.overlays import MockOverlayBackend
+from ...support.builders import make_marker_filesystem_vcscore
+from ...support.overlays import MockOverlayBackend
 
 BINDINGS = {"backend": "backend", "docs": "docs"}
 EFFECTIVE_MATCH_DIGEST = "test-carrier-diff-effective-match"

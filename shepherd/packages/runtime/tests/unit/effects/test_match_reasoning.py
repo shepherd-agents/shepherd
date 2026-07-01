@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import pytest
-from shepherd_runtime.effects import Ask, Match, OverbroadHandler, Plan, Subset, Tell
 from hypothesis import given, settings
 from hypothesis import strategies as st
+from shepherd_runtime.effects import Ask, Match, OverbroadHandler, Plan, Subset, Tell
 
 
 @dataclass(frozen=True)

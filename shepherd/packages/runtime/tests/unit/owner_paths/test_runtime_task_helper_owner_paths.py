@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 
+import pytest
 from shepherd_runtime.task.artifacts import collect_artifacts as runtime_collect_artifacts
 from shepherd_runtime.task.artifacts import read_artifact as runtime_read_artifact
 from shepherd_runtime.task.artifacts import should_parse_json as runtime_should_parse_json
@@ -24,7 +25,6 @@ from shepherd_runtime.task.pipeline import _DefaultPolicy as RuntimeDefaultPolic
 from shepherd_runtime.task.pipeline import _FatalPolicy as RuntimeFatalPolicy
 from shepherd_runtime.task.pipeline import _make_stage_stub as runtime_make_stage_stub
 from shepherd_runtime.task.pipeline import _SkipPolicy as RuntimeSkipPolicy
-import pytest
 
 
 def test_runtime_task_marker_owner_path_exposes_runtime_symbols() -> None:

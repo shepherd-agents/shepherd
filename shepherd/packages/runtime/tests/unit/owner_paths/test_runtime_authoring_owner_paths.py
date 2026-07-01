@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 
 import pytest
+from pydantic import BaseModel
 from shepherd_runtime.step.api import BoundStepBuilder, InlineStep, StepBuilder, step
 from shepherd_runtime.step.metadata import StepInputInfo, StepMetadata, extract_step_metadata
 from shepherd_runtime.task._mixin import TaskMixin
@@ -21,7 +22,6 @@ from shepherd_transform.source import (
     reconstruct_task_class,
     try_reconstruct_task_class,
 )
-from pydantic import BaseModel
 
 
 def test_runtime_task_authoring_owner_path_exposes_runtime_task_decorator() -> None:

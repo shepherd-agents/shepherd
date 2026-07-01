@@ -26,10 +26,10 @@ from vcs_core._workspace_authority import WorkspaceAuthorityPending, write_pendi
 from vcs_core._world_refs import encode_ref_component
 from vcs_core._world_storage_manager import WorldStorageManager
 from vcs_core._world_types import WORLD_TRANSITION_SCHEMA, WorldSnapshot
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
 from vcs_core.substrates import FilesystemSubstrate, MarkerSubstrate
 from vcs_core.types import EffectRecord, ScopeInfo
+from vcs_core.vcscore import VcsCore
 
 from ...support.overlays import MockOverlayBackend
 

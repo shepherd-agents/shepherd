@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal, Union
+from typing import TYPE_CHECKING, Any, Literal, Union
 
-from shepherd_kernel_v3_reference.kernel.ir import Ref
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
 
 
 @dataclass(frozen=True)

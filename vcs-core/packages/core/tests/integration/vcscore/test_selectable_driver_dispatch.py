@@ -28,9 +28,9 @@ from vcs_core._substrate_driver import (
 )
 from vcs_core._substrate_runtime import build_builtin_substrate_context
 from vcs_core._world_substrate_adapters import TaskTraceSubstrateDriver
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
 from vcs_core.substrates import FilesystemSubstrate, MarkerSubstrate
+from vcs_core.vcscore import VcsCore
 
 from ...support.overlays import MockOverlayBackend
 

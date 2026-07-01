@@ -9,6 +9,10 @@ This module tests:
 from typing import Literal
 
 import pytest
+from pydantic import BaseModel
+from shepherd_core.effects import StepCompleted, StepStarted
+from shepherd_runtime.scope import Scope
+from shepherd_runtime.step.api import step
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_tests import MockProvider
 from shepherd_tests.tasks import (
@@ -17,11 +21,6 @@ from shepherd_tests.tasks import (
     make_inline_step_task,
     make_step_task,
 )
-from pydantic import BaseModel
-
-from shepherd_core.effects import StepCompleted, StepStarted
-from shepherd_runtime.scope import Scope
-from shepherd_runtime.step.api import step
 
 from .conftest import Severity
 

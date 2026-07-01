@@ -11,16 +11,6 @@ import pytest
 from shepherd_runtime.nucleus import GitRepo
 from vcs_core._authority import AuthzMatchView
 
-from shepherd_dialect.workspace_control.may import (
-    DEFAULT_WORKSPACE_MAY_PROFILE,
-    MayProfileWideningError,
-    UnsupportedMayProfileError,
-    canonical_may_profile_name,
-    normalize_may_profile,
-    repo_authority_for_may,
-    resolve_workspace_authority_decision,
-    supported_may_profile_names,
-)
 from shepherd_dialect.workspace_control.authority import (
     GitRepoAuthorityDecisionPolicy,
     GitRepoGrant,
@@ -36,6 +26,16 @@ from shepherd_dialect.workspace_control.authority import (
     decide_gitrepo_authority_request,
     gitrepo_authority_surface_for_grant,
     gitrepo_grant_descriptor_from_may_annotation,
+)
+from shepherd_dialect.workspace_control.may import (
+    DEFAULT_WORKSPACE_MAY_PROFILE,
+    MayProfileWideningError,
+    UnsupportedMayProfileError,
+    canonical_may_profile_name,
+    normalize_may_profile,
+    repo_authority_for_may,
+    resolve_workspace_authority_decision,
+    supported_may_profile_names,
 )
 from shepherd_dialect.workspace_control.retained_output_authority import (
     retained_output_authority_provider_for_context,

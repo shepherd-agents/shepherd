@@ -12,7 +12,7 @@ Follows the same autoconfig pattern as configure_pr_review.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Annotated
 
 from shepherd.autoconfig import WORKSPACE_ANALYSIS_GUIDANCE

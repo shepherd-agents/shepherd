@@ -53,7 +53,7 @@ def read_trace_revision(workspace: str | Path, rev: str | None = None) -> TraceV
             from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
         except ImportError:
             from vcs_core.experimental import TaskTraceSubstrateDriver
-        from vcs_core.runtime_api import VcsCore, Store
+        from vcs_core.runtime_api import Store, VcsCore
     except ImportError as exc:
         raise DurableTraceReadError("vcs_core is required for --trace-rev") from exc
 

@@ -8,10 +8,10 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 import pytest
-from shepherd_core.effects import ToolCallStarted
-from shepherd_core.effects.commons_vcs import shepherd_effect_profile, project_effect_layer
-from shepherd_core.scope.stream import EffectLayer
 from commons_vcs import Object, Repo
+from shepherd_core.effects import ToolCallStarted
+from shepherd_core.effects.commons_vcs import project_effect_layer, shepherd_effect_profile
+from shepherd_core.scope.stream import EffectLayer
 from vcs_core.profiles.commons_vcs import profile as vcscore_profile
 from vcs_core.profiles.projection import project_commit_object, project_scope_object
 from vcs_core.recording import RecordingPipeline

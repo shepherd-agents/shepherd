@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
 from itertools import count
-from typing import TypeAlias, cast
+from typing import TYPE_CHECKING, TypeAlias, cast
 
 from shepherd_kernel_v3_reference.kernel.ir import (
     BinderDef,
@@ -25,7 +24,6 @@ from shepherd_kernel_v3_reference.kernel.ir import (
     SchemaDef,
 )
 from shepherd_kernel_v3_reference.profiles import CORE_A, PUBLICATION_EXPERIMENTAL, SemanticProfile
-from shepherd_kernel_v3_reference.schemas import Schema
 from shepherd_kernel_v3_reference.source.effects import EffectRegistry
 from shepherd_kernel_v3_reference.source.experimental import Forward, TerminalDelay, TerminalFork
 from shepherd_kernel_v3_reference.source.handlers import (
@@ -50,6 +48,11 @@ from shepherd_kernel_v3_reference.source.wellformed import (
     validate_publication_experimental_handler_body,
     validate_publication_experimental_program,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping
+
+    from shepherd_kernel_v3_reference.schemas import Schema
 
 
 @dataclass(frozen=True)

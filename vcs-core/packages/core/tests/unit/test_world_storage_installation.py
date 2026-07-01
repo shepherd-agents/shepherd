@@ -17,8 +17,8 @@ from vcs_core._world_storage_installation import (
 )
 from vcs_core._world_storage_manager import SubstrateStoreSpec, WorldStorageManager
 from vcs_core._world_types import SubstrateStoreIdentity
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
+from vcs_core.vcscore import VcsCore
 
 
 def test_default_world_storage_opens_stable_workspace_store(tmp_path) -> None:

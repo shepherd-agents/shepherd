@@ -8,10 +8,11 @@ binder_env_ref)`, with the binder body stored separately in `BinderDef`.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
-from shepherd_kernel_v3_reference.schemas import Schema
-from shepherd_kernel_v3_reference.source.syntax import Expr
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.schemas import Schema
+    from shepherd_kernel_v3_reference.source.syntax import Expr
 
 Ref = str
 

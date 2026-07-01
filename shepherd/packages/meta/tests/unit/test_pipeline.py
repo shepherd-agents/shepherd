@@ -5,12 +5,12 @@ tasks with combinators like retry, gate, and timeout.
 """
 
 import pytest
+from pydantic import BaseModel
 from shepherd.pipeline import Pipeline, PipelineResult
 from shepherd_core.errors import ScopeNotConfiguredError
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_tests import MockProvider
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Tasks

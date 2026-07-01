@@ -14,8 +14,8 @@ from vcs_core.recording import NestedParentAuthorization
 
 if TYPE_CHECKING:
     from vcs_core._runtime_types import OperationRefInfo
-    from vcs_core.vcscore import VcsCore
     from vcs_core.types import ScopeInfo
+    from vcs_core.vcscore import VcsCore
 
 
 def _authority(operation: OperationRefInfo) -> ReadinessOperationAuthority:

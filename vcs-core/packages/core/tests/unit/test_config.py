@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from vcs_core.config import VcsCoreConfig, SecretRef, _deep_merge, _merge_layers, load_config
+from vcs_core.config import SecretRef, VcsCoreConfig, _deep_merge, _merge_layers, load_config
 
 if TYPE_CHECKING:
     from pathlib import Path

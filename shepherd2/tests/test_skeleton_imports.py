@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 import pytest
-from shepherd2.vnext import skeleton as skeleton
+from shepherd2.vnext import skeleton
 
 
 def test_skeleton_import_does_not_load_vcs_core() -> None:

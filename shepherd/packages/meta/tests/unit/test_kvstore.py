@@ -14,7 +14,6 @@ Test coverage:
 """
 
 import pytest
-
 from shepherd_contexts import KVStoreContext, SessionState
 from shepherd_core.context import compute_composite_reversibility, is_execution_context
 from shepherd_core.effects import TaskCompleted, TaskStarted

@@ -8,16 +8,16 @@ from typing import TYPE_CHECKING
 
 import pytest
 from shepherd_runtime.nucleus import GitRepo, GitRepoBasis
-from vcs_core import FilesystemSubstrate, MarkerSubstrate, VcsCore, Store, build_builtin_substrate_context
+from vcs_core import FilesystemSubstrate, MarkerSubstrate, Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
 
 from shepherd_dialect.run_driver import ShepherdRunDriver
 from shepherd_dialect.workspace_control import (
+    RunOutput,
     ShepherdRunLedgerDriver,
     ShepherdTaskArtifactDriver,
     ShepherdTaskLedgerDriver,
     ShepherdWorkspace,
-    RunOutput,
     WorkspaceControlError,
 )
 from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled

@@ -6,6 +6,7 @@ import asyncio
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
 from shepherd_kernel_v3_reference.kernel import elaborate
 from shepherd_kernel_v3_reference.source.syntax import Lit, Return
 from shepherd_runtime.kernel import (
@@ -17,7 +18,6 @@ from shepherd_runtime.kernel import (
 )
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, task
-from pydantic import BaseModel
 
 
 @pytest.fixture(autouse=True)

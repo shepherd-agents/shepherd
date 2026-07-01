@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import Annotated
 
 import pytest
+from pydantic import BaseModel, Field
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_tests import MockProvider
-from pydantic import BaseModel, Field
 
 
 @pytest.fixture(autouse=True)

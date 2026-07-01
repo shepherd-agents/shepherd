@@ -1,7 +1,6 @@
 import functools
 from collections import Counter
-from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -40,6 +39,9 @@ from shepherd_kernel_v3_reference.trace.validate import (
     TraceEvidenceBundle,
     validate_trace_evidence,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def test_stable_identity_cache_preserves_trace_evidence_and_bounds_computes() -> None:

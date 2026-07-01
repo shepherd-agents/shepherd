@@ -8,8 +8,9 @@ them requires re-recording transcripts (DESIGN ground rule 3).
 # --8<-- [start:setup]
 from dataclasses import dataclass
 
-import shepherd as shp
 from shepherd.providers import claude
+
+import shepherd as shp
 
 
 @dataclass(frozen=True)

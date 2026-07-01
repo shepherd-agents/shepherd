@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import BaseModel, Field
 from shepherd_core.run import run, run_sync
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_tests import MockProvider
-from pydantic import BaseModel, Field
 
 
 @task

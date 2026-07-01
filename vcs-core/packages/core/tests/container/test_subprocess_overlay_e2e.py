@@ -27,9 +27,9 @@ from pathlib import Path
 
 import pytest
 from vcs_core._substrate_runtime import build_builtin_substrate_context
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
 from vcs_core.substrates import FilesystemSubstrate, MarkerSubstrate
+from vcs_core.vcscore import VcsCore
 
 pytestmark = [
     pytest.mark.container,

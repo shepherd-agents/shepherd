@@ -7,7 +7,6 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, get_args
 
-from vcs_core._operation_journal_inventory import probe_operation_journals
 from vcs_core._authority_inventory import (
     AUTHORITY_SETTLEMENT_FILE_UNREADABLE,
     AUTHORITY_SETTLEMENT_IDENTITY_MISMATCH,
@@ -15,6 +14,7 @@ from vcs_core._authority_inventory import (
     AUTHORITY_SETTLEMENT_SCHEMA_MISMATCH,
     probe_authority_settlement_pending,
 )
+from vcs_core._operation_journal_inventory import probe_operation_journals
 from vcs_core._query_inventory import (
     AUTHORITY_REF_TARGET_MISSING_WORLD,
     AUTHORITY_REF_UNREADABLE,
@@ -65,8 +65,8 @@ from vcs_core._workspace_authority_inventory import probe_workspace_authority_pe
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from vcs_core.vcscore import VcsCore
     from vcs_core.store import Store
+    from vcs_core.vcscore import VcsCore
 
 READINESS_RESULT_SCHEMA = "vcscore/shepherd-query-readiness/v1"
 READINESS_REQUEST_SCHEMA = "vcscore/shepherd-query-readiness-request/v1"

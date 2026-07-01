@@ -25,8 +25,8 @@ if TYPE_CHECKING:
     from vcs_core._materialization_coordinator import MaterializationRecoveryReport
     from vcs_core._query_readiness import ReadinessOperationAuthority
     from vcs_core.materialization import MaterializationAssessment
-    from vcs_core.vcscore import VcsCore
     from vcs_core.types import MaterializationPlan, ScopeInfo
+    from vcs_core.vcscore import VcsCore
 
 
 class _VcsCoreGroundScopeAccess(GroundScopeAccess):

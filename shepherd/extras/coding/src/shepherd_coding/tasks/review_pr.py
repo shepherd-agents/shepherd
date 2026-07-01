@@ -2,9 +2,9 @@
 
 from typing import Literal
 
+from pydantic import BaseModel, Field
 from shepherd_contexts.workspace.ref import WorkspaceRef
 from shepherd_runtime.task.authoring import Context, Input, Output, task
-from pydantic import BaseModel, Field
 
 from ..contexts import GitHubContext
 from ..models import PRDetails, ReviewFinding

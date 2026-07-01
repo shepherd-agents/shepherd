@@ -9,9 +9,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Annotated, Any
 
+from pydantic import BaseModel, Field
 from shepherd_runtime.task.authoring import Input, Output, task  # type: ignore[no-redef]
 from shepherd_runtime.task.markers import TaskRef
-from pydantic import BaseModel, Field
 
 from shepherd_transform.source import extract_task_source, reconstruct_task
 

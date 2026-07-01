@@ -9,8 +9,8 @@ RUN_REF_SCHEMA = "shepherd.runtime.run_ref.v1"
 
 __all__ = [
     "RUN_REF_SCHEMA",
-    "VcsCoreExecutionLink",
     "RunRef",
+    "VcsCoreExecutionLink",
     "run_ref_from_json",
     "run_ref_to_json",
 ]

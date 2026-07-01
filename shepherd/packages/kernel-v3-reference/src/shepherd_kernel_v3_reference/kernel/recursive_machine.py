@@ -2,18 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from shepherd_kernel_v3_reference.kernel.context import ExecutionContext
-from shepherd_kernel_v3_reference.kernel.continuation_objects import (
-    ContinuationObjectBuilder,
-)
-from shepherd_kernel_v3_reference.kernel.continuations import (
-    ContinuationImage,
-)
 from shepherd_kernel_v3_reference.kernel.events import (
     ContinuationDelay,
     ContinuationPending,
@@ -51,9 +44,7 @@ from shepherd_kernel_v3_reference.kernel.ir import (
     KTerminalFork,
     Ref,
 )
-from shepherd_kernel_v3_reference.kernel.program_admission import KernelProgramInput
 from shepherd_kernel_v3_reference.kernel.runtime_services import EvidenceMode, _KernelRuntimeServices
-from shepherd_kernel_v3_reference.source.effects import EffectRegistry
 from shepherd_kernel_v3_reference.source.eval_direct import AbortAfterResume, eval_expr
 from shepherd_kernel_v3_reference.source.outcomes import (
     Completed,
@@ -66,6 +57,18 @@ from shepherd_kernel_v3_reference.source.outcomes import (
 )
 from shepherd_kernel_v3_reference.source.syntax import Lit
 from shepherd_kernel_v3_reference.source.values import Env
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+
+    from shepherd_kernel_v3_reference.kernel.continuation_objects import (
+        ContinuationObjectBuilder,
+    )
+    from shepherd_kernel_v3_reference.kernel.continuations import (
+        ContinuationImage,
+    )
+    from shepherd_kernel_v3_reference.kernel.program_admission import KernelProgramInput
+    from shepherd_kernel_v3_reference.source.effects import EffectRegistry
 
 
 @dataclass(frozen=True)

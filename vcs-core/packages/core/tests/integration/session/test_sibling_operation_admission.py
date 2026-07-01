@@ -18,9 +18,9 @@ from vcs_core._sibling_groups import (
     SiblingHandleRecord,
     sibling_machine_scope_name,
 )
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
 from vcs_core.types import ScopeInfo
+from vcs_core.vcscore import VcsCore
 
 GROUP_ID = "sg-bbbb00000000"
 

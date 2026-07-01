@@ -31,11 +31,11 @@ if TYPE_CHECKING:
 
     import pygit2
 
+    from vcs_core._authority import AuthorityMergeResult, DecisionProvider, RetainedOutputDecisionProvider
     from vcs_core._command_envelope import CommandExecutionOptions
     from vcs_core._command_values import CommandValueSource
     from vcs_core._lifecycle_run import LifecycleRun, LifecycleScopeState
     from vcs_core._materialization_coordinator import MaterializationRecoveryReport
-    from vcs_core._authority import AuthorityMergeResult, DecisionProvider, RetainedOutputDecisionProvider
     from vcs_core._parent_tree_manifest import ParentTreeManifest
     from vcs_core._projection_store import ScopeRegistryMismatch
     from vcs_core._query_inventory import InventorySnapshot
@@ -56,6 +56,10 @@ if TYPE_CHECKING:
     from vcs_core.recording import NestedParentAuthorization
 
 from vcs_core import _vcscore_lifecycle, _vcscore_materialization, _vcscore_queries, _vcscore_runtime
+from vcs_core._authority_inventory import (
+    authority_settlement_pending_labels,
+    read_valid_authority_settlement_pending_records,
+)
 from vcs_core._binding_contracts import BindingContractResolver
 from vcs_core._binding_surface import BindingSurface
 from vcs_core._capture_reducer import (
@@ -72,10 +76,6 @@ from vcs_core._fork_hints import ForkHints
 from vcs_core._identity import read_ground_world_id
 from vcs_core._operation_start_authority import begin_capture_diagnostic_operation, begin_capture_reduction_operation
 from vcs_core._operation_tx import OpenOperationGuard
-from vcs_core._authority_inventory import (
-    authority_settlement_pending_labels,
-    read_valid_authority_settlement_pending_records,
-)
 from vcs_core._patch_manager import PatchManager
 from vcs_core._python_runtime_capture_adapter import PythonRuntimeCaptureAdapter
 from vcs_core._substrate_driver import CaptureAdapter, CaptureAdapterRegistry, SubstrateDriver
@@ -1864,13 +1864,13 @@ class VcsCore:
            ``manager.create_prepared_driver_candidate_bundle(...,
            ingress_kind="reduce")``.
         """
-        from vcs_core._vcscore_runtime import python_runtime_events_from_effects
         from vcs_core._substrate_driver import (
             DriverIngressResult,
             ReduceRequest,
             TupleSink,
         )
         from vcs_core._substrate_evidence_kinds import Mechanism
+        from vcs_core._vcscore_runtime import python_runtime_events_from_effects
         from vcs_core._world_types import canonical_digest
 
         adapter = self._capture_adapter_by_mechanism(Mechanism.PYTHON_RUNTIME)

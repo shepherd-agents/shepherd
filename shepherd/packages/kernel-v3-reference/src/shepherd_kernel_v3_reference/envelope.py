@@ -37,18 +37,20 @@ The four-value `kind` taxonomy maps 1:1 to the validator call chain:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from shepherd_kernel_v3_reference.kernel.replay import (
     ExternalEffectRequest,
     ReplayableKernelTransition,
 )
-from shepherd_kernel_v3_reference.profiles import SemanticProfile
-from shepherd_kernel_v3_reference.semantic import (
-    ProfileRejected,
-    SemanticTransitionBatch,
-)
-from shepherd_kernel_v3_reference.trace.records import TraceRecord
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.profiles import SemanticProfile
+    from shepherd_kernel_v3_reference.semantic import (
+        ProfileRejected,
+        SemanticTransitionBatch,
+    )
+    from shepherd_kernel_v3_reference.trace.records import TraceRecord
 
 KERNEL_VERSION = "shepherd_kernel_v3_reference.kernel.v0"
 
@@ -255,9 +257,9 @@ class WireResult:
 
 
 __all__ = [
+    "KERNEL_VERSION",
     "CompletedResult",
     "EnvelopeStatus",
-    "KERNEL_VERSION",
     "KernelRejection",
     "KernelResultEnvelope",
     "KernelResultPayload",

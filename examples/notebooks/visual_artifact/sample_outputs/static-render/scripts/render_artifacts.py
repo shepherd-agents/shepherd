@@ -1,10 +1,10 @@
 """Render static visual-artifact gallery assets."""
 
-# ruff: noqa: E402,INP001,T201
+# ruff: noqa: INP001
 
 import sys
-from tempfile import TemporaryDirectory
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 EXAMPLE_ROOT = Path(__file__).resolve().parents[3]
 STATIC_RENDER_DIR = Path(__file__).resolve().parents[1]

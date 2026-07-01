@@ -18,10 +18,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 from vcs_core._containment import JailNotEstablished
-from vcs_core.runtime_api import VcsCore, Store, build_builtin_substrate_context
+from vcs_core.runtime_api import Store, VcsCore, build_builtin_substrate_context
 from vcs_core.substrates import DeclarativeFilesystemSubstrate, MarkerSubstrate
 
-from shepherd_dialect import ShepherdRunDriver, DeterministicFakeProvider, UnsupportedMayProfileError
+from shepherd_dialect import DeterministicFakeProvider, ShepherdRunDriver, UnsupportedMayProfileError
 
 if TYPE_CHECKING:
     from pathlib import Path

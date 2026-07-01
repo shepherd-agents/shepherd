@@ -7,9 +7,9 @@ inconclusive.
 
 from __future__ import annotations
 
+from pydantic import BaseModel, Field
 from shepherd_contexts.workspace import WorkspaceRef  # noqa: TC002
 from shepherd_runtime.task.authoring import Context, Input, Output, task
-from pydantic import BaseModel, Field
 
 from shepherd_coding.models import IssueVerdict  # noqa: TC001
 

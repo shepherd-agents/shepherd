@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
-from shepherd_kernel_v3_reference.kernel.continuation_objects import ContinuationObject
 from shepherd_kernel_v3_reference.kernel.events import (
     ContinuationDelay as ContinuationDelayEvent,
 )
@@ -37,12 +35,8 @@ from shepherd_kernel_v3_reference.kernel.events import (
 from shepherd_kernel_v3_reference.kernel.events import (
     TerminalResumeResult as TerminalResumeResultEvent,
 )
-from shepherd_kernel_v3_reference.kernel.program_admission import KernelProgramInput
 from shepherd_kernel_v3_reference.kernel.recursive_machine import RecursiveKernelEvaluator
 from shepherd_kernel_v3_reference.kernel.step_machine import StepKernelEvaluator
-from shepherd_kernel_v3_reference.source.effects import EffectRegistry
-from shepherd_kernel_v3_reference.source.outcomes import SourceOutcome
-from shepherd_kernel_v3_reference.source.values import Env
 from shepherd_kernel_v3_reference.trace.records import (
     ContinuationDelay,
     ContinuationPending,
@@ -59,6 +53,15 @@ from shepherd_kernel_v3_reference.trace.records import (
     TerminalResumeResult,
     TraceRecord,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping
+
+    from shepherd_kernel_v3_reference.kernel.continuation_objects import ContinuationObject
+    from shepherd_kernel_v3_reference.kernel.program_admission import KernelProgramInput
+    from shepherd_kernel_v3_reference.source.effects import EffectRegistry
+    from shepherd_kernel_v3_reference.source.outcomes import SourceOutcome
+    from shepherd_kernel_v3_reference.source.values import Env
 
 TraceEvaluatorEngine = Literal["auto", "step", "recursive"]
 

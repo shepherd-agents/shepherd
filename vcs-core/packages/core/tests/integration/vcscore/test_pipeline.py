@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 from vcs_core.commons_recording import CommonsShadowUnsupportedError
-from vcs_core.vcscore import VcsCore
 from vcs_core.types import EffectRecord, ScopeInfo
+from vcs_core.vcscore import VcsCore
 
 if TYPE_CHECKING:
     from pathlib import Path

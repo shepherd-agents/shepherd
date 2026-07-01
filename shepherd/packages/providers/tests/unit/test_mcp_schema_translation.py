@@ -10,8 +10,8 @@ from __future__ import annotations
 import pytest
 
 try:
-    from shepherd_providers.openai._mcp_stdio_bridge import mcp_tools_to_function_schemas
     from mcp.types import Tool
+    from shepherd_providers.openai._mcp_stdio_bridge import mcp_tools_to_function_schemas
 
     _MCP_AVAILABLE = True
 except ImportError:

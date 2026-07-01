@@ -7,10 +7,9 @@ import statistics
 import sys
 import time
 from collections import Counter
-from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from itertools import pairwise
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from shepherd_kernel_v3_reference.kernel import (
     ExternalEffectRequestRef,
@@ -52,6 +51,9 @@ from shepherd_kernel_v3_reference.trace.validate import (
     validate_runtime_trace_prefix,
     validate_trace_evidence,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
 
 
 @dataclass(frozen=True)

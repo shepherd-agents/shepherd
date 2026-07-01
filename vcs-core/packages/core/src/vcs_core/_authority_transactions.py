@@ -16,8 +16,8 @@ from vcs_core.types import EffectRecord
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from vcs_core.vcscore import VcsCore
     from vcs_core.types import ScopeInfo
+    from vcs_core.vcscore import VcsCore
 
 
 def ensure_authority_operation_ids_available(owner: VcsCore, *operation_ids: str) -> None:

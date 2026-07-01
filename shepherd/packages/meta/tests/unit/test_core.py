@@ -1,7 +1,5 @@
 """Tests for shepherd core functionality."""
 
-from shepherd_contexts.kvstore.effects import KeySet
-from shepherd_contexts.simple_workspace.effects import SimpleWorkspaceMaterialized
 from shepherd_contexts import (
     BashCommand,
     MCPToolCalled,
@@ -9,6 +7,8 @@ from shepherd_contexts import (
     SessionCreated,
     WorkspacePatchCaptured,
 )
+from shepherd_contexts.kvstore.effects import KeySet
+from shepherd_contexts.simple_workspace.effects import SimpleWorkspaceMaterialized
 from shepherd_core.context import is_reversible
 from shepherd_core.effects import (
     DiffPatch,

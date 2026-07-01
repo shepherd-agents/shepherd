@@ -2,9 +2,9 @@
 
 from typing import Annotated
 
+from pydantic import BaseModel
 from shepherd_runtime.task.authoring import Check, FileExists, Input, InRange, MaxLength, NonEmpty, Output, task
 from shepherd_runtime.task.metadata import _extract_checks, extract_task_metadata
-from pydantic import BaseModel
 
 # =============================================================================
 # _extract_checks helper

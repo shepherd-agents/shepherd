@@ -32,7 +32,7 @@ Rules".
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from shepherd_kernel_v3_reference.envelope import (
     CompletedResult,
@@ -47,7 +47,6 @@ from shepherd_kernel_v3_reference.kernel.replay import (
     ExternalEffectRequest,
     external_effect_request_to_json,
 )
-from shepherd_kernel_v3_reference.profiles import SemanticProfile
 from shepherd_kernel_v3_reference.semantic import (
     AdmissionBasis,
     ExternalEvidenceLink,
@@ -55,6 +54,9 @@ from shepherd_kernel_v3_reference.semantic import (
     SemanticTransitionBatch,
 )
 from shepherd_kernel_v3_reference.trace.serde import trace_record_to_json
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.profiles import SemanticProfile
 
 
 def _profile_to_wire(profile: SemanticProfile) -> str:

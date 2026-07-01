@@ -3,11 +3,11 @@
 from typing import Annotated
 
 import pytest
+from pydantic import BaseModel
 from shepherd_core.errors import CheckFailedError
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Check, Input, NonEmpty, Output, task
 from shepherd_tests import MockProvider
-from pydantic import BaseModel
 
 # Module-level Check instances so get_type_hints() can resolve them
 _always_fail = Check(predicate=lambda v: False, message="always fails")

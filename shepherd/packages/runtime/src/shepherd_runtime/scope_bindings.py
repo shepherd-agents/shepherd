@@ -7,8 +7,8 @@ Resolution order per D2:
 1. Walk the active Scope outward.
 2. For each scope, check exact-class match then ``isinstance`` match.
 3. If exactly one binding satisfies at the innermost depth, return it.
-4. Multiple at same depth -> ``AmbiguousBinding(T)``.
-5. None on the chain -> ``NoBindingForType(T)``.
+4. Multiple at same depth -> ``AmbiguousBindingError(T)``.
+5. None on the chain -> ``NoBindingForTypeError(T)``.
 
 The ``ContextRef[T]`` proxy delegates attribute access to the current
 value and re-resolves on each access so rebinding in the same Scope
@@ -26,10 +26,10 @@ from typing import Any, Generic, TypeVar
 from shepherd_runtime._scope.scope import current_scope
 
 __all__ = [
+    "AmbiguousBindingError",
     "ContextRef",
+    "NoBindingForTypeError",
     "TypedContextRef",
-    "AmbiguousBinding",
-    "NoBindingForType",
     "current_binding",
 ]
 
@@ -37,7 +37,7 @@ __all__ = [
 T = TypeVar("T")
 
 
-class AmbiguousBinding(LookupError):
+class AmbiguousBindingError(LookupError):
     """Two or more bindings at the same innermost depth match ``T``."""
 
     def __init__(self, target_type: type) -> None:
@@ -48,7 +48,7 @@ class AmbiguousBinding(LookupError):
         self.target_type = target_type
 
 
-class NoBindingForType(LookupError):
+class NoBindingForTypeError(LookupError):
     """No binding on the active Scope chain matches ``T``."""
 
     def __init__(self, target_type: type) -> None:
@@ -101,8 +101,8 @@ TypedContextRef = ContextRef
 def current_binding(target_type: type[T]) -> ContextRef[T]:
     """Return a live ``ContextRef[T]`` for the innermost matching binding.
 
-    Raises ``NoBindingForType`` if no binding matches anywhere on the
-    Scope chain. Raises ``AmbiguousBinding`` if two or more bindings
+    Raises ``NoBindingForTypeError`` if no binding matches anywhere on the
+    Scope chain. Raises ``AmbiguousBindingError`` if two or more bindings
     match at the same innermost depth.
 
     The returned ``ContextRef`` re-resolves on every attribute access,
@@ -125,7 +125,7 @@ def _resolve(target_type: type[T]) -> T:
     """
     scope = current_scope()
     if scope is None:
-        raise NoBindingForType(target_type)
+        raise NoBindingForTypeError(target_type)
 
     bindings = scope.all_bindings()  # innermost-first order from the scope chain
     exact: list[Any] = []
@@ -139,7 +139,7 @@ def _resolve(target_type: type[T]) -> T:
 
     chosen = exact or iso
     if not chosen:
-        raise NoBindingForType(target_type)
+        raise NoBindingForTypeError(target_type)
     if len(chosen) > 1:
-        raise AmbiguousBinding(target_type)
+        raise AmbiguousBindingError(target_type)
     return chosen[0]

@@ -7,8 +7,8 @@ from typing import Any
 
 from vcs_core import _cli_ipc
 from vcs_core._query_readiness import MutationPrecondition, ReadinessRequest
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
+from vcs_core.vcscore import VcsCore
 
 
 def query_readiness_json(

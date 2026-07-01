@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
-from typing import Literal, Union
+from typing import TYPE_CHECKING, Literal, Union
 
 from shepherd_kernel_v3_reference.kernel.context import ExecutionContext
-from shepherd_kernel_v3_reference.kernel.continuation_objects import ContinuationStackCursor
-from shepherd_kernel_v3_reference.kernel.ir import HandlerInstallDef, Ref
-from shepherd_kernel_v3_reference.source.values import Env
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+
+    from shepherd_kernel_v3_reference.kernel.continuation_objects import ContinuationStackCursor
+    from shepherd_kernel_v3_reference.kernel.ir import HandlerInstallDef, Ref
+    from shepherd_kernel_v3_reference.source.values import Env
 
 
 @dataclass(frozen=True)

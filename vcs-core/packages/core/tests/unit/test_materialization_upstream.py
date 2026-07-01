@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 from vcs_core._upstream import PreflightResult
 from vcs_core.materialization import MaterializationPreflightError, MaterializationUnit, plan_materialization
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
+from vcs_core.vcscore import VcsCore
 
 
 def _record_pending_replay(store: Store, *, materializer_key: str) -> None:

@@ -4,12 +4,12 @@ import asyncio
 from typing import Literal
 
 import pytest
+from pydantic import BaseModel
 from shepherd_core.effects import StepCompleted, StepStarted
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.step.api import StepOutputError, step
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_tests import MockProvider
-from pydantic import BaseModel
 
 # =============================================================================
 # Error Handling

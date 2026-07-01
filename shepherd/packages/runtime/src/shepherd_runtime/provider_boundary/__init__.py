@@ -29,7 +29,7 @@ from shepherd_runtime.provider_boundary.recorder import (
     InterpositionRecorder,
     RecorderLifecycleError,
     StubRecorder,
-    ToolHandlerNotFound,
+    ToolHandlerNotFoundError,
 )
 from shepherd_runtime.provider_boundary.runtime import (
     ProviderRuntime,
@@ -49,33 +49,33 @@ from shepherd_runtime.provider_boundary.tools import (
 )
 
 __all__ = [
+    "BypassInterposition",
+    # D6: InterpositionRecorder
+    "InterpositionRecorder",
+    "ModelRequest",
+    "ModelResponse",
     # D1: ProviderInterposition Protocol + D4: BypassInterposition
     "ProviderInterposition",
-    "BypassInterposition",
-    "ResponderFn",
+    # D5: payload schemas
+    "ProviderMessage",
     # D2: ProviderRuntime + TraceWriter
     "ProviderRuntime",
-    "TraceWriter",
+    "ProviderSettings",
+    "RecorderLifecycleError",
+    "ResponderFn",
     "StubProviderRuntime",
+    "StubRecorder",
+    "StubToolHandler",
     "StubTraceWriter",
+    "ToolCallRecord",
     # D3: ToolHandler
     "ToolHandler",
     "ToolHandlerEntry",
-    "StubToolHandler",
-    # D5: payload schemas
-    "ProviderMessage",
+    "ToolHandlerNotFoundError",
     "ToolSpec",
-    "ProviderSettings",
-    "ToolCallRecord",
+    "TraceWriter",
     "Usage",
-    "ModelRequest",
-    "ModelResponse",
     "summarize_model_failure",
     "summarize_model_request",
     "summarize_model_response",
-    # D6: InterpositionRecorder
-    "InterpositionRecorder",
-    "StubRecorder",
-    "RecorderLifecycleError",
-    "ToolHandlerNotFound",
 ]

@@ -46,7 +46,7 @@ def discover_all_tasks(*, get_entry_points: Any) -> dict[str, type]:
         try:
             package_name = ep.value.split(":")[0]
             tasks.update(discover_tasks_from_package(package_name))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             if is_strict_mode():
                 raise PluginLoadError(name, PACKAGES_GROUP, exc) from exc
             logger.warning("Failed to walk package '%s'", name, exc_info=logger.isEnabledFor(logging.DEBUG))

@@ -52,7 +52,7 @@ PACKAGES = {
 # sub-packages collapse into one wheel their entry points must be re-declared
 # here, or discovery silently finds nothing. Keep in sync with the source
 # packages' pyproject.toml [project.entry-points.*] tables.
-ENTRY_POINTS = '''\
+ENTRY_POINTS = """\
 [project.entry-points."shepherd.providers"]
 claude = "shepherd_providers.claude:ClaudeProvider"
 openai = "shepherd_providers.openai:OpenAIProvider"
@@ -80,9 +80,9 @@ database = "shepherd_contexts.database.effects"
 "shepherd.task_ledger" = "shepherd_dialect.plugin:TASK_LEDGER_PLUGIN"
 "shepherd.task_artifacts" = "shepherd_dialect.plugin:TASK_ARTIFACT_PLUGIN"
 "shepherd.run_ledger" = "shepherd_dialect.plugin:RUN_LEDGER_PLUGIN"
-'''
+"""
 
-PYPROJECT = '''\
+PYPROJECT = """\
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -141,10 +141,11 @@ packages = [
 
 [tool.hatch.build.targets.sdist]
 include = ["/src", "/README.md", "/LICENSE"]
-'''
+"""
 
 
 def stage(version: str) -> None:
+    """Assemble the bundled source tree and pyproject under STAGE."""
     if STAGE.exists():
         shutil.rmtree(STAGE)
     src = STAGE / "src"
@@ -191,6 +192,7 @@ def stage(version: str) -> None:
 
 
 def main() -> int:
+    """Stage the bundle and build sdist + wheel into --out-dir."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--version", default=DEFAULT_VERSION)
     ap.add_argument(
@@ -205,7 +207,7 @@ def main() -> int:
     for f in out.glob("shepherd_ai-*"):
         f.unlink()
 
-    result = subprocess.run(["uv", "build", "--out-dir", str(out)], cwd=STAGE)
+    result = subprocess.run(["uv", "build", "--out-dir", str(out)], cwd=STAGE, check=False)
     if result.returncode != 0:
         return result.returncode
 

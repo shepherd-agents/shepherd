@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from shepherd_runtime.task.authoring import Input, Output, task
 from pydantic import BaseModel, Field
+from shepherd_runtime.task.authoring import Input, Output, task
 
 from ..models import PRDetails  # noqa: TC001
 from ..utils import get_pr_details

@@ -32,7 +32,6 @@ from shepherd_runtime.nucleus import (
     Exhausted,
     Failed,
     Finished,
-    NoActiveTaskRun,
     Stopped,
     WorkspaceAlreadyConfigured,
     WorkspaceNotConfigured,

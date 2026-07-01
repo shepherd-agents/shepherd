@@ -80,10 +80,10 @@ from shepherd_dialect.workspace_control.queries import (
     outputs_for_run,
     resolve_run_selector,
     resolve_task,
-    run_vcscore_projection,
-    run_vcscore_projection_for_exact_run,
     run_output_citations,
     run_output_citations_for_exact_run,
+    run_vcscore_projection,
+    run_vcscore_projection_for_exact_run,
     show_run,
     trace_exact_run,
     trace_run,
@@ -234,7 +234,6 @@ class TaskExecutor(Protocol):
 
     def execute(self, workspace: Any, request: TaskExecutionRequest) -> Any:
         """Execute the request and return the task body's value."""
-...
 
 
 class InProcessTaskExecutor:
@@ -742,7 +741,7 @@ class ShepherdWorkspace:
         repo_path = workspace / ".vcscore"
         if not repo_path.exists():
             raise WorkspaceControlError("not a Shepherd workspace. Run `sp init` first.")
-        from vcs_core import FilesystemSubstrate, MarkerSubstrate, VcsCore, Store, build_builtin_substrate_context
+        from vcs_core import FilesystemSubstrate, MarkerSubstrate, Store, VcsCore, build_builtin_substrate_context
 
         from shepherd_dialect.run_driver import ShepherdRunDriver
 

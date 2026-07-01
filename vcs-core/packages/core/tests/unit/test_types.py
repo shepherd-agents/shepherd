@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import vcs_core.types as public_types
 import pytest
+import vcs_core.types as public_types
 from vcs_core.types import (
     DRIVER_INGRESS_RESULT_VALUE_SCHEMA,
     FileChange,

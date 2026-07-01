@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 
 import pytest
+from pydantic import BaseModel
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_transform.source import (
     ReconstructionError,
@@ -14,7 +15,6 @@ from shepherd_transform.source import (
     reconstruct_task_class,
     try_reconstruct_task_class,
 )
-from pydantic import BaseModel
 
 SIMPLE_TASK = '''
 @task

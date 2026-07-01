@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
 from shepherd_core.context.kernel import ExecutionContextDefaults
 from shepherd_core.effects.effects import (
     StageCompleted,
@@ -20,7 +21,6 @@ from shepherd_core.types import ReversibilityLevel
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Context, Input, Output, task
 from shepherd_runtime.task.pipeline import OnError, Stage
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Contexts

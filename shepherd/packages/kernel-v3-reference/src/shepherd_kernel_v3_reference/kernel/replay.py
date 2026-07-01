@@ -6,7 +6,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from math import isfinite
 from types import MappingProxyType
-from typing import Any, Literal, TypeAlias, cast
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, cast
 
 from shepherd_kernel_v3_reference.kernel.continuation_objects import (
     ContinuationObject,
@@ -16,7 +16,6 @@ from shepherd_kernel_v3_reference.kernel.continuation_objects import (
     continuation_object_ref,
     continuation_object_to_json,
 )
-from shepherd_kernel_v3_reference.kernel.ir import Ref
 from shepherd_kernel_v3_reference.kernel.program_admission import (
     KernelProgramInput,
     PreparedKernelProgram,
@@ -26,7 +25,6 @@ from shepherd_kernel_v3_reference.kernel.program_identity import project_program
 from shepherd_kernel_v3_reference.kernel.refs import content_ref
 from shepherd_kernel_v3_reference.kernel.step_machine import StepKernelEvaluator
 from shepherd_kernel_v3_reference.profiles import SemanticProfile
-from shepherd_kernel_v3_reference.source.effects import EffectRegistry
 from shepherd_kernel_v3_reference.source.outcomes import (
     Completed,
     Delayed,
@@ -35,7 +33,6 @@ from shepherd_kernel_v3_reference.source.outcomes import (
     SourceOutcome,
     Suspended,
 )
-from shepherd_kernel_v3_reference.source.values import Env
 from shepherd_kernel_v3_reference.trace.machine import TraceDebugEvidence, TraceResult, record_from_event, run_trace
 from shepherd_kernel_v3_reference.trace.records import EffectDeclaration, TraceRecord
 from shepherd_kernel_v3_reference.trace.serde import (
@@ -44,6 +41,11 @@ from shepherd_kernel_v3_reference.trace.serde import (
     trace_record_to_json,
     trace_to_json,
 )
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
+    from shepherd_kernel_v3_reference.source.effects import EffectRegistry
+    from shepherd_kernel_v3_reference.source.values import Env
 
 CONTINUATION_REPLAY_ARTIFACT_SCHEMA_VERSION = "shepherd_kernel_v3_reference.continuation-replay-artifact.v2"
 CONTINUATION_SOURCE_KEY_SCHEMA_VERSION = "shepherd_kernel_v3_reference.continuation-source-key.v1"

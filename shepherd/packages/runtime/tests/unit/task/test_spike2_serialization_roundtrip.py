@@ -16,9 +16,9 @@ from typing import Literal
 
 import pydantic
 import pytest
+from pydantic import BaseModel, create_model
 from shepherd_core._shared.coerce import _coerce_step_value
 from shepherd_runtime.task.metadata import FieldInfo
-from pydantic import BaseModel, create_model
 
 # ---------------------------------------------------------------------------
 # Shared fixtures: types under test

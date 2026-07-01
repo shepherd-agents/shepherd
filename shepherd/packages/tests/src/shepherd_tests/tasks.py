@@ -33,9 +33,9 @@ Example:
 from enum import Enum
 from typing import Literal, NamedTuple, TypeVar
 
+from pydantic import BaseModel
 from shepherd_runtime.step.api import step
 from shepherd_runtime.task.authoring import Input, Output, task
-from pydantic import BaseModel
 
 T = TypeVar("T")
 

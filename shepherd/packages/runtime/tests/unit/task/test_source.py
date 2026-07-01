@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import BaseModel
 from shepherd_core.errors import TaskRefOutputError
 from shepherd_core.types import ExecutionResult
 from shepherd_runtime.scope import Scope
@@ -10,7 +11,6 @@ from shepherd_runtime.task.authoring import Input, Output, TaskRef, task
 from shepherd_runtime.task.metadata import extract_task_metadata
 from shepherd_runtime.task.output import TaskRefReconstructionPolicy, extract_outputs
 from shepherd_tests import MockProvider
-from pydantic import BaseModel
 
 
 @task

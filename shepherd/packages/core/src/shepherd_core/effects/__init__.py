@@ -27,12 +27,12 @@ from .commons_vcs import (
     SHEPHERD_PREVIOUS_ROLE,
     ProjectedEffectLayer,
     ProjectedEffectStream,
-    shepherd_effect_profile,
     normalize_commons_value,
     project_effect_layer,
     project_effect_object,
     project_effect_stream,
     project_event_layer,
+    shepherd_effect_profile,
     validate_shepherd_effect_v1,
     validate_shepherd_event_v1,
 )

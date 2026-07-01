@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import pytest
+from typing import TYPE_CHECKING
 
 from shepherd_kernel_v3_reference.conformance import artifact_from_trace_result, conformance_artifact_to_json
 from shepherd_kernel_v3_reference.kernel import elaborate, elaborate_publication_experimental
@@ -19,6 +19,9 @@ from shepherd_kernel_v3_reference.trace.machine import (
     run_trace,
 )
 from shepherd_kernel_v3_reference.trace.records import TerminalResumeResult
+
+if TYPE_CHECKING:
+    import pytest
 
 
 def test_step_machine_successful_handled_resumption_matches_recursive_artifact(

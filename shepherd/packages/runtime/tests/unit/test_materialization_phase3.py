@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Self
 
 import pytest
+from pydantic import ValidationError
 from shepherd_core.effects import ContextMaterialized, Effect
 from shepherd_core.scope.model import ContextBinding
 from shepherd_core.types import ReversibilityLevel
@@ -23,7 +24,6 @@ from shepherd_runtime.materialization import (
     register_materializer,
 )
 from shepherd_runtime.scope import Scope
-from pydantic import ValidationError
 
 # =============================================================================
 # Test Fixtures - Mock Materializable Contexts

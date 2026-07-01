@@ -20,10 +20,10 @@ except ImportError:
     PydanticValidationError = None  # type: ignore[misc,assignment]
 
 __all__ = [
-    "SHEPHERD_IMPORTS",
     "SECURE_ALLOWED_DUNDERS",
     "SECURE_ALLOWED_MODULES",
     "SECURE_FORBIDDEN_NAMES",
+    "SHEPHERD_IMPORTS",
     "STANDARD_IMPORTS",
     "ReconstructionError",
     "reconstruct_task_class",

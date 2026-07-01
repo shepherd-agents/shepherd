@@ -23,13 +23,13 @@ See: DESIGN-effect-replay.md Phase 0
 """
 
 # Import effects not exported by shepherd package
+from shepherd_contexts import KVStoreContext, WorkspaceRef
 from shepherd_contexts.kvstore.effects import KeyDeleted, KeySet
 from shepherd_contexts.session.effects import SessionCreated
 from shepherd_contexts.simple_workspace.context import SimpleWorkspace
 from shepherd_contexts.simple_workspace.delta import FileChangeset, FileDelta
 from shepherd_contexts.simple_workspace.effects import SimpleWorkspaceChangesetCaptured
 from shepherd_contexts.workspace.effects import WorkspacePatchCaptured
-from shepherd_contexts import KVStoreContext, WorkspaceRef
 from shepherd_core.effects import DiffPatch
 
 # =============================================================================

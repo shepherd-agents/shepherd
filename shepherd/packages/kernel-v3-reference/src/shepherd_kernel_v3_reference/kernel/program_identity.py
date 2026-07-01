@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
+from typing import TYPE_CHECKING
 
 from shepherd_kernel_v3_reference.kernel.ir import (
     KAbort,
@@ -18,10 +19,12 @@ from shepherd_kernel_v3_reference.kernel.ir import (
     KTerminalFork,
     Ref,
 )
-from shepherd_kernel_v3_reference.kernel.program_admission import NodeId, PreparedKernelProgram
 from shepherd_kernel_v3_reference.kernel.refs import content_ref
 from shepherd_kernel_v3_reference.schemas import schema_fingerprint
 from shepherd_kernel_v3_reference.source.syntax import Lit, RecordExpr, Var
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.program_admission import NodeId, PreparedKernelProgram
 
 
 @dataclass(frozen=True)

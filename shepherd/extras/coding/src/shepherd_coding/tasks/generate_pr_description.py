@@ -5,12 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Annotated
 
+from pydantic import BaseModel, Field
 from shepherd_runtime.nucleus import deliver
 from shepherd_runtime.nucleus import task as nucleus_task
 from shepherd_runtime.task.authoring import Input, Output
 from shepherd_runtime.task.authoring import task as class_task
 from shepherd_runtime.task.markers import InputMarker
-from pydantic import BaseModel, Field
 
 _PR_DESC_GUIDANCE = """\
 You are a senior engineer writing a pull request description.

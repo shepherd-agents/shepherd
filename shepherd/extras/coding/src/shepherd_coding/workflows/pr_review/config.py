@@ -13,8 +13,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from shepherd_core import Infer  # noqa: TC002 (runtime: Pydantic resolves Infer annotations)
 from pydantic import BaseModel, Field
+from shepherd_core import Infer  # noqa: TC002 (runtime: Pydantic resolves Infer annotations)
 
 
 class VerifyConfig(BaseModel):

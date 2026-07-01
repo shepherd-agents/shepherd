@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import vcs_core as vcs_core_pkg
 import pytest
+import vcs_core as vcs_core_pkg
 from vcs_core import spi
 from vcs_core._errors import InvalidRepositoryStateError
 from vcs_core._substrate_runtime import ContainmentSubstrate, build_builtin_substrate_context

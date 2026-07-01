@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal
 
-from shepherd_core.effects import Effect
 from pydantic import Field
+from shepherd_core.effects import Effect
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

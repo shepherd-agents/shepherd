@@ -5,12 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 from vcs_core._errors import InvalidRepositoryStateError
-from vcs_core._vcscore_seal import (
-    ValidatedRetainedWorkspace,
-    _scope_selector,
-    _validate_retained_workspace_handle,
-    _validated_retained_workspace,
-)
 from vcs_core._retained_output_selection import (
     _recover_current_parent_retained_selection,
     _recover_published_retained_selection,
@@ -20,6 +14,12 @@ from vcs_core._retained_output_settlement import (
     read_retained_output_settlement,
     retained_output_settlement_ref,
     write_retained_output_settlement,
+)
+from vcs_core._vcscore_seal import (
+    ValidatedRetainedWorkspace,
+    _scope_selector,
+    _validate_retained_workspace_handle,
+    _validated_retained_workspace,
 )
 from vcs_core._world_types import canonical_digest
 from vcs_core.types import (

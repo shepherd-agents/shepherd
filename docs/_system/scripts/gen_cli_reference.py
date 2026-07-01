@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate docs/reference/cli.md from the checked CLI fixture (simulated
 `shepherd --help` capture) — the second generate+drift pipeline. --check
-fails on any difference between the committed page and a regeneration."""
+fails on any difference between the committed page and a regeneration.
+"""
 
 from __future__ import annotations
 

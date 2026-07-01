@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from pydantic import BaseModel, Field
 from shepherd_contexts import WorkspaceRef  # noqa: TC002
 from shepherd_runtime.task.authoring import Context, Input, Output, task
-from pydantic import BaseModel, Field
 
 from ..models import CritiqueOutput
 

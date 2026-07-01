@@ -9,10 +9,10 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
+from pydantic import BaseModel
 from shepherd_core.effects import TaskCompleted, TaskStarted
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, task
-from pydantic import BaseModel
 
 
 @task

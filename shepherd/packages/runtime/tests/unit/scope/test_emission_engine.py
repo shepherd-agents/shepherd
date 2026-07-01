@@ -6,12 +6,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TYPE_CHECKING, Any, Literal
 
 import pytest
+from pydantic import BaseModel
 from shepherd_core.context.kernel import ExecutionContextDefaults
 from shepherd_core.effects import ContextPrepared, Effect
 from shepherd_core.types import ProviderBinding, ReversibilityLevel
 from shepherd_runtime._scope._emission import EmissionEngine
 from shepherd_runtime.scope import Scope, ScopeProxy
-from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from shepherd_core.scope.stream import EffectLayer

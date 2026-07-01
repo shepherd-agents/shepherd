@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Annotated
 
 import pytest
+from pydantic import BaseModel
 from shepherd_core.schema import SINGLE_OUTPUT_KEY
 from shepherd_runtime.effects import Match, Plan, PlanNotExtractable, Tell, handle, sync_tell
 from shepherd_runtime.nucleus import (
@@ -26,7 +27,6 @@ from shepherd_runtime.nucleus import (
 from shepherd_runtime.provider_boundary import ModelRequest, ModelResponse
 from shepherd_runtime.task.markers import InputMarker
 from shepherd_runtime.trace import Trace, active_trace_recorder
-from pydantic import BaseModel
 
 
 @pytest.fixture(autouse=True)

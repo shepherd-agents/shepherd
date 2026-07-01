@@ -4,7 +4,10 @@ from shepherd_kernel_v3_reference.kernel import (
     elaborate,
     elaborate_publication_experimental,
 )
-from shepherd_kernel_v3_reference.kernel.continuation_objects import CONTINUATION_OBJECT_SCHEMA_VERSION, ContinuationRoot
+from shepherd_kernel_v3_reference.kernel.continuation_objects import (
+    CONTINUATION_OBJECT_SCHEMA_VERSION,
+    ContinuationRoot,
+)
 from shepherd_kernel_v3_reference.schemas import AnySchema
 from shepherd_kernel_v3_reference.source.experimental import TerminalDelay, TerminalFork
 from shepherd_kernel_v3_reference.source.handlers import HandlerEnv, StaticHandlerInstall

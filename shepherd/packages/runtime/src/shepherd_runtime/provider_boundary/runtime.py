@@ -22,10 +22,10 @@ from shepherd_runtime.kernel import ExecutionContext
 from shepherd_runtime.trace import KernelRecord, Ref, RunRef, SurfaceRecord
 
 __all__ = [
-    "TraceWriter",
     "ProviderRuntime",
-    "StubTraceWriter",
     "StubProviderRuntime",
+    "StubTraceWriter",
+    "TraceWriter",
 ]
 
 
@@ -39,15 +39,14 @@ class TraceWriter(Protocol):
     test-runtime counter-based refs are not.
     """
 
-    def append_kernel(self, record: "KernelRecord") -> "Ref": ...
+    def append_kernel(self, record: KernelRecord) -> Ref: ...
 
-    def append_surface(self, record: "SurfaceRecord") -> "Ref": ...
+    def append_surface(self, record: SurfaceRecord) -> Ref: ...
 
 
 @runtime_checkable
 class ProviderRuntime(Protocol):
-    """Runtime services exposed to provider adapters during one
-    ``perform_model_call`` invocation.
+    """Runtime services for one ``perform_model_call`` invocation.
 
     Constructed by ``ExecutionLifecycle``, consumed by the adapter
     and (transitively) by the recorder. ``execution_context`` is
@@ -60,10 +59,10 @@ class ProviderRuntime(Protocol):
     def trace_writer(self) -> TraceWriter: ...
 
     @property
-    def execution_context(self) -> "ExecutionContext": ...
+    def execution_context(self) -> ExecutionContext: ...
 
     @property
-    def run_ref(self) -> "RunRef": ...
+    def run_ref(self) -> RunRef: ...
 
     @property
     def task_name(self) -> str | None: ...
@@ -91,12 +90,12 @@ class StubTraceWriter:
         self._counter += 1
         return f"ref:{self._counter}"
 
-    def append_kernel(self, record: "KernelRecord") -> "Ref":
+    def append_kernel(self, record: KernelRecord) -> Ref:
         ref = self._next_ref()
         self.kernel_records.append((ref, record))
         return ref
 
-    def append_surface(self, record: "SurfaceRecord") -> "Ref":
+    def append_surface(self, record: SurfaceRecord) -> Ref:
         ref = self._next_ref()
         self.surface_records.append((ref, record))
         return ref

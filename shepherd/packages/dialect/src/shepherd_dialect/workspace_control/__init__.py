@@ -1,5 +1,6 @@
 """Workspace-control records and read/query helpers."""
 
+from shepherd_dialect.workspace_control.authority import GitRepoGrant, GitRepoPath, May, ReadOnly, ReadWrite
 from shepherd_dialect.workspace_control.authority_read_model import (
     RunAuthority,
     RunOutputSettlementEvidence,
@@ -7,10 +8,10 @@ from shepherd_dialect.workspace_control.authority_read_model import (
 )
 from shepherd_dialect.workspace_control.changesets import Changeset, ChangesetStat
 from shepherd_dialect.workspace_control.drivers import (
+    LedgerWriteAuthority,
     ShepherdRunLedgerDriver,
     ShepherdTaskArtifactDriver,
     ShepherdTaskLedgerDriver,
-    LedgerWriteAuthority,
 )
 from shepherd_dialect.workspace_control.errors import WorkspaceControlError
 from shepherd_dialect.workspace_control.flow_context import (
@@ -46,7 +47,6 @@ from shepherd_dialect.workspace_control.outputs import (
     TraceDescriptorNotResolvedError,
     run_output_publication_from_seal_handoff,
 )
-from shepherd_dialect.workspace_control.authority import GitRepoGrant, GitRepoPath, May, ReadOnly, ReadWrite
 from shepherd_dialect.workspace_control.queries import (
     RUN_LEDGER_BINDING,
     RUN_LEDGER_SCHEMA,
@@ -66,9 +66,9 @@ from shepherd_dialect.workspace_control.queries import (
     read_task_ledger_payload,
     resolve_run_selector,
     resolve_task,
-    run_vcscore_projection,
     run_output_citations,
     run_output_citations_for_exact_run,
+    run_vcscore_projection,
     show_run,
     trace_run,
 )
@@ -104,11 +104,11 @@ from shepherd_dialect.workspace_control.schemas import (
 )
 from shepherd_dialect.workspace_control.task_handles import WorkspaceTask
 from shepherd_dialect.workspace_control.workspace import (
-    ShepherdWorkspace,
     BindingPolicy,
     InProcessTaskExecutor,
     RunStartError,
     RuntimeTaskLibrary,
+    ShepherdWorkspace,
     TaskExecutionRequest,
     TaskExecutor,
     TaskHandle,
@@ -132,10 +132,6 @@ __all__ = [
     "TASK_LEDGER_SCHEMA",
     "TASK_REF_SCHEMA",
     "WORKSPACE_REF_SCHEMA",
-    "ShepherdRunLedgerDriver",
-    "ShepherdTaskArtifactDriver",
-    "ShepherdTaskLedgerDriver",
-    "ShepherdWorkspace",
     "BindingPolicy",
     "Changeset",
     "ChangesetStat",
@@ -175,6 +171,10 @@ __all__ = [
     "RunSummary",
     "RunTerminalization",
     "RuntimeTaskLibrary",
+    "ShepherdRunLedgerDriver",
+    "ShepherdTaskArtifactDriver",
+    "ShepherdTaskLedgerDriver",
+    "ShepherdWorkspace",
     "TaskArtifactLock",
     "TaskArtifactRef",
     "TaskDefinitionVersion",
@@ -210,12 +210,12 @@ __all__ = [
     "resolve_task",
     "run_can_produce_source_identity",
     "run_has_published_workspace_output",
-    "run_vcscore_projection",
     "run_output_citations",
     "run_output_citations_for_exact_run",
     "run_output_publication_from_seal_handoff",
     "run_published_workspace_output",
     "run_trace_terminal_status",
+    "run_vcscore_projection",
     "run_workspace_output_world_oid",
     "show_run",
     "trace_run",

@@ -49,8 +49,8 @@ from vcs_core._recovery_inventory import (
 from vcs_core._world_types import WORLD_TRANSITION_SCHEMA, WorldSnapshot
 from vcs_core.cli import main
 from vcs_core.git_store import build_tree, create_signature
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
+from vcs_core.vcscore import VcsCore
 
 
 @pytest.fixture

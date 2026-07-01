@@ -10,10 +10,10 @@ import tempfile
 from pathlib import Path
 from typing import Literal
 
+from pydantic import BaseModel, Field
 from shepherd_contexts.workspace.ref import WorkspaceRef
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_runtime.task.pipeline import OnError
-from pydantic import BaseModel, Field
 
 from shepherd_coding.contexts import GitHubContext
 from shepherd_coding.findings import CodeFinding, review_finding_to_code_finding

@@ -188,35 +188,34 @@ class BindingService:
                     f"{type(context).__name__} has no __binding_name__. Use scope.bind('name', context) to specify one."
                 )
             name = binding_name
-        else:
-            if isinstance(name_or_context, str):
-                # name-keyed form: bind("name", context)
-                if name_or_context.startswith(_TYPE_NAME_PREFIX):
-                    raise ValueError(
-                        f"binding name {name_or_context!r} starts with "
-                        f"reserved prefix {_TYPE_NAME_PREFIX!r}; use "
-                        f"scope.bind(T, value) for type-keyed bindings."
-                    )
-                name = name_or_context
-            elif isinstance(name_or_context, type):
-                # CONTRACTS C5 / DECISIONS D2 type-keyed form: bind(T, value).
-                # current_binding(T) ignores the binding name and matches on
-                # context type, so a synthetic name is sufficient as a
-                # registry slot.
-                target_type = name_or_context
-                if not isinstance(context, target_type):
-                    raise TypeError(
-                        f"bind({target_type.__name__}, value): value is "
-                        f"{type(context).__name__}, not a {target_type.__name__}."
-                    )
-                name = _synthetic_type_binding_name(target_type)
-            else:
-                raise TypeError(
-                    f"First argument must be a string name or a type, got "
-                    f"{type(name_or_context).__name__}. "
-                    f"Use scope.bind('name', context), scope.bind(T, context), "
-                    f"or scope.bind(context)."
+        elif isinstance(name_or_context, str):
+            # name-keyed form: bind("name", context)
+            if name_or_context.startswith(_TYPE_NAME_PREFIX):
+                raise ValueError(
+                    f"binding name {name_or_context!r} starts with "
+                    f"reserved prefix {_TYPE_NAME_PREFIX!r}; use "
+                    f"scope.bind(T, value) for type-keyed bindings."
                 )
+            name = name_or_context
+        elif isinstance(name_or_context, type):
+            # CONTRACTS C5 / DECISIONS D2 type-keyed form: bind(T, value).
+            # current_binding(T) ignores the binding name and matches on
+            # context type, so a synthetic name is sufficient as a
+            # registry slot.
+            target_type = name_or_context
+            if not isinstance(context, target_type):
+                raise TypeError(
+                    f"bind({target_type.__name__}, value): value is "
+                    f"{type(context).__name__}, not a {target_type.__name__}."
+                )
+            name = _synthetic_type_binding_name(target_type)
+        else:
+            raise TypeError(
+                f"First argument must be a string name or a type, got "
+                f"{type(name_or_context).__name__}. "
+                f"Use scope.bind('name', context), scope.bind(T, context), "
+                f"or scope.bind(context)."
+            )
         return name, context
 
 

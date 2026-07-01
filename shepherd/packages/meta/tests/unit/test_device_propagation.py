@@ -12,12 +12,12 @@ when run_sync() bridges from sync to async execution.
 """
 
 import pytest
+from pydantic import BaseModel
 from shepherd.pipeline import Pipeline
 from shepherd_runtime.device import Device, DeviceNestingError, get_current_device
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_tests import MockProvider
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Tasks

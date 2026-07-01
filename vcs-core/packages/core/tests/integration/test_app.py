@@ -17,9 +17,9 @@ from vcs_core._app import (
 from vcs_core._errors import WorkspaceAuthorityRecoveryRequiredError
 from vcs_core._sibling_groups import SiblingGroupRecord, SiblingHandleRecord, sibling_machine_scope_name
 from vcs_core.cli import main
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
 from vcs_core.types import ScopeInfo
+from vcs_core.vcscore import VcsCore
 
 from ..support.cli import init_repo
 

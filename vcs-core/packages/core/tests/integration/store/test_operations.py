@@ -5,9 +5,9 @@ from __future__ import annotations
 import json
 from concurrent.futures import ThreadPoolExecutor
 
-import vcs_core._store_operation_queries as store_operation_queries
 import pygit2
 import pytest
+import vcs_core._store_operation_queries as store_operation_queries
 from vcs_core._errors import InvalidRepositoryStateError
 from vcs_core._projection_store import (
     ARCHIVED_OPERATIONS_BY_ID_CURRENT_REF,

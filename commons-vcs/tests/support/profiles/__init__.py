@@ -12,6 +12,6 @@ spike's purpose is to validate that the schema and digest discipline
 hold under real code, not to harden production validators.
 """
 
-from . import shepherd, vcscore, sgc_stub
+from . import sgc_stub, shepherd, vcscore
 
-__all__ = ["shepherd", "vcscore", "sgc_stub"]
+__all__ = ["sgc_stub", "shepherd", "vcscore"]

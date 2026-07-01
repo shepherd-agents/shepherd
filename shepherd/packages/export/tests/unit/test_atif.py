@@ -18,8 +18,8 @@ from shepherd_core.effects import (
 from shepherd_core.scope.stream import Stream
 
 try:
-    from shepherd_export.atif import from_atif, from_atif_json, to_atif, to_atif_json
     from harbor.models.trajectories import Trajectory
+    from shepherd_export.atif import from_atif, from_atif_json, to_atif, to_atif_json
 
     HAS_HARBOR = True
 except ImportError:

@@ -18,16 +18,17 @@ Pinned by `docs/design/proposed/260505-plans/CONTRACTS.md` D6.
 
 from __future__ import annotations
 
-from typing import Literal, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol
 
-from shepherd_runtime.provider_boundary.payloads import ModelRequest
-from shepherd_runtime.trace import Ref
+if TYPE_CHECKING:
+    from shepherd_runtime.provider_boundary.payloads import ModelRequest
+    from shepherd_runtime.trace import Ref
 
 __all__ = [
     "InterpositionRecorder",
-    "StubRecorder",
     "RecorderLifecycleError",
-    "ToolHandlerNotFound",
+    "StubRecorder",
+    "ToolHandlerNotFoundError",
 ]
 
 
@@ -41,9 +42,8 @@ class RecorderLifecycleError(RuntimeError):
     """
 
 
-class ToolHandlerNotFound(LookupError):
-    """``select_tool_handler`` was called for a ``tool.<name>`` kind
-    with no handler registered.
+class ToolHandlerNotFoundError(LookupError):
+    """``select_tool_handler`` found no handler for a ``tool.<name>`` kind.
 
     Adapters catch this at the recorder boundary and emit
     ``capture(selection_ref, "abort", ...)`` plus
@@ -53,8 +53,7 @@ class ToolHandlerNotFound(LookupError):
 
 
 class InterpositionRecorder(Protocol):
-    """Mediates between provider adapters and the kernel trace
-    machine.
+    """Mediates between provider adapters and the kernel trace machine.
 
     Adapters drive these methods from streaming SDK callbacks; the
     recorder owns ref minting, ``ExecutionContext`` stamping, and
@@ -71,42 +70,42 @@ class InterpositionRecorder(Protocol):
     resume -> resume_return -> capture``.
     """
 
-    def start_model_call(self, request: "ModelRequest") -> "Ref":
+    def start_model_call(self, request: ModelRequest) -> Ref:
         """Mint ``EffectDeclaration("model.call")``; return its ref."""
 
     def select_provider_handler(
-        self, declaration_ref: "Ref", handler_id: str
-    ) -> "Ref":
+        self, declaration_ref: Ref, handler_id: str
+    ) -> Ref:
         """Mint ``HandlerSelection`` for the model.call; return its ref."""
 
     def open_tool_call(
-        self, parent_decl_ref: "Ref", tool_name: str, payload: dict
-    ) -> "Ref":
+        self, parent_decl_ref: Ref, tool_name: str, payload: dict
+    ) -> Ref:
         """Mint nested ``EffectDeclaration("tool.<name>")``; return its ref."""
 
-    def select_tool_handler(self, decl_ref: "Ref", handler_id: str) -> "Ref":
+    def select_tool_handler(self, decl_ref: Ref, handler_id: str) -> Ref:
         """Mint ``HandlerSelection`` for a tool effect; return its ref."""
 
     def mint_resumption(
-        self, decl_ref: "Ref", selection_ref: "Ref"
-    ) -> "Ref":
+        self, decl_ref: Ref, selection_ref: Ref
+    ) -> Ref:
         """Mint ``ResumptionHandle``; return its ref."""
 
-    def resume(self, handle_ref: "Ref", value: object) -> "Ref":
+    def resume(self, handle_ref: Ref, value: object) -> Ref:
         """Mint ``ContinuationResume``; return its ref."""
 
-    def resume_return(self, resume_ref: "Ref", value: object) -> "Ref":
+    def resume_return(self, resume_ref: Ref, value: object) -> Ref:
         """Mint ``ResumeReturn``; return its ref."""
 
     def capture(
         self,
-        selection_ref: "Ref",
+        selection_ref: Ref,
         action_kind: Literal["return", "abort"],
         payload: object,
-    ) -> "Ref":
+    ) -> Ref:
         """Mint ``EffectCapture``; return its ref."""
 
-    def selection_closed(self, selection_ref: "Ref", reason: str) -> "Ref":
+    def selection_closed(self, selection_ref: Ref, reason: str) -> Ref:
         """Mint ``SelectionClosed``; return its ref."""
 
 
@@ -138,15 +137,15 @@ class StubRecorder:
         self._counter += 1
         return f"{kind}:stub:{self._counter}"
 
-    def start_model_call(self, request: "ModelRequest") -> "Ref":
+    def start_model_call(self, request: ModelRequest) -> Ref:
         ref = self._next_ref("decl")
         self._declarations.add(ref)
         self.calls.append(("start_model_call", request, ref))
         return ref
 
     def select_provider_handler(
-        self, declaration_ref: "Ref", handler_id: str
-    ) -> "Ref":
+        self, declaration_ref: Ref, handler_id: str
+    ) -> Ref:
         self._require_declaration(declaration_ref)
         ref = self._next_ref("sel")
         self._selections[ref] = declaration_ref
@@ -156,8 +155,8 @@ class StubRecorder:
         return ref
 
     def open_tool_call(
-        self, parent_decl_ref: "Ref", tool_name: str, payload: dict
-    ) -> "Ref":
+        self, parent_decl_ref: Ref, tool_name: str, payload: dict
+    ) -> Ref:
         self._require_declaration(parent_decl_ref)
         ref = self._next_ref("decl")
         self._declarations.add(ref)
@@ -166,7 +165,7 @@ class StubRecorder:
         )
         return ref
 
-    def select_tool_handler(self, decl_ref: "Ref", handler_id: str) -> "Ref":
+    def select_tool_handler(self, decl_ref: Ref, handler_id: str) -> Ref:
         self._require_declaration(decl_ref)
         ref = self._next_ref("sel")
         self._selections[ref] = decl_ref
@@ -174,8 +173,8 @@ class StubRecorder:
         return ref
 
     def mint_resumption(
-        self, decl_ref: "Ref", selection_ref: "Ref"
-    ) -> "Ref":
+        self, decl_ref: Ref, selection_ref: Ref
+    ) -> Ref:
         self._require_selection(selection_ref)
         if self._selections[selection_ref] != decl_ref:
             raise RecorderLifecycleError(
@@ -186,7 +185,7 @@ class StubRecorder:
         self.calls.append(("mint_resumption", decl_ref, selection_ref, ref))
         return ref
 
-    def resume(self, handle_ref: "Ref", value: object) -> "Ref":
+    def resume(self, handle_ref: Ref, value: object) -> Ref:
         if handle_ref not in self._handles:
             raise RecorderLifecycleError(f"unknown resumption handle {handle_ref!r}")
         ref = self._next_ref("resume")
@@ -194,7 +193,7 @@ class StubRecorder:
         self.calls.append(("resume", handle_ref, value, ref))
         return ref
 
-    def resume_return(self, resume_ref: "Ref", value: object) -> "Ref":
+    def resume_return(self, resume_ref: Ref, value: object) -> Ref:
         if resume_ref not in self._resumes:
             raise RecorderLifecycleError(f"unknown resume ref {resume_ref!r}")
         ref = self._next_ref("rret")
@@ -204,10 +203,10 @@ class StubRecorder:
 
     def capture(
         self,
-        selection_ref: "Ref",
+        selection_ref: Ref,
         action_kind: Literal["return", "abort"],
         payload: object,
-    ) -> "Ref":
+    ) -> Ref:
         self._require_selection(selection_ref)
         if selection_ref in self._captured:
             raise RecorderLifecycleError(f"selection {selection_ref!r} is already captured")
@@ -228,7 +227,7 @@ class StubRecorder:
         )
         return ref
 
-    def selection_closed(self, selection_ref: "Ref", reason: str) -> "Ref":
+    def selection_closed(self, selection_ref: Ref, reason: str) -> Ref:
         self._require_selection(selection_ref)
         if selection_ref in self._closed:
             raise RecorderLifecycleError(f"selection {selection_ref!r} is already closed")
@@ -237,10 +236,10 @@ class StubRecorder:
         self.calls.append(("selection_closed", selection_ref, reason, ref))
         return ref
 
-    def _require_declaration(self, declaration_ref: "Ref") -> None:
+    def _require_declaration(self, declaration_ref: Ref) -> None:
         if declaration_ref not in self._declarations:
             raise RecorderLifecycleError(f"unknown declaration ref {declaration_ref!r}")
 
-    def _require_selection(self, selection_ref: "Ref") -> None:
+    def _require_selection(self, selection_ref: Ref) -> None:
         if selection_ref not in self._selections:
             raise RecorderLifecycleError(f"unknown selection ref {selection_ref!r}")

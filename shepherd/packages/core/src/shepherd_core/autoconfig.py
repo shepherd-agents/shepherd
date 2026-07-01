@@ -18,9 +18,9 @@ from __future__ import annotations
 
 from typing import Any, get_args, get_type_hints
 
-from shepherd_runtime.task.markers import InputMarker
 from pydantic import BaseModel, Field, create_model
 from pydantic.fields import PydanticUndefined  # type: ignore[attr-defined]
+from shepherd_runtime.task.markers import InputMarker
 
 from ._infer import _InferMarker
 

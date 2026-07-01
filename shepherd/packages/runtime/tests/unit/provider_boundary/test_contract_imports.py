@@ -16,7 +16,6 @@ import asyncio
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Imports — each contract resolves from shepherd_runtime.provider_boundary
 # ---------------------------------------------------------------------------
@@ -91,13 +90,13 @@ def test_d6_interposition_recorder_imports() -> None:
         InterpositionRecorder,
         RecorderLifecycleError,
         StubRecorder,
-        ToolHandlerNotFound,
+        ToolHandlerNotFoundError,
     )
 
     assert InterpositionRecorder.__name__ == "InterpositionRecorder"
     assert StubRecorder.__name__ == "StubRecorder"
     assert issubclass(RecorderLifecycleError, RuntimeError)
-    assert issubclass(ToolHandlerNotFound, LookupError)
+    assert issubclass(ToolHandlerNotFoundError, LookupError)
 
 
 def test_transcript_summary_helpers_import() -> None:

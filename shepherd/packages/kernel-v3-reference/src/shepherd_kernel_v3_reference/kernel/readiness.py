@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import TYPE_CHECKING
 
-from shepherd_kernel_v3_reference.kernel.elaborate import KernelProgram
-from shepherd_kernel_v3_reference.kernel.ir import Ref
 from shepherd_kernel_v3_reference.kernel.program_admission import PreparedKernelProgram, prepare_kernel_program
 from shepherd_kernel_v3_reference.kernel.program_identity import project_program_identity
 from shepherd_kernel_v3_reference.profiles import CORE_A
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.elaborate import KernelProgram
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
 
 
 class KernelProgramReadinessError(RuntimeError):

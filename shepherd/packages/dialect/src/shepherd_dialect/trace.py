@@ -37,12 +37,12 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
 __all__ = [
-    "SHEPHERD_KERNEL_DOMAIN",
     "CHILD_LAUNCH_REFUSED",
     "CHILD_RUN_COMPLETED",
     "CHILD_VALUE_COMPLETED",
-    "VCSCORE_DOMAIN",
+    "SHEPHERD_KERNEL_DOMAIN",
     "TRACE_RUNTIME",
+    "VCSCORE_DOMAIN",
     "RunTrace",
     "append_run_trace",
     "build_run_trace_revision",

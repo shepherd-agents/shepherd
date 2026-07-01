@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 import pytest
 from click.testing import CliRunner
 from vcs_core.cli import main
-from vcs_core.vcscore import VcsCore
 from vcs_core.types import EffectRecord
+from vcs_core.vcscore import VcsCore
 
 from ...support.cli import init_repo as _init
 

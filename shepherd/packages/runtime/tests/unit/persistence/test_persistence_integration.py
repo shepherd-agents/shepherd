@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
 from shepherd_contexts.workspace.effects import WorkspacePatchCaptured
 from shepherd_core.context.kernel import ExecutionContextDefaults
 from shepherd_core.effects import (
@@ -29,7 +30,6 @@ from shepherd_runtime.materialization import (
 )
 from shepherd_runtime.persistence import PersistenceManager, ProjectId
 from shepherd_runtime.scope import Scope
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Context and Materializer Implementation

@@ -196,7 +196,7 @@ class Workspace:
     """The ambient workspace handle: owns the VcsCore composition (probe b: eager)."""
 
     def __init__(self, *, model: Any, root: Path) -> None:
-        from vcs_core.runtime_api import VcsCore, Store, build_builtin_substrate_context
+        from vcs_core.runtime_api import Store, VcsCore, build_builtin_substrate_context
         from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
         from vcs_core.substrates import DeclarativeFilesystemSubstrate, MarkerSubstrate
 

@@ -37,8 +37,8 @@ from vcs_core._workspace_external_state import (
     external_workspace_blockers,
 )
 from vcs_core.materialization import MaterializationPreflightBlocker, MaterializationPreflightError
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import GROUND_REF
+from vcs_core.vcscore import VcsCore
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

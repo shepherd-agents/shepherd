@@ -11,8 +11,8 @@ from shepherd_core.config import is_strict_mode
 from shepherd_core.errors import PluginLoadError
 from shepherd_core.foundation.protocols.device import ContextStateBase
 
-from ._task_discovery import PACKAGES_GROUP, TASKS_GROUP, discover_all_tasks as _discover_all_tasks
-from ._task_discovery import discover_tasks_from_package
+from ._task_discovery import PACKAGES_GROUP, TASKS_GROUP, discover_tasks_from_package
+from ._task_discovery import discover_all_tasks as _discover_all_tasks
 
 if TYPE_CHECKING:
     from shepherd_core.context.kernel import ExecutionContext

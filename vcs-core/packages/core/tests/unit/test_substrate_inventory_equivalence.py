@@ -28,8 +28,8 @@ import stat
 from typing import TYPE_CHECKING, Any
 
 from vcs_core.materialization import build_materializers
-from vcs_core.vcscore import VcsCore
 from vcs_core.spi import CapabilitySet, DriverSchema
+from vcs_core.vcscore import VcsCore
 
 from ..support.builders import make_marker_filesystem_substrates, make_store
 from ..support.drivers import PlainCommandDriver

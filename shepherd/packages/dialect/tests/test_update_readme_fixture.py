@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from vcs_core.runtime_api import VcsCore, Store, build_builtin_substrate_context
+from vcs_core.runtime_api import Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
 from vcs_core.substrates import DeclarativeFilesystemSubstrate, MarkerSubstrate
 

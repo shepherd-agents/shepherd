@@ -16,10 +16,10 @@ from vcs_core._errors import (
     StaleScopeError,
 )
 from vcs_core._substrate_runtime import build_builtin_substrate_context
-from vcs_core.vcscore import VcsCore
 from vcs_core.scope_stack import ScopeStack
 from vcs_core.store import Store
 from vcs_core.substrates import DeclarativeFilesystemSubstrate
+from vcs_core.vcscore import VcsCore
 
 from ..support.builders import make_marker_filesystem_vcscore, make_store
 

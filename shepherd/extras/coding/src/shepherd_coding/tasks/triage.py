@@ -7,8 +7,8 @@ from __future__ import annotations
 
 from typing import Literal
 
-from shepherd_runtime.task.authoring import Input, Output, task
 from pydantic import BaseModel, Field
+from shepherd_runtime.task.authoring import Input, Output, task
 
 
 @task(

@@ -16,7 +16,6 @@ Test coverage:
 from __future__ import annotations
 
 import pytest
-
 from shepherd_contexts import WorkspaceRef
 from shepherd_core.effects import ToolCallRejected
 from shepherd_core.types import (

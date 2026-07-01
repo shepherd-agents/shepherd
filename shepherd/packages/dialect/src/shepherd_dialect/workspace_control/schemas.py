@@ -10,16 +10,16 @@ from shepherd2.schemas.run_outputs import (
     run_output_descriptor_locator_from_payload,
     run_output_descriptor_locator_payload,
 )
-from shepherd_kernel_v3_reference.vcscore_certificate import (
-    VcsCoreCertificateError,
-    validate_vcscore_run_proof_envelope,
-)
 from shepherd_kernel_v3_reference.proof_envelope import (
     ProofEnvelope,
     ProofProfile,
     ProofStrength,
     proof_envelope_from_json,
     runtime_only_envelope,
+)
+from shepherd_kernel_v3_reference.vcscore_certificate import (
+    VcsCoreCertificateError,
+    validate_vcscore_run_proof_envelope,
 )
 
 TaskVersionStatus = Literal["active", "superseded", "deprecated", "draft"]

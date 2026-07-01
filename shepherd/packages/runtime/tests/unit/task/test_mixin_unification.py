@@ -11,11 +11,11 @@ import asyncio
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
 from shepherd_core.effects import TaskCompleted, TaskStarted
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task._mixin import _async_execute_mode
 from shepherd_runtime.task.authoring import Input, Output, task
-from pydantic import BaseModel
 
 # ---------------------------------------------------------------------------
 # Test tasks

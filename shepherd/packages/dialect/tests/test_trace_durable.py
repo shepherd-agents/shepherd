@@ -17,7 +17,7 @@ import pytest
 if TYPE_CHECKING:
     from pathlib import Path
 from shepherd2.kernel.canonical import canonical_digest
-from vcs_core.runtime_api import VcsCore, Store, build_builtin_substrate_context
+from vcs_core.runtime_api import Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
 from vcs_core.substrates import FilesystemSubstrate, MarkerSubstrate
 

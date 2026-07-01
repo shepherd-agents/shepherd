@@ -13,12 +13,12 @@ Key behaviors tested:
 """
 
 import pytest
+from pydantic import BaseModel
 from shepherd_core.effects import TaskStarted
 from shepherd_core.scope import Stream
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_tests import MockProvider
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Fixtures

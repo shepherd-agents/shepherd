@@ -6,10 +6,10 @@ from typing import Union, get_args, get_origin
 from uuid import UUID
 
 import pytest
+from pydantic import BaseModel
 from shepherd_core.errors import SchemaGenerationError
 from shepherd_core.schema import type_to_json_schema
 from shepherd_runtime.step.output import return_type_to_output_schema
-from pydantic import BaseModel
 
 
 def _normalize_schema(schema: dict) -> str:

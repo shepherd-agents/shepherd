@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from shepherd_kernel_v3_reference.kernel.context import ExecutionContext
-from shepherd_kernel_v3_reference.kernel.continuations import ContinuationImage
-from shepherd_kernel_v3_reference.kernel.ir import Ref
 from shepherd_kernel_v3_reference.profiles import CORE_A, SemanticProfile
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from shepherd_kernel_v3_reference.kernel.continuations import ContinuationImage
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
 
 
 @dataclass

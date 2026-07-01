@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
+from pydantic import Field
 from shepherd_core.effects import (
     PREVIEW_LENGTH_TOOL_OUTPUT,
     DiffPatch,
     Effect,
 )
-from pydantic import Field
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

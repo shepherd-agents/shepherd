@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
-from shepherd_core.effects import Effect
 from pydantic import computed_field
+from shepherd_core.effects import Effect
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

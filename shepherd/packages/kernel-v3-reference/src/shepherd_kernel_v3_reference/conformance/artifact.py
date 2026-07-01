@@ -17,8 +17,6 @@ from shepherd_kernel_v3_reference.kernel.continuation_objects import (
     continuation_object_ref,
     continuation_object_to_json,
 )
-from shepherd_kernel_v3_reference.kernel.ir import Ref
-from shepherd_kernel_v3_reference.trace.machine import TraceResult
 from shepherd_kernel_v3_reference.trace.records import (
     ContinuationDelay,
     ContinuationPending,
@@ -36,6 +34,10 @@ from shepherd_kernel_v3_reference.trace.validate import (
     TraceValidationError,
     validate_trace_evidence,
 )
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
+    from shepherd_kernel_v3_reference.trace.machine import TraceResult
 
 JsonValue: TypeAlias = Any
 CONFORMANCE_ARTIFACT_SCHEMA_VERSION = "shepherd_kernel_v3_reference.conformance-artifact.v2"

@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Literal
 
+from pydantic import create_model
 from shepherd_kernel_v3_reference.kernel import (
     ExternalEffectRequestDescriptor,
     HostCompleted,
@@ -27,7 +28,6 @@ from shepherd_kernel_v3_reference.kernel import (
     run_kernel,
 )
 from shepherd_kernel_v3_reference.source.outcomes import Completed
-from pydantic import create_model
 
 if TYPE_CHECKING:
     from collections.abc import Generator

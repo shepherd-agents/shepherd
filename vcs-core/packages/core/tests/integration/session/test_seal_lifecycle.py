@@ -8,14 +8,14 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
-import vcs_core._vcscore_lifecycle as lifecycle
-import vcs_core._vcscore_seal as seal_module
-import vcs_core._retained_output_selection as selection_module
 import pygit2
 import pytest
-from vcs_core import VcsCore, Store, build_builtin_substrate_context
-from vcs_core._errors import InvalidRepositoryStateError, SiblingGroupRecoveryRequiredError
+import vcs_core._retained_output_selection as selection_module
+import vcs_core._vcscore_lifecycle as lifecycle
+import vcs_core._vcscore_seal as seal_module
+from vcs_core import Store, VcsCore, build_builtin_substrate_context
 from vcs_core._authority import AuthorityDecision, read_pending_authority_settlement
+from vcs_core._errors import InvalidRepositoryStateError, SiblingGroupRecoveryRequiredError
 from vcs_core._permission_plan_evidence import permission_plan_digest
 from vcs_core._projection_store import SCOPE_REGISTRY_CURRENT_REF, SEAL_AND_SELECT_ENV
 from vcs_core._retained_output_settlement import (
@@ -38,7 +38,7 @@ from vcs_core.git_store import build_tree, create_commit_with_recovery, create_o
 from vcs_core.substrates import FilesystemSubstrate, MarkerSubstrate
 from vcs_core.types import RetainedOutputSettlement
 
-from...support.overlays import MockOverlayBackend
+from ...support.overlays import MockOverlayBackend
 
 
 def _authority_effects(history: Any) -> list[dict[str, object]]:

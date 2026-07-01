@@ -7,6 +7,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
+from pydantic import BaseModel
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_transform.transform_lock import (
     LockError,
@@ -14,7 +15,6 @@ from shepherd_transform.transform_lock import (
     TransformLock,
     TransformState,
 )
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Task Classes

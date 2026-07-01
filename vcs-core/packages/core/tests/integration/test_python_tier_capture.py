@@ -23,8 +23,8 @@ import json
 import pytest
 from vcs_core._active_surface_profiles import permissive_active_surface, read_only_filesystem_surface
 from vcs_core._substrate_driver import SurfacePolicyError
-from vcs_core.vcscore import VcsCore
 from vcs_core.types import ScopeInfo
+from vcs_core.vcscore import VcsCore
 
 
 def _content_digest(content: bytes) -> str:

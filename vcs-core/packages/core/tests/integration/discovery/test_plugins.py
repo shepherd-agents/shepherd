@@ -16,7 +16,6 @@ from vcs_core.discovery import (
     resolve_bindings,
 )
 from vcs_core.manifest import SubstrateManifest, SubstratePlugin
-from vcs_core.vcscore import VcsCore
 from vcs_core.spi import (
     BaseSubstrateDriver,
     CapabilitySet,
@@ -28,6 +27,7 @@ from vcs_core.spi import (
     ParamSpec,
 )
 from vcs_core.store import Store
+from vcs_core.vcscore import VcsCore
 
 from ...support.drivers import PlainCommandDriver
 

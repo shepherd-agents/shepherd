@@ -23,10 +23,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
-import vcs_core._vcscore_lifecycle as lifecycle
 import pytest
+import vcs_core._vcscore_lifecycle as lifecycle
 from vcs_core._command_admission import CommandAdmissionError
-from vcs_core._command_envelope import CommandExecutionOptions, AuthorityMergeControl
+from vcs_core._command_envelope import AuthorityMergeControl, CommandExecutionOptions
 from vcs_core._errors import InvalidRepositoryStateError
 from vcs_core._execution_capability import (
     ExecutionAuthorityRequired,
@@ -52,12 +52,12 @@ from vcs_core._substrate_driver import (
 )
 from vcs_core._world_transition_coordinator import dispatch_driver
 from vcs_core._world_types import SubstrateStoreIdentity
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
 from vcs_core.substrates import FilesystemSubstrate, MarkerSubstrate
 from vcs_core.types import AuthorityExecutionOutcome, ScopeInfo, SealedExecutionOutcome
+from vcs_core.vcscore import VcsCore
 
-from...support.overlays import MockOverlayBackend
+from ...support.overlays import MockOverlayBackend
 
 _EFFECTIVE_MATCH_DIGEST = "test-effective-match"
 _AUTHORITY_SURFACE_PLAN_DIGEST = "test-authority-surface-plan"

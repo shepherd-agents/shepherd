@@ -8,7 +8,6 @@ Key behaviors:
 from __future__ import annotations
 
 import pytest
-
 from shepherd_runtime.scope import Scope
 
 from .conftest import MockContext, MockProvider

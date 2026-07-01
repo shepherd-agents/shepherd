@@ -8,8 +8,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from shepherd_kernel_v3_reference.schemas import (
     IntSchema,
@@ -35,6 +34,9 @@ from shepherd_kernel_v3_reference.source.syntax import (
     Return,
     Var,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 FIXTURE_SCHEMA_VERSION = "shepherd_kernel_v3_reference.v0_lite_fixture.v1"
 
@@ -259,8 +261,8 @@ def _load_schema(data: Any) -> Any:
 
 __all__ = [
     "FIXTURE_SCHEMA_VERSION",
-    "Fixture",
     "VALID_KINDS",
+    "Fixture",
     "iter_fixtures",
     "load_fixture",
 ]

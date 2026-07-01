@@ -6,6 +6,7 @@ from pathlib import Path  # noqa: TC003 (runtime: used in pytest fixtures)
 from typing import Annotated
 
 import pytest
+from pydantic import BaseModel, Field
 from shepherd.autoconfig import (
     NoContextError,
     _build_inference_task,
@@ -18,7 +19,6 @@ from shepherd.autoconfig import (
 from shepherd_core import Infer
 from shepherd_runtime.scope import Scope
 from shepherd_tests import MockProvider
-from pydantic import BaseModel, Field
 
 # =============================================================================
 # Fixtures

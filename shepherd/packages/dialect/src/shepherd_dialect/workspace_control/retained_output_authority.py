@@ -5,7 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from shepherd_dialect.permission_plan import CarrierCheckAuthority, PermissionPlan, install as install_permission_plan
+from shepherd_dialect.permission_plan import CarrierCheckAuthority, PermissionPlan
+from shepherd_dialect.permission_plan import install as install_permission_plan
 from shepherd_dialect.workspace_control.authority import (
     GitRepoAuthorityDecisionPolicy,
     GitRepoAuthoritySurface,
@@ -13,8 +14,8 @@ from shepherd_dialect.workspace_control.authority import (
     decide_gitrepo_authority_request,
 )
 from shepherd_dialect.workspace_control.workspace_authority import (
-    vcscore_authority_context_for_run_authority_context,
     validate_run_authority_context,
+    vcscore_authority_context_for_run_authority_context,
     workspace_gitrepo_grant_for_profile,
     workspace_retained_output_authority_policy_for_grant,
     workspace_retained_output_authority_policy_for_profile,

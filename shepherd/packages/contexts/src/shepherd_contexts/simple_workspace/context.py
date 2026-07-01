@@ -25,6 +25,7 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Self
 
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 from shepherd_core.effects import (
     MAX_CONTENT_SIZE,
     Effect,
@@ -43,7 +44,6 @@ from shepherd_core.types import (
     ValidationResult,
 )
 from shepherd_runtime.context import Bindable, Sandbox
-from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 from shepherd_contexts.simple_workspace.delta import FileChangeset, FileDelta
 from shepherd_contexts.simple_workspace.effects import SimpleWorkspaceChangesetCaptured

@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from shepherd_kernel_v3_reference.kernel.context import ExecutionContext
-from shepherd_kernel_v3_reference.kernel.continuation_objects import ContinuationObject, ContinuationRoot
 from shepherd_kernel_v3_reference.kernel.events import (
     ContinuationDelay,
     ContinuationPending,
@@ -57,6 +55,11 @@ from shepherd_kernel_v3_reference.source.outcomes import (
 )
 from shepherd_kernel_v3_reference.source.syntax import Lit
 from shepherd_kernel_v3_reference.source.values import Env
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from shepherd_kernel_v3_reference.kernel.continuation_objects import ContinuationObject, ContinuationRoot
 
 
 @dataclass(frozen=True)

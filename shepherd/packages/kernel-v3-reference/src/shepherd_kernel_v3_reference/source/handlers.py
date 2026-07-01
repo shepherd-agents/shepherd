@@ -19,13 +19,13 @@ scope here.
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from shepherd_kernel_v3_reference.schemas import Schema
-
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from shepherd_kernel_v3_reference.schemas import Schema
     from shepherd_kernel_v3_reference.source.syntax import Computation
 
 

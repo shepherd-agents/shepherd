@@ -13,19 +13,19 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from vcs_core import FilesystemSubstrate, MarkerSubstrate, VcsCore, Store, build_builtin_substrate_context
+from vcs_core import FilesystemSubstrate, MarkerSubstrate, Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
 
 from shepherd_dialect.run_driver import ShepherdRunDriver
 from shepherd_dialect.workspace_control import (
     RUN_LEDGER_BINDING,
+    RunRecord,
+    RunRef,
+    RunStartError,
     ShepherdRunLedgerDriver,
     ShepherdTaskArtifactDriver,
     ShepherdTaskLedgerDriver,
     ShepherdWorkspace,
-    RunRecord,
-    RunRef,
-    RunStartError,
 )
 from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 

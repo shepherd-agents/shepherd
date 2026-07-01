@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from shepherd_kernel_v3_reference.kernel.context import ExecutionContext
 from shepherd_kernel_v3_reference.kernel.continuation_objects import (
@@ -46,14 +46,6 @@ from shepherd_kernel_v3_reference.kernel.frame_state import (
     ResumeReturnFrame,
     _require_ref,
 )
-from shepherd_kernel_v3_reference.kernel.ir import (
-    BinderDef,
-    HandlerEnvDef,
-    HandlerInstallDef,
-    KComputation,
-    Ref,
-    SchemaDef,
-)
 from shepherd_kernel_v3_reference.kernel.program_admission import (
     KernelProgramInput,
     PreparedKernelProgram,
@@ -67,6 +59,16 @@ from shepherd_kernel_v3_reference.schemas import check
 from shepherd_kernel_v3_reference.source.effects import EffectRegistry
 from shepherd_kernel_v3_reference.source.syntax import Lit, RecordExpr, Var
 from shepherd_kernel_v3_reference.source.values import Env
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.ir import (
+        BinderDef,
+        HandlerEnvDef,
+        HandlerInstallDef,
+        KComputation,
+        Ref,
+        SchemaDef,
+    )
 
 
 class EvidenceMode(StrEnum):

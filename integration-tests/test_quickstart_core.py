@@ -9,8 +9,8 @@ import sys
 from pathlib import Path
 
 import tomllib
-from shepherd.cli import main as shepherd_cli
 from click.testing import CliRunner
+from shepherd.cli import main as shepherd_cli
 
 REPO = Path(__file__).resolve().parents[1]
 QUICKSTART_EXAMPLES = REPO / "examples" / "quickstart"

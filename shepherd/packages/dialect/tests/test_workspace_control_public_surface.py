@@ -8,14 +8,14 @@ from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
-from shepherd_runtime.nucleus import GitRepo, GitRepoBasis
 from click.testing import CliRunner
+from shepherd_runtime.nucleus import GitRepo, GitRepoBasis
 from vcs_core import (
     FilesystemSubstrate,
     InvalidRepositoryStateError,
     MarkerSubstrate,
-    VcsCore,
     Store,
+    VcsCore,
     build_builtin_substrate_context,
 )
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
@@ -24,16 +24,16 @@ from shepherd_dialect import cli
 from shepherd_dialect.run_driver import ShepherdRunDriver
 from shepherd_dialect.workspace_control import (
     RUN_LEDGER_BINDING,
-    ShepherdRunLedgerDriver,
-    ShepherdTaskArtifactDriver,
-    ShepherdTaskLedgerDriver,
-    ShepherdWorkspace,
     RunAuthority,
     RunOutput,
     RunOutputSettlementEvidence,
     RunOutputSettlementPolicy,
     RunRef,
     RunStartError,
+    ShepherdRunLedgerDriver,
+    ShepherdTaskArtifactDriver,
+    ShepherdTaskLedgerDriver,
+    ShepherdWorkspace,
     TaskNotFoundError,
     TaskRef,
     WorkspaceControlError,

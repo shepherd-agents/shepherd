@@ -24,7 +24,10 @@ default source surface remains Core-A.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Union
+from typing import TYPE_CHECKING, Any, Union
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.source.handlers import HandlerEnv
 
 # --- expressions --------------------------------------------------------
 
@@ -123,4 +126,3 @@ Computation = CoreComputation
 
 # Forward import to avoid a cycle: HandlerEnv lives in `handlers.py` because
 # it carries handler installations that ultimately reference computations.
-from shepherd_kernel_v3_reference.source.handlers import HandlerEnv

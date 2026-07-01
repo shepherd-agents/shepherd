@@ -11,7 +11,6 @@ from vcs_core._binding_contracts import BindingContractError
 from vcs_core._errors import StaleScopeError
 from vcs_core._schema_errors import SchemaValidationError
 from vcs_core._substrate_runtime import build_builtin_substrate_context
-from vcs_core.vcscore import VcsCore
 from vcs_core.spi import (
     CapabilitySet,
     CommandRequest,
@@ -23,6 +22,7 @@ from vcs_core.spi import (
     UnsupportedRequestError,
 )
 from vcs_core.types import BoundSubstrate, EffectRecord, ScopeInfo
+from vcs_core.vcscore import VcsCore
 
 
 def _operation_id(entry) -> object:  # type: ignore[no-untyped-def]

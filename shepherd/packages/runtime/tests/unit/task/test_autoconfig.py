@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
+from pydantic import BaseModel, Field
 from shepherd_core import Infer, _InferMarker
 from shepherd_core._shared.schema import type_to_json_schema
 from shepherd_core.autoconfig import build_inference_model, extract_infer_fields
 from shepherd_runtime.task.markers import Input, InputMarker
-from pydantic import BaseModel, Field
 
 # =============================================================================
 # Fixtures

@@ -13,13 +13,13 @@ from shepherd2.schemas.run_outputs import (
     run_output_descriptor_locator_from_payload,
     run_output_id_for,
 )
+from shepherd_kernel_v3_reference.proof_envelope import ProofEnvelope, ProofProfile, ProofStrength
 from shepherd_kernel_v3_reference.vcscore_certificate import (
     VCSCORE_RUN_EXTENSION_NAME,
     VCSCORE_RUN_THEOREM_IDS,
     vcscore_run_certificate_from_run_record,
     vcscore_run_proof_envelope,
 )
-from shepherd_kernel_v3_reference.proof_envelope import ProofEnvelope, ProofProfile, ProofStrength
 from vcs_core.keyed_json_tree import KeyedJsonTreeStore
 from vcs_core.types import RetainedOutputIdentity, RetainedOutputQueryResult, ScopeInfo, SealCandidateHandoff
 
@@ -28,7 +28,6 @@ from shepherd_dialect.workspace_control import (
     RUN_LEDGER_SCHEMA,
     TASK_LEDGER_BINDING,
     TASK_LEDGER_SCHEMA,
-    ShepherdWorkspace,
     PendingEffectRef,
     RetainedWorkspaceOutputPublicationError,
     RunAuthorityContext,
@@ -42,6 +41,7 @@ from shepherd_dialect.workspace_control import (
     RunRetainedCustody,
     RunSummary,
     RunTerminalization,
+    ShepherdWorkspace,
     TaskArtifactLock,
     TaskArtifactRef,
     TaskDefinitionVersion,
@@ -59,9 +59,9 @@ from shepherd_dialect.workspace_control import (
     read_task_ledger_payload,
     resolve_task,
     run_has_published_workspace_output,
-    run_vcscore_projection,
     run_output_citations,
     run_output_publication_from_seal_handoff,
+    run_vcscore_projection,
     run_workspace_output_world_oid,
     show_run,
     trace_run,

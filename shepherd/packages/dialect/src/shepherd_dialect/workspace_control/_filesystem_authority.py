@@ -73,7 +73,7 @@ class WorkspaceFilesystemAuthorityMergeProvider:
 
     def execution_options(self) -> CommandExecutionOptions:
         """Build framework execution controls for authority terminalization."""
-        from vcs_core.runtime_api import CommandExecutionOptions, AuthorityMergeControl
+        from vcs_core.runtime_api import AuthorityMergeControl, CommandExecutionOptions
 
         return CommandExecutionOptions(
             success_disposition="authority_merge",

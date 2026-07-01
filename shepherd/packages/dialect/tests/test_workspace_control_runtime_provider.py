@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
 import pytest
-from vcs_core import FilesystemSubstrate, MarkerSubstrate, VcsCore, Store, build_builtin_substrate_context
+from vcs_core import FilesystemSubstrate, MarkerSubstrate, Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_api import native_jail_available
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
 
@@ -16,11 +16,11 @@ import shepherd_dialect.workspace_control.runtime_provider as runtime_provider_m
 from shepherd_dialect.provider_runtime import ExecutionProviderResult, ProviderEvent
 from shepherd_dialect.run_driver import ShepherdRunDriver
 from shepherd_dialect.workspace_control import (
+    RunStartError,
     ShepherdRunLedgerDriver,
     ShepherdTaskArtifactDriver,
     ShepherdTaskLedgerDriver,
     ShepherdWorkspace,
-    RunStartError,
     WorkspaceControlError,
     get_run_args,
 )

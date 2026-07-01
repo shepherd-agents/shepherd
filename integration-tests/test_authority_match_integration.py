@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from shepherd_runtime.effects.policy import Match
-from vcs_core import VcsCore, Store, build_builtin_substrate_context
+from vcs_core import Store, VcsCore, build_builtin_substrate_context
 from vcs_core.substrates import FilesystemSubstrate, MarkerSubstrate
 from vcs_core.types import FileState, normalize_git_filemode
 

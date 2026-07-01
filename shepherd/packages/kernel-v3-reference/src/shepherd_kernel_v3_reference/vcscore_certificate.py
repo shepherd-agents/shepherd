@@ -9,9 +9,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias
 
-from shepherd_kernel_v3_reference.kernel.ir import Ref
 from shepherd_kernel_v3_reference.kernel.refs import content_ref
 from shepherd_kernel_v3_reference.proof_envelope import (
     EXTENSION_PROOF_SURFACE_THEOREM_IDS,
@@ -22,6 +21,9 @@ from shepherd_kernel_v3_reference.proof_envelope import (
     ProofProfile,
     ProofStrength,
 )
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
 
 JsonValue: TypeAlias = Any
 JsonObject: TypeAlias = dict[str, JsonValue]
@@ -388,17 +390,17 @@ def _require_equal(actual: object, expected: object, field_name: str) -> None:
 
 
 __all__ = [
+    "EXTENSION_PROOF_SURFACE_THEOREM_IDS",
     "VCSCORE_RUN_CERTIFICATE_SCHEMA_VERSION",
     "VCSCORE_RUN_CERTIFICATE_VALIDATOR",
     "VCSCORE_RUN_EXTENSION_NAME",
     "VCSCORE_RUN_THEOREM_IDS",
-    "EXTENSION_PROOF_SURFACE_THEOREM_IDS",
     "VcsCoreCertificateError",
     "VcsCoreRunCertificate",
     "is_vcscore_run_proof_envelope",
+    "validate_vcscore_run_proof_envelope",
     "vcscore_run_certificate_from_json",
     "vcscore_run_certificate_from_run_record",
     "vcscore_run_proof_envelope",
     "vcscore_run_proof_envelope_from_run_record",
-    "validate_vcscore_run_proof_envelope",
 ]

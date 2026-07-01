@@ -8,9 +8,9 @@ reporting results. The pipeline commits or rolls back based on the outcome.
 
 from __future__ import annotations
 
+from pydantic import BaseModel, Field
 from shepherd_contexts.workspace import WorkspaceRef  # noqa: TC002
 from shepherd_runtime.task.authoring import Context, Input, Output, task
-from pydantic import BaseModel, Field
 
 _FIX_GUIDANCE = """\
 You are a code repair agent with full access to the workspace. You will

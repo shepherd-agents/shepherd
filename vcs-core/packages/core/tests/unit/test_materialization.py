@@ -22,11 +22,11 @@ from vcs_core._materialization_coordinator import (
 from vcs_core._query_inventory import InventorySnapshot
 from vcs_core._workspace_authority import WorkspaceAuthorityPending, write_pending_workspace_authority
 from vcs_core.materialization import build_materializers, plan_materialization
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import GROUND_REF
 from vcs_core.types import DiffSummary, ScopeInfo, Status
+from vcs_core.vcscore import VcsCore
 
-from ..support.builders import make_marker_filesystem_vcscore, make_marker_filesystem_substrates, make_store
+from ..support.builders import make_marker_filesystem_substrates, make_marker_filesystem_vcscore, make_store
 from ..support.overlays import MockOverlayBackend
 
 if TYPE_CHECKING:

@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Any, ClassVar, Literal, Optional
 
 import pytest
+from pydantic import BaseModel
 from shepherd_runtime.nucleus import task as nucleus_task
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, task
@@ -28,7 +29,6 @@ from shepherd_transform.grounding import (
 from shepherd_transform.grounding import (
     TestInputGenerator as InputGenerator,
 )
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Fixtures - Task Classes

@@ -7,6 +7,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
+from pydantic import BaseModel
 from shepherd_core.effects import (
     Effect,
     EffectTypeRegistry,
@@ -15,7 +16,6 @@ from shepherd_core.effects import (
     ToolCallRejected,
     ToolCallStarted,
 )
-from pydantic import BaseModel
 
 from shepherd_runtime.effects import compose_effect_registry, decode_effect
 

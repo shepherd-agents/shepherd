@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Iterator, Mapping
 from dataclasses import asdict, dataclass, field
 from math import isfinite
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from shepherd_kernel_v3_reference.kernel.continuation_objects import (
     CONTINUATION_OBJECT_SCHEMA_VERSION,
@@ -21,12 +21,14 @@ from shepherd_kernel_v3_reference.kernel.continuation_objects import (
 )
 from shepherd_kernel_v3_reference.paths import source_path_ref, unhandled_source_path_ref
 from shepherd_kernel_v3_reference.profiles import CORE_A, SemanticProfile
-from shepherd_kernel_v3_reference.trace.records import (
-    ContinuationPending,
-    EffectDeclaration,
-    ForkBranch,
-    TraceRecord,
-)
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.trace.records import (
+        ContinuationPending,
+        EffectDeclaration,
+        ForkBranch,
+        TraceRecord,
+    )
 
 JsonValue = Any
 

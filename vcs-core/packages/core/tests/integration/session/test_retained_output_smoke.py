@@ -6,7 +6,7 @@ from dataclasses import replace
 from pathlib import Path
 
 import pytest
-from vcs_core import VcsCore, Store, build_builtin_substrate_context
+from vcs_core import Store, VcsCore, build_builtin_substrate_context
 from vcs_core._errors import InvalidRepositoryStateError
 from vcs_core._projection_store import SEAL_AND_SELECT_ENV
 from vcs_core._seal_handoff import read_seal_handoff

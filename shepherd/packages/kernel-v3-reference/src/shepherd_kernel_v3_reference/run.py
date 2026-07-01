@@ -28,6 +28,8 @@ observation's stream position.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from shepherd_kernel_v3_reference.envelope import (
     CompletedResult,
     KernelRejection,
@@ -38,9 +40,6 @@ from shepherd_kernel_v3_reference.kernel.admission import (
     AdmittedObservationError,
     validate_admitted_observation,
 )
-from shepherd_kernel_v3_reference.kernel.program_admission import (
-    KernelProgramInput,
-)
 from shepherd_kernel_v3_reference.kernel.replay import (
     ExternalEffectRequest,
     KernelReplayRejected,
@@ -50,8 +49,13 @@ from shepherd_kernel_v3_reference.kernel.replay import (
     resume_kernel_replay,
     start_kernel_replay,
 )
-from shepherd_kernel_v3_reference.source.effects import EffectRegistry
-from shepherd_kernel_v3_reference.source.values import Env
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.program_admission import (
+        KernelProgramInput,
+    )
+    from shepherd_kernel_v3_reference.source.effects import EffectRegistry
+    from shepherd_kernel_v3_reference.source.values import Env
 
 
 def start_kernel_run(

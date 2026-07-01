@@ -14,6 +14,7 @@ This test file verifies that:
 """
 
 import pytest
+from pydantic import BaseModel
 from shepherd_runtime.combinators import (
     Budget,
     Rejected,
@@ -45,7 +46,6 @@ from shepherd_runtime.combinators import (
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_tests import MockProvider
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Fixtures: @task classes for testing

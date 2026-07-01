@@ -86,7 +86,8 @@ def readiness_problems(rel: str, text: str) -> list[str]:
 # --------------------------------------------------------------------------- #
 def nav_entry(rel: str, text: str) -> str:
     """The nav line under the section. Index pages get a bare path (matching the
-    existing `- workflows/index.md`); other pages get `Title: path` from the H1."""
+    existing `- workflows/index.md`); other pages get `Title: path` from the H1.
+    """
     if Path(rel).name == "index.md":
         return f"      - {rel}"
     title = None
@@ -105,7 +106,8 @@ def nav_entry(rel: str, text: str) -> str:
 # --------------------------------------------------------------------------- #
 def add_unexclusion(cfg_text: str, rel: str) -> tuple[str, str]:
     """Insert `  !/<rel>` into exclude_docs after the last existing `  !/...`
-    page line (before the !stylesheets/** , !assets/** asset lines)."""
+    page line (before the !stylesheets/** , !assets/** asset lines).
+    """
     line = f"  !/{rel}"
     if re.search(rf"(?m)^{re.escape(line)}\s*$", cfg_text):
         return cfg_text, f"(already present) {line.strip()}"
@@ -134,7 +136,8 @@ def add_unexclusion(cfg_text: str, rel: str) -> tuple[str, str]:
 
 def add_nav_entry(cfg_text: str, rel: str, entry_line: str) -> tuple[str, str]:
     """Insert the nav entry under the section matching the page's top-level dir,
-    creating the section if absent."""
+    creating the section if absent.
+    """
     top = rel.split("/", 1)[0]
     section = DIR_TO_SECTION.get(top, top.capitalize())
 
@@ -177,7 +180,8 @@ def add_nav_entry(cfg_text: str, rel: str, entry_line: str) -> tuple[str, str]:
 # --------------------------------------------------------------------------- #
 def run_gate() -> int:
     """Invoke the membership gate's main() with a clean argv (it argparses
-    sys.argv; promote's own args must not leak into it)."""
+    sys.argv; promote's own args must not leak into it).
+    """
     saved = sys.argv
     sys.argv = ["check_shepherd_docs.py"]
     try:
@@ -195,8 +199,7 @@ def main() -> int:
     args = ap.parse_args()
 
     rel = args.page.replace("\\", "/").strip()
-    if rel.startswith("docs/"):
-        rel = rel[len("docs/"):]
+    rel = rel.removeprefix("docs/")
     page_path = DOCS / rel
     if not page_path.is_file():
         print(f"ERROR: no such page: docs/{rel}")

@@ -5,13 +5,13 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pydantic import BaseModel
 from shepherd_runtime.registry import (
     PACKAGES_GROUP,
     discover_all_tasks,
     discover_tasks_from_package,
 )
 from shepherd_runtime.task.authoring import Input, Output, task
-from pydantic import BaseModel
 
 # =============================================================================
 # Test fixtures: task classes for discovery

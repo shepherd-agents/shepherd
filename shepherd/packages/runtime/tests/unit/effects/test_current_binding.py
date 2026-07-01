@@ -14,8 +14,8 @@ import pytest
 from shepherd_core.context.kernel import ExecutionContextDefaults
 from shepherd_core.types import ReversibilityLevel
 from shepherd_runtime.scope import (
-    AmbiguousBinding,
-    NoBindingForType,
+    AmbiguousBindingError,
+    NoBindingForTypeError,
     Scope,
     current_binding,
 )
@@ -68,14 +68,14 @@ class _SessionState(ExecutionContextDefaults):
 
 def test_current_binding_imports_from_runtime_scope() -> None:
     from shepherd_runtime.scope import (
-        AmbiguousBinding,
-        NoBindingForType,
+        AmbiguousBindingError,
+        NoBindingForTypeError,
         current_binding,
     )
 
     assert current_binding.__name__ == "current_binding"
-    assert issubclass(AmbiguousBinding, LookupError)
-    assert issubclass(NoBindingForType, LookupError)
+    assert issubclass(AmbiguousBindingError, LookupError)
+    assert issubclass(NoBindingForTypeError, LookupError)
 
 
 def test_current_binding_finds_exact_type() -> None:
@@ -92,7 +92,7 @@ def test_current_binding_finds_exact_type() -> None:
 def test_current_binding_raises_no_binding_for_type_on_miss() -> None:
     with Scope(root=True) as scope:
         scope.bind(_SessionState(user="alice"))
-        with pytest.raises(NoBindingForType):
+        with pytest.raises(NoBindingForTypeError):
             current_binding(_BankingContext)
 
 
@@ -136,13 +136,13 @@ def test_current_binding_raises_ambiguous_binding_for_same_depth_matches() -> No
         scope.bind("primary", _BankingContext(account_id="A"))
         scope.bind("secondary", _BankingContext(account_id="B"))
 
-        with pytest.raises(AmbiguousBinding):
+        with pytest.raises(AmbiguousBindingError):
             current_binding(_BankingContext)
 
 
 def test_no_active_scope_raises_no_binding_for_type() -> None:
     """Without an active Scope, the lookup chain is empty."""
-    with pytest.raises(NoBindingForType):
+    with pytest.raises(NoBindingForTypeError):
         current_binding(_BankingContext)
 
 

@@ -43,9 +43,9 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
 
+    from vcs_core._authority import DecisionProvider
     from vcs_core._binding_contracts import ResolvedDriverBinding
     from vcs_core._command_values import CommandValueSource
-    from vcs_core._authority import DecisionProvider
     from vcs_core._runtime_types import OperationRefInfo, RuntimeContext
     from vcs_core._world_types import SubstrateHead
     from vcs_core.vcscore import VcsCore

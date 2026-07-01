@@ -12,6 +12,8 @@ Tests core invariants of the immutable Stream data structure:
 import json
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from shepherd_core.effects import (
     Effect,
     TaskCompleted,
@@ -20,8 +22,6 @@ from shepherd_core.effects import (
     ToolCallStarted,
 )
 from shepherd_core.scope.stream import Stream
-from hypothesis import given, settings
-from hypothesis import strategies as st
 
 # =============================================================================
 # Hypothesis Strategies

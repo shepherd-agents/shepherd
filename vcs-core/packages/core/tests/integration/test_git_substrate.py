@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 from vcs_core._hooks import HookEvent
 from vcs_core._substrate_runtime import BuiltInRuntimeBinding, build_builtin_substrate_context
 from vcs_core.git_substrate import GitSubstrate
-from vcs_core.vcscore import VcsCore
 from vcs_core.recording import RecordingPipeline
 from vcs_core.store import Store
 from vcs_core.types import EffectRecord, ScopeInfo
+from vcs_core.vcscore import VcsCore
 
 if TYPE_CHECKING:
     from pathlib import Path

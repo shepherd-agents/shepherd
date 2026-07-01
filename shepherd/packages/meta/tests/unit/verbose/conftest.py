@@ -3,7 +3,6 @@
 import io
 
 import pytest
-
 from shepherd_providers import VerboseConfig, VerboseFormatter
 
 

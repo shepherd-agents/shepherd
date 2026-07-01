@@ -8,13 +8,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Self
 
-from shepherd_core.effects import Effect
 from shepherd_core.provider import Provider
 from shepherd_core.types import ExecutionResult, ProviderBinding, ProviderCapabilities, ReversibilityLevel
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from shepherd_core.effects import Effect
     from shepherd_core.provider import ProviderRuntime
     from shepherd_runtime.context import Sandbox
 

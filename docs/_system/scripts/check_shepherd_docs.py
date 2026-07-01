@@ -194,7 +194,9 @@ def main() -> int:
 
 
 def self_test() -> int:
-    import shutil, subprocess, tempfile
+    import shutil
+    import subprocess
+    import tempfile
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         shutil.copytree(PROTO / "docs", root / "docs")

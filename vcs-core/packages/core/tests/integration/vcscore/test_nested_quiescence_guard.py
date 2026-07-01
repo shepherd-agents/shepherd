@@ -7,10 +7,10 @@ import pytest
 from vcs_core._errors import WorldQuiescenceError
 from vcs_core._substrate_runtime import build_builtin_substrate_context
 from vcs_core._world_substrate_adapters import TaskTraceSubstrateDriver
-from vcs_core.vcscore import VcsCore
 from vcs_core.recording import NestedParentAuthorization
 from vcs_core.store import Store
 from vcs_core.substrates import FilesystemSubstrate, MarkerSubstrate
+from vcs_core.vcscore import VcsCore
 
 
 def _hybrid_payload(frontier: str) -> dict[str, Any]:

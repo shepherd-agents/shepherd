@@ -57,8 +57,7 @@ if TYPE_CHECKING:
     # shepherd_dialect ships no py.typed marker yet, so it reads as untyped to
     # consumers; the sp.* handle symbols are typed as Any until pass-2 typing
     # hardening adds the marker (which will make these re-exports precise).
-    from shepherd_dialect.workspace_control import ( # type: ignore[import-untyped]
-        ShepherdWorkspace,
+    from shepherd_dialect.workspace_control import (  # type: ignore[import-untyped]
         Changeset,
         ChangesetStat,
         Flow,
@@ -69,6 +68,7 @@ if TYPE_CHECKING:
         ReadOnly,
         ReadWrite,
         RunOutput,
+        ShepherdWorkspace,
         WorkspaceRun,
         WorkspaceTask,
     )

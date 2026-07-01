@@ -6,22 +6,6 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 
 import pygit2
 
-from vcs_core._dirty_flag import check_dirty_flag
-from vcs_core._errors import (
-    InterruptedLifecycleError,
-    InvalidRepositoryStateError,
-    ParentWorkingTreeDivergedError,
-    ScopeAdmissionError,
-    StaleScopeError,
-)
-from vcs_core._fork_hints import ForkHints
-from vcs_core._identity import read_ground_world_id
-from vcs_core._lifecycle_progress import LifecycleProgress
-from vcs_core._lifecycle_recovery import LifecycleRecovery, LifecycleRecoveryDependencies
-from vcs_core._lifecycle_run import LifecycleRun, LifecycleScopeState
-from vcs_core._lifecycle_state import LifecycleRunState
-from vcs_core._lock import acquire_session_lock, release_session_lock
-from vcs_core._vcscore_admission import mutation_admission
 from vcs_core._authority import (
     AuthorityBindingRootsError,
     AuthorityCommitOutcome,
@@ -51,6 +35,21 @@ from vcs_core._authority_transactions import (
     record_authority_settlement_effect,
     update_pending_authority_settlement,
 )
+from vcs_core._dirty_flag import check_dirty_flag
+from vcs_core._errors import (
+    InterruptedLifecycleError,
+    InvalidRepositoryStateError,
+    ParentWorkingTreeDivergedError,
+    ScopeAdmissionError,
+    StaleScopeError,
+)
+from vcs_core._fork_hints import ForkHints
+from vcs_core._identity import read_ground_world_id
+from vcs_core._lifecycle_progress import LifecycleProgress
+from vcs_core._lifecycle_recovery import LifecycleRecovery, LifecycleRecoveryDependencies
+from vcs_core._lifecycle_run import LifecycleRun, LifecycleScopeState
+from vcs_core._lifecycle_state import LifecycleRunState
+from vcs_core._lock import acquire_session_lock, release_session_lock
 from vcs_core._parent_tree_manifest import capture_parent_tree_manifest, diff_parent_tree_manifest
 from vcs_core._permission_plan_evidence import PermissionPlanEvidenceError, validate_permission_plan_evidence
 from vcs_core._projection_store import ScopeRegistryEntry, ScopeRegistryStatus, seal_and_select_enabled
@@ -71,6 +70,7 @@ from vcs_core._sibling_group_blockers import (
 )
 from vcs_core._substrate_runtime import ContainmentSubstrate
 from vcs_core._substrate_tree_read import read_substrate_workspace_file
+from vcs_core._vcscore_admission import mutation_admission
 from vcs_core._workspace_authority import (
     WorkspaceAuthorityPending,
     clear_pending_workspace_authority_for_scope,
@@ -88,10 +88,10 @@ from vcs_core.types import (
 if TYPE_CHECKING:
     from collections.abc import Callable, Collection, Mapping, Sequence
 
-    from vcs_core._vcscore_seal import PreparedSealHandoff
     from vcs_core._mutation_admission import MutationAdmission
     from vcs_core._query_readiness import ReadinessOperationAuthority, RuntimeAdmissionContext
     from vcs_core._runtime_types import OperationRefInfo
+    from vcs_core._vcscore_seal import PreparedSealHandoff
     from vcs_core.vcscore import VcsCore
 
 logger = logging.getLogger(__name__)

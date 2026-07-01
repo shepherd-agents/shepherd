@@ -8,9 +8,9 @@ namespace enumerations. See ``260622-admission-tier-open-ops-index.md`` (Part B 
 
 from __future__ import annotations
 
+import pygit2
 import vcs_core._operation_journal_inventory as oji
 import vcs_core._query_readiness as qr
-import pygit2
 from vcs_core._operation_journal_inventory import probe_operation_journals
 from vcs_core._query_readiness import ReadinessRequest, _admission_operation_journal_items
 from vcs_core._world_refs import operation_journal_ref, world_open_operation_journal_index_ref

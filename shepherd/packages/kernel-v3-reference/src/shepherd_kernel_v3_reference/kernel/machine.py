@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from shepherd_kernel_v3_reference.kernel.program_admission import KernelProgramInput
-from shepherd_kernel_v3_reference.source.outcomes import SourceOutcome
-from shepherd_kernel_v3_reference.source.values import Env
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.program_admission import KernelProgramInput
+    from shepherd_kernel_v3_reference.source.outcomes import SourceOutcome
+    from shepherd_kernel_v3_reference.source.values import Env
 
 
 def run_kernel(program: KernelProgramInput, env: Env | None = None) -> SourceOutcome:

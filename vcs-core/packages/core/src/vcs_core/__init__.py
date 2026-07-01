@@ -32,10 +32,9 @@ from vcs_core._substrate_runtime import build_builtin_substrate_context
 
 # --- Config (public in R1b) ---
 from vcs_core.authority import AuthorityAspect, SubstrateAuthority
-from vcs_core.config import BindingConfig, VcsCoreConfig, SecretRef
+from vcs_core.config import BindingConfig, SecretRef, VcsCoreConfig
 from vcs_core.git_substrate import GitSubstrate
 from vcs_core.manifest import SubstrateManifest, SubstratePlugin
-from vcs_core.vcscore import VcsCore
 from vcs_core.scope_stack import ScopeStack
 from vcs_core.sqlite_substrate import SQLiteSubstrate
 from vcs_core.store import Store
@@ -71,6 +70,7 @@ from vcs_core.types import (
     Status,
     WorkspaceChange,
 )
+from vcs_core.vcscore import VcsCore
 
 __all__ = [
     "ActivationError",
@@ -92,8 +92,6 @@ __all__ = [
     "MaterializationPhase",
     "MaterializationPlan",
     "MergePreconditionError",
-    "VcsCore",
-    "VcsCoreConfig",
     "OpenScopeError",
     "OperationHistory",
     "OperationSummary",
@@ -126,6 +124,8 @@ __all__ = [
     "SubstrateNotBoundError",
     "SubstratePlugin",
     "UnscopedMutationError",
+    "VcsCore",
+    "VcsCoreConfig",
     "VerifyFailedError",
     "WorkspaceChange",
     "WorldQuiescenceError",

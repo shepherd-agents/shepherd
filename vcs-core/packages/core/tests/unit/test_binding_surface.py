@@ -11,10 +11,10 @@ from vcs_core._binding_contracts import BindingContractError, BindingContractRes
 from vcs_core._binding_surface import BindingSurface
 from vcs_core.config import VcsCoreConfig
 from vcs_core.manifest import SubstrateManifest
-from vcs_core.vcscore import VcsCore
 from vcs_core.spi import CapabilitySet, CommandRequest, DriverSchema
 from vcs_core.store import Store
 from vcs_core.types import BoundSubstrate
+from vcs_core.vcscore import VcsCore
 
 from ..support.drivers import PlainCommandDriver
 

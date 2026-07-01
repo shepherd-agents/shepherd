@@ -20,10 +20,9 @@ optional `EffectRegistry`.
 
 from __future__ import annotations
 
-from collections.abc import Generator, Iterator
 from dataclasses import dataclass, field
 from itertools import count
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from shepherd_kernel_v3_reference.schemas import check
 from shepherd_kernel_v3_reference.source.effects import EffectRegistry
@@ -54,6 +53,9 @@ from shepherd_kernel_v3_reference.source.syntax import (
 )
 from shepherd_kernel_v3_reference.source.values import Env
 from shepherd_kernel_v3_reference.source.wellformed import validate_handler_body, validate_program
+
+if TYPE_CHECKING:
+    from collections.abc import Generator, Iterator
 
 # --- internal yield types ---------------------------------------------------
 

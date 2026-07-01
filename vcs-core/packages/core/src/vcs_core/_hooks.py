@@ -14,8 +14,8 @@ from typing import TYPE_CHECKING, Any, Literal
 from vcs_core._fs_capture import ensure_fs_capture_shim
 
 if TYPE_CHECKING:
-    from vcs_core.vcscore import VcsCore
     from vcs_core.types import BoundSubstrate, EffectRecord, ScopeInfo
+    from vcs_core.vcscore import VcsCore
 
 
 HookKind = Literal["path_wrapper", "ld_preload", "http_proxy"]

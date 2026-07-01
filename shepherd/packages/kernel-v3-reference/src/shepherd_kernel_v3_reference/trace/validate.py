@@ -19,9 +19,8 @@ Core-A.
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Container, Mapping
 from dataclasses import dataclass, field
-from typing import Any, Literal, TypeVar, get_args
+from typing import TYPE_CHECKING, Any, Literal, TypeVar, get_args
 
 from shepherd_kernel_v3_reference.kernel.continuation_objects import (
     BindFramePayload,
@@ -45,14 +44,11 @@ from shepherd_kernel_v3_reference.kernel.continuation_objects import (
     continuation_frame_payload_child_roles,
     continuation_object_ref,
 )
-from shepherd_kernel_v3_reference.kernel.ir import Ref
 from shepherd_kernel_v3_reference.kernel.program_admission import KernelProgramInput, ensure_prepared_kernel_program
 from shepherd_kernel_v3_reference.kernel.refs import content_ref
 from shepherd_kernel_v3_reference.paths import source_path_ref
 from shepherd_kernel_v3_reference.profiles import PUBLICATION_EXPERIMENTAL
-from shepherd_kernel_v3_reference.source.effects import EffectRegistry
 from shepherd_kernel_v3_reference.source.outcomes import Completed, Forked, SourceOutcome
-from shepherd_kernel_v3_reference.source.values import Env
 from shepherd_kernel_v3_reference.trace.machine import TraceEvaluatorEngine, run_trace
 from shepherd_kernel_v3_reference.trace.records import (
     ContinuationDelay,
@@ -70,6 +66,13 @@ from shepherd_kernel_v3_reference.trace.records import (
     TerminalResumeResult,
     TraceRecord,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Container, Mapping
+
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
+    from shepherd_kernel_v3_reference.source.effects import EffectRegistry
+    from shepherd_kernel_v3_reference.source.values import Env
 
 _RUNTIME_OPERATIONAL_CLOSURE_REASONS = frozenset({"runtime_failure", "cancelled"})
 TRACE_EVIDENCE_BUNDLE_SCHEMA_VERSION = "shepherd_kernel_v3_reference.trace-evidence-bundle.v2"

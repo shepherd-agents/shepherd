@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import get_args, get_origin
 
 import pytest
+from pydantic import BaseModel
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import CompletedTask, Input, Output, TaskRef, task
 from shepherd_runtime.task.metadata import extract_task_metadata
@@ -22,7 +23,6 @@ from shepherd_tests import MockProvider
 from shepherd_transform.meta import CritiqueTask
 from shepherd_transform.meta import TransformTask as BuiltinTransformTask
 from shepherd_transform.source import extract_task_source
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Task Classes

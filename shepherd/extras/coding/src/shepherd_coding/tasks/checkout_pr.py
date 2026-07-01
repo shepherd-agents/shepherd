@@ -10,8 +10,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from shepherd_runtime.task.authoring import Input, Output, task
 from pydantic import BaseModel, Field
+from shepherd_runtime.task.authoring import Input, Output, task
 
 
 def _has_local_repo(clone_url: str) -> Path | None:

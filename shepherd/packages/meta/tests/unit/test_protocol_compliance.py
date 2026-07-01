@@ -22,12 +22,11 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from shepherd_runtime.context.sandbox import GITPYTHON_AVAILABLE
-
 from shepherd_contexts import KVStoreContext, SessionState, WorkspaceRef
 from shepherd_core.context import compute_composite_reversibility, is_execution_context
 from shepherd_core.effects import Effect
 from shepherd_core.types import ExecutionResult, ProviderBinding, ReversibilityLevel
+from shepherd_runtime.context.sandbox import GITPYTHON_AVAILABLE
 
 if GITPYTHON_AVAILABLE:
     from git import Repo

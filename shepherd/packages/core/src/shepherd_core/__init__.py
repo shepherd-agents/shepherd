@@ -118,8 +118,6 @@ from shepherd_core.effects import (
 # Errors
 # =============================================================================
 from shepherd_core.errors import (
-    # Base
-    ShepherdError,
     ArtifactNotFoundError,
     BindingNotFoundError,
     BindingValidationError,
@@ -142,6 +140,8 @@ from shepherd_core.errors import (
     SDKExecutionError,
     # Session
     SessionCWDMismatchError,
+    # Base
+    ShepherdError,
     TaskExecutionError,
 )
 from shepherd_core.foundation import (

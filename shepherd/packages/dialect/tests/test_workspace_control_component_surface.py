@@ -7,7 +7,7 @@ import pytest
 from shepherd_runtime.nucleus import GitRepo
 
 from shepherd_dialect import workspace_control
-from shepherd_dialect.workspace_control import ShepherdWorkspace, May, ReadOnly, ReadWrite, RunStartError, TaskRef
+from shepherd_dialect.workspace_control import May, ReadOnly, ReadWrite, RunStartError, ShepherdWorkspace, TaskRef
 from shepherd_dialect.workspace_control.changesets import Changeset
 from shepherd_dialect.workspace_control.run_handles import WorkspaceRun
 from shepherd_dialect.workspace_control.run_outputs import RunOutput

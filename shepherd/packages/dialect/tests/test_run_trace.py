@@ -16,7 +16,7 @@ import sys
 from typing import TYPE_CHECKING
 
 import pytest
-from vcs_core.runtime_api import VcsCore, Store, build_builtin_substrate_context
+from vcs_core.runtime_api import Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_substrate import FileCreate, TaskTraceSubstrateDriver
 from vcs_core.substrates import DeclarativeFilesystemSubstrate, MarkerSubstrate
 
@@ -24,8 +24,8 @@ from shepherd_dialect import (
     CHILD_LAUNCH_REFUSED,
     CHILD_RUN_COMPLETED,
     CHILD_VALUE_COMPLETED,
-    ShepherdRunDriver,
     RunTrace,
+    ShepherdRunDriver,
     append_run_trace,
     build_run_trace_revision,
     read_run_trace,

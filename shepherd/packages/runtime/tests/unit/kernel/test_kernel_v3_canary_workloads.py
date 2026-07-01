@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
 from shepherd_core.context.kernel import ExecutionContextDefaults
 from shepherd_core.effects import TaskCompleted
 from shepherd_core.types import ReversibilityLevel
@@ -29,7 +30,6 @@ from shepherd_runtime.kernel import (
 )
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Context, Input, Output, task
-from pydantic import BaseModel
 
 
 @dataclass

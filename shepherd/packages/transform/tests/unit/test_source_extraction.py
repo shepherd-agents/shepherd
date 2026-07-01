@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import BaseModel
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_transform.source import (
     SourceExtractionError,
@@ -10,7 +11,6 @@ from shepherd_transform.source import (
     extract_task_source,
     extract_task_with_imports,
 )
-from pydantic import BaseModel
 
 
 @task

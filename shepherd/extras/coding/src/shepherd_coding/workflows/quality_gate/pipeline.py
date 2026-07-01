@@ -17,12 +17,12 @@ from typing import Literal
 
 logger = logging.getLogger(__name__)
 
+from pydantic import BaseModel, Field
 from shepherd_contexts.workspace.ref import WorkspaceRef
 from shepherd_core import Infer  # noqa: TC002 (runtime: Pydantic resolves Infer annotations)
 from shepherd_runtime.context.sandbox import GitWorktreeSandbox
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_runtime.task.pipeline import OnError, Stage
-from pydantic import BaseModel, Field
 
 from shepherd_coding.findings import (
     CATEGORY_PRIORITY,

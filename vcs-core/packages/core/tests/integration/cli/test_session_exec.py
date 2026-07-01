@@ -18,8 +18,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
-import vcs_core.store as store_module
 import pytest
+import vcs_core.store as store_module
 from click.testing import CliRunner
 from vcs_core._capture_reducer import CAPTURE_REDUCTION_KIND
 from vcs_core._cli_session_runtime import run_managed_exec

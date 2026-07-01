@@ -7,9 +7,9 @@ from pathlib import Path
 from vcs_core import (
     DeclarativeFilesystemSubstrate,
     MarkerSubstrate,
-    VcsCore,
     ScopeStack,
     Store,
+    VcsCore,
     build_builtin_substrate_context,
 )
 

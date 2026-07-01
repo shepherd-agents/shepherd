@@ -127,7 +127,7 @@ def validate_disjoint_roots(roots: Iterable[str]) -> tuple[str,...]:
     """Fail closed unless every bound root is disjoint (none nests inside another).
 
     Returns the canonicalized (realpath) roots on success. Raises
-:class:`OverlappingBoundRootsError` if any two roots are equal or one contains the other —
+    :class:`OverlappingBoundRootsError` if any two roots are equal or one contains the other —
     that is the excluded sub-root case (§4 precondition): allow nesting and you have silently
     re-entered Tier-3.
     """

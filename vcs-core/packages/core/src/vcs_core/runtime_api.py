@@ -39,12 +39,6 @@ from typing import TYPE_CHECKING, Any
 
 # --- Group A: construction (re-exported for one import home) ---
 from vcs_core import build_builtin_substrate_context
-
-# Boot-time workspace adoption — the Python twin of `vcs-core init --adopt`:
-# record pre-existing workspace files as ordinary effects on ground so that
-# later materialization (`push`) owns them. Promoted at B3c-3 alongside
-# `VcsCore.world_oid()`; the CLI was previously the only caller.
-from vcs_core._command_envelope import CommandExecutionOptions, AuthorityMergeControl
 from vcs_core._authority import (
     AuthorityDecision,
     AuthorityMergeResult,
@@ -52,8 +46,13 @@ from vcs_core._authority import (
     AuthzMatchView,
     GitRepoAuthorityRequest,
 )
+
+# Boot-time workspace adoption — the Python twin of `vcs-core init --adopt`:
+# record pre-existing workspace files as ordinary effects on ground so that
+# later materialization (`push`) owns them. Promoted at B3c-3 alongside
+# `VcsCore.world_oid()`; the CLI was previously the only caller.
+from vcs_core._command_envelope import AuthorityMergeControl, CommandExecutionOptions
 from vcs_core._workspace_adoption import adopt_workspace_baseline
-from vcs_core.vcscore import VcsCore
 
 # --- Group B: the run / command seam (shared with the SPI; consumer send-side) ---
 from vcs_core.spi import (
@@ -65,6 +64,7 @@ from vcs_core.spi import (
 )
 from vcs_core.store import Store
 from vcs_core.types import AuthorityExecutionOutcome
+from vcs_core.vcscore import VcsCore
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -78,6 +78,7 @@ __all__ = [
     "CALL_API_VERSION",
     "AuthorityDecision",
     "AuthorityExecutionOutcome",
+    "AuthorityMergeControl",
     "AuthorityMergeResult",
     "AuthorityOutcome",
     "AuthzMatchView",
@@ -86,9 +87,8 @@ __all__ = [
     "DriverContext",
     "DriverIngressResult",
     "GitRepoAuthorityRequest",
-    "VcsCore",
-    "AuthorityMergeControl",
     "Store",
+    "VcsCore",
     "adopt_workspace_baseline",
     "build_builtin_substrate_context",
     "native_jail_available",

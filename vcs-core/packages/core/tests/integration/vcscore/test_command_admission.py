@@ -10,7 +10,6 @@ from vcs_core._command_admission import CommandAdmissionError
 from vcs_core._patch_manager import PatchManager
 from vcs_core._performed_event_admission import PerformedEventAdmissionError
 from vcs_core._substrate_runtime import PerformedEventSpec, build_builtin_substrate_context
-from vcs_core.vcscore import VcsCore
 from vcs_core.recording import RecordingPipeline
 from vcs_core.spi import (
     CapabilitySet,
@@ -26,6 +25,7 @@ from vcs_core.spi import (
 from vcs_core.store import Store
 from vcs_core.substrates import FilesystemSubstrate
 from vcs_core.types import EffectRecord, ScopeInfo
+from vcs_core.vcscore import VcsCore
 
 
 @dataclass

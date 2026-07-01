@@ -210,8 +210,8 @@ def _select_workspace_adoption_state(
     source: AdoptionSource,
     advance_materialized: bool,
 ) -> None:
-    from vcs_core.vcscore import VcsCore
     from vcs_core.types import ScopeInfo
+    from vcs_core.vcscore import VcsCore
 
     vcscore = VcsCore(os.fspath(workspace), store=store)
     vcscore._select_workspace_state_from_store_required(

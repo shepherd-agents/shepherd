@@ -1,6 +1,6 @@
 """Render executed notebook HTML exports to PNG screenshots and PDFs."""
 
-# ruff: noqa: INP001,T201
+# ruff: noqa: INP001
 
 import sys
 from pathlib import Path

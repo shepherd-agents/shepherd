@@ -902,8 +902,6 @@ class SandboxSnapshotError(ShepherdError):
 # =============================================================================
 
 __all__ = [
-    # Base
-    "ShepherdError",
     "ArtifactNotFoundError",
     "BindingNotFoundError",
     "BindingValidationError",
@@ -932,6 +930,8 @@ __all__ = [
     "SchemaGenerationError",
     # Configure phase
     "ScopeNotConfiguredError",
+    # Base
+    "ShepherdError",
     "StepExecutionError",
     "StepOutputError",
     "TaskExecutionError",

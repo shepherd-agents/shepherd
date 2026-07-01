@@ -12,18 +12,16 @@ from dataclasses import dataclass
 from typing import Literal
 
 import pytest
-from shepherd_runtime.task.authoring import Artifact, Context, Input, Output, task
-from shepherd_runtime.task.metadata import resolve_contexts
-from shepherd_runtime.task.output import extract_outputs
-from shepherd_runtime.task.prompt import generate_task_prompt
-from shepherd_tests import MockProvider
 from pydantic import BaseModel
-
 from shepherd_core.context import ExecutionContextDefaults
 from shepherd_core.errors import ContextResolutionError
 from shepherd_core.types import ExecutionResult, ReversibilityLevel
 from shepherd_runtime.scope import Scope
-from shepherd_runtime.task.metadata import extract_task_metadata
+from shepherd_runtime.task.authoring import Artifact, Context, Input, Output, task
+from shepherd_runtime.task.metadata import extract_task_metadata, resolve_contexts
+from shepherd_runtime.task.output import extract_outputs
+from shepherd_runtime.task.prompt import generate_task_prompt
+from shepherd_tests import MockProvider
 
 # =============================================================================
 # Test Fixtures - Simple Contexts
@@ -537,8 +535,8 @@ class TestSyncWrapper:
 
 from typing import Annotated
 
-from shepherd_runtime.task.output import generate_output_schema
 from pydantic import Field
+from shepherd_runtime.task.output import generate_output_schema
 
 
 class TestFieldAnnotationExtraction:

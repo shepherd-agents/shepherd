@@ -7,9 +7,9 @@ import shutil
 from pathlib import Path
 
 import yaml
+from pydantic import BaseModel, Field
 from shepherd_contexts import WorkspaceRef  # noqa: TC002
 from shepherd_runtime.task.authoring import Context, Input, Output, task
-from pydantic import BaseModel, Field
 
 from shepherd_authoring.checks import check_file_exists
 from shepherd_authoring.tasks.draft_spike_plan import DraftSpikePlan

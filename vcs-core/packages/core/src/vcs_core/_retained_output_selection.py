@@ -7,17 +7,6 @@ from typing import TYPE_CHECKING, Any, cast
 
 import pygit2
 
-from vcs_core._errors import InvalidRepositoryStateError
-from vcs_core._vcscore_admission import mutation_admission
-from vcs_core._vcscore_seal import (
-    ValidatedRetainedWorkspace,
-    _required_snapshot_head,
-    _scope_selector,
-    _validate_handoff_head,
-    _validate_retained_workspace_handle,
-    _validated_retained_workspace,
-)
-from vcs_core._operation_journal_inventory import probe_operation_journal
 from vcs_core._authority import (
     AuthorityDecision,
     AuthorityOutcome,
@@ -39,6 +28,8 @@ from vcs_core._authority_transactions import (
     record_authority_settlement_effect,
     update_pending_authority_settlement,
 )
+from vcs_core._errors import InvalidRepositoryStateError
+from vcs_core._operation_journal_inventory import probe_operation_journal
 from vcs_core._permission_plan_evidence import PermissionPlanEvidenceError, validate_permission_plan_evidence
 from vcs_core._retained_output_settlement import (
     read_retained_output_settlement,
@@ -46,6 +37,15 @@ from vcs_core._retained_output_settlement import (
     write_retained_output_settlement,
 )
 from vcs_core._sibling_group_blockers import refresh_sibling_group_recovery_blockers
+from vcs_core._vcscore_admission import mutation_admission
+from vcs_core._vcscore_seal import (
+    ValidatedRetainedWorkspace,
+    _required_snapshot_head,
+    _scope_selector,
+    _validate_handoff_head,
+    _validate_retained_workspace_handle,
+    _validated_retained_workspace,
+)
 from vcs_core._world_authority_finalizer import MAX_AUTHORITY_RETRY_ATTEMPTS, WorldAuthorityFinalizer
 from vcs_core._world_operation_builder import CandidateSelection, OperationFinalBuilder
 from vcs_core._world_types import WORLD_TRANSITION_SCHEMA, WorldSnapshot, canonical_digest

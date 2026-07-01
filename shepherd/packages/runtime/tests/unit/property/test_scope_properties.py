@@ -9,6 +9,8 @@ Tests core invariants of the Scope containment system:
 """
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from shepherd_core.context.kernel import ExecutionContext
 from shepherd_core.effects import (
     Effect,
@@ -18,8 +20,6 @@ from shepherd_core.effects import (
 )
 from shepherd_core.foundation.errors import ScopeError
 from shepherd_runtime.scope import Scope
-from hypothesis import given, settings
-from hypothesis import strategies as st
 
 # =============================================================================
 # Test Context

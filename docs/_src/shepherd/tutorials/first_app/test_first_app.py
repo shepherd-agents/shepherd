@@ -1,10 +1,11 @@
 """Executes the tutorial's documented example against the simulated offline
-provider — what the docs show is what runs (DESIGN goal 2 / S5)."""
+provider — what the docs show is what runs (DESIGN goal 2 / S5).
+"""
 
+from shepherd.providers import claude
 from tutorials.first_app.app import SAMPLE_DIFF, Triage, main, review_change, triage_change
 
 import shepherd as shp
-from shepherd.providers import claude
 
 
 def test_triage_matches_documented_output():

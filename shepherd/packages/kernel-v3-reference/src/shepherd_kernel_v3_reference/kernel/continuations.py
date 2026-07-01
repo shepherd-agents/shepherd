@@ -5,10 +5,12 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from math import isfinite
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
-from shepherd_kernel_v3_reference.kernel.ir import Ref
 from shepherd_kernel_v3_reference.kernel.refs import content_ref
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
 
 CONTINUATION_IMAGE_SCHEMA_VERSION = "shepherd_kernel_v3_reference.continuation-image.v1"
 CONTINUATION_CONTROL_SCHEMA_VERSION = "shepherd_kernel_v3_reference.continuation-control.v1"

@@ -4,16 +4,16 @@ from dataclasses import replace
 
 import pytest
 
+from shepherd_kernel_v3_reference.proof_envelope import ProofProfile, ProofStrength
 from shepherd_kernel_v3_reference.vcscore_certificate import (
     VCSCORE_RUN_THEOREM_IDS,
     VcsCoreCertificateError,
+    validate_vcscore_run_proof_envelope,
     vcscore_run_certificate_from_json,
     vcscore_run_certificate_from_run_record,
     vcscore_run_proof_envelope,
     vcscore_run_proof_envelope_from_run_record,
-    validate_vcscore_run_proof_envelope,
 )
-from shepherd_kernel_v3_reference.proof_envelope import ProofProfile, ProofStrength
 
 
 def _merged_record() -> dict[str, object]:

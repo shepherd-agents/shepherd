@@ -9,8 +9,8 @@ from vcs_core._capture_reducer import CAPTURE_DIAGNOSTIC_KIND, CAPTURE_REDUCTION
 if TYPE_CHECKING:
     from vcs_core._query_readiness import ReadinessOperationAuthority
     from vcs_core._runtime_types import OperationRefInfo
-    from vcs_core.vcscore import VcsCore
     from vcs_core.types import ScopeInfo
+    from vcs_core.vcscore import VcsCore
 
 AllowlistedOperationStartReason = Literal[
     "not_admitted_shell_command",

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from vcs_core import FilesystemSubstrate, MarkerSubstrate, VcsCore, Store, build_builtin_substrate_context
+from vcs_core import FilesystemSubstrate, MarkerSubstrate, Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_api import AuthorityDecision, AuthzMatchView, GitRepoAuthorityRequest
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
 from vcs_core.types import AuthorityExecutionOutcome
@@ -22,13 +22,13 @@ from shepherd_dialect.workspace_control._filesystem_authority import (
     filesystem_authority_merge_provider_for_clamp,
     merge_workspace_scope_with_filesystem_authority,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 from shepherd_dialect.workspace_control.authority import (
     GitRepoGrantClamp,
     GitRepoGrantClause,
     GitRepoGrantDescriptor,
     clamp_gitrepo_grants,
 )
+from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 
 BINDING_ROOTS = {"backend": "backend", "docs": "docs"}
 

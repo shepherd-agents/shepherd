@@ -11,17 +11,19 @@ import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Any, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias
 
-from shepherd_kernel_v3_reference.kernel.ir import Ref
 from shepherd_kernel_v3_reference.kernel.refs import content_ref
-from shepherd_kernel_v3_reference.trace.records import TraceRecord
 from shepherd_kernel_v3_reference.trace.serde import trace_to_json
 from shepherd_kernel_v3_reference.trace.validate import (
     TraceValidationError,
     validate_core_a_trace,
     validate_core_a_trace_prefix,
 )
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
+    from shepherd_kernel_v3_reference.trace.records import TraceRecord
 
 JsonValue: TypeAlias = Any
 MetadataItems: TypeAlias = tuple[tuple[str, JsonValue], ...]
@@ -373,11 +375,11 @@ def _require_str_item(value: JsonValue, context: str) -> str:
 
 
 __all__ = [
+    "EXTENSION_PROOF_SURFACE_THEOREM_IDS",
     "PROOF_ENVELOPE_SCHEMA_VERSION",
     "PROOF_ENVELOPE_VALIDATOR",
     "PROOF_EVIDENCE_REF_KIND",
     "PROOF_SURFACE_THEOREM_IDS",
-    "EXTENSION_PROOF_SURFACE_THEOREM_IDS",
     "ProofEnvelope",
     "ProofEnvelopeError",
     "ProofProfile",

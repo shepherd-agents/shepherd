@@ -7,7 +7,7 @@ import json
 from dataclasses import dataclass
 from typing import Any, Literal
 
-from..kernel.facts import Fact, FactDraft, ReadContext, TraceOwnerId, TraceSlice, TraceStore
+from ..kernel.facts import Fact, FactDraft, ReadContext, TraceOwnerId, TraceSlice, TraceStore
 
 RunOutputSettlementAction = Literal["selected", "applied", "released", "discarded"]
 RunOutputState = Literal["unconsumed", "selected", "applied", "released", "discarded", "invalid"]

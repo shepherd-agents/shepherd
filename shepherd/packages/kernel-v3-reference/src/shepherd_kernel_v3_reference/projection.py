@@ -39,21 +39,21 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from shepherd_kernel_v3_reference.envelope import KernelResultEnvelope, WireResult
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
+    from shepherd_kernel_v3_reference.kernel.program_admission import PreparedKernelProgram
+    from shepherd_kernel_v3_reference.kernel.replay import KernelReplayState, ReplayableKernelTransition
+    from shepherd_kernel_v3_reference.profiles import SemanticProfile
 
 from shepherd_kernel_v3_reference.kernel.continuation_objects import (
     ContinuationObject,
     continuation_object_child_refs,
     continuation_object_to_json,
 )
-from shepherd_kernel_v3_reference.kernel.ir import Ref
-from shepherd_kernel_v3_reference.kernel.program_admission import PreparedKernelProgram
 from shepherd_kernel_v3_reference.kernel.program_identity import (
     ProgramIdentity,
     project_program_identity,
 )
 from shepherd_kernel_v3_reference.kernel.refs import content_ref
-from shepherd_kernel_v3_reference.kernel.replay import KernelReplayState, ReplayableKernelTransition
-from shepherd_kernel_v3_reference.profiles import SemanticProfile
 from shepherd_kernel_v3_reference.semantic import (
     AdmissionBasis,
     CanonicalRefMap,

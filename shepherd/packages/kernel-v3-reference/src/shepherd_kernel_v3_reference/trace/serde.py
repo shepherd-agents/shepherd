@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
 from dataclasses import MISSING, asdict, fields
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from shepherd_kernel_v3_reference.trace.records import (
     ContinuationDelay,
@@ -23,6 +22,9 @@ from shepherd_kernel_v3_reference.trace.records import (
     TerminalResumeResult,
     TraceRecord,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 _RECORD_TYPES = {
     cls.__name__: cls

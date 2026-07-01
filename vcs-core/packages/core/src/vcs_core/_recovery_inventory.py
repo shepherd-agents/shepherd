@@ -38,9 +38,9 @@ if TYPE_CHECKING:
 
     from vcs_core._projection_store import ScopeRegistryMismatch
     from vcs_core._sibling_groups import SiblingGroupListing
-    from vcs_core.vcscore import VcsCore
     from vcs_core.store import Store
     from vcs_core.types import OperationSummary
+    from vcs_core.vcscore import VcsCore
 
 
 RECLAIMABLE_SCOPE_REF_MISMATCH_KINDS: frozenset[ScopeRegistryMismatchKind] = frozenset(

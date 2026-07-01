@@ -15,7 +15,7 @@ from shepherd_runtime.nucleus import deliver, task
 from shepherd_runtime.scope import current_binding
 from shepherd_runtime.task.markers import InputMarker
 
-from ..contexts import BankingContext  # noqa: TC001
+from ..contexts import BankingContext
 
 _GUIDANCE = """\
 Query the balance of a banking account using the active

@@ -7,9 +7,9 @@ import json
 import logging
 from pathlib import Path
 
-import vcs_core.vcscore as vcscore_module
 import pygit2
 import pytest
+import vcs_core.vcscore as vcscore_module
 from vcs_core._errors import (
     InvalidIdentityError,
     InvalidRepositoryStateError,
@@ -20,8 +20,8 @@ from vcs_core._errors import (
 )
 from vcs_core._workspace_adoption import adopt_workspace_baseline
 from vcs_core._world_operation_runner import WorldOperationResult, WorldOperationRunner
-from vcs_core.vcscore import VcsCore
 from vcs_core.scope_stack import ScopeStack
+from vcs_core.vcscore import VcsCore
 
 from ...support.builders import make_marker_filesystem_vcscore, make_store
 from ...support.overlays import MockOverlayBackend

@@ -8,9 +8,9 @@ from __future__ import annotations
 
 from typing import Literal
 
+from pydantic import BaseModel, Field
 from shepherd_contexts.workspace.ref import WorkspaceRef
 from shepherd_runtime.task.authoring import Context, Input, Output, task
-from pydantic import BaseModel, Field
 
 from shepherd_coding.findings import CodeFinding  # noqa: TC001
 

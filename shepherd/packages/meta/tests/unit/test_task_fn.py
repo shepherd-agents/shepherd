@@ -5,11 +5,11 @@ callables, preserving identity and enabling composition.
 """
 
 import pytest
+from pydantic import BaseModel
 from shepherd.adapters import TaskAdapter, task_fn
 from shepherd_runtime.scope import Scope
 from shepherd_runtime.task.authoring import Input, Output, task
 from shepherd_tests import MockProvider
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Tasks

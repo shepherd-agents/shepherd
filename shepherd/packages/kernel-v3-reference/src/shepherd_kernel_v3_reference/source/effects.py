@@ -14,8 +14,10 @@ the operation alone.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from shepherd_kernel_v3_reference.schemas import Schema
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.schemas import Schema
 
 
 @dataclass(frozen=True)

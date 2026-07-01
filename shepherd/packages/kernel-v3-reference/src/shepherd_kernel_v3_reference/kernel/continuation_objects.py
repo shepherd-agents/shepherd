@@ -5,12 +5,14 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field, fields, is_dataclass
 from math import isfinite
-from typing import Any, Literal, Protocol, TypeAlias, Union, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeAlias, Union, cast
 
-from shepherd_kernel_v3_reference.kernel.context import ExecutionContext
 from shepherd_kernel_v3_reference.kernel.continuations import CONTINUATION_IMAGE_KINDS, ContinuationImageKind
-from shepherd_kernel_v3_reference.kernel.ir import Ref
 from shepherd_kernel_v3_reference.kernel.refs import content_ref
+
+if TYPE_CHECKING:
+    from shepherd_kernel_v3_reference.kernel.context import ExecutionContext
+    from shepherd_kernel_v3_reference.kernel.ir import Ref
 
 CONTINUATION_OBJECT_SCHEMA_VERSION = "shepherd_kernel_v3_reference.continuation-object.v5"
 CONTINUATION_CONTROL_DAG_SCHEMA_VERSION = "shepherd_kernel_v3_reference.continuation-control-dag.v1"

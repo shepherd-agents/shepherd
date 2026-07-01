@@ -11,8 +11,8 @@ from vcs_core._sibling_groups import (
     sibling_machine_scope_name,
 )
 from vcs_core.git_store import build_tree, create_signature
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
+from vcs_core.vcscore import VcsCore
 
 
 def _parent_oid(store: Store) -> str:

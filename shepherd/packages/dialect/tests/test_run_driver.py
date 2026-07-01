@@ -18,8 +18,8 @@ from vcs_core._driver_schema_validation import validate_driver_schema, validate_
 from vcs_core.runtime_api import (
     CALL_API_VERSION,
     CommandExecutionOptions,
-    VcsCore,
     Store,
+    VcsCore,
     build_builtin_substrate_context,
 )
 from vcs_core.spi import ExecutionAuthorityRequired, NetMode

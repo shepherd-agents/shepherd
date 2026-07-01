@@ -142,8 +142,9 @@ def deploy() -> None:
 
 
 def link_audit() -> None:
-    """link check via the repo's docs/tools/link-audit.py; skips cleanly if
-    the tool is absent so the pipeline still runs anywhere."""
+    """Link check via the repo's docs/tools/link-audit.py; skips cleanly if
+    the tool is absent so the pipeline still runs anywhere.
+    """
     tool = HERE.parent.parent / "docs/tools/link-audit.py"
     if not tool.exists():
         say("== link audit: skipped (docs/tools/link-audit.py not found) ==")

@@ -24,11 +24,12 @@ _SKIP_REASON = "Set SHEPHERD_RUN_LLM_TESTS=1 to run real LLM tests"
 )
 async def test_real_inference_produces_useful_config() -> None:
     """configure_pr_review against this repo should produce a non-trivial config."""
-    from shepherd import workspace
     from shepherd_coding.tasks import configure_pr_review
     from shepherd_contexts.workspace.ref import WorkspaceRef
     from shepherd_runtime.nucleus.workspace import reset_workspace_for_tests
     from shepherd_runtime.registry import discover_providers
+
+    from shepherd import workspace
 
     providers = discover_providers()
     provider_cls = providers.get("claude") or providers.get("openai")

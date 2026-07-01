@@ -5,14 +5,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from vcs_core._errors import InvalidRepositoryStateError
+from vcs_core._retained_output_selection import _validate_retained_selection_world
+from vcs_core._retained_output_settlement import read_retained_output_settlement, retained_output_settlement_ref
+from vcs_core._retained_output_settlement_ops import ReceiptOnlyAction, _receipt_only_operation_id
 from vcs_core._vcscore_seal import (
     ValidatedRetainedWorkspace,
     _require_public_retained_read_allowed,
     _validated_retained_workspace,
 )
-from vcs_core._retained_output_selection import _validate_retained_selection_world
-from vcs_core._retained_output_settlement import read_retained_output_settlement, retained_output_settlement_ref
-from vcs_core._retained_output_settlement_ops import ReceiptOnlyAction, _receipt_only_operation_id
 from vcs_core.store import GROUND_REF
 from vcs_core.types import (
     RetainedOutputIdentity,

@@ -8,6 +8,9 @@ Tests core invariants of the Effect system:
 """
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
+from pydantic import ValidationError
 from shepherd_core.effects import (
     EFFECT_TYPES,
     KERNEL_EFFECT_REGISTRY,
@@ -22,9 +25,6 @@ from shepherd_core.effects import (
     ToolCallStarted,
     effect_from_dict,
 )
-from hypothesis import given, settings
-from hypothesis import strategies as st
-from pydantic import ValidationError
 
 # =============================================================================
 # Hypothesis Strategies

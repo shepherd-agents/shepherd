@@ -14,9 +14,11 @@ storage-free semantic outcomes.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import Any, Union
+from typing import TYPE_CHECKING, Any, Union
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping
 
 
 class ResumptionUsed(RuntimeError):

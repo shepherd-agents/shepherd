@@ -33,8 +33,8 @@ from vcs_core._world_substrate_adapters import (
     WorkspaceSubstrateAdapter,
     workspace_state_revision_payload,
 )
-from vcs_core.vcscore import VcsCore
 from vcs_core.store import Store
+from vcs_core.vcscore import VcsCore
 
 
 def _digest(content: bytes) -> str:

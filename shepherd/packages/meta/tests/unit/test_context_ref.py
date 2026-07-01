@@ -3,7 +3,6 @@
 import copy
 
 import pytest
-
 from shepherd_contexts import KVStoreContext, SessionState, WorkspaceRef
 from shepherd_core.context import ExecutionContextDefaults
 from shepherd_core.types import ProviderCapabilities, ReversibilityLevel

@@ -38,6 +38,7 @@ from __future__ import annotations
 import hashlib
 from typing import TYPE_CHECKING, Any, ClassVar, Self
 
+from pydantic import BaseModel, ConfigDict, PrivateAttr
 from shepherd_core.types import (
     ExecutionResult,
     ProviderBinding,
@@ -45,7 +46,6 @@ from shepherd_core.types import (
     ReversibilityLevel,
 )
 from shepherd_runtime.context import Bindable
-from pydantic import BaseModel, ConfigDict, PrivateAttr
 
 from shepherd_contexts.kvstore.effects import KeyDeleted, KeySet
 

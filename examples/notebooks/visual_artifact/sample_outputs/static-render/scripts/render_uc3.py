@@ -1,6 +1,6 @@
 """Render static recovery before/after assets."""
 
-# ruff: noqa: E402,INP001,T201
+# ruff: noqa: INP001
 
 import sys
 from pathlib import Path

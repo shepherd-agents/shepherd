@@ -3,8 +3,7 @@
 import warnings
 from typing import Literal
 
-from shepherd_core.schema import type_to_json_schema
-from shepherd_core.schema import SINGLE_OUTPUT_KEY
+from shepherd_core.schema import SINGLE_OUTPUT_KEY, type_to_json_schema
 from shepherd_runtime.step.api import DEFAULT_STEP_TIMEOUT
 from shepherd_runtime.step.metadata import extract_step_metadata
 from shepherd_runtime.step.output import return_type_to_output_schema

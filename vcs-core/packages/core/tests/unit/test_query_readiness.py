@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import pygit2
 import pytest
+from vcs_core._authority import _authority_settlement_pending_path
 from vcs_core._dirty_flag import write_dirty_flag
 from vcs_core._errors import OrphanedOperationsError
 from vcs_core._materialization_run import MaterializationRun, write_materialization_run
-from vcs_core._authority import _authority_settlement_pending_path
 from vcs_core._query_readiness import (
     ReadinessOperationAuthority,
     ReadinessRequest,
@@ -32,9 +32,9 @@ from vcs_core._world_storage_installation import (
     open_or_init_default_world_storage,
 )
 from vcs_core.git_store import create_commit_with_recovery, insert_tree_entry
-from vcs_core.vcscore import VcsCore
 from vcs_core.recording import NestedParentAuthorization
 from vcs_core.store import Store
+from vcs_core.vcscore import VcsCore
 
 
 def test_probe_scope_reports_ground_without_activation_handle(mg: VcsCore) -> None:

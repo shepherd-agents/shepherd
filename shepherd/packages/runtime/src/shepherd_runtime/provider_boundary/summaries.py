@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from shepherd_runtime.provider_boundary.payloads import ModelRequest, ModelResponse
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from shepherd_runtime.provider_boundary.payloads import ModelRequest, ModelResponse
 
 __all__ = [
     "summarize_model_failure",

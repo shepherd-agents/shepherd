@@ -5,6 +5,8 @@ import math
 from collections.abc import Mapping
 
 import pytest
+from commons_vcs import Edge, Object, Repo
+from commons_vcs.backends import MemoryBackend
 from shepherd_core.effects import FileCreate, FilePatch, ToolCallBatch, ToolCallStarted
 from shepherd_core.effects.commons_vcs import (
     SHEPHERD_CAUSED_BY_ROLE,
@@ -13,19 +15,17 @@ from shepherd_core.effects.commons_vcs import (
     SHEPHERD_EFFECT_SCHEMA,
     SHEPHERD_EVENT_SCHEMA,
     SHEPHERD_PREVIOUS_ROLE,
+    ProjectedEffectStream,
     ShepherdCommonsRecorder,
     ShepherdStreamConflictError,
     ShepherdStreamRecoveryError,
-    ProjectedEffectStream,
-    shepherd_effect_profile,
     normalize_commons_value,
     project_effect_layer,
     project_effect_object,
     project_effect_stream,
+    shepherd_effect_profile,
 )
 from shepherd_core.scope.stream import EffectLayer
-from commons_vcs import Edge, Object, Repo
-from commons_vcs.backends import MemoryBackend
 
 
 def _encoded_field(value: object, field: str) -> object:

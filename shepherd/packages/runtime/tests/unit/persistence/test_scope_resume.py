@@ -11,6 +11,7 @@ Tests:
 from pathlib import Path
 
 import pytest
+from pydantic import BaseModel
 from shepherd_contexts.workspace.effects import WorkspacePatchCaptured
 from shepherd_core.context.kernel import ExecutionContextDefaults
 from shepherd_core.effects import (
@@ -22,7 +23,6 @@ from shepherd_core.effects import (
 )
 from shepherd_core.types import ProviderBinding, ReversibilityLevel
 from shepherd_runtime.scope import Scope
-from pydantic import BaseModel
 
 # =============================================================================
 # Test Context Implementation

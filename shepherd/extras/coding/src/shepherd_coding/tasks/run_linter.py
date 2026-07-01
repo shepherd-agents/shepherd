@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import shutil
 
+from pydantic import BaseModel, Field
 from shepherd_runtime.nucleus import task as nucleus_task
 from shepherd_runtime.task.authoring import Input, Output, task
-from pydantic import BaseModel, Field
 
 from shepherd_coding.models import ToolRunResult
 

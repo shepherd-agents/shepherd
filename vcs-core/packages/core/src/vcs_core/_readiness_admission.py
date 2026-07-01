@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
+from vcs_core._authority_inventory import (
+    authority_settlement_pending_label,
+    probe_authority_settlement_pending,
+)
 from vcs_core._errors import (
     InvalidRepositoryStateError,
     OpenScopeError,
@@ -12,10 +16,6 @@ from vcs_core._errors import (
     SiblingGroupRecoveryRequiredError,
     WorkspaceAuthorityRecoveryRequiredError,
     WorldQuiescenceError,
-)
-from vcs_core._authority_inventory import (
-    authority_settlement_pending_label,
-    probe_authority_settlement_pending,
 )
 from vcs_core._query_readiness import (
     ReadinessOperationAuthority,
@@ -29,8 +29,8 @@ if TYPE_CHECKING:
 
     from vcs_core._query_inventory import InventoryItem
     from vcs_core._query_readiness import ReadinessResult, RuntimeAdmissionContext
-    from vcs_core.vcscore import VcsCore
     from vcs_core.store import Store
+    from vcs_core.vcscore import VcsCore
 
 
 def require_readiness_allowed(
