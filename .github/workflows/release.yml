@@ -1,0 +1,33 @@
+name: Release shepherd-ai
+
+# Real PyPI releases are triggered by publishing a GitHub Release, which points
+# at an immutable v* tag (e.g. v0.1.3). The tag — minus the leading "v" — is the
+# single source of truth for the version. Never publish from a branch push:
+# PyPI is append-only, so a moving branch would either error or force a version
+# bump on every commit.
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+jobs:
+  pypi:
+    name: Build & publish to PyPI (Trusted Publishing)
+    runs-on: ubuntu-latest
+    environment: pypi           # add a required reviewer to this environment in repo settings
+    permissions:
+      id-token: write           # OIDC token for PyPI Trusted Publishing — no API token stored
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Build the bundled shepherd-ai sdist + wheel
+        run: python3 packaging/shepherd-ai/build.py --version "${GITHUB_REF_NAME#v}"
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist    # build.py writes artifacts to <repo>/dist by default
