@@ -13,8 +13,12 @@ extend-exclude = [
     "shepherd/design/**",
     "shepherd/eval/**",
     "shepherd/examples/**",
+    # Union of both repos' docs-tree excludes so this file is one lint truth
+    # (D6): _system/_src exist only publicly; design/tools only internally.
     "docs/_system/**",
     "docs/_src/**",
+    "docs/design/**",
+    "docs/tools/**",
     "vcs-core/design/**",
     "vcs-core/scripts/**",
     "scripts/**",
@@ -133,6 +137,7 @@ ban-relative-imports = "parents"
 "examples/**" = [
     "ANN",     # Type annotations not required in examples
     "BLE001",  # Blind except OK in example utility code
+    "D",       # Docstrings not required in example/notebook helper code
     "T201",    # Print is the primary output mechanism in examples
 ]
 "shepherd/packages/meta/src/shepherd/templates/**" = [
@@ -152,6 +157,13 @@ ban-relative-imports = "parents"
     "ANN",     # Type annotations not required in integration tests
     "D",       # Docstrings not required in integration tests
     "N999",    # Hyphenated directory name is intentional
+]
+"shepherd/packages/dialect/tests/test_lane_c_confinement_build.py" = [
+    "RUF002",  # ⋃ (N-ARY UNION) is the deliberate set-union operator from the v0.2 soundness proof
+]
+"vcs-core/packages/core/tests/integration/test_python_patches.py" = [
+    "PTH107",  # os.remove/os.chmod are deliberate here — the test proves the
+    "PTH101",  # vcs-core patch layer intercepts os.* calls; Path.* would bypass it
 ]
 "**/conftest.py" = [
     "ANN",     # Type annotations not required in test plumbing
