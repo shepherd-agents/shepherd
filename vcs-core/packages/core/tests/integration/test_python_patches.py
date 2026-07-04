@@ -109,7 +109,7 @@ def test_os_remove_is_recorded(workspace: Path) -> None:
         with target.open("w", encoding="utf-8") as handle:
             handle.write("payload")
 
-        os.remove(target)  # noqa: PTH107
+        os.remove(target)
 
         effects = _file_effects(mg, task)
         assert any(effect.get("type") == "FileDelete" and effect.get("path") == "remove.txt" for effect in effects)
@@ -121,7 +121,7 @@ def test_os_remove_without_scope_raises(workspace: Path) -> None:
 
     with _active_mg(workspace):
         with pytest.raises(UnscopedMutationError, match=r"os\.remove"):
-            os.remove(target)  # noqa: PTH107
+            os.remove(target)
 
         assert target.exists()
 
@@ -232,7 +232,7 @@ def test_os_chmod_mode_only_change_is_recorded(workspace: Path) -> None:
         target = workspace / "script.sh"
 
         target.write_text("#!/bin/sh\necho payload\n")
-        os.chmod(target, 0o755)  # noqa: PTH101
+        os.chmod(target, 0o755)
 
         effects = _file_effects(mg, task)
         assert any(effect.get("type") == "FilePatch" and effect.get("path") == "script.sh" for effect in effects)

@@ -14,8 +14,6 @@ Then render a directory of ``<id>/index.html`` exports, or a single file:
     uv run --with playwright python examples/notebooks/visual_artifact/render.py /tmp/out
 """
 
-# ruff: noqa: D103
-
 from __future__ import annotations
 
 import argparse

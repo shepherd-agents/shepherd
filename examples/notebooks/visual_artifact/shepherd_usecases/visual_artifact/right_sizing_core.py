@@ -1,7 +1,5 @@
 """Model right-sizing genre over the gradient-descent tile gate."""
 
-# ruff: noqa: D101,D103
-
 from __future__ import annotations
 
 import json

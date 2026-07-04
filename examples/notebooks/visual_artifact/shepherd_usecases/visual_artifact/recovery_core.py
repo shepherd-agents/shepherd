@@ -1,6 +1,6 @@
 """Pipeline recovery genre for the gradient-descent tile."""
 
-# ruff: noqa: D101,D103,TC003
+# ruff: noqa: TC003
 
 from __future__ import annotations
 

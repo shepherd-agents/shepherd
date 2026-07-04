@@ -6,7 +6,7 @@ minimum; the planted defect shows the path moving uphill. The static gate and
 critic both key off that same decision-critical direction.
 """
 
-# ruff: noqa: D101,D103,TC003
+# ruff: noqa: TC003
 
 from __future__ import annotations
 

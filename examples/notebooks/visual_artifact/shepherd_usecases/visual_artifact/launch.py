@@ -1,7 +1,5 @@
 """Visual-artifact notebook helpers backed by Shepherd workspace-control APIs."""
 
-# ruff: noqa: D103
-
 from __future__ import annotations
 
 import importlib.util
