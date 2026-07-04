@@ -83,12 +83,18 @@ def _start_fenced_run(
 
 def test_workspace_control_production_does_not_reintroduce_skeleton_bridge() -> None:
     source_root = Path(__file__).resolve().parents[1] / "src" / "shepherd_dialect" / "workspace_control"
+    # These needles must stay specific to the retired deferred-bridge spine.
+    # The rename scrub (p030 -> '') collapsed the original bridge-specific
+    # tokens onto generic substrings — `_p030_enabled` -> `_enabled` matched
+    # legitimate feature-flag/`*_enabled` code all over workspace_control. Keep
+    # the module path and the full env-var / flag names; do NOT re-introduce a
+    # bare `_enabled` needle.
     forbidden = (
         "shepherd2.vnext import skeleton",
         "shepherd2.vnext.skeleton",
         "SHEPHERD2_SKELETON",
         "SHEPHERD_ENABLE_DEFERRED_BRIDGE",
-        "_enabled",
+        "_deferred_bridge_enabled",
     )
     offenders: list[str] = []
     for path in source_root.rglob("*.py"):
