@@ -96,6 +96,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# Durable operation-kind vocabulary for the authority lane. Named constants so a
+# raw literal cannot silently diverge from the token it records (W1a).
+AUTHORITY_MERGE_OPERATION_KIND = "skeleton.authority.merge"
+AUTHORITY_SETTLEMENT_OPERATION_KIND = "skeleton.authority.settlement"
+
 
 def _admission(owner: VcsCore) -> MutationAdmission:
     return mutation_admission(
@@ -1390,7 +1395,7 @@ def merge_with_authority(
             scope=scope,
             operation_id=authority_operation_id,
             operation_label="skeleton filesystem authority",
-            operation_kind="skeleton.authority.merge",
+            operation_kind=AUTHORITY_MERGE_OPERATION_KIND,
             operation_metadata={
                 "authority": {
                     "cohort_id": prepared.cohort_id,
@@ -1754,7 +1759,7 @@ def _record_authority_final_settlement(
         candidate_digest=candidate_digest,
         monitor_basis="carrier_check_at_commit",
         operation_label="skeleton filesystem authority settlement",
-        operation_kind="skeleton.authority.settlement",
+        operation_kind=AUTHORITY_SETTLEMENT_OPERATION_KIND,
         effect_type="AuthoritySettlement",
         effect_metadata=settlement_metadata(
             operation_id=authority_operation_id,

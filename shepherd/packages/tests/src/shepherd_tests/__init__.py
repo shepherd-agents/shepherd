@@ -39,7 +39,7 @@ from shepherd_tests.tasks import (
     make_step_task,
 )
 
-__version__ = "1.0.0a1"
+__version__ = "0.2.0"
 
 __all__ = [
     "INLINE_STEP_TEST_CASES",

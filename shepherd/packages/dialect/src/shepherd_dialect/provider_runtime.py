@@ -357,7 +357,7 @@ def provider_events_from_observations(observations: tuple[ObservationDraft, ...]
 
 
 def fact_from_provider_event(event: ProviderEvent, *, append_local_id: str | None = None) -> Any:
-    """Project one provider event to an shepherd2 FactDraft.
+    """Project one provider event to a shepherd2 FactDraft.
 
     The returned draft does not include a trace owner; callers supply owner
     identity when they append the fact to a trace store.

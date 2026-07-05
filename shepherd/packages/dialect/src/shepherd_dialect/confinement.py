@@ -19,6 +19,7 @@ defaulted population is countable, the same discipline
 from __future__ import annotations
 
 import os
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -113,7 +114,7 @@ class OverlappingBoundRootsError(ValueError):
 class BindingRootGrant:
     """One bound root and whether its per-binding grant makes the subtree writable.
 
-    The pure input to per-binding jail lowering, decoupled from the ``May[GitRepo,...]``
+    The pure input to per-binding jail lowering, decoupled from the ``May[GitRepo, ...]``
     annotation machinery (Lane C wires captured grants to this). ``writable`` is True for a
     ReadWrite grant, False for ReadOnly.
     """
@@ -123,21 +124,58 @@ class BindingRootGrant:
     writable: bool
 
 
+def _fold_path(path: Path) -> Path:
+    """Case- and Unicode-fold a path for filesystem-aliasing-aware comparison.
+
+    ``os.path.realpath`` resolves symlinks and ``..`` but does **not** case-fold or
+    Unicode-normalize on macOS APFS (case-insensitive) — so ``realpath("backend")`` and
+    ``realpath("BACKEND")`` are distinct strings that name the *same* directory. Folding
+    (NFC-normalize + casefold each part) makes such aliases compare equal, so the nesting test
+    below catches case-/Unicode-aliased pairs as well. Fail-closed direction: on a genuinely
+    case-sensitive filesystem this over-rejects two roots that differ only by case/normalization
+    (a pathological, easily-renamed bind config) — the safe trade for a security guard.
+    """
+    return Path(*(unicodedata.normalize("NFC", part).casefold() for part in path.parts))
+
+
+def _roots_overlap(a: Path, b: Path) -> bool:
+    """Whether two realpath'd bound roots name the same subtree or one nests in the other.
+
+    Three fail-closed lenses: (1) exact realpath string equality/nesting (symlinks/``..`` already
+    resolved); (2) inode identity via :func:`os.path.samefile` for roots that exist — the
+    filesystem's own truth, catching case/Unicode/hardlink aliases to the *same* directory even
+    when the realpath strings differ; (3) case-/Unicode-folded equality/nesting, catching aliased
+    *nesting* (and aliases whose targets do not yet exist, where ``samefile`` cannot speak).
+    """
+    if a == b or a.is_relative_to(b) or b.is_relative_to(a):
+        return True
+    try:
+        if a.samefile(b):  # same inode ⇒ same dir regardless of case/normalization
+            return True
+    except OSError:
+        pass  # one side does not exist yet — the fold lens still covers aliasing
+    fa, fb = _fold_path(a), _fold_path(b)
+    return fa == fb or fa.is_relative_to(fb) or fb.is_relative_to(fa)
+
+
 def validate_disjoint_roots(roots: Iterable[str]) -> tuple[str, ...]:
-    """Fail closed unless every bound root is disjoint (none nests inside another).
+    """Fail closed unless every bound root is disjoint (none aliases or nests inside another).
 
     Returns the canonicalized (realpath) roots on success. Raises
-    :class:`OverlappingBoundRootsError` if any two roots are equal or one contains the other —
-    that is the excluded sub-root case (§4 precondition): allow nesting and you have silently
-    re-entered Tier-3.
+    :class:`OverlappingBoundRootsError` if any two roots name the same subtree or one contains the
+    other — the excluded sub-root case (§4 precondition): allow nesting and you have silently
+    re-entered Tier-3. Overlap is judged by :func:`_roots_overlap`, which treats
+    filesystem-aliased roots (case-insensitive APFS, Unicode NFC/NFD, hardlinks) as overlapping so
+    an alias cannot smuggle a ReadOnly subtree into a ReadWrite root's writable set.
     """
     canonical = [Path(os.path.realpath(str(root))) for root in roots]
     for i, a in enumerate(canonical):
         for b in canonical[i + 1 :]:
-            if a == b or a.is_relative_to(b) or b.is_relative_to(a):
+            if _roots_overlap(a, b):
                 raise OverlappingBoundRootsError(
-                    f"bound roots overlap or nest: {a} vs {b}. Per-binding grants require disjoint roots "
-                    "(a nested root is sub-root semantics — Tier-3, excluded from v0.2)."
+                    f"bound roots overlap, alias, or nest: {a} vs {b}. Per-binding grants require "
+                    "disjoint roots (a nested or filesystem-aliased root is sub-root semantics — "
+                    "Tier-3, excluded from v0.2)."
                 )
     return tuple(str(root) for root in canonical)
 

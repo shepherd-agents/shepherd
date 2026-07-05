@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-workspace"
-version = "0.1.0"
+version = "0.2.0"
 description = "Shepherd framework workspace"
 requires-python = ">=3.11"
 dependencies = [
@@ -22,11 +22,11 @@ dependencies = [
     "pytest>=8.0.0",
     "pytest-xdist>=3.6.0",
     "pytest-asyncio>=0.23.0",
-    "pyyaml>=6.0", # Required for eval scenario generation
-    "hypothesis>=6.100.0", # Property-based testing
-    "ruff>=0.15.0,<1.0.0", # Ensure `uv run ruff` resolves to the locked workspace tool, not PATH.
-    "RestrictedPython>=7.0,<8.0", # Required for secure task reconstruction tests
-    "filelock>=3.0", # Required for persistence tests
+    "pyyaml>=6.0",  # Required for eval scenario generation
+    "hypothesis>=6.100.0",  # Property-based testing
+    "ruff>=0.15.0,<1.0.0",  # Ensure `uv run ruff` resolves to the locked workspace tool, not PATH.
+    "RestrictedPython>=7.0,<8.0",  # Required for secure task reconstruction tests
+    "filelock>=3.0",  # Required for persistence tests
 ]
 
 [dependency-groups]
@@ -95,7 +95,7 @@ asyncio_default_fixture_loop_scope = "function"
 addopts = "--import-mode=importlib"
 markers = [
     "slow: marks tests as slow (>1s execution time)",
-    "slow: marks expensive/workspace-control scenario tests excluded from fast local dialect checks",
+    "slow: marks expensive /workspace-control scenario tests excluded from fast local dialect checks",
     "workspace_scenario: marks full workspace-control scenario/integration tests excluded from fast local dialect checks",
     "workspace_native_jail: marks workspace-control tests that require a proven native syscall jail",
     "integration: marks tests requiring external resources or network",

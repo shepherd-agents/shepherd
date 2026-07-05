@@ -164,3 +164,24 @@ def test_seatbelt_handles_workspace_path_with_shell_and_sbpl_metacharacters(tmp_
     inside = weird / "ok.txt"
     backend.launch(backend.profile_for(_permissive(weird), allow_network=True), weird, ["/usr/bin/touch", str(inside)])
     assert inside.exists()  # in-WORKDIR write lands even with metacharacters in the path
+
+
+@_macos
+def test_seatbelt_escapes_backslash_in_workspace_path(tmp_path) -> None:
+    """SBPL escaping regression (backslash): a legitimate workspace path containing a literal
+    backslash must be escaped inside the double-quoted SBPL subpath literal (``\\`` -> ``\\\\``),
+    so the profile stays well-formed and the Permissive probe does not spuriously fail."""
+    weird = tmp_path / "ws\\back\\slash"
+    weird.mkdir()
+    # Direct escaping assertion: the raw backslash path must appear only in escaped form.
+    profile = lower_to_seatbelt(_permissive(weird), allow_network=True)
+    raw = str(weird.resolve())
+    assert raw not in profile
+    assert raw.replace("\\", "\\\\") in profile
+    # And end-to-end: probe + launch still work with the backslash path.
+    backend = SeatbeltContainmentBackend()
+    backend.probe(backend.profile_for(_permissive(weird), allow_network=True), weird, writable_roots=_permissive(weird))
+    backend.probe(backend.profile_for((), allow_network=False), weird, writable_roots=())
+    inside = weird / "ok.txt"
+    backend.launch(backend.profile_for(_permissive(weird), allow_network=True), weird, ["/usr/bin/touch", str(inside)])
+    assert inside.exists()

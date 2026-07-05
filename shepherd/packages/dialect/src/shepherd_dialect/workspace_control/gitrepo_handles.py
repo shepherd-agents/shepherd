@@ -25,6 +25,26 @@ def selected_workspace_git_repo(mg: Any) -> GitRepo:
     )
 
 
+def named_subroot_git_repo(mg: Any, name: str) -> GitRepo:
+    """Hydrate a named sub-root binding as a GitRepo value noun (Lane C, LC-1).
+
+    A named binding is a *view* of the selected whole-workspace custody, scoped to a disjoint
+    sub-root the workspace records (``name -> realpath(root)``). Because custody is whole-workspace
+    (confirmed by the Lane C custody spike), the basis is the selected workspace basis; the binding
+    *name* plus the workspace-recorded root distinguish the view. Authority is the binding's full
+    declared vocabulary (read+write) — per-parameter ``May[...]`` grants clamp it at spawn
+    (§6.2). The root deliberately does not live on the value noun ("GitRepo is always a
+    value"); the workspace holds it and threads it to the jail/authority lowering in LC-2/LC-3.
+    """
+    from shepherd_runtime.nucleus import GitRepo
+
+    return GitRepo(
+        binding=name,
+        basis=selected_workspace_git_repo_basis(mg),
+        authority=_READ_WRITE_AUTHORITY,
+    )
+
+
 def require_selected_workspace_git_repo(mg: Any, repo: Any) -> GitRepo:
     """Validate that ``repo`` is the current selected workspace GitRepo input."""
     from shepherd_runtime.nucleus import GitRepo

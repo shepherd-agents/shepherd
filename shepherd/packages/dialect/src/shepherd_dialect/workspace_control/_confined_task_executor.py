@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 from collections.abc import Callable, Mapping
@@ -74,12 +75,36 @@ class ConfinedProcessTaskExecutorDescriptor:
 
 
 @dataclass(frozen=True)
+class ConfinedBindingAuthority:
+    """One named binding's confined-run authority (Lane C LC-3e).
+
+    ``param`` names the task parameter the in-body handle is injected as; ``binding`` is the
+    bound name; ``authority`` is the clamped per-binding authority (``"readonly"``/``"readwrite"``
+    — never a run-wide scalar, per the S2 tripwire); ``root`` is the bound subtree's
+    **working-path-relative** POSIX path (``""``/``"."`` for the whole working path). The caller
+    (LC-3f wiring) relativizes the workspace-absolute bound root against the run working path.
+    """
+
+    param: str
+    binding: str
+    authority: str
+    root: str
+
+
+@dataclass(frozen=True)
 class ConfinedRootTaskProvider:
-    """Execution-bound provider that runs one root task artifact in a jailed subprocess."""
+    """Execution-bound provider that runs one root task artifact in a jailed subprocess.
+
+    Exactly one of ``repo_authority`` (the v0.1 single-binding form: one ``repo`` handle at the
+    working path) or ``binding_authorities`` (Lane C LC-3e: one handle per named binding, each
+    with its own clamped authority and sub-root) must be provided; ``_stage_request`` fails
+    closed otherwise.
+    """
 
     artifact_payload: Mapping[str, object]
     kwargs: Mapping[str, Any]
-    repo_authority: str
+    repo_authority: str | None = None
+    binding_authorities: tuple[ConfinedBindingAuthority, ...] | None = None
     launch_metadata: dict[str, object] | None = None
     provider_id: str = "workspace-control-confined-task"
 
@@ -107,6 +132,11 @@ class ConfinedRootTaskProvider:
             except Exception as exc:
                 raise ConfinedTaskExecutionError.prelaunch(exc) from exc
 
+            # Lane C sub-root materialization: the jail's fail-closed pre-flight probe writes a
+            # canary beneath every writable root, so each bound sub-root directory must already
+            # exist in the run's clone upper. The clone mirrors the workspace, so bound roots that
+            # exist in the workspace normally exist here — but ensure it fail-closed, dialect-side.
+            self._materialize_binding_subroots(execution)
             try:
                 if self.launch_metadata is not None:
                     self.launch_metadata["confined_worker_entrypoint"] = str(_confined_task_runner_entrypoint_path())
@@ -145,6 +175,25 @@ class ConfinedRootTaskProvider:
                 )
             return {"status": "ok", "provider": self.provider_id, "result": payload.get("result")}
 
+    def _materialize_binding_subroots(self, execution: Any) -> None:
+        """Create each bound sub-root directory in the run clone before the jail probe (Lane C).
+
+        This best-effort ``mkdir`` is not itself the fail-closed layer: the jail's per-root
+        pre-flight probe writes a canary beneath every writable root and raises
+        ``JailNotEstablished`` if any bound root is missing or denied, so a sub-root that failed to
+        materialize here is caught before the body runs.
+        """
+        if self.binding_authorities is None:
+            return
+        working_path = getattr(execution, "working_path", None)
+        if working_path is None:
+            return
+        working = Path(working_path)
+        for entry in self.binding_authorities:
+            if entry.root in {"", ".", os.curdir}:
+                continue
+            (working / PurePosixPath(entry.root)).mkdir(parents=True, exist_ok=True)
+
     def _stage_request(self, root_path: Path) -> Path:
         source_root = root_path / "src"
         source_root.mkdir()
@@ -160,16 +209,36 @@ class ConfinedRootTaskProvider:
         entrypoint = self.artifact_payload.get("entrypoint")
         if not isinstance(entrypoint, Mapping):
             raise TypeError("task artifact entrypoint must be an object")
-        request = {
+        if (self.repo_authority is None) == (self.binding_authorities is None):
+            raise RuntimeError(
+                "confined task provider requires exactly one of repo_authority (single-binding) "
+                "or binding_authorities (per-binding) — refusing an ambiguous authority shape"
+            )
+        request: dict[str, object] = {
             "schema": "shepherd.workspace_control.confined_task_request.v1",
             "source_root": str(source_root),
             "entrypoint": dict(entrypoint),
             "kwargs": dict(self.kwargs),
-            "repo": {
+        }
+        if self.repo_authority is not None:
+            # v0.1 single-binding shape — byte-identical to the pre-LC-3e request.
+            request["repo"] = {
                 "binding": "workspace",
                 "authority": self.repo_authority,
-            },
-        }
+            }
+        else:
+            assert self.binding_authorities is not None
+            if not self.binding_authorities:
+                raise RuntimeError("binding_authorities must name at least one binding")
+            request["bindings"] = [
+                {
+                    "param": entry.param,
+                    "binding": entry.binding,
+                    "authority": entry.authority,
+                    "root": entry.root,
+                }
+                for entry in self.binding_authorities
+            ]
         request_path = root_path / "request.json"
         request_path.write_text(json.dumps(request, sort_keys=True), encoding="utf-8")
         return request_path

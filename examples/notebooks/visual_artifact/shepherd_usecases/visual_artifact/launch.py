@@ -8,7 +8,7 @@ import shutil
 import sys
 import tempfile
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -65,7 +65,7 @@ class NotebookSetupError(RuntimeError):
     """Raised when a public notebook is not running from a usable environment."""
 
 
-@dataclass(frozen=True)
+@dataclass
 class LaunchWorkspace:
     """Notebook-owned Shepherd workspace plus one flow."""
 
@@ -73,6 +73,7 @@ class LaunchWorkspace:
     flow: Flow
     repo: Any
     root: Path
+    _live_tasks_registered: bool = field(default=False, init=False, repr=False)
 
     def close(self) -> None:
         self.control.close()
@@ -179,8 +180,6 @@ def open_workspace(
         workspace_path=root,
     )
     control.tasks.register(TASK_REF, may_default="ReadWrite")
-    control.tasks.register(LIVE_ARTIFACT_TASK_REF, may_default="ReadWrite")
-    control.tasks.register(LIVE_REVIEW_TASK_REF, may_default="ReadWrite")
     flow = control.flows.open(name=name, metadata=dict(metadata or {}))
     return LaunchWorkspace(control=control, flow=flow, repo=control.git_repo(), root=root)
 
@@ -301,6 +300,7 @@ def run_claude_artifact(
     model: str | None = None,
 ) -> WorkspaceRun:
     """Run one live Claude artifact attempt through public flow/run APIs."""
+    _ensure_live_tasks_registered(workspace)
     return workspace.flow.fork(
         LIVE_ARTIFACT_TASK_REF,
         repo=workspace.repo,
@@ -330,6 +330,7 @@ def run_claude_review(
     model: str | None = None,
 ) -> WorkspaceRun:
     """Run one live Claude reviewer over explicit retained artifact refs."""
+    _ensure_live_tasks_registered(workspace)
     return workspace.flow.fork(
         LIVE_REVIEW_TASK_REF,
         repo=workspace.repo,
@@ -497,6 +498,14 @@ def _claude_runtime(*, model: str | None = None) -> dict[str, object]:
     if model is not None:
         runtime["model"] = model
     return runtime
+
+
+def _ensure_live_tasks_registered(workspace: LaunchWorkspace) -> None:
+    if workspace._live_tasks_registered:
+        return
+    workspace.control.tasks.register(LIVE_ARTIFACT_TASK_REF, may_default="ReadWrite")
+    workspace.control.tasks.register(LIVE_REVIEW_TASK_REF, may_default="ReadWrite")
+    workspace._live_tasks_registered = True
 
 
 def _require_python() -> None:

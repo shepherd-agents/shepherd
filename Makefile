@@ -277,3 +277,18 @@ verify:
 	done
 	@uv run --directory shepherd2 python -c "import shepherd2; print('  shepherd2: OK')"
 	@echo "All imports verified!"
+
+# --- 0.2.0 release evidence -------------------------------------------------
+# Executes the Lane C per-binding jail acceptance gate (A1-A7) to a JUnit
+# report, then fails unless the sentinel confirms all 10 gate ids were
+# collected AND passed with the 7 jailed legs skip-free. The release evidence
+# packet and the public macOS CI job both cite this target, so "proven
+# executed, not skipped" is the same mechanism in both places. Native syscall
+# jail evidence requires a jail-capable host (macOS Seatbelt / Linux Landlock).
+.PHONY: release-evidence-lane-c
+release-evidence-lane-c:
+	@mkdir -p tmp/release-evidence
+	-uv run --directory shepherd/packages/dialect --group dev pytest tests/test_lane_c_acceptance_gate.py \
+		-rA -q --junitxml=$(CURDIR)/tmp/release-evidence/lane-c.junit.xml
+	uv run python scripts/check_executed_evidence.py \
+		--junitxml tmp/release-evidence/lane-c.junit.xml --profile lane-c

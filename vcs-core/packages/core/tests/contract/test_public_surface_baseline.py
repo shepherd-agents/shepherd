@@ -14,6 +14,7 @@ from ..support.public_surface import PUBLIC_LOOKING_TOP_LEVEL_MODULES
 EXPECTED_PACKAGE_ROOT_EXPORTS = {
     "ActivationError",
     "AuthorityAspect",
+    "RetainedOutputIdentity",
     "BindingConfig",
     "build_builtin_substrate_context",
     "BoundSubstrate",
@@ -73,6 +74,18 @@ EXPECTED_PACKAGE_ROOT_EXPORTS = {
 # The stable implement-side surface (decisions.md `spi-top-level-promotion`).
 # `vcs_core.spi` is the single source of truth.
 EXPECTED_SPI_EXPORTS = {
+    # Surface additions not previously baseline-tracked (Lane C authority +
+    # keyed-json/revision-storage substrate work); synced 2026-07-03.
+    "AuthorityRole",
+    "CrashLagOrdering",
+    "DriverAuthorityRequiredError",
+    "GrowthBound",
+    "KeyedJsonPut",
+    "KeyedJsonTreeDraft",
+    "ReadSafety",
+    "RevisionContentDraft",
+    "RevisionStorageProfile",
+    "RevisionStorageShape",
     # Versioning
     "SPI_VERSION",
     "SUBSTRATE_DRIVER_CONTRACT_REVISION",

@@ -102,7 +102,10 @@ def test_vcscore_coverage_returns_runtime_reports(tmp_path: Path) -> None:
     finally:
         mg.deactivate()
 
-    assert reports["filesystem"].containment.regime == "none"
+    # PR#4 made the portable copy carrier a universal backend floor, so the
+    # default filesystem substrate now always has containment (was "none" when
+    # no carrier was auto-resolved).
+    assert reports["filesystem"].containment.regime == "complete"
     assert reports["filesystem"].provenance.regime == "partial"
     assert reports["marker"].containment.regime == "none"
     assert reports["marker"].provenance.regime == "none"

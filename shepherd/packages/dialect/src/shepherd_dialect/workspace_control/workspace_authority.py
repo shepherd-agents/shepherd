@@ -17,7 +17,7 @@ from shepherd_dialect.workspace_control.authority import (
 from shepherd_dialect.workspace_control.schemas import RunAuthorityContext
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Mapping, Sequence
 
     from shepherd_dialect.workspace_control.may import MayProfile, WorkspaceAuthorityDecision
 
@@ -49,6 +49,55 @@ def workspace_gitrepo_grant_for_profile(profile: MayProfile, *, grant_ref: str) 
         grant_ref=grant_ref,
         clauses=(GitRepoGrantClause(binding_ref="workspace", mutates=mutates),),
     )
+
+
+def resolve_per_binding_authority(
+    *,
+    task_default: str,
+    requested_may: str | None,
+    joined: Sequence[tuple[str, str, GitRepoGrantDescriptor]],
+) -> tuple[WorkspaceAuthorityDecision, tuple[object, ...]]:
+    """Lower LC-3b's joined per-binding grants to a decision + per-binding jail grants (LC-3d).
+
+    ``joined`` is ``_join_bindings_to_grants``' output — ``(binding_name, realpath_root,
+    per-parameter grant descriptor)`` with exact correspondence already enforced. This:
+
+    1. re-keys every captured clause's ``binding_ref`` to its binding name (so two
+       ``May[GitRepo, ...]`` parameters do not collide on the capture's default ``binding_ref``),
+       combining them into one requested descriptor;
+    2. resolves the authority decision — the S1 ceiling expansion clamps every binding under the
+       whole-run ``may`` ceiling, and the S2 per-binding view (`repo_authority_by_binding`) keeps a
+       ``docs:RO / backend:RW`` run from collapsing to one scalar; and
+    3. builds ``[BindingRootGrant(name, root, writable)]`` (writable iff the clamped per-binding
+       authority is ``readwrite``), the pure input the jail lowering
+       (``lower_grants_to_confinement``) turns into ``writable_roots = union-of(ReadWrite roots)``.
+
+    Returns ``(decision, binding_root_grants)``. The caller feeds the grants through
+    ``permission_plan.install(Sequence[BindingRootGrant])`` (LC-3d) — the existing seam, not a
+    second confinement source. Fails closed if the clamp drops a binding (no effective clause).
+    """
+    from dataclasses import replace
+
+    from shepherd_dialect.confinement import BindingRootGrant
+    from shepherd_dialect.workspace_control.errors import WorkspaceControlError
+    from shepherd_dialect.workspace_control.may import resolve_workspace_authority_decision
+
+    clauses = tuple(
+        replace(clause, binding_ref=name) for name, _root, descriptor in joined for clause in descriptor.clauses
+    )
+    requested = GitRepoGrantDescriptor(grant_ref="signature:multi-binding", clauses=clauses)
+    decision = resolve_workspace_authority_decision(
+        task_default=task_default, requested=requested_may, gitrepo_grant=requested
+    )
+    authority = decision.repo_authority_by_binding()
+    grants: list[object] = []
+    for name, root, _descriptor in joined:
+        if name not in authority:
+            raise WorkspaceControlError(
+                f"per-binding clamp dropped binding {name!r} (no effective authority) — refusing to run it unconfined"
+            )
+        grants.append(BindingRootGrant(binding=name, root=root, writable=authority[name] == "readwrite"))
+    return decision, tuple(grants)
 
 
 def workspace_filesystem_authority_grant_clamp(decision: WorkspaceAuthorityDecision) -> GitRepoGrantClamp:
@@ -145,6 +194,41 @@ def run_authority_context_for_decision(decision: WorkspaceAuthorityDecision) -> 
         authority_surface_plan_digest=surface.authority_surface_plan_digest,
         classifier_policy=policy.to_descriptor(),
     )
+
+
+def run_authority_context_for_multi_binding_decision(
+    decision: WorkspaceAuthorityDecision,
+    *,
+    per_binding_roots: Mapping[str, str],
+) -> RunAuthorityContext:
+    """Build durable authority evidence for a heterogeneous per-binding run (Lane C LC-4b).
+
+    Reads authority ONLY through the non-collapsing per-binding view
+    (``repo_authority_by_binding``); it never touches the run-wide scalar (which trips the S2
+    tripwire on a ``docs:RO / backend:RW`` run). Retained-output *settlement* of the whole-delta
+    output follows the owner-decided **any-writable** rule: the syscall jail already guarantees the
+    retained delta contains only authorized writes, so selecting the whole delta is sound iff at
+    least one binding was ``ReadWrite``. The persisted classifier/grant surface is therefore the
+    homogeneous settlement profile (``ReadWrite`` when any binding is writable, else ``ReadOnly``),
+    and the true per-binding authorities + sub-roots are recorded additively in
+    ``per_binding_authority`` for evidence and the per-binding changeset view. Per-binding
+    *settlement/custody* remains deferred (a single whole-delta output ships).
+    """
+    from dataclasses import replace
+
+    from shepherd_dialect.workspace_control.may import resolve_workspace_authority_decision
+
+    per_binding = decision.repo_authority_by_binding()
+    if not per_binding:
+        raise ValueError("multi-binding run authority context requires a per-binding authority decision")
+    can_mutate = any(authority == "readwrite" for authority in per_binding.values())
+    settlement_profile_name = "ReadWrite" if can_mutate else "ReadOnly"
+    settlement_decision = resolve_workspace_authority_decision(task_default=settlement_profile_name, requested=None)
+    base = run_authority_context_for_decision(settlement_decision)
+    per_binding_authority = {
+        name: {"authority": per_binding[name], "root": per_binding_roots[name]} for name in sorted(per_binding)
+    }
+    return replace(base, per_binding_authority=per_binding_authority)
 
 
 def validate_run_authority_context(context: RunAuthorityContext) -> ValidatedRunAuthorityContext:

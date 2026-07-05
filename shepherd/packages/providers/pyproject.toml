@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd-providers"
-version = "1.0.0a1"
+version = "0.2.0"
 description = "Provider implementations for shepherd-core (Claude, OpenAI)"
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10.0,<4.0.0"
 dependencies = [
-    "shepherd-core>=2.0.0a1",
-    "shepherd-runtime>=0.1.0a1,<1.0.0",
+    "shepherd-core",
+    "shepherd-runtime",
 ]
 
 [project.optional-dependencies]

@@ -101,3 +101,40 @@ def test_import_shepherd_has_no_vcs_core_import_side_effect() -> None:
     after = {name for name in sys.modules if name == "vcs_core" or name.startswith("vcs_core.")}
 
     assert after == before
+
+
+def test_meta_cli_mutates_no_ambient_process_env() -> None:
+    """The CLI/templates must not mutate ambient process env (W1c).
+
+    ``os.environ.setdefault``/``os.environ[...] = ...`` / ``os.environ.update``
+    at the entrypoint leaks across in-process CliRunner invocations and poisons
+    test order. Feature flags are scoped via ``scoped_seal_and_select()``
+    (a restoring context manager) instead. This is an AST scan so it also
+    catches the templates the quickstart copies verbatim.
+    """
+    offenders: dict[str, list[str]] = {}
+    for path in sorted(SHEPHERD_META_SRC.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        hits: list[str] = []
+        for node in ast.walk(tree):
+            # os.environ.setdefault(...) / os.environ.update(...)
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr in {"setdefault", "update", "pop"}
+                and isinstance(node.func.value, ast.Attribute)
+                and node.func.value.attr == "environ"
+            ):
+                hits.append(f"os.environ.{node.func.attr}@L{node.lineno}")
+            # os.environ[...] = ... (Subscript assignment target)
+            if isinstance(node, ast.Assign):
+                for tgt in node.targets:
+                    if (
+                        isinstance(tgt, ast.Subscript)
+                        and isinstance(tgt.value, ast.Attribute)
+                        and tgt.value.attr == "environ"
+                    ):
+                        hits.append(f"os.environ[...]=@L{node.lineno}")
+        if hits:
+            offenders[_rel(path)] = hits
+    assert offenders == {}, f"ambient process-env mutation in the meta package: {offenders}"

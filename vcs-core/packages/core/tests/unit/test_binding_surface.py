@@ -114,7 +114,14 @@ def test_binding_surface_records_metadata_and_resolver_loads_live_driver_schema(
 
 
 @pytest.mark.xfail(
-    reason="caching regression under always-on carrier — see #11",
+    reason=(
+        "PR#4 (portable copy carrier + auto backend) regressed the resolved-binding-contract "
+        "cache: the first exec calls describe() twice and the second re-resolves instead of "
+        "hitting the cache (observed 3 calls, expected 1). Functionally harmless — results are "
+        "correct — but the caching invariant is broken. Reproduces in the public checkout "
+        "(public CI does not run the vcs-core unit suite). Tracked as shepherd-agents/shepherd#11 "
+        "and the divergence ledger known-public-bugs."
+    ),
     strict=True,
 )
 def test_vcscore_exec_uses_cached_resolved_binding_contract_without_runtime_describe(tmp_path) -> None:

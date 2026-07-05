@@ -263,6 +263,58 @@ def test_run_driver_lowers_defaulted_may_to_permissive_confinement(mg: VcsCore) 
     }
 
 
+def test_run_driver_lowers_confinement_from_per_binding_grants(mg: VcsCore, tmp_path: Path) -> None:
+    """LC-3d hookup (a): when per-binding grants are present, confinement lowers from THEM through
+    the same install() seam — writable_roots is the union of the ReadWrite roots, the ReadOnly root
+    excluded — not from the whole-workspace may= profile."""
+    import os
+
+    from shepherd_dialect.confinement import BindingRootGrant
+
+    docs = tmp_path / "docs"
+    backend = tmp_path / "backend"
+    docs.mkdir()
+    backend.mkdir()
+    provider = CapturingConfinementProvider()
+
+    outcome = mg.execute_recorded(
+        "runtime",
+        "run",
+        scope=mg.ground,
+        task_id=DEMO_TASK_ID,
+        may="ReadOnly",  # a whole-run ReadOnly may= would deny all writes; the grants override it
+        binding_grants=[
+            BindingRootGrant(binding="docs", root=str(docs), writable=False),
+            BindingRootGrant(binding="backend", root=str(backend), writable=True),
+        ],
+        provider=provider,
+    )
+
+    assert provider.confinement is not None
+    assert provider.confinement.writable_roots == (os.path.realpath(str(backend)),)
+    assert provider.confinement.network.mode is NetMode.DENY_ALL
+    # may= provenance is still recorded on the multi-binding path (grants are the enforced surface).
+    core = outcome.value.transitions[0].payload["portable_core"]
+    assert core["may"] == {"declared": "ReadOnly", "resolved": "ReadOnly", "source": "declared"}
+
+
+def test_run_driver_absent_binding_grants_uses_may_path_unchanged(mg: VcsCore) -> None:
+    """LC-3d hookup (b): absent per-binding grants, confinement lowers from may= exactly as before."""
+    provider = CapturingConfinementProvider()
+
+    mg.execute_recorded(
+        "runtime",
+        "run",
+        scope=mg.ground,
+        task_id=DEMO_TASK_ID,
+        may="ReadOnly",
+        provider=provider,
+    )
+
+    assert provider.confinement is not None
+    assert provider.confinement.writable_roots == ()  # byte-identical to the pre-LC-3d may= path
+
+
 def test_run_driver_args_schema_is_opaque_object() -> None:
     spec = ShepherdRunDriver().describe().commands["run"].params["args"]
     assert spec.type == "object"
@@ -280,6 +332,7 @@ def test_run_driver_schema_marks_python_only_params_nonprojectable() -> None:
     assert result.required_one_of == (("task_body", "task_id"),)
     assert {param.param_name for param in result.hidden_params} == {
         "task_body",
+        "binding_grants",
         "provider",
         "substrate_handlers",
         "supervisor_handlers",

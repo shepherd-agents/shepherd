@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd-runtime"
-version = "0.1.0a1"
+version = "0.2.0"
 description = "Public runtime surfaces for the Shepherd framework"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 dependencies = [
-    "shepherd-core>=2.0.0a1,<3.0.0",
-    "shepherd-kernel-v3-reference>=0.1.0a1,<1.0.0",
+    "shepherd-core",
+    "shepherd-kernel-v3-reference",
 ]
 
 [project.optional-dependencies]
@@ -24,8 +24,8 @@ persistence = [
 [dependency-groups]
 lint = ["ruff>=0.5.0,<1.0.0"]
 test = [
-    "shepherd-contexts>=1.0.0a1,<2.0.0",
-    "shepherd-tests>=1.0.0a1,<2.0.0",
+    "shepherd-contexts",
+    "shepherd-tests",
     "hypothesis>=6.100.0,<7.0.0",
     "pytest>=8.0.0,<9.0.0",
     "pytest-asyncio>=0.23.0,<1.0.0",

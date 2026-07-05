@@ -43,7 +43,7 @@ class RecorderLifecycleError(RuntimeError):
 
 
 class ToolHandlerNotFoundError(LookupError):
-    """``select_tool_handler`` found no handler for a ``tool.<name>`` kind.
+    """``select_tool_handler`` was called for a ``tool.<name>`` with no handler registered.
 
     Adapters catch this at the recorder boundary and emit
     ``capture(selection_ref, "abort", ...)`` plus
@@ -53,7 +53,7 @@ class ToolHandlerNotFoundError(LookupError):
 
 
 class InterpositionRecorder(Protocol):
-    """Mediates between provider adapters and the kernel trace machine.
+    """Mediate between provider adapters and the kernel trace machine.
 
     Adapters drive these methods from streaming SDK callbacks; the
     recorder owns ref minting, ``ExecutionContext`` stamping, and

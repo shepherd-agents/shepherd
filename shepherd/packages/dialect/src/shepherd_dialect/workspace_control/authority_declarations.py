@@ -11,6 +11,7 @@ from shepherd_dialect.workspace_control.authority import (
     GitRepoPath,
     ReadOnly,
     ReadWrite,
+    _reject_path_scoped_clauses,
     gitrepo_grant_descriptor_from_may_annotation,
 )
 
@@ -56,8 +57,10 @@ def compile_gitrepo_grant_from_annotation(
         )
     except (TypeError, ValueError) as exc:
         raise AuthorityDeclarationError(str(exc)) from exc
-    if descriptor is not None and parameter_name != "repo":
-        raise AuthorityDeclarationError("May[GitRepo,...] is only supported on the injected repo parameter")
+    # LC-3a: per-binding capture. A ``May[GitRepo, ...]`` grant is captured on any parameter, not
+    # only the injected ``repo``; the parameter name rides ``grant_ref`` ("signature:<param>"). The
+    # multi-binding run path (fenced until LC-4) reads these per-parameter grants; the single-binding
+    # ``repo=`` path still resolves exactly one grant downstream.
     return descriptor
 
 
@@ -66,7 +69,7 @@ def compile_gitrepo_grant_from_ast_annotation(
     *,
     parameter_name: str,
 ) -> GitRepoGrantDescriptor | None:
-    """Compile supported generated-source ``May[GitRepo,...]`` syntax without ``eval``."""
+    """Compile supported generated-source ``May[GitRepo, ...]`` syntax without ``eval``."""
     if annotation is None:
         return None
     if not isinstance(annotation, ast.Subscript):
@@ -86,11 +89,17 @@ def compile_gitrepo_grant_from_ast_annotation(
         if handle_name != "GitRepo":
             raise AuthorityDeclarationError("GitRepo May grant metadata must annotate shepherd_runtime.nucleus.GitRepo")
         if len(metadata) != 1:
-            raise AuthorityDeclarationError("May[GitRepo,...] supports exactly one GitRepo grant in this slice")
+            raise AuthorityDeclarationError("May[GitRepo, ...] supports exactly one GitRepo grant in this slice")
         grant = _public_gitrepo_grant_from_ast(metadata[0])
         descriptor = grant.to_descriptor(grant_ref=f"signature:{parameter_name}")
-        if parameter_name != "repo":
-            raise AuthorityDeclarationError("May[GitRepo,...] is only supported on the injected repo parameter")
+        # P-030 v0.2 fence: reject path-scoped grants at the generated-source (AST) seam, the same
+        # as the runtime seam. Keyed on the ``path_prefix`` field, honoring the private escape.
+        try:
+            _reject_path_scoped_clauses(descriptor.clauses)
+        except ValueError as exc:
+            raise AuthorityDeclarationError(str(exc)) from exc
+        # LC-3a: per-binding capture (generated-source path) — captured on any parameter, not only
+        # the injected ``repo``; the parameter name rides ``grant_ref``.
         return descriptor
     return None
 

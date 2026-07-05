@@ -82,7 +82,7 @@ def _core_checks(*, backend: str) -> list[dict[str, object]]:
 def _claude_checks() -> list[dict[str, object]]:
     checks: list[dict[str, object]] = []
     try:
-        from vcs_core.runtime_api import native_jail_available
+        from shepherd_dialect import native_jail_available
 
         jail_ok = native_jail_available()
     except Exception as exc:  # noqa: BLE001

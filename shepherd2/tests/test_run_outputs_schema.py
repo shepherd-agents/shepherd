@@ -823,3 +823,42 @@ def test_run_output_descriptor_fact_can_represent_alias_shape() -> None:
     assert descriptor.payload["output_name"] == "patch"
     assert descriptor.payload["world_binding"] == "workspace"
     assert descriptor.payload["citation"] == citation
+
+
+# --- W4.2: durable-state compatibility fails closed on unknown vocabulary -----
+# Pins the D3 claim (durable-state-compatibility.md): opening store state
+# written by an incompatible Shepherd version must raise a diagnosable refusal
+# that NAMES the offending vocabulary — never a silent misread.
+
+
+def _valid_locator_payload() -> dict[str, str]:
+    return run_output_descriptor_locator_payload(
+        RunOutputDescriptorLocator(
+            execution_id="exec:run-1",
+            output_name="workspace",
+            frontier_id="frontier:run-1",
+            descriptor_fact_id="fact:desc-1",
+            schema_ref=RUN_OUTPUT_DESCRIPTOR_SCHEMA,
+        )
+    )
+
+
+def test_durable_state_fails_closed_on_unknown_vocabulary() -> None:
+    """An unknown persisted schema string is refused, and the error names it."""
+    payload = _valid_locator_payload()
+    payload["schema"] = "legacy.run_output_descriptor_locator.v0"  # an older/foreign vocabulary
+
+    with pytest.raises(ValueError) as exc:
+        run_output_descriptor_locator_from_payload(payload)
+
+    message = str(exc.value)
+    # fail-closed AND diagnosable: the offending value is named, and the
+    # current expected vocabulary is cited so the mismatch is actionable.
+    assert "legacy.run_output_descriptor_locator.v0" in message
+    assert RUN_OUTPUT_DESCRIPTOR_LOCATOR_SCHEMA in message
+
+
+def test_valid_vocabulary_still_round_trips() -> None:
+    """The fail-closed guard does not reject current, well-formed payloads."""
+    locator = run_output_descriptor_locator_from_payload(_valid_locator_payload())
+    assert locator.schema_ref == RUN_OUTPUT_DESCRIPTOR_SCHEMA

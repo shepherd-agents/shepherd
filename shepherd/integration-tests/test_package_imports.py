@@ -897,16 +897,20 @@ class TestMetaPackageImports:
             workspace,
         )
 
+        # Strict facade-drift guard: exact order + membership. Update deliberately
+        # when the public surface changes on purpose (e.g. the P-030 Lane C
+        # per-binding grant surface: GitRepo/May/ReadOnly/ReadWrite/Flow/...).
         assert shepherd.__all__ == [
             "__version__",
             "workspace",
             "Workspace",
             "task",
             "deliver",
+            "handle",
+            "ask",
+            "tell",
             "Permissive",
-            "Match",
-            "Plan",
-            "Subset",
+            "current_binding",
             "Run",
             "RunRef",
             "RunInProgress",
@@ -914,15 +918,29 @@ class TestMetaPackageImports:
             "DeliveryFailed",
             "emit_artifact",
             "Artifact",
-            "handle",
-            "ask",
-            "tell",
+            "Match",
+            "Plan",
+            "Subset",
             "EffectNotPermitted",
             "EffectSurfaceEmpty",
             "EffectSurfaceTooWide",
             "OverbroadHandler",
             "PlanNotExtractable",
-            "current_binding",
+            "GitRepo",
+            "GitRepoBasis",
+            "open",
+            "ShepherdWorkspace",
+            "WorkspaceRun",
+            "WorkspaceTask",
+            "RunOutput",
+            "Changeset",
+            "ChangesetStat",
+            "May",
+            "ReadOnly",
+            "ReadWrite",
+            "GitRepoGrant",
+            "Flow",
+            "FlowControlClient",
         ]
         assert callable(task), "task should be callable (decorator)"
         assert callable(workspace), "workspace should be callable"

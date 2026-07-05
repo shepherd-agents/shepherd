@@ -14,6 +14,7 @@
 <p align="center">
   <a href="#installation">Install</a> |
   <a href="#quickstart">Quickstart</a> |
+  <a href="#permissions-the-signature-is-the-permission-surface">Permissions</a> |
   <a href="#examples">Examples</a> |
   <a href="https://docs.shepherd-agents.ai/">Docs</a> |
   <a href="#citation">Citation</a>
@@ -46,10 +47,12 @@ agent.
 > [Offline Quickstart](#offline-quickstart) — it runs anywhere, keyless.
 
 A task is a plain Python function with **no body**; the signature and docstring
-are the contract the agent fulfils at runtime:
+are the contract the agent fulfils at runtime — including its permissions: the
+grant on `repo` is what lets the agent write the repository
+(see [Permissions](#permissions-the-signature-is-the-permission-surface)):
 
 ```python
-def write_program(repo, prompt: str, output_path: str = "program.py") -> None:
+def write_program(repo: sp.May[sp.GitRepo, sp.ReadWrite], prompt: str, output_path: str = "program.py") -> None:
     """Write a small, self-contained Python program that does what `prompt` asks.
 
     Save it to output_path. It must run with plain `python3`, read no input,
@@ -113,6 +116,40 @@ Inspect the full record with `shepherd run show --latest` (add `--json` to any
 read command for the durable machine payload); see the
 [docs](https://docs.shepherd-agents.ai/) for backend selection and the complete
 `run` surface.
+
+## Permissions: the signature is the permission surface
+
+A task can declare a read-only or read-write grant **per bound repository**, in
+its signature:
+
+```python
+from shepherd import task, May, GitRepo, ReadOnly, ReadWrite
+
+@task
+def apply_documented_fix(
+    docs:    May[GitRepo, ReadOnly],   # read-only: writes refused at the OS
+    backend: May[GitRepo, ReadWrite],  # writable root
+    issue:   str,
+) -> None: ...
+```
+
+On a jailed device the grant is compiled to that run's writable roots and
+**enforced at the native syscall jail** (macOS Seatbelt; Linux Landlock): a
+write to a `ReadOnly`-granted repository, or to any managed path not covered by
+a `ReadWrite` grant, is refused at the syscall — before the last undo point, not
+advised and not caught only at a merge gate. Reading the signature *is* reading
+the permission surface, and `shepherd task show` renders it expanded. Grants are
+whole-profile per binding (a bound repository is entirely writable or entirely
+read-only). Bindings are named with `ws.bind(root="backend/", name="backend")`
+and passed to a run with `workspace.run(task, bindings={...})`; each run's world
+output is inspected per binding with `run.changeset(name="backend")` and settled
+once with `select` / `release` / `discard`.
+
+> **Scope (P-030 v0.2).** Per-binding whole-profile `ReadOnly`/`ReadWrite` over
+> disjoint named bindings, on a jailed device, filesystem / Git substrate,
+> same-process value-children. Enforcement is exercised on macOS Seatbelt; Linux
+> Landlock is container-gated. Sub-root / `where(path=…)` grants are not part of
+> this cut.
 
 ## Examples
 

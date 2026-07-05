@@ -72,7 +72,7 @@ That lane uses `runtime={"provider": "claude"}`, the local `claude` CLI,
 login.
 
 See [the guide quickstart](../../docs/guides/quickstart.md) for the full
-first-run walkthrough and [`examples/quickstart`](../../examples/quickstart)
+first-run walkthrough and [`examples/quickstart`](../../../examples/quickstart)
 for checked-in executable examples.
 
 ## Public API Shape

@@ -505,6 +505,10 @@ def _emit_run_show(value: Any) -> None:
     click.echo(f"  provider:     {record.get('provider')}")
     click.echo(f"  may:          {record.get('may_profile')}")
     click.echo(f"  enforcement:  {record.get('enforcement')} ({execution.get('enforcement_basis')})")
+    flags = execution.get("effective_feature_flags")
+    if flags:
+        rendered = ", ".join(f"{name}={'on' if state else 'off'}" for name, state in sorted(flags.items()))
+        click.echo(f"  flags:        {rendered}")
     click.echo(f"  terminal:     {terminal.get('body_status')} / {terminal.get('world_disposition')}")
     click.echo(f"  publication:  {terminal.get('output_publication_status')}")
     if outputs:
@@ -578,10 +582,66 @@ def _emit_task_list(value: Any) -> None:
         )
 
 
+def _grant_access_label(grant: Any) -> str:
+    """Summarize one captured GitRepo grant descriptor as ``read-only``/``read-write``.
+
+    A grant is read-only only when a clause pins ``mutates`` to ``False`` (``ReadOnly``).
+    ``ReadWrite`` leaves ``mutates`` unconstrained (``None``) and path grants pin it to
+    ``True``; both mean the binding may write. This reads the recorded descriptor only.
+    """
+    if isinstance(grant, dict):
+        clauses = grant.get("clauses")
+        if isinstance(clauses, list | tuple):
+            for clause in clauses:
+                if isinstance(clause, dict) and clause.get("mutates") is False:
+                    return "read-only"
+    return "read-write"
+
+
+def _task_binding_grants(signature: Any) -> list[tuple[str, str]]:
+    """Return ``(parameter, access)`` pairs for every per-binding GitRepo grant, in order."""
+    grants: list[tuple[str, str]] = []
+    if not isinstance(signature, dict):
+        return grants
+    parameters = signature.get("parameters")
+    if not isinstance(parameters, list | tuple):
+        return grants
+    for parameter in parameters:
+        if not isinstance(parameter, dict):
+            continue
+        grant = parameter.get("gitrepo_grant")
+        if grant is None:
+            continue
+        name = parameter.get("name")
+        if not isinstance(name, str) or not name:
+            continue
+        grants.append((name, _grant_access_label(grant)))
+    return grants
+
+
+def _task_grant_summary_line(task: Any) -> str | None:
+    """Compute the leading permission-surface line for ``sp task show``.
+
+    Leads with the per-binding grant summary (``docs read-only / backend read-write``);
+    falls back to the task-level may profile (``may: ReadOnly``) when there are no
+    per-binding grants; returns ``None`` when neither is recorded. Rendering only.
+    """
+    grants = _task_binding_grants(task.get("signature_schema") or {}) if isinstance(task, dict) else []
+    if grants:
+        return " / ".join(f"{name} {access}" for name, access in grants)
+    may = task.get("may_default") if isinstance(task, dict) else None
+    if may:
+        return f"may: {may}"
+    return None
+
+
 def _emit_task_show(value: Any) -> None:
     description = _jsonable(value)
     task = description.get("task") or {}
     artifact = description.get("artifact") or {}
+    summary = _task_grant_summary_line(task)
+    if summary is not None:
+        click.echo(summary)
     click.echo(f"Task {task.get('task_id')}@{task.get('version')}")
     click.echo(f"  status:  {task.get('status')}")
     click.echo(f"  import:  {task.get('import_path')}")

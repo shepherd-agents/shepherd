@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
-from collections.abc import Mapping
+from collections.abc import Iterable, Iterator, Mapping
+from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import Annotated as May
@@ -45,6 +47,51 @@ _ALLOWED_FIELD_OPS: dict[str, frozenset[str]] = {
     **{field: frozenset({"eq"}) for field in _BOOLEAN_EQ_FIELDS},
     "path": frozenset({"eq", "startswith"}),
 }
+
+
+# P-030 v0.2 grant fence.
+#
+# Path-scoped (``path_prefix``) GitRepo grants are NOT part of the v0.2 claim: jail enforcement is
+# whole-root, and sub-root grants are ``target-spec`` (P-030 rev-5 phase iii). They remain sound,
+# settlement-boundary internal machinery, so the two *public* ``May[...]`` acceptance seams
+# (``gitrepo_grant_descriptor_from_public_grant`` for the runtime route and the AST recognizer in
+# ``authority_declarations``) refuse them unless a caller explicitly opts in via the private
+# escape below. The escape is deliberately not a public ``register``/``register_source``/
+# ``update_source`` keyword. Descriptor construction and ``from_descriptor`` rehydration are out of
+# bounds for the fence: persisted authority contexts legitimately carry ``path_prefix`` clauses.
+_PATH_SCOPED_GRANT_REJECTION = (
+    "path-scoped grants are not part of the P-030 v0.2 claim; use ReadOnly or ReadWrite "
+    "(sub-root GitRepo grants are target-spec / settlement-boundary internal only)"
+)
+_ALLOW_PATH_PREFIX_GRANTS: ContextVar[bool] = ContextVar("_allow_path_prefix_grants", default=False)
+
+
+@contextlib.contextmanager
+def _allow_path_prefix_grants() -> Iterator[None]:
+    """Private escape: permit path-scoped GitRepo grants through the public compile seams.
+
+    Internal adoption-boundary / settlement-lane callers (and their tests) legitimately compile
+    ``path_prefix`` grants. This context manager scopes that permission around a public compile
+    call without exposing a public registration keyword. It is intentionally underscore-private.
+    """
+    token = _ALLOW_PATH_PREFIX_GRANTS.set(True)
+    try:
+        yield
+    finally:
+        _ALLOW_PATH_PREFIX_GRANTS.reset(token)
+
+
+def _reject_path_scoped_clauses(clauses: Iterable[GitRepoGrantClause]) -> None:
+    """Refuse any clause carrying a ``path_prefix`` unless the private escape is active.
+
+    Keys on the field being set, never on the grant *type* — ``ReadOnly``/``ReadWrite`` are
+    ``GitRepoGrant`` instances with ``path_prefix=None`` and always pass. Scans every clause, so a
+    multi-clause descriptor with a single path-scoped clause is still refused.
+    """
+    if _ALLOW_PATH_PREFIX_GRANTS.get():
+        return
+    if any(clause.path_prefix is not None for clause in clauses):
+        raise ValueError(_PATH_SCOPED_GRANT_REJECTION)
 
 
 @dataclass(frozen=True)
@@ -180,7 +227,7 @@ class GitRepoAuthorityView:
 class GitRepoGrant:
     """Public GitRepo grant value for the workspace-control v0 surface.
 
-    This is the first public spelling accepted by ``May[GitRepo,...]``. It
+    This is the first public spelling accepted by ``May[GitRepo, ...]``. It
     deliberately lowers to the same internal descriptor fragment as the
     existing authority slice: one GitRepo binding, optional path prefix, and an
     optional mutates equality constraint.
@@ -219,7 +266,7 @@ def GitRepoPath(
     binding_ref: str = "workspace",
     mutates: bool | None = True,
 ) -> GitRepoGrant:
-    """Return a public path-sensitive GitRepo grant for ``May[GitRepo,...]``."""
+    """Return a public path-sensitive GitRepo grant for ``May[GitRepo, ...]``."""
     return GitRepoGrant(
         label=f"GitRepoPath:{path_prefix}",
         binding_ref=binding_ref,
@@ -235,10 +282,13 @@ def gitrepo_grant_descriptor_from_public_grant(
 ) -> GitRepoGrantDescriptor:
     """Normalize a public GitRepo grant value into the descriptor fragment."""
     if isinstance(grant, GitRepoGrantDescriptor):
-        return GitRepoGrantDescriptor(grant_ref=grant_ref, clauses=grant.clauses)
-    if isinstance(grant, GitRepoGrant):
-        return grant.to_descriptor(grant_ref=grant_ref)
-    raise TypeError(f"unsupported GitRepo May grant: {grant!r}")
+        descriptor = GitRepoGrantDescriptor(grant_ref=grant_ref, clauses=grant.clauses)
+    elif isinstance(grant, GitRepoGrant):
+        descriptor = grant.to_descriptor(grant_ref=grant_ref)
+    else:
+        raise TypeError(f"unsupported GitRepo May grant: {grant!r}")
+    _reject_path_scoped_clauses(descriptor.clauses)
+    return descriptor
 
 
 def gitrepo_grant_descriptor_from_may_annotation(
@@ -246,7 +296,7 @@ def gitrepo_grant_descriptor_from_may_annotation(
     *,
     grant_ref: str,
 ) -> GitRepoGrantDescriptor | None:
-    """Extract a GitRepo grant descriptor from ``May[GitRepo,...]`` annotation."""
+    """Extract a GitRepo grant descriptor from ``May[GitRepo, ...]`` annotation."""
     if get_origin(annotation) is not May:
         return None
     args = get_args(annotation)
@@ -256,11 +306,11 @@ def gitrepo_grant_descriptor_from_may_annotation(
     metadata = args[1:]
     if handle_type is GitRepo:
         if len(metadata) != 1:
-            raise ValueError("May[GitRepo,...] supports exactly one GitRepo grant in this slice")
+            raise ValueError("May[GitRepo, ...] supports exactly one GitRepo grant in this slice")
         return gitrepo_grant_descriptor_from_public_grant(metadata[0], grant_ref=grant_ref)
     grants = [item for item in metadata if isinstance(item, GitRepoGrant | GitRepoGrantDescriptor)]
     if len(grants) > 1:
-        raise ValueError("May[GitRepo,...] supports exactly one GitRepo grant in this slice")
+        raise ValueError("May[GitRepo, ...] supports exactly one GitRepo grant in this slice")
     if grants:
         raise TypeError("GitRepo May grant metadata must annotate shepherd_runtime.nucleus.GitRepo")
     return None

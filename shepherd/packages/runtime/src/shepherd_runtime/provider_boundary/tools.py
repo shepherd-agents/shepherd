@@ -46,7 +46,7 @@ class ToolHandlerEntry:
 
 
 class ToolHandler(Protocol):
-    """Lookup helper for ``tool.<name>`` handlers in the binding-env chain.
+    """Lookup helper for ``tool.<name>`` handlers in the active binding-env chain.
 
     The implementation walks the binding-env chain per CONTRACTS C6:
 

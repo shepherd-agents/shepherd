@@ -1,6 +1,6 @@
 """Workspace-control records and read/query helpers."""
 
-from shepherd_dialect.workspace_control.authority import GitRepoGrant, GitRepoPath, May, ReadOnly, ReadWrite
+from shepherd_dialect.workspace_control.authority import GitRepoGrant, May, ReadOnly, ReadWrite
 from shepherd_dialect.workspace_control.authority_read_model import (
     RunAuthority,
     RunOutputSettlementEvidence,
@@ -140,7 +140,6 @@ __all__ = [
     "Flow",
     "FlowControlClient",
     "GitRepoGrant",
-    "GitRepoPath",
     "InProcessTaskExecutor",
     "LedgerWriteAuthority",
     "May",

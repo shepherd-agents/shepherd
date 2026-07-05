@@ -70,6 +70,27 @@ def test_public_floor_absence_guards_are_component_checks(monkeypatch: pytest.Mo
     assert not hasattr(Changeset, "release")
     assert not hasattr(Changeset, "discard")
 
+    # P-030 v0.2 fence: path-scoped GitRepo grants are not part of the claim. GitRepoPath is not a
+    # public facade symbol, and a public May[...] carrying a path-scoped clause is refused at the
+    # runtime seam regardless of how it was spelled (guilty-until-cleared, like best_of_n/apply).
+    assert not hasattr(workspace_control, "GitRepoPath")
+    from shepherd_dialect.workspace_control.authority import (
+        GitRepoGrant,
+        GitRepoGrantClause,
+        GitRepoGrantDescriptor,
+        gitrepo_grant_descriptor_from_may_annotation,
+    )
+
+    for path_grant in (
+        GitRepoGrant(path_prefix="src/app"),
+        GitRepoGrantDescriptor(
+            grant_ref="signature:repo",
+            clauses=(GitRepoGrantClause(binding_ref="workspace", path_prefix="src/app"),),
+        ),
+    ):
+        with pytest.raises(ValueError, match=r"not part of the P-030 v0\.2 claim"):
+            gitrepo_grant_descriptor_from_may_annotation(May[GitRepo, path_grant], grant_ref="signature:repo")
+
     workspace = ShepherdWorkspace(object())
     assert not hasattr(workspace.runs, "start_authority_workspace_run")
     monkeypatch.delenv("SHEPHERD_ENABLE_FENCED_RUN_START", raising=False)
@@ -97,6 +118,7 @@ def test_workspace_task_handle_delegates_definition_json_and_run() -> None:
         {
             "task_ref": TaskRef("sample_tasks.fix_bug"),
             "repo": repo,
+            "bindings": None,  # LC-2: WorkspaceTask.run delegates bindings= for multi-binding parity
             "args": {"issue": "parser"},
             "may": "ReadWrite",
             "placement": "advisory",

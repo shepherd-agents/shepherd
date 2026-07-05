@@ -9,7 +9,7 @@ import os
 import sys
 import tempfile
 import uuid
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, replace
@@ -21,7 +21,10 @@ from vcs_core import InvalidRepositoryStateError
 from vcs_core.runtime_api import native_jail_available
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver, resolve_task_id
 
+from shepherd_dialect.confinement import BindingRootGrant
+from shepherd_dialect.trace import VCSCORE_DOMAIN
 from shepherd_dialect.workspace_control._confined_task_executor import (
+    ConfinedBindingAuthority,
     ConfinedProcessTaskExecutorDescriptor,
     ConfinedRootTaskProvider,
     ConfinedTaskExecutionError,
@@ -41,7 +44,7 @@ from shepherd_dialect.workspace_control.drivers import (
     mint_ledger_write_authority,
 )
 from shepherd_dialect.workspace_control.errors import WorkspaceControlError
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
+from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled, effective_feature_flags
 from shepherd_dialect.workspace_control.identities import (
     RunRef,
     RunRefInput,
@@ -111,6 +114,8 @@ from shepherd_dialect.workspace_control.runtime_provider import (
     resolve_workspace_run_runtime_plan,
 )
 from shepherd_dialect.workspace_control.schemas import (
+    FILESYSTEM_AUTHORITY_TERMINALIZATION_KIND,
+    RETAINED_OUTPUT_SELECTION_KIND,
     DeclaredTaskDependency,
     ResolvedTask,
     ResolvedTaskGraph,
@@ -138,7 +143,9 @@ from shepherd_dialect.workspace_control.schemas import (
 )
 from shepherd_dialect.workspace_control.workspace_authority import (
     WORKSPACE_FILESYSTEM_AUTHORITY_BINDING_ROOTS,
+    resolve_per_binding_authority,
     run_authority_context_for_decision,
+    run_authority_context_for_multi_binding_decision,
     workspace_filesystem_authority_grant_clamp,
 )
 
@@ -223,6 +230,10 @@ class TaskExecutionRequest:
     resolution_id: str | None = None
     alias_path: str | None = None
     metadata: Mapping[str, object] | None = None
+    # Lane C (LC-4): per-binding in-process carriers keyed by task parameter name. When present,
+    # the executor injects them by name instead of passing a single `repo` positional. `None` for
+    # every single-binding call, keeping that invocation shape byte-identical.
+    bindings: Mapping[str, Any] | None = None
 
 
 class TaskExecutor(Protocol):
@@ -245,6 +256,15 @@ class InProcessTaskExecutor:
 
     def execute(self, workspace: Any, request: TaskExecutionRequest) -> Any:
         with _loaded_task_callable(workspace.mg, request.task_lock.artifact_ref) as task_body:
+            if request.bindings is not None:
+                # Lane C: inject one carrier per named binding by parameter name. kwargs collisions
+                # were already refused fail-closed when the carriers were built.
+                collisions = sorted(set(request.bindings) & set(request.kwargs))
+                if collisions:
+                    raise WorkspaceControlError(
+                        f"binding parameter(s) {collisions} collide with task arguments — refusing to inject"
+                    )
+                return task_body(**request.bindings, **request.kwargs)
             return task_body(request.repo, **request.kwargs)
 
 
@@ -303,6 +323,7 @@ class _WorkspaceRunPlacementDecision:
             resolved_placement=self.resolved,
             enforcement_basis=self.initial_enforcement_basis,
             execution_descriptor=self.execution_descriptor,
+            effective_feature_flags=effective_feature_flags(),
         )
 
 
@@ -717,6 +738,11 @@ class ShepherdWorkspace:
         from shepherd_dialect.workspace_control.flows import FlowControlClient
 
         self.flows = FlowControlClient(self)
+        # LC-1: named multi-binding acquisition. `name -> realpath(root)` for disjoint sub-root
+        # bindings, plus the returned handles for `ws[name]`. Threaded to the jail/authority
+        # lowering by LC-2/LC-3; empty for the single-binding `git_repo()` path.
+        self._bound_roots: dict[str, str] = {}
+        self._bound_handles: dict[str, GitRepo] = {}
 
     @classmethod
     def discover(
@@ -785,34 +811,140 @@ class ShepherdWorkspace:
 
         return selected_workspace_git_repo(self.mg)
 
+    def bind(self, *, root: str | Path, name: str) -> GitRepo:
+        """Bind a named, disjoint sub-root ``GitRepo`` handle (Lane C, LC-1).
+
+        ``root`` is a plain path (relative to the workspace, or absolute) — deliberately not
+        ``GitRepo(root=…)``: the ``GitRepo`` value noun has no ``root`` field and "GitRepo is always
+        a value" (sp-user-model §3). ``bind`` records ``name -> realpath(root)`` on the workspace
+        (the ``binding_roots`` entry the jail/authority lowering consume in LC-2/LC-3) and returns
+        the binding's full-authority ``GitRepo`` value; per-parameter grants clamp it at spawn.
+
+        Bound roots must be **disjoint** — a root that equals, contains, or is contained by an
+        existing bound root is refused **at bind time** (the §4 soundness precondition: a nested root
+        is sub-root semantics, i.e. Tier-3). Single-binding ``git_repo()`` is unaffected (additive).
+        """
+        from shepherd_dialect.confinement import OverlappingBoundRootsError, validate_disjoint_roots
+        from shepherd_dialect.workspace_control.gitrepo_handles import (
+            WORKSPACE_GIT_REPO_BINDING,
+            named_subroot_git_repo,
+        )
+
+        if not name or name == WORKSPACE_GIT_REPO_BINDING:
+            raise WorkspaceControlError(f"invalid binding name {name!r}")
+        if name in self._bound_roots:
+            raise WorkspaceControlError(f"binding {name!r} is already bound")
+
+        root_path = Path(root)
+        if not root_path.is_absolute():
+            if self.workspace_path is None:
+                raise WorkspaceControlError("a relative bind root requires a workspace path")
+            root_path = self.workspace_path / root_path
+        resolved = os.path.realpath(str(root_path))
+
+        if self.workspace_path is not None:
+            ws_real = os.path.realpath(str(self.workspace_path))
+            if resolved != ws_real and not Path(resolved).is_relative_to(ws_real):
+                raise WorkspaceControlError(f"bind root {resolved!r} is outside the workspace {ws_real!r}")
+
+        # Disjoint validation across all bound roots — the §4 precondition, enforced at bind time
+        # (not only at lowering). Reuses the confinement validator so the two agree.
+        try:
+            validate_disjoint_roots([*self._bound_roots.values(), resolved])
+        except OverlappingBoundRootsError as exc:
+            raise WorkspaceControlError(str(exc)) from exc
+
+        handle = named_subroot_git_repo(self.mg, name)
+        self._bound_roots[name] = resolved
+        self._bound_handles[name] = handle
+        return handle
+
+    def __getitem__(self, name: str) -> GitRepo:
+        """Look up a bound ``GitRepo`` by name (Lane C, LC-1)."""
+        try:
+            return self._bound_handles[name]
+        except KeyError:
+            raise WorkspaceControlError(f"no bound GitRepo named {name!r}") from None
+
     def run(
         self,
         task_ref: TaskRefInput,
         *,
-        repo: GitRepo,
+        repo: GitRepo | None = None,
+        bindings: Mapping[str, GitRepo] | None = None,
         args: Mapping[str, Any] | None = None,
         may: str | None = None,
         placement: WorkspaceRunPlacement = "auto",
         runtime: Mapping[str, object] | RuntimeOptions | None = None,
     ) -> WorkspaceRun:
-        """Run a task against the current selected workspace GitRepo basis.
+        """Run a task against a selected or named-bound GitRepo basis.
 
-        This is the first narrow facade: handle in, retained output
-        views out. Execution routes through the nucleus/vcs-core retained-output
-        producer. ``placement="auto"`` uses the native jail on jail-capable
-        hosts and records advisory execution otherwise; ``placement="jail"``
-        is fail-closed. Callers should reacquire ``workspace.git_repo()`` after
-        selecting an output before starting the next run.
+        Exactly one of ``repo`` / ``bindings`` is given. ``repo`` is the v0.1 single
+        selected-workspace binding (handle in, retained output views out).
+        ``bindings={"docs": docs, "backend": backend}`` (Lane C) runs against named
+        sub-root handles from :meth:`bind`, each with its own signature grant.
+
+        Execution routes through the nucleus/vcs-core retained-output producer.
+        ``placement="auto"`` uses the native jail on jail-capable hosts and records
+        advisory execution otherwise; ``placement="jail"`` is fail-closed. Callers
+        should reacquire ``workspace.git_repo()`` after selecting an output before
+        starting the next run.
         """
+        selected_repo, binding_roots = self._resolve_run_targets(repo, bindings)
+        if binding_roots is not None:
+            # Lane C LC-4: the per-binding staging path is live. `_resolve_run_targets` already
+            # validated the bindings fail-closed (unbound/foreign refused); route to the confined,
+            # jail-enforced multi-binding run — the syscall jail enforces each binding's grant.
+            return self._run_retained_multi_binding_workspace(
+                task_ref,
+                binding_roots=binding_roots,
+                args=args,
+                may=may,
+                placement=placement,
+                runtime=runtime,
+                flow_context=None,
+            )
+        assert selected_repo is not None  # _resolve_run_targets guarantees exactly one target
         return self._run_retained_workspace(
             task_ref,
-            repo=repo,
+            repo=selected_repo,
             args=args,
             may=may,
             placement=placement,
             runtime=runtime,
             flow_context=None,
         )
+
+    def _resolve_run_targets(
+        self, repo: GitRepo | None, bindings: Mapping[str, GitRepo] | None
+    ) -> tuple[GitRepo | None, dict[str, str] | None]:
+        """Validate run targets to ``(selected_repo, binding_roots)`` — exactly one populated (LC-2).
+
+        Exactly one of ``repo`` / ``bindings`` must be given. For ``bindings``, every handle must be
+        one produced by *this* workspace's :meth:`bind`: a raw ``git_repo()`` handle, a handle from
+        another workspace, or a name that was never bound all **fail closed** — the run never proceeds
+        unconfined against an unrecognized binding. Returns the ``name → realpath(root)`` map that LC-3
+        lowers to the per-binding jail profile.
+        """
+        if (repo is None) == (bindings is None):
+            raise WorkspaceControlError("run requires exactly one of repo= or bindings=")
+        if bindings is not None:
+            if not bindings:
+                raise WorkspaceControlError("bindings= must be a non-empty mapping of name → GitRepo")
+            roots: dict[str, str] = {}
+            for name, handle in bindings.items():
+                bound = self._bound_handles.get(name)
+                if bound is None:
+                    raise WorkspaceControlError(
+                        f"binding {name!r} is not bound on this workspace; call ws.bind(root=..., name={name!r}) first"
+                    )
+                if handle is not bound and handle != bound:
+                    raise WorkspaceControlError(
+                        f"the handle passed for binding {name!r} was not produced by this workspace's ws.bind"
+                    )
+                roots[name] = self._bound_roots[name]
+            return None, roots
+        return repo, None
 
     def _run_with_flow_context(
         self,
@@ -862,6 +994,38 @@ class ShepherdWorkspace:
         )
         return WorkspaceRun(self, record)
 
+    def _run_retained_multi_binding_workspace(
+        self,
+        task_ref: TaskRefInput,
+        *,
+        binding_roots: Mapping[str, str],
+        args: Mapping[str, Any] | None,
+        may: str | None,
+        placement: WorkspaceRunPlacement,
+        runtime: Mapping[str, object] | RuntimeOptions | None,
+        flow_context: FlowRunContext | None,
+    ) -> WorkspaceRun:
+        """Start a per-binding (Lane C) retained run against named, disjoint sub-root bindings.
+
+        Mirrors :meth:`_run_retained_workspace` but threads the ``name -> realpath(root)`` map so
+        the run start can stage the signature's per-parameter grants into per-binding jail
+        confinement + in-body handle authorities. The published whole-delta retained output is
+        identical in shape to the single-binding path (per-binding settlement is deferred).
+        """
+        from shepherd_dialect.workspace_control.run_handles import WorkspaceRun
+
+        record = self.runs._start_retained_workspace_run(
+            coerce_task_ref(task_ref),
+            args=args,
+            may=may,
+            placement=placement,
+            runtime=runtime,
+            launch_surface="python",
+            flow_context=flow_context,
+            binding_roots=binding_roots,
+        )
+        return WorkspaceRun(self, record)
+
     def select(self, output: RunOutput) -> RetainedOutputSelectionResult:
         """Select a resolved retained run output into its live parent world."""
         return self._settle_retained_run_output(output, method_name="select_retained_output")
@@ -874,10 +1038,39 @@ class ShepherdWorkspace:
         """Consume a resolved retained run output as discarded."""
         return self._settle_retained_run_output(output, method_name="discard_retained_output")
 
+    def _refuse_readonly_multi_binding_select(self, output: RunOutput) -> None:
+        """Enforce the any-writable settlement rule for a heterogeneous run (Lane C LC-4b).
+
+        Selecting a per-binding run's whole-delta output is allowed iff at least one binding was
+        ReadWrite — the syscall jail guarantees the retained delta contains only authorized writes,
+        so selecting the whole delta cannot apply an unauthorized change. ``can_mutate`` is computed
+        explicitly from the recorded per-binding authority (``any(a == "readwrite")``), never via
+        the tripwired run-wide scalar. Single-binding runs (no per-binding evidence) are untouched.
+        """
+        owner = getattr(output, "owner", None)
+        if getattr(owner, "kind", None) != "run" or getattr(owner, "run_id", None) is None:
+            return
+        record = get_run(self.mg, owner.run_id)
+        if record is None or record.authority_context is None:
+            return
+        per_binding = record.authority_context.per_binding_authority
+        if per_binding is None:
+            return
+        can_mutate = any(
+            isinstance(entry, Mapping) and entry.get("authority") == "readwrite" for entry in per_binding.values()
+        )
+        if not can_mutate:
+            raise WorkspaceControlError(
+                "retained-output select refused (any-writable rule): every binding in this run was "
+                "ReadOnly, so nothing was authorized to mutate the workspace — selecting the whole "
+                "delta is not allowed. Use release/discard instead."
+            )
+
     def _settle_retained_run_output(self, output: RunOutput, *, method_name: str) -> Any:
         request = _validated_retained_run_output_settlement_request(self, output)
         kwargs: dict[str, Any] = {}
         if method_name == "select_retained_output":
+            self._refuse_readonly_multi_binding_select(request.output)
             provider = _retained_output_selection_authority_provider(self.mg, request.output)
             kwargs["decide"] = provider
             kwargs["effective_match_digest"] = provider.effective_match_digest
@@ -1576,7 +1769,7 @@ class RunControlClient:
             may_profile=may_profile,
             handler_env_ref=None,
             settlement_policy={
-                "kind": "skeleton.filesystem_authority_terminalization",
+                "kind": FILESYSTEM_AUTHORITY_TERMINALIZATION_KIND,
                 "binding_roots": dict(WORKSPACE_FILESYSTEM_AUTHORITY_BINDING_ROOTS),
                 "authority_context": filesystem_authority_context,
             },
@@ -1807,8 +2000,14 @@ class RunControlClient:
         reason: str | None = None,
         placement: WorkspaceRunPlacement = "auto",
         flow_context: FlowRunContext | None = None,
+        binding_roots: Mapping[str, str] | None = None,
     ) -> RunRecord:
-        """Start a retained workspace run with optional internal flow metadata."""
+        """Start a retained workspace run with optional internal flow metadata.
+
+        ``binding_roots`` (Lane C) selects the per-binding path: when present it carries the run's
+        ``name -> realpath(root)`` map and the run stages the signature's per-parameter grants into
+        per-binding jail confinement. Absent, the single-binding path is byte-identical.
+        """
         task_ref_id = coerce_task_ref(task_ref)
         task_payload, task_ledger_head = _selected_task_ledger_payload_with_head(self.mg)
         task = _get_task_from_payload(task_payload, task_ref_id)
@@ -1832,23 +2031,44 @@ class RunControlClient:
             launch_surface=launch_surface,
         )
         parent_scope = self.mg.ground if parent is None else parent
-        try:
-            authority_decision = resolve_workspace_authority_decision(
-                task_default=resolved.may_default,
-                requested=may,
-                gitrepo_grant=_workspace_gitrepo_grant_from_signature(resolved.signature_schema),
+        multi_binding: _MultiBindingRunStaging | None = None
+        if binding_roots is not None:
+            try:
+                multi_binding = _stage_multi_binding_run(
+                    signature_schema=resolved.signature_schema,
+                    binding_roots=binding_roots,
+                    task_default=resolved.may_default,
+                    requested_may=may,
+                    workspace_path=self._workspace.workspace_path,
+                )
+            except (WorkspaceControlError, MayProfileError) as exc:
+                raise RunStartError(str(exc)) from exc
+            authority_decision = multi_binding.decision
+            authority_context = run_authority_context_for_multi_binding_decision(
+                multi_binding.decision,
+                per_binding_roots={a.binding: a.root for a in multi_binding.binding_authorities},
             )
-        except MayProfileError as exc:
-            raise RunStartError(str(exc)) from exc
-        authority_context = run_authority_context_for_decision(authority_decision)
+            placement_decision = _multi_binding_placement_decision(placement, multi_binding)
+        else:
+            try:
+                authority_decision = resolve_workspace_authority_decision(
+                    task_default=resolved.may_default,
+                    requested=may,
+                    gitrepo_grant=_workspace_gitrepo_grant_from_signature(resolved.signature_schema),
+                )
+            except MayProfileError as exc:
+                raise RunStartError(str(exc)) from exc
+            authority_context = run_authority_context_for_decision(authority_decision)
+            placement_decision = _workspace_run_placement_decision(
+                self._workspace,
+                placement,
+                authority_decision=authority_decision,
+            )
         may_profile = authority_context.effective_may
         runtime_plan = _workspace_run_runtime_plan(runtime)
-        placement_decision = _workspace_run_placement_decision(
-            self._workspace,
-            placement,
-            authority_decision=authority_decision,
-        )
         _validate_workspace_runtime_plan_for_placement(runtime_plan, placement_decision)
+        if multi_binding is not None and runtime_plan.uses_execution_provider:
+            raise RunStartError("multi-binding runs do not support runtime execution providers")
 
         self._workspace.trace_store_path.parent.mkdir(parents=True, exist_ok=True)
         run_ref = f"run-{uuid.uuid4().hex[:12]}"
@@ -1879,6 +2099,7 @@ class RunControlClient:
             authority_decision,
             placement_decision=placement_decision,
             runtime_plan=runtime_plan,
+            profile_name=None if multi_binding is None else authority_decision.may_profile_name,
         )
         placement_decision = replace(
             placement_decision,
@@ -1892,7 +2113,7 @@ class RunControlClient:
         if retained_authority_context is None:
             raise RunStartError("retained workspace run authority context projection failed")
         settlement_policy: JsonObject = {
-            "kind": "skeleton.retained_output_selection",
+            "kind": RETAINED_OUTPUT_SELECTION_KIND,
             "authority_context": retained_authority_context,
             "execution_enforcement": retained_execution.to_descriptor(),
         }
@@ -1904,6 +2125,12 @@ class RunControlClient:
             handler_env_ref=None,
             settlement_policy=settlement_policy,
         )
+        # A retained run executes under the seal-and-select lane by construction;
+        # build its execution evidence inside that scope so the recorded
+        # effective-flag provenance (P1.2) reflects the lane the run actually
+        # used, not the ambient env at record-assembly time.
+        with _seal_and_select_enabled():
+            run_execution_evidence = placement_decision.evidence()
         running = RunRecord(
             run_ref=run_ref,
             task_id=resolved.task_id,
@@ -1916,7 +2143,7 @@ class RunControlClient:
             authority_context=authority_context,
             provider="shepherd.workspace_control.nucleus.v0",
             enforcement="advisory",
-            execution_evidence=placement_decision.evidence(),
+            execution_evidence=run_execution_evidence,
             status="running",
             terminalization=RunTerminalization(
                 body_status="running",
@@ -1956,6 +2183,7 @@ class RunControlClient:
                     resolved_graph=resolved_graph,
                     placement_decision=placement_decision,
                     runtime_plan=runtime_plan,
+                    multi_binding=multi_binding,
                 )
             except _NucleusRetainedRunExecutionError as exc:
                 self._publish_failed_retained_workspace_run(
@@ -2092,6 +2320,7 @@ class RunControlClient:
         resolved_graph: ResolvedTaskGraph,
         placement_decision: _WorkspaceRunPlacementDecision,
         runtime_plan: WorkspaceRunRuntimePlan,
+        multi_binding: _MultiBindingRunStaging | None = None,
     ) -> tuple[Any, tuple[TaskResolutionRecord, ...], tuple[TaskExecutionRecord, ...]]:
         """Execute a workspace-control task through vcs-core's retained runtime command."""
         from vcs_core.runtime_api import CommandExecutionOptions
@@ -2107,6 +2336,7 @@ class RunControlClient:
             placement_decision=placement_decision,
             task_execution_metadata=task_execution_metadata,
             runtime_plan=runtime_plan,
+            multi_binding=multi_binding,
         )
         executor_descriptor = (
             RuntimeProviderTaskExecutorDescriptor(execution_plan.executor_kind)
@@ -2125,6 +2355,7 @@ class RunControlClient:
             executor_descriptor=executor_descriptor,
             task_execution_metadata=task_execution_metadata,
             error_cls=_NucleusRetainedRunExecutionError,
+            multi_binding=multi_binding,
         )
         if not isinstance(recorded_value, SealedExecutionOutcome):
             raise RunStartError("nucleus retained workspace run did not return a sealed execution outcome")
@@ -2141,6 +2372,7 @@ class RunControlClient:
         placement_decision: _WorkspaceRunPlacementDecision,
         task_execution_metadata: dict[str, object],
         runtime_plan: WorkspaceRunRuntimePlan,
+        multi_binding: _MultiBindingRunStaging | None = None,
     ) -> Any | None:
         """Return the execution-bound provider for retained runs that require syscall enforcement."""
         if runtime_plan.provider_kind == "static":
@@ -2183,6 +2415,15 @@ class RunControlClient:
             raise RunStartError("confined retained workspace runs do not yet support linked task dependencies")
         artifact_payload = _read_task_artifact(self.mg, root_resolution.task_lock.artifact_ref)
         task_execution_metadata["launch_confined_attempted"] = False
+        if multi_binding is not None:
+            # Lane C jailed path: one in-body handle per named binding, each with its own clamped
+            # authority + sub-root — never a run-wide `repo_authority` scalar (the S2 collapse).
+            return _confined_multi_binding_provider(
+                artifact_payload=artifact_payload,
+                args=args,
+                binding_authorities=multi_binding.binding_authorities,
+                launch_metadata=task_execution_metadata,
+            )
         return ConfinedRootTaskProvider(
             artifact_payload=artifact_payload,
             kwargs=dict(args),
@@ -2246,6 +2487,7 @@ class RunControlClient:
         execution_provider: Any | None = None,
         executor_descriptor: TaskExecutor | None = None,
         task_execution_metadata: Mapping[str, object] | None = None,
+        multi_binding: _MultiBindingRunStaging | None = None,
     ) -> tuple[Any, tuple[TaskResolutionRecord, ...], tuple[TaskExecutionRecord, ...]]:
         """Execute a workspace-control task through vcs-core's runtime command."""
         if execution_provider is not None:
@@ -2260,16 +2502,34 @@ class RunControlClient:
                 executor_descriptor=executor_descriptor,
                 task_execution_metadata=task_execution_metadata,
                 error_cls=error_cls,
+                multi_binding=multi_binding,
             )
         task_executions: list[TaskExecutionRecord] = []
         runtime_ref: TaskRuntimeContext | None = None
 
         def task_body(_stack: Any, *, working_path: str) -> object:
             nonlocal runtime_ref
-            repo = _WorkspaceControlCarrierGitRepo(
-                root=Path(working_path),
-                authority=authority_decision.repo_authority,
-            )
+            bindings_handles: dict[str, Any] | None = None
+            if multi_binding is not None:
+                # Lane C advisory (all-RW) path: inject one in-process carrier per named binding,
+                # by parameter name, each rooted at its own sub-root with its own clamped authority
+                # (the in-process mirror of the confined runner's per-binding handles). kwargs
+                # collisions fail closed, mirroring the runner's `_binding_handles`.
+                bindings_handles = _in_process_binding_carriers(
+                    working_path=working_path,
+                    binding_authorities=multi_binding.binding_authorities,
+                )
+                collisions = sorted(set(bindings_handles) & set(args))
+                if collisions:
+                    raise WorkspaceControlError(
+                        f"binding parameter(s) {collisions} collide with task arguments — refusing to inject"
+                    )
+                repo: Any = None
+            else:
+                repo = _WorkspaceControlCarrierGitRepo(
+                    root=Path(working_path),
+                    authority=authority_decision.repo_authority,
+                )
             runtime = TaskRuntimeContext(
                 workspace=self._workspace,
                 run_ref=run_ref,
@@ -2288,6 +2548,7 @@ class RunControlClient:
                 call_kind="root_run",
                 resolution_id=root_resolution.resolution_id,
                 metadata=dict(task_execution_metadata or {}),
+                bindings=bindings_handles,
             )
             started = _started_task_execution_record(self._workspace.task_executor, request)
             try:
@@ -2311,7 +2572,7 @@ class RunControlClient:
                 "run",
                 scope=parent_scope,
                 task_body=task_body,
-                may=_runtime_may_for_workspace_authority(authority_decision),
+                may=_runtime_provenance_may(authority_decision, multi_binding),
                 execution_options=execution_options,
             )
         except Exception as exc:
@@ -2342,6 +2603,7 @@ class RunControlClient:
         executor_descriptor: TaskExecutor | None,
         task_execution_metadata: Mapping[str, object] | None,
         error_cls: type[_NucleusRunExecutionError],
+        multi_binding: _MultiBindingRunStaging | None = None,
     ) -> tuple[Any, tuple[TaskResolutionRecord, ...], tuple[TaskExecutionRecord, ...]]:
         """Execute a root workspace task via an execution-bound confined provider."""
         executor = executor_descriptor or ConfinedProcessTaskExecutorDescriptor()
@@ -2350,10 +2612,30 @@ class RunControlClient:
             if isinstance(task_execution_metadata, dict)
             else dict(task_execution_metadata or {})
         )
+        if multi_binding is not None:
+            # Lane C jailed path: the confined provider carries the per-binding handle authorities;
+            # confinement lowers from per-binding grants through the run driver's install() seam.
+            # The grants carry each bound sub-root as a working-path-relative POSIX path — the run
+            # driver joins it to the clone working path (the run executes in an overlay clone whose
+            # absolute path differs from the bound workspace roots). The recorded `may` is
+            # provenance only (never a run-wide scalar — the S2 collapse the tripwire forbids).
+            request_repo: Any = {
+                "bindings": [
+                    {"param": a.param, "binding": a.binding, "authority": a.authority, "root": a.root}
+                    for a in multi_binding.binding_authorities
+                ]
+            }
+            binding_grants: Any = [
+                BindingRootGrant(binding=a.binding, root=a.root, writable=a.authority == "readwrite")
+                for a in multi_binding.binding_authorities
+            ]
+        else:
+            request_repo = {"binding": "workspace", "authority": authority_decision.repo_authority}
+            binding_grants = None
         request = TaskExecutionRequest(
             run_ref=run_ref,
             task_lock=root_resolution.task_lock,
-            repo={"binding": "workspace", "authority": authority_decision.repo_authority},
+            repo=request_repo,
             kwargs=dict(args),
             call_kind="root_run",
             resolution_id=root_resolution.resolution_id,
@@ -2367,15 +2649,20 @@ class RunControlClient:
         task_body.__module__ = root_resolution.task_lock.task_id.rpartition(".")[0] or task_body.__module__
         task_body.__qualname__ = root_resolution.task_lock.task_id
         task_body.__name__ = root_resolution.task_lock.task_id.rsplit(".", 1)[-1]
+        recorded_kwargs: dict[str, Any] = {
+            "task_body": task_body,
+            "may": _runtime_provenance_may(authority_decision, multi_binding),
+            "provider": execution_provider,
+            "execution_options": execution_options,
+        }
+        if binding_grants is not None:
+            recorded_kwargs["binding_grants"] = binding_grants
         try:
             recorded = self.mg.execute_recorded(
                 "runtime",
                 "run",
                 scope=parent_scope,
-                task_body=task_body,
-                may=_runtime_may_for_workspace_authority(authority_decision),
-                provider=execution_provider,
-                execution_options=execution_options,
+                **recorded_kwargs,
             )
         except Exception as exc:
             failed_started = replace(started, metadata=dict(execution_metadata))
@@ -2400,7 +2687,7 @@ class RunControlClient:
             "trace_owner_id": f"task:{resolved.task_id}@{resolved.version}:{run_ref}",
             "frontier_id": trace_ref.frontier_id,
             "run_ref": run_ref,
-            "identity_domain": "vcscore.canonical.v2",
+            "identity_domain": VCSCORE_DOMAIN,
             "events": [
                 {
                     "id": f"{run_ref}:terminal",
@@ -2682,7 +2969,14 @@ def _callable_may_default(task_body: Callable[..., Any]) -> str:
 
 @dataclass(frozen=True)
 class _WorkspaceControlCarrierGitRepo:
-    """Compatibility repo facade over the runtime command's carrier path."""
+    """Compatibility repo facade over the runtime command's carrier path.
+
+    Single-binding ``git_repo()`` runs root this at the working path (``binding="workspace"``); a
+    Lane C per-binding handle (LC-3e tail) roots at its own bound sub-root, so a write path is
+    relative to *its own* root and the in-body authority check enforces that binding's clamped grant
+    — the in-process mirror of the confined runner's ``_ConfinedCarrierGitRepo`` second enforcement
+    layer (write refused unless ``authority == "readwrite"``, paths relative POSIX).
+    """
 
     root: Path
     authority: str
@@ -2692,8 +2986,6 @@ class _WorkspaceControlCarrierGitRepo:
         _validate_workspace_relative_path(path, field_name="workspace repo write path")
         if not isinstance(content, bytes):
             raise TypeError("content must be bytes")
-        if self.binding != "workspace":
-            raise WorkspaceControlError("workspace-control carrier GitRepo only supports workspace binding")
         if self.authority != "readwrite":
             raise PermissionError(f"GitRepoHandle.write is not permitted under authority={self.authority!r}")
         if not isinstance(mode, int):
@@ -2703,6 +2995,37 @@ class _WorkspaceControlCarrierGitRepo:
         target.write_bytes(content)
         target.chmod(mode)
         return self
+
+
+def _in_process_binding_carriers(
+    *,
+    working_path: str | Path,
+    binding_authorities: Sequence[ConfinedBindingAuthority],
+) -> dict[str, _WorkspaceControlCarrierGitRepo]:
+    """Build in-process per-binding carrier handles keyed by parameter name (Lane C, LC-3e tail).
+
+    The in-process analogue of the confined runner's ``_binding_handles``: each handle roots at its
+    own sub-root under the run working path, carries its own clamped authority, and refuses a write
+    under readonly authority — the second enforcement layer's semantics without a jail. A ``""``/``.``
+    root means the whole working path. Param collisions and non-relative roots fail closed, so a
+    malformed staging never injects ambiguous or escaped authority.
+    """
+    if not binding_authorities:
+        raise WorkspaceControlError("multi-binding in-process run requires at least one binding authority")
+    working = Path(working_path)
+    handles: dict[str, _WorkspaceControlCarrierGitRepo] = {}
+    for entry in binding_authorities:
+        if entry.param in handles:
+            raise WorkspaceControlError(f"binding parameter {entry.param!r} collides with another binding")
+        if entry.root in {"", os.curdir}:
+            root = working
+        else:
+            _validate_workspace_relative_path(entry.root, field_name="binding root")
+            root = working / PurePosixPath(entry.root)
+        handles[entry.param] = _WorkspaceControlCarrierGitRepo(
+            root=root, authority=entry.authority, binding=entry.binding
+        )
+    return handles
 
 
 def _validate_workspace_relative_path(path: str, *, field_name: str) -> None:
@@ -2731,6 +3054,93 @@ def _portable_runtime_result(value: object) -> object:
 
 def _runtime_may_for_workspace_authority(decision: WorkspaceAuthorityDecision) -> str:
     return "ReadOnly" if decision.repo_authority == "readonly" else "Permissive"
+
+
+def _runtime_provenance_may(decision: WorkspaceAuthorityDecision, multi_binding: _MultiBindingRunStaging | None) -> str:
+    """Return the ``may`` string recorded as run provenance.
+
+    Single-binding runs keep the confinement-lowering profile (``ReadOnly``/``Permissive``). A
+    multi-binding run must never collapse per-binding authority to one run-wide scalar (the S2
+    tripwire), so it records the run's effective profile *name* as provenance only — the enforced
+    surface is the per-binding grant set, not this string.
+    """
+    if multi_binding is None:
+        return _runtime_may_for_workspace_authority(decision)
+    return decision.may_profile_name
+
+
+def _multi_binding_execution_descriptor(
+    staging: _MultiBindingRunStaging, *, resolved: Literal["advisory", "jail"]
+) -> JsonObject:
+    """Execution descriptor for a per-binding run — never reads a run-wide authority scalar."""
+    profile = staging.decision.may_profile_name
+    if resolved == "jail":
+        return {
+            "mode": "confined_process",
+            "enforcement": "syscall_jail",
+            "profile": profile,
+            "provider": "workspace-control-confined-task",
+        }
+    return {
+        "mode": "in_process",
+        "enforcement": "advisory",
+        "profile": profile,
+        "provider": "in-process",
+    }
+
+
+def _multi_binding_placement_decision(
+    placement: WorkspaceRunPlacement, staging: _MultiBindingRunStaging
+) -> _WorkspaceRunPlacementDecision:
+    """Resolve placement for a per-binding run — the W3 honesty rule generalized per binding.
+
+    ``placement="advisory"`` is REFUSED if ANY binding is read-only: an in-process device cannot
+    enforce a ReadOnly grant at the syscall, so labelling such a run advisory would be dishonest.
+    ``placement="auto"`` resolves to the jail on a jail-capable host, and to advisory otherwise —
+    but advisory is only legal when no binding is read-only, else it fails closed. ``placement=
+    "jail"`` fails closed on a jail-less host (downstream, via ``launch_confined``), like the
+    single-binding path.
+    """
+    requested = _resolve_workspace_run_placement(placement)
+    per_binding = staging.decision.repo_authority_by_binding()
+    any_readonly = any(authority == "readonly" for authority in per_binding.values())
+    if requested == "advisory":
+        if any_readonly:
+            raise RunStartError(
+                "placement='advisory' cannot satisfy a read-only binding in a multi-binding run "
+                "(a ReadOnly grant is only enforceable at the syscall jail)"
+            )
+        return _WorkspaceRunPlacementDecision(
+            requested=requested,
+            resolved="advisory",
+            execution_descriptor=_multi_binding_execution_descriptor(staging, resolved="advisory"),
+            initial_enforcement_basis="explicit_advisory",
+        )
+    if requested == "jail":
+        return _WorkspaceRunPlacementDecision(
+            requested=requested,
+            resolved="jail",
+            execution_descriptor=_multi_binding_execution_descriptor(staging, resolved="jail"),
+            initial_enforcement_basis="required_jail",
+        )
+    if native_jail_available():
+        return _WorkspaceRunPlacementDecision(
+            requested=requested,
+            resolved="jail",
+            execution_descriptor=_multi_binding_execution_descriptor(staging, resolved="jail"),
+            initial_enforcement_basis="auto_jail",
+        )
+    if any_readonly:
+        raise RunStartError(
+            "placement='auto' resolved to advisory on this jail-less host, but a read-only binding "
+            "requires the syscall jail — refusing fail-closed rather than running unenforced"
+        )
+    return _WorkspaceRunPlacementDecision(
+        requested=requested,
+        resolved="advisory",
+        execution_descriptor=_multi_binding_execution_descriptor(staging, resolved="advisory"),
+        initial_enforcement_basis="auto_advisory",
+    )
 
 
 def _workspace_run_placement_decision(
@@ -2812,16 +3222,23 @@ def _retained_execution_plan_for_decision(
     *,
     placement_decision: _WorkspaceRunPlacementDecision,
     runtime_plan: WorkspaceRunRuntimePlan | None = None,
+    profile_name: str | None = None,
 ) -> RetainedExecutionPlan:
     provider = runtime_plan.provider_id if runtime_plan is not None and runtime_plan.provider_id is not None else None
+    # A per-binding run passes ``profile_name`` (the effective profile *name*) so this never reads
+    # the run-wide authority scalar — that would collapse a heterogeneous decision (S2 tripwire).
     if placement_decision.resolved == "jail":
         return RetainedExecutionPlan(
             mode="confined_process",
             provider=provider or "workspace-control-confined-task",
             executor_kind="confined_process",
-            profile=_runtime_may_for_workspace_authority(decision),
+            profile=profile_name if profile_name is not None else _runtime_may_for_workspace_authority(decision),
             authority_basis=(
-                "effective_gitrepo_readonly" if decision.repo_authority == "readonly" else "workspace_run_placement"
+                "per_binding_grants"
+                if profile_name is not None
+                else (
+                    "effective_gitrepo_readonly" if decision.repo_authority == "readonly" else "workspace_run_placement"
+                )
             ),
             requested_monitor="syscall_jail",
             monitor_required=True,
@@ -2830,8 +3247,12 @@ def _retained_execution_plan_for_decision(
         mode="in_process",
         provider=provider or "in-process",
         executor_kind="in_process",
-        profile=_runtime_may_for_workspace_authority(decision),
-        authority_basis="runtime_provider" if provider is not None else "effective_gitrepo_readwrite",
+        profile=profile_name if profile_name is not None else _runtime_may_for_workspace_authority(decision),
+        authority_basis=(
+            "per_binding_grants"
+            if profile_name is not None
+            else ("runtime_provider" if provider is not None else "effective_gitrepo_readwrite")
+        ),
         requested_monitor=None,
         monitor_required=False,
     )
@@ -3356,6 +3777,165 @@ def _workspace_gitrepo_grant_from_signature(signature_schema: Mapping[str, objec
     if len(grants) != 1:
         raise RunStartError("workspace-control GitRepo grant v0 supports exactly one repo grant")
     return grants[0]
+
+
+def _workspace_gitrepo_grants_by_param(signature_schema: Mapping[str, object]) -> dict[str, Any]:
+    """Return every parameter's captured GitRepo grant, keyed by parameter name (Lane C, LC-3b).
+
+    Unlike :func:`_workspace_gitrepo_grant_from_signature` (the single-binding accessor, capped at
+    one grant), this returns the full per-parameter capture LC-3a enabled, for the multi-binding run
+    path. Keyed by the parameter name recorded in the signature schema.
+    """
+    from shepherd_dialect.workspace_control.authority import GitRepoGrantDescriptor
+
+    grants: dict[str, Any] = {}
+    raw_parameters = signature_schema.get("parameters")
+    if not isinstance(raw_parameters, list | tuple):
+        return grants
+    for raw_parameter in raw_parameters:
+        if not isinstance(raw_parameter, Mapping):
+            continue
+        raw_grant = raw_parameter.get("gitrepo_grant")
+        name = raw_parameter.get("name")
+        if raw_grant is not None and isinstance(name, str):
+            grants[name] = GitRepoGrantDescriptor.from_descriptor(raw_grant)
+    return grants
+
+
+def _join_bindings_to_grants(
+    *,
+    binding_roots: Mapping[str, str],
+    grants_by_param: Mapping[str, Any],
+) -> list[tuple[str, str, Any]]:
+    """Join each named binding to its parameter's grant, failing closed on any orphan (Lane C, LC-3b).
+
+    The task signature and the ``bindings=`` map must correspond exactly, both fail-closed:
+    - a ``May[GitRepo, ...]`` parameter with no matching binding would run **ungranted**; and
+    - a binding with no matching granted parameter is **silent** authority.
+    Returns ``(binding_name, realpath_root, grant_descriptor)`` per binding, sorted, for the clamp.
+    """
+    binding_names = set(binding_roots)
+    granted_params = set(grants_by_param)
+    missing_binding = sorted(granted_params - binding_names)
+    if missing_binding:
+        raise WorkspaceControlError(
+            "these granted parameters have no matching binding (would run ungranted): "
+            f"{missing_binding}; pass each as bindings={{'<name>': handle}}"
+        )
+    ungranted_binding = sorted(binding_names - granted_params)
+    if ungranted_binding:
+        raise WorkspaceControlError(
+            "these bindings have no matching May[GitRepo, ...] parameter (silent authority): "
+            f"{ungranted_binding}; declare each parameter's grant in the task signature"
+        )
+    return [(name, binding_roots[name], grants_by_param[name]) for name in sorted(binding_names)]
+
+
+@dataclass(frozen=True)
+class _MultiBindingRunStaging:
+    """Everything a fenced multi-binding run needs, staged from the signature + bindings (Lane C, LC-3f).
+
+    ``decision`` is the S1/S2 per-binding authority decision — read only via
+    :meth:`~shepherd_dialect.workspace_control.may.WorkspaceAuthorityDecision.repo_authority_by_binding`,
+    never the run-wide scalar (which would trip the S2 tripwire on a ``docs:RO / backend:RW`` run).
+    ``binding_grants`` carries the *absolute* bound roots the jail install
+    (``install(Sequence[BindingRootGrant])``) lowers to ``writable_roots``. ``binding_authorities``
+    carries the *working-path-relative* sub-roots the confined runner / in-process carrier root each
+    per-binding handle at, injected by parameter name (param = binding name, per LC-3b's join).
+    """
+
+    decision: WorkspaceAuthorityDecision
+    binding_grants: tuple[BindingRootGrant, ...]
+    binding_authorities: tuple[ConfinedBindingAuthority, ...]
+
+
+def _relativize_bound_root(bound_root: str, *, workspace_path: str | Path) -> str:
+    """Relativize a bound root against the run working path, fail-closed (Lane C, LC-3f).
+
+    Returns the working-path-relative POSIX sub-root the confined runner / in-process carrier root
+    each per-binding handle at. Refuses anything that is not strictly inside the working path — an
+    absolute result, a ``..`` escape, or ``.`` (the whole working path is not a sub-root) — so a
+    mis-mapped root never grants a binding authority over the wrong subtree.
+    """
+    reference = os.path.realpath(str(workspace_path))
+    try:
+        rel = os.path.relpath(bound_root, reference)
+    except ValueError as exc:  # e.g. different drives on Windows — refuse, never guess
+        raise WorkspaceControlError(
+            f"bound root {bound_root!r} is not inside the run working path {reference!r}"
+        ) from exc
+    if Path(rel).is_absolute() or rel == os.curdir or os.pardir in Path(rel).parts:
+        raise WorkspaceControlError(
+            f"bound root {bound_root!r} does not relativize to a sub-root strictly inside the run "
+            f"working path {reference!r} (got {rel!r}); refusing to stage it fail-closed"
+        )
+    return Path(rel).as_posix()
+
+
+def _stage_multi_binding_run(
+    *,
+    signature_schema: Mapping[str, object],
+    binding_roots: Mapping[str, str],
+    task_default: str,
+    requested_may: str | None,
+    workspace_path: str | Path,
+) -> _MultiBindingRunStaging:
+    """Stage a multi-binding run's per-binding permission surface (Lane C, LC-3f).
+
+    Joins the signature's per-parameter GitRepo grants (LC-3a/b) to the run's named bindings,
+    resolves the per-binding authority decision (LC-3c/d — the S1 ceiling expansion + the S2
+    non-collapsing view), and produces both root representations a run needs: the absolute
+    ``BindingRootGrant`` sequence for the jail install seam, and the working-path-relative
+    ``ConfinedBindingAuthority`` tuple for per-binding handle injection (by parameter name).
+
+    Fails closed on any orphan (the join), any dropped binding (the clamp), or any bound root that
+    does not relativize to a sub-root strictly inside the working path. Reads authority only via
+    ``repo_authority_by_binding()``, never the run-wide scalar, so the S2 tripwire never fires here.
+
+    Called from the live multi-binding run-start path (``run(bindings=...)`` routes here); the
+    LC-3-era fence has been removed. Also exercised directly by the LC-3 grant-capture tests.
+    """
+    grants_by_param = _workspace_gitrepo_grants_by_param(signature_schema)
+    joined = _join_bindings_to_grants(binding_roots=binding_roots, grants_by_param=grants_by_param)
+    decision, binding_grants = resolve_per_binding_authority(
+        task_default=task_default, requested_may=requested_may, joined=joined
+    )
+    authority_by_binding = decision.repo_authority_by_binding()
+    binding_authorities = tuple(
+        ConfinedBindingAuthority(
+            param=name,
+            binding=name,
+            authority=authority_by_binding[name],
+            root=_relativize_bound_root(root, workspace_path=workspace_path),
+        )
+        for name, root, _grant in joined
+    )
+    return _MultiBindingRunStaging(
+        decision=decision,
+        binding_grants=tuple(binding_grants),
+        binding_authorities=binding_authorities,
+    )
+
+
+def _confined_multi_binding_provider(
+    *,
+    artifact_payload: Mapping[str, object],
+    args: Mapping[str, Any],
+    binding_authorities: Sequence[ConfinedBindingAuthority],
+    launch_metadata: dict[str, object] | None = None,
+) -> ConfinedRootTaskProvider:
+    """Build the confined provider for a multi-binding run (Lane C, LC-3e/LC-3f).
+
+    Carries ``binding_authorities`` (one handle per named binding, injected by parameter name),
+    never ``repo_authority`` — reading a run-wide scalar on this path is exactly the S2 collapse the
+    tripwire forbids. ``ConfinedRootTaskProvider`` fails closed if both authority shapes are given.
+    """
+    return ConfinedRootTaskProvider(
+        artifact_payload=artifact_payload,
+        kwargs=dict(args),
+        binding_authorities=tuple(binding_authorities),
+        launch_metadata=launch_metadata,
+    )
 
 
 def _task_schema_digest(

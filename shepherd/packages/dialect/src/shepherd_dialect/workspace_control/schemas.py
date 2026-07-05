@@ -69,10 +69,18 @@ _LAUNCH_SURFACES = frozenset({"python", "cli", "model_tool", "sdk", "operator"})
 _TASK_EXECUTION_CALL_KINDS = frozenset({"root_run", "linked_call"})
 _TASK_EXECUTION_STATUSES = frozenset({"started", "completed", "failed"})
 _TASK_EXECUTOR_KINDS = frozenset({"in_process", "process", "confined_process"})
+# Durable launch-settlement-policy kind strings. These are SERIALIZED vocabulary
+# (they name records in retained-output custody), so they live as named
+# constants — a raw literal that diverges from these (e.g. the p030->skeleton
+# scrub that overloaded the fenced-run-start guard's needle) is exactly the
+# class of bug W1a prevents. The no-raw-literal guard
+# (test_workspace_control_vocabulary.py) keeps them here.
+FILESYSTEM_AUTHORITY_TERMINALIZATION_KIND = "skeleton.filesystem_authority_terminalization"
+RETAINED_OUTPUT_SELECTION_KIND = "skeleton.retained_output_selection"
 _LAUNCH_SETTLEMENT_POLICY_KINDS = frozenset(
     {
-        "skeleton.filesystem_authority_terminalization",
-        "skeleton.retained_output_selection",
+        FILESYSTEM_AUTHORITY_TERMINALIZATION_KIND,
+        RETAINED_OUTPUT_SELECTION_KIND,
     }
 )
 _RUNTIME_POLICY_FIELDS = frozenset({"requested", "resolved"})
@@ -726,6 +734,11 @@ class RunAuthorityContext:
     This is evidence and classifier metadata, not custody. Retained-output
     settlement remains in vcs-core, while launch/settlement records describe
     which execution and adoption monitors enforced the authority surface.
+
+    Placement-policy review rule: facts a settlement decision depends on live
+    here, behind the fail-closed authority-context validator. RunExecutionEvidence
+    is for observability about how the run executed, not a side channel for
+    settlement-relevant fields that would otherwise face this validator.
     """
 
     task_default_may: str
@@ -739,6 +752,7 @@ class RunAuthorityContext:
     effective_match_digest: str
     authority_surface_plan_digest: str
     classifier_policy: JsonObject
+    per_binding_authority: JsonObject | None = None
     schema: str = _RUN_AUTHORITY_CONTEXT_SCHEMA
 
     def __post_init__(self) -> None:
@@ -769,6 +783,23 @@ class RunAuthorityContext:
         grant_digest = self.effective_grant.get("digest")
         if grant_digest is not None:
             raise ValueError("run.authority_context.effective_grant must not embed a digest field")
+        if self.per_binding_authority is not None:
+            # Lane C additive per-binding evidence: {name: {"authority": ..., "root": ...}}.
+            # Single-binding runs leave it absent, keeping the persisted shape byte-identical.
+            if not isinstance(self.per_binding_authority, Mapping) or not self.per_binding_authority:
+                raise TypeError("run.authority_context.per_binding_authority must be a non-empty object when present")
+            for name, entry in self.per_binding_authority.items():
+                if not isinstance(name, str) or not name:
+                    raise ValueError("run.authority_context.per_binding_authority names must be non-empty strings")
+                if not isinstance(entry, Mapping):
+                    raise TypeError("run.authority_context.per_binding_authority entries must be objects")
+                if entry.get("authority") not in _WORKSPACE_REPO_AUTHORITIES:
+                    raise ValueError(
+                        f"run.authority_context.per_binding_authority[{name!r}].authority is unsupported: "
+                        f"{entry.get('authority')!r}"
+                    )
+                if not isinstance(entry.get("root"), str):
+                    raise TypeError(f"run.authority_context.per_binding_authority[{name!r}].root must be a string")
 
     def to_json(self) -> JsonObject:
         return {
@@ -784,10 +815,12 @@ class RunAuthorityContext:
             "effective_match_digest": self.effective_match_digest,
             "authority_surface_plan_digest": self.authority_surface_plan_digest,
             "classifier_policy": dict(self.classifier_policy),
+            "per_binding_authority": (None if self.per_binding_authority is None else dict(self.per_binding_authority)),
         }
 
     @classmethod
     def from_json(cls, value: Mapping[str, object]) -> RunAuthorityContext:
+        raw_per_binding = value.get("per_binding_authority")
         return cls(
             schema=_required_str(value, "schema"),
             task_default_may=_required_str(value, "task_default_may"),
@@ -801,6 +834,9 @@ class RunAuthorityContext:
             effective_match_digest=_required_str(value, "effective_match_digest"),
             authority_surface_plan_digest=_required_str(value, "authority_surface_plan_digest"),
             classifier_policy=dict(_required_mapping(value, "classifier_policy")),
+            per_binding_authority=None
+            if raw_per_binding is None
+            else dict(_required_mapping(value, "per_binding_authority")),
         )
 
 
@@ -874,10 +910,10 @@ def _validate_launch_settlement_policy(policy: Mapping[str, object]) -> None:
     kind = policy.get("kind")
     if kind not in _LAUNCH_SETTLEMENT_POLICY_KINDS:
         raise ValueError(f"unsupported launch settlement policy kind: {kind!r}")
-    if kind == "skeleton.retained_output_selection":
+    if kind == RETAINED_OUTPUT_SELECTION_KIND:
         _validate_retained_output_selection_policy(policy)
         return
-    if kind == "skeleton.filesystem_authority_terminalization":
+    if kind == FILESYSTEM_AUTHORITY_TERMINALIZATION_KIND:
         _validate_filesystem_authority_terminalization_policy(policy)
         return
 
@@ -1030,6 +1066,12 @@ class RunExecutionEvidence:
     resolved_placement: RunResolvedPlacement = "advisory"
     enforcement_basis: RunEnforcementBasis = "legacy_advisory"
     execution_descriptor: JsonObject | None = None
+    # Additive (P1.2 / finding #5): the resolved state of the flags that alter
+    # durable run behavior (e.g. ``seal_and_select``), so two runs under
+    # different flag state are distinguishable in the record. ``None`` on
+    # records written before this field existed — read as "not recorded", never
+    # as "all-false".
+    effective_feature_flags: JsonObject | None = None
 
     def __post_init__(self) -> None:
         if self.requested_placement not in _RUN_REQUESTED_PLACEMENTS:
@@ -1040,6 +1082,8 @@ class RunExecutionEvidence:
             raise ValueError(f"unsupported enforcement basis: {self.enforcement_basis!r}")
         if self.execution_descriptor is not None and not isinstance(self.execution_descriptor, Mapping):
             raise TypeError("run.execution_evidence.execution_descriptor must be an object or null")
+        if self.effective_feature_flags is not None and not isinstance(self.effective_feature_flags, Mapping):
+            raise TypeError("run.execution_evidence.effective_feature_flags must be an object or null")
         _validate_run_execution_evidence(self)
 
     def to_json(self) -> JsonObject:
@@ -1048,6 +1092,9 @@ class RunExecutionEvidence:
             "resolved_placement": self.resolved_placement,
             "enforcement_basis": self.enforcement_basis,
             "execution_descriptor": None if self.execution_descriptor is None else dict(self.execution_descriptor),
+            "effective_feature_flags": (
+                None if self.effective_feature_flags is None else dict(self.effective_feature_flags)
+            ),
         }
 
     @classmethod
@@ -1074,6 +1121,7 @@ class RunExecutionEvidence:
                 default="legacy_advisory",
             ),  # type: ignore[arg-type]
             execution_descriptor=_optional_mapping_or_none(value, "execution_descriptor"),
+            effective_feature_flags=_optional_mapping_or_none(value, "effective_feature_flags"),
         )
 
 

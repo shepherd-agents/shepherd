@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd-transform"
-version = "0.1.0a1"
+version = "0.2.0"
 description = "Advanced transformation, meta-task, and behavioral grounding surfaces for Shepherd"
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10.0,<4.0.0"
 dependencies = [
-    "shepherd-runtime>=0.1.0a1,<1.0.0",
+    "shepherd-runtime",
 ]
 
 [dependency-groups]

@@ -15,7 +15,9 @@ import shepherd as sp
 
 TASK_ID = "quickstart.claude_readme"
 TASK_SOURCE = '''
-def update_readme(repo, goal: str, output_path: str = "README.md"):
+import shepherd as sp
+
+def update_readme(repo: sp.May[sp.GitRepo, sp.ReadWrite], goal: str, output_path: str = "README.md"):
     """Use Claude to make the README clearer for a first-time developer.
 
     Keep the edit small. Preserve existing factual claims. Write the proposed
@@ -33,7 +35,7 @@ def _live_ready() -> tuple[bool, str]:
     if claude_auth_mode() is None:
         return False, "no ANTHROPIC_API_KEY and no signed-in `claude` CLI"
     try:
-        from vcs_core.runtime_api import native_jail_available
+        from shepherd_dialect import native_jail_available
     except (ImportError, OSError, RuntimeError, ValueError) as exc:
         return False, f"could not check native jail: {exc}"
     if not native_jail_available():
@@ -61,7 +63,6 @@ def main() -> None:
             TASK_ID,
             repo=workspace.git_repo(),
             args={"goal": "tighten the quickstart section"},
-            may="ReadWrite",
             placement="jail",
             runtime={"provider": "claude"},
         )

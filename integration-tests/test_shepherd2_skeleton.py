@@ -677,7 +677,7 @@ def test_skeleton_v1a_rehydrates_after_reactivation(tmp_path: Path) -> None:
 
 
 def test_skeleton_run_output_resolves_through_workspace_control_after_reactivation(tmp_path: Path) -> None:
-    """Workspace-control RunOutput reconstruction shares the durable ground identity."""
+    """Workspace-control RunOutput reconstruction shares 's durable ground identity."""
     trace_path = tmp_path / "trace.sqlite"
     mg = _make_mg(tmp_path)
     try:

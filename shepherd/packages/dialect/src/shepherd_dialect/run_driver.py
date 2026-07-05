@@ -90,6 +90,39 @@ def _scan_tree(root: Any) -> dict[str, bytes]:
     return out
 
 
+def _rebased_binding_grants(binding_grants: Any, working_path: Any) -> list[Any]:
+    """Re-root working-path-relative per-binding grants against the run's clone working path.
+
+    A run executes in an isolated overlay clone whose absolute path differs from the bound
+    workspace roots, so the jail's writable roots must name the clone's sub-roots, not the
+    workspace's. Lane C stages each bound sub-root as a working-path-relative POSIX path; here we
+    join it to ``execution.working_path`` (the only point that holds both the relative sub-root and
+    the clone path). An **absolute** grant root is used as-is — byte-identical to the pre-Lane-C
+    per-binding install path (the run-driver unit coverage passes absolute roots).
+    """
+    from dataclasses import replace
+    from pathlib import Path, PurePosixPath
+
+    working = Path(working_path)
+    rebased: list[Any] = []
+    for grant in binding_grants:
+        root = grant.root
+        if PurePosixPath(root).is_absolute() or Path(root).is_absolute():
+            rebased.append(grant)
+        else:
+            # Defense in depth at the seam: the facade's staging already refuses `..`/`.`
+            # relative roots fail-closed, but a joined `..` here would authorize a subtree
+            # OUTSIDE the run clone — refuse rather than trust the (Python-only) caller.
+            parts = PurePosixPath(root).parts
+            if root in {"", "."} or any(part in {".", ".."} for part in parts):
+                raise ValueError(
+                    f"per-binding grant root {root!r} must be a clean working-path-relative "
+                    "POSIX sub-root (no '.'/'..' segments); refusing to rebase it"
+                )
+            rebased.append(replace(grant, root=str(working / PurePosixPath(root))))
+    return rebased
+
+
 def _resolve_enforced_may(params: Mapping[str, Any]) -> MayResolution:
     """Resolve the single authority source for a run.
 
@@ -156,6 +189,14 @@ class ShepherdRunDriver(BaseSubstrateDriver):
                 required=False,
                 description="Runtime option envelope. Current branch records it as provenance; "
                 "execution selection still uses the explicit provider instance.",
+            ),
+            "binding_grants": ParamSpec(
+                type="object",
+                required=False,
+                projectable=False,
+                description="Per-binding grant sequence (Lane C LC-3d): a Sequence[BindingRootGrant]. "
+                "When present, confinement lowers from these grants through the same "
+                "install() seam instead of the whole-workspace may= profile.",
             ),
             "provider": ParamSpec(
                 type="ExecutionProvider",
@@ -248,8 +289,20 @@ class ShepherdRunDriver(BaseSubstrateDriver):
         # in-process provider ignores it (advisory column). The resolution still carries
         # declared/resolved/source so a defaulted Permissive is recorded as such
         # (`may-default-is-permissive`, amended).
+        #
+        # LC-3d (Lane C): the multi-binding path carries per-binding grants end to end. When a
+        # `Sequence[BindingRootGrant]` is present, confinement lowers from THOSE grants through the
+        # SAME install() seam (never a collapsed whole-run may= scalar — that would trip the S2
+        # amplification). The resulting PermissionPlan therefore cites the per-binding assignment.
+        # `may_resolution` is still resolved and recorded below as run provenance.
         may_resolution = _resolve_enforced_may(params)
-        permission_plan = install_permission_plan(may_resolution, execution.working_path)
+        binding_grants = params.get("binding_grants")
+        if binding_grants:
+            permission_plan = install_permission_plan(
+                _rebased_binding_grants(binding_grants, execution.working_path), execution.working_path
+            )
+        else:
+            permission_plan = install_permission_plan(may_resolution, execution.working_path)
         confinement = permission_plan.confinement
         if "confinement" in task_body_parameters:
             args["confinement"] = confinement

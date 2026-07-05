@@ -620,10 +620,11 @@ class TestVMCommandRunnerIntegration:
         assert "first" in result.stdout
         assert "second" in result.stdout
 
-    def test_mkdir_and_cleanup(self):
+    def test_mkdir_and_cleanup(self, tmp_path):
         """mkdir_p and rm_rf should work."""
         runner = VMCommandRunner(timeout=10.0)
-        test_dir = Path("/tmp/shepherd-test-vm-paths")
+        # Per-test unique dir (was a fixed /tmp path — collided under -n auto).
+        test_dir = tmp_path / "shepherd-test-vm-paths"
 
         try:
             runner.mkdir_p(test_dir)
@@ -632,10 +633,11 @@ class TestVMCommandRunnerIntegration:
             runner.rm_rf(test_dir)
             assert not runner.exists(test_dir)
 
-    def test_path_with_spaces(self):
+    def test_path_with_spaces(self, tmp_path):
         """Paths with spaces should be handled correctly."""
         runner = VMCommandRunner(timeout=10.0)
-        test_dir = Path("/tmp/shepherd test dir")
+        # Keep the space in the leaf name; keep the parent unique per test.
+        test_dir = tmp_path / "shepherd test dir"
 
         try:
             runner.mkdir_p(test_dir)

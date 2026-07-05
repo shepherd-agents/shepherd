@@ -5,7 +5,7 @@ question, retire the mechanism): `filter` ← the stream *views* question
 (legacy `test_views`), `summary` ← `test_debug_summary`, `compare` ←
 `test_comparison`/`compare_streams`, now keyed on real cross-run identity.
 The Match auto-lift is the selector parameter: kind strings, effect types,
-and predicates today; `Match`/ `Pattern.event` compile into the same
+and predicates today; `Match`/P-011 `Pattern.event` compile into the same
 slot tomorrow.
 """
 

@@ -52,6 +52,7 @@ from vcs_core._authority import (
 # later materialization (`push`) owns them. Promoted at B3c-3 alongside
 # `VcsCore.world_oid()`; the CLI was previously the only caller.
 from vcs_core._command_envelope import AuthorityMergeControl, CommandExecutionOptions
+from vcs_core._identity import initialize_ground_world_id
 from vcs_core._workspace_adoption import adopt_workspace_baseline
 
 # --- Group B: the run / command seam (shared with the SPI; consumer send-side) ---
@@ -91,6 +92,7 @@ __all__ = [
     "VcsCore",
     "adopt_workspace_baseline",
     "build_builtin_substrate_context",
+    "initialize_ground_world_id",
     "native_jail_available",
     "substrate_client",
     "version_surfaces",

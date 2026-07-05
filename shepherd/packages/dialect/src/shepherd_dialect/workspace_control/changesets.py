@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING
 
 from shepherd_dialect.workspace_control.errors import WorkspaceControlError
@@ -43,9 +43,16 @@ class Changeset:
     A Changeset is derived from a RunOutput. It does not own custody and cannot
     settle or mutate worlds; reads and inspections delegate through the output's
     retained-custody validation path.
+
+    ``root_prefix`` (Lane C LC-5) narrows the view to one bound sub-root: a free prefix-filter over
+    the whole-workspace changeset's changed paths (custody is unchanged — the whole delta is a
+    single custody token; per-binding settlement is deferred). ``binding_view_name`` labels the
+    narrowed binding. Both are ``None`` for the whole-workspace view (byte-identical).
     """
 
     _output: RunOutput = field(repr=False, compare=False)
+    root_prefix: str | None = None
+    binding_view_name: str | None = None
 
     @property
     def output(self) -> RunOutput:
@@ -62,7 +69,7 @@ class Changeset:
 
     @property
     def binding(self) -> str:
-        return self._output.binding
+        return self._output.binding if self.binding_view_name is None else self.binding_view_name
 
     @property
     def state(self) -> str:
@@ -70,11 +77,15 @@ class Changeset:
 
     @property
     def changed_paths(self) -> tuple[str, ...]:
-        return self._output.changed_paths
+        return _filter_paths_to_root(self._output.changed_paths, self.root_prefix)
+
+    def narrowed_to_binding(self, *, name: str, root: str) -> Changeset:
+        """Return a prefix-filtered VIEW of this changeset scoped to one bound sub-root (Lane C)."""
+        return Changeset(self._output, root_prefix=root, binding_view_name=name)
 
     def refresh(self) -> Changeset:
         """Re-resolve the underlying output through its owning workspace."""
-        return Changeset(self._output.refresh())
+        return Changeset(self._output.refresh(), root_prefix=self.root_prefix, binding_view_name=self.binding_view_name)
 
     def inspect(self) -> JsonObject:
         """Return a JSON-shaped, custody-refreshed changeset snapshot."""
@@ -90,8 +101,17 @@ class Changeset:
         return self._output.read_file(path)
 
     def stat(self) -> ChangesetStat:
-        """Return a custody-refreshed changeset summary."""
-        return _stat_from_output_snapshot(self._output.inspect())
+        """Return a custody-refreshed changeset summary (narrowed to the bound sub-root if set)."""
+        stat = _stat_from_output_snapshot(self._output.inspect())
+        if self.root_prefix is None:
+            return stat
+        narrowed = _filter_paths_to_root(stat.changed_paths, self.root_prefix)
+        return replace(
+            stat,
+            binding=self.binding,
+            changed_path_count=len(narrowed),
+            changed_paths=narrowed,
+        )
 
     def to_json(self) -> JsonObject:
         """Return a JSON-shaped snapshot of this changeset wrapper."""
@@ -104,6 +124,20 @@ class Changeset:
             "changed_paths": list(self.changed_paths),
             "output": self._output.to_json(),
         }
+
+
+def _filter_paths_to_root(paths: tuple[str, ...], root_prefix: str | None) -> tuple[str, ...]:
+    """Prefix-filter workspace-relative changed paths to a bound sub-root (Lane C per-binding view).
+
+    Paths are workspace-relative POSIX (self-discriminating by root prefix, LC §1 #6), so the view
+    is a free prefix-filter: keep a path iff it is the root itself or lies strictly beneath it.
+    """
+    if root_prefix is None:
+        return paths
+    prefix = root_prefix.strip("/")
+    if not prefix:
+        return paths
+    return tuple(path for path in paths if path == prefix or path.startswith(f"{prefix}/"))
 
 
 def _stat_from_output_snapshot(output: JsonObject) -> ChangesetStat:

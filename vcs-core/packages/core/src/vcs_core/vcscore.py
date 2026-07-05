@@ -238,7 +238,7 @@ class VcsCore:
         allow_activate_init: bool = True,
     ) -> None:
         self._workspace = workspace
-        self._repo_path = os.path.join(workspace, ".vcscore")  # noqa: PTH118
+        self._repo_path = os.path.join(workspace, ".vcscore")  # noqa: PTH118 — _repo_path is consumed as str throughout
         self._store = store or Store(self._repo_path)
         self._allow_activate_init = allow_activate_init
         self._pipeline = RecordingPipeline(self._store)
@@ -3054,7 +3054,7 @@ class VcsCore:
         """Create VcsCore from config files, with optional programmatic substrates.
 
         Config-driven substrates are discovered and instantiated from
-        vcscore.toml +.vcscore/config.toml. additional_substrates are
+        vcscore.toml + .vcscore/config.toml. additional_substrates are
         appended after config-driven substrates.
 
         A single Store instance is shared between VcsCore and all substrates.
@@ -3068,7 +3068,7 @@ class VcsCore:
         from vcs_core.config import load_config
         from vcs_core.discovery import resolve_bindings
 
-        repo_path = os.path.join(workspace, ".vcscore")  # noqa: PTH118
+        repo_path = os.path.join(workspace, ".vcscore")  # noqa: PTH118 — repo_path stays str for downstream string use
         store = Store.open_existing(repo_path)
 
         config = load_config(workspace)

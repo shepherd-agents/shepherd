@@ -59,7 +59,6 @@ EXPECTED_MANIFEST = [
     "ReadOnly",
     "ReadWrite",
     "GitRepoGrant",
-    "GitRepoPath",
     "Flow",
     "FlowControlClient",
 ]
@@ -76,7 +75,6 @@ LAZY_NAMES = [
     "ReadOnly",
     "ReadWrite",
     "GitRepoGrant",
-    "GitRepoPath",
     "Flow",
     "FlowControlClient",
 ]
@@ -143,6 +141,9 @@ def test_out_of_scope_surface_stays_absent() -> None:
     assert not hasattr(sp, "gather")
     for verb in ("write", "apply", "run"):
         assert not hasattr(sp.GitRepo, verb)
+    # P-030 v0.2 fence: the path-scoped grant spelling is not part of the public facade.
+    assert not hasattr(sp, "GitRepoPath")
+    assert "GitRepoPath" not in sp.__all__
 
 
 def test_offline_import_stays_light() -> None:

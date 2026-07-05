@@ -3,9 +3,33 @@
 These tests verify that all Shepherd packages work together correctly.
 """
 
+import os
+
 import pytest
 from shepherd_runtime.scope import Scope
 from shepherd_tests import MockProvider
+
+
+@pytest.fixture(autouse=True)
+def _isolate_process_environment():
+    """Snapshot and restore ``os.environ`` around every test (W0.2).
+
+    This suite mixes in-process ``CliRunner`` invocations (test_openai_api.py)
+    with flag-sensitive tests the same way the top-level ``integration-tests/``
+    suite does. The specific CLI leak that motivated this was removed at the
+    source in W1c (the CLI now scopes ``scoped_seal_and_select()``), so this is
+    belt-and-braces: it protects against *any* test that writes process env
+    directly, which the CLI fix does not cover.
+    """
+    saved = dict(os.environ)
+    try:
+        yield
+    finally:
+        for key in set(os.environ) - set(saved):
+            del os.environ[key]
+        for key, value in saved.items():
+            if os.environ.get(key) != value:
+                os.environ[key] = value
 
 
 @pytest.fixture

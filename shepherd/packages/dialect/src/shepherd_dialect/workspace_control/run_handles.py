@@ -55,8 +55,31 @@ class WorkspaceRun:
             raise WorkspaceControlError(f"run {self.run_ref!r} has no output named {name!r}") from exc
 
     def changeset(self, name: str = "workspace") -> Changeset:
-        """Return the read-only changeset view for one run output."""
+        """Return the read-only changeset view for one run output, or one bound sub-root.
+
+        ``name`` is an output name (``"workspace"``, the whole delta) or — for a Lane C
+        multi-binding run — a bound binding name, which returns the whole-delta changeset narrowed
+        to that binding's root prefix (a free prefix-filter VIEW; custody is unchanged). An unknown
+        name fails closed.
+        """
+        per_binding = self._per_binding_roots()
+        if name in per_binding:
+            return self.output("workspace").changeset().narrowed_to_binding(name=name, root=per_binding[name])
         return self.output(name).changeset()
+
+    def _per_binding_roots(self) -> dict[str, str]:
+        """Return the run's recorded ``binding name -> workspace-relative sub-root`` map (Lane C)."""
+        from collections.abc import Mapping
+
+        context = self.record.authority_context
+        per_binding = None if context is None else context.per_binding_authority
+        if not isinstance(per_binding, Mapping):
+            return {}
+        roots: dict[str, str] = {}
+        for name, entry in per_binding.items():
+            if isinstance(entry, Mapping) and isinstance(entry.get("root"), str):
+                roots[str(name)] = str(entry["root"])
+        return roots
 
     def authority(self) -> RunAuthority:
         """Return the validated persisted authority view for this run."""

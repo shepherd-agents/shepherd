@@ -20,6 +20,9 @@ from shepherd_dialect.workspace_control.run_outputs import RunOutput
 class RunRecordStub:
     run_ref: str
     status: str
+    # Lane C: real RunRecords always carry the field (possibly None);
+    # WorkspaceRun._per_binding_roots reads it on the changeset path.
+    authority_context: Any = None
 
     def to_json(self) -> dict[str, str]:
         return {"run_ref": self.run_ref, "status": self.status}

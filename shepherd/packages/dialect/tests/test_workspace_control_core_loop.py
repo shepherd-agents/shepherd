@@ -53,6 +53,7 @@ from shepherd_dialect.workspace_control._confined_task_executor import (
     ConfinedRootTaskProvider,
     ConfinedTaskExecutionError,
 )
+from shepherd_dialect.workspace_control.authority import _allow_path_prefix_grants
 from shepherd_dialect.workspace_control.drivers import mint_ledger_write_authority
 from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 from shepherd_dialect.workspace_control.gitrepo_handles import same_git_binding_state
@@ -1902,6 +1903,10 @@ def fix_bug(repo, issue: str):
             "profile": "Permissive",
             "provider": "in-process",
         }
+        # P1.2 / finding #5: a retained run records the effective flag state
+        # (seal-and-select is on for the retained lane). The load-bearing check
+        # is that this flag-carrying record then settles cleanly below.
+        assert record.execution_evidence.effective_feature_flags == {"seal_and_select": True}
         assert record.authority_context.grant_clamp["effective_digest"] == (
             record.authority_context.effective_grant_digest
         )
@@ -2207,14 +2212,17 @@ def fix_bug(repo: May[GitRepo, {grant_expr}]):
 def test_generated_source_public_may_gitrepo_grant_lowers_to_descriptor(tmp_path: Path) -> None:
     workspace = _make_workspace(tmp_path / "ws")
     try:
-        task = workspace.tasks.register_source(
-            task_id="generated.fix_bug",
-            module="generated_tasks",
-            entrypoint="fix_bug",
-            source_text='def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):\n'
-            ' return repo.write("src/app/main.py", b"generated\\n")\n',
-            may_default="ReadWrite",
-        )
+        # Path-scoped grants are fenced out of the public seam; the adoption-boundary lane
+        # compiles them through the private escape (here, the generated-source / AST route).
+        with _allow_path_prefix_grants():
+            task = workspace.tasks.register_source(
+                task_id="generated.fix_bug",
+                module="generated_tasks",
+                entrypoint="fix_bug",
+                source_text='def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):\n'
+                ' return repo.write("src/app/main.py", b"generated\\n")\n',
+                may_default="ReadWrite",
+            )
 
         (repo_param,) = [parameter for parameter in task.signature_schema["parameters"] if parameter["name"] == "repo"]
         assert repo_param["gitrepo_grant"]["clauses"] == [
@@ -2224,6 +2232,24 @@ def test_generated_source_public_may_gitrepo_grant_lowers_to_descriptor(tmp_path
                 "mutates": True,
             }
         ]
+    finally:
+        workspace.close()
+
+
+def test_generated_source_path_gitrepo_grant_refused_at_ast_seam_by_default(tmp_path: Path) -> None:
+    # P-030 v0.2 fence: the generated-source (AST) route refuses a path-scoped grant unless the
+    # private escape is active. This is the second acceptance seam — a runtime-only fence would
+    # silently re-open the generated-source lane.
+    workspace = _make_workspace(tmp_path / "ws")
+    try:
+        with pytest.raises(TaskRegistrationError, match=r"not part of the P-030 v0\.2 claim"):
+            workspace.tasks.register_source(
+                task_id="generated.fix_bug",
+                module="generated_tasks",
+                entrypoint="fix_bug",
+                source_text='def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):\n return None\n',
+                may_default="ReadWrite",
+            )
     finally:
         workspace.close()
 
@@ -2252,7 +2278,8 @@ def test_public_may_path_gitrepo_grant_authorizes_retained_output_selection(
         monkeypatch,
         """
 from shepherd_runtime.nucleus import GitRepo
-from shepherd_dialect.workspace_control import GitRepoPath, May
+from shepherd_dialect.workspace_control import May
+from shepherd_dialect.workspace_control.authority import GitRepoPath
 
 def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):
     return repo.write("src/app/main.py", b"allowed by grant\\n")
@@ -2260,7 +2287,8 @@ def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):
     )
     workspace = _make_workspace(tmp_path / "ws")
     try:
-        workspace.tasks.register(source, may_default="ReadWrite")
+        with _allow_path_prefix_grants():
+            workspace.tasks.register(source, may_default="ReadWrite")
         repo = _seed_selected_workspace(workspace)
         run = workspace.run("sample_tasks.fix_bug", repo=repo, placement="advisory")
         output = run.output()
@@ -2326,7 +2354,8 @@ def test_public_may_path_gitrepo_grant_denies_retained_output_selection_outside_
         monkeypatch,
         """
 from shepherd_runtime.nucleus import GitRepo
-from shepherd_dialect.workspace_control import GitRepoPath, May
+from shepherd_dialect.workspace_control import May
+from shepherd_dialect.workspace_control.authority import GitRepoPath
 
 def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):
     return repo.write("docs/forbidden.txt", b"outside grant\\n")
@@ -2334,7 +2363,8 @@ def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):
     )
     workspace = _make_workspace(tmp_path / "ws")
     try:
-        workspace.tasks.register(source, may_default="ReadWrite")
+        with _allow_path_prefix_grants():
+            workspace.tasks.register(source, may_default="ReadWrite")
         repo = _seed_selected_workspace(workspace)
         run = workspace.run("sample_tasks.fix_bug", repo=repo, placement="advisory")
         output = run.output()
@@ -2351,22 +2381,34 @@ def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):
         workspace.close()
 
 
-def test_unconsumed_retained_output_blocks_task_update_and_uses_run_authority(tmp_path: Path) -> None:
+def test_unconsumed_retained_output_blocks_task_update_and_uses_run_authority(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # This test asserts the flag-OFF readiness lane: with seal-and-select
+    # enabled, a retained scope is a legitimate state and update_source is no
+    # longer "readiness blocked". The CLI entrypoint setdefaults the flag ON
+    # (cli/__init__.py), so any in-process CLI invocation earlier in the same
+    # pytest process (e.g. CliRunner in test_quickstart_core.py) — or a
+    # developer's shell env — would silently flip this test's semantics.
+    monkeypatch.delenv("VCS_CORE_SEAL_AND_SELECT", raising=False)
     workspace = _make_workspace(tmp_path / "ws")
     try:
-        v1 = workspace.tasks.register_source(
-            task_id="generated.fix_bug",
-            module="generated_tasks",
-            entrypoint="fix_bug",
-            source_text="""
+        with _allow_path_prefix_grants():
+            v1 = workspace.tasks.register_source(
+                task_id="generated.fix_bug",
+                module="generated_tasks",
+                entrypoint="fix_bug",
+                source_text="""
 from shepherd_runtime.nucleus import GitRepo
-from shepherd_dialect.workspace_control import GitRepoPath, May
+from shepherd_dialect.workspace_control import May
+from shepherd_dialect.workspace_control.authority import GitRepoPath
 
 def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):
     return repo.write("docs/forbidden.txt", b"outside original grant\\n")
 """,
-            may_default="ReadWrite",
-        )
+                may_default="ReadWrite",
+            )
         repo = _seed_selected_workspace(workspace)
         run = workspace.run("generated.fix_bug", repo=repo, placement="advisory")
         output = run.output()
@@ -2409,7 +2451,8 @@ def test_public_may_path_gitrepo_grant_denies_direct_authority_launch_outside_gr
         monkeypatch,
         """
 from shepherd_runtime.nucleus import GitRepo
-from shepherd_dialect.workspace_control import GitRepoPath, May
+from shepherd_dialect.workspace_control import May
+from shepherd_dialect.workspace_control.authority import GitRepoPath
 
 def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):
     return repo.write("docs/forbidden.txt", b"outside grant\\n")
@@ -2417,7 +2460,8 @@ def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):
     )
     workspace = _make_workspace(tmp_path / "ws")
     try:
-        workspace.tasks.register(source, may_default="ReadWrite")
+        with _allow_path_prefix_grants():
+            workspace.tasks.register(source, may_default="ReadWrite")
         _seed_selected_workspace(workspace)
 
         with pytest.raises(RunStartError, match="filesystem_merge_mutates_outside_effective_match"):

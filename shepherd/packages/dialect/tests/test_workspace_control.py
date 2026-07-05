@@ -855,6 +855,41 @@ def test_run_record_enforcement_defaults_legacy_records_to_advisory() -> None:
     assert restored.execution_evidence == RunExecutionEvidence()
 
 
+def test_run_execution_evidence_round_trips_effective_feature_flags() -> None:
+    # P1.2 / finding #5: the recorded flag state survives to_json -> from_json
+    # for both flag states, so two runs under different flags are distinguishable.
+    for state in (True, False):
+        evidence = RunExecutionEvidence(effective_feature_flags={"seal_and_select": state})
+        payload = evidence.to_json()
+        assert payload["effective_feature_flags"] == {"seal_and_select": state}
+        assert RunExecutionEvidence.from_json(payload) == evidence
+
+
+def test_run_execution_evidence_absent_feature_flags_read_as_not_recorded() -> None:
+    # A record written before the field existed reads as None ("not recorded"),
+    # never as an empty/all-false map that would silently claim flags were off.
+    payload = RunExecutionEvidence().to_json()
+    payload.pop("effective_feature_flags")
+
+    restored = RunExecutionEvidence.from_json(payload)
+
+    assert restored.effective_feature_flags is None
+
+
+def test_run_execution_evidence_rejects_non_object_feature_flags() -> None:
+    with pytest.raises(TypeError, match="effective_feature_flags must be an object or null"):
+        RunExecutionEvidence(effective_feature_flags="seal_and_select")  # type: ignore[arg-type]
+
+
+def test_effective_feature_flags_reader_reflects_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    from shepherd_dialect.workspace_control.feature_flags import effective_feature_flags
+
+    monkeypatch.setenv("VCS_CORE_SEAL_AND_SELECT", "1")
+    assert effective_feature_flags() == {"seal_and_select": True}
+    monkeypatch.delenv("VCS_CORE_SEAL_AND_SELECT", raising=False)
+    assert effective_feature_flags() == {"seal_and_select": False}
+
+
 def test_run_execution_evidence_rejects_impossible_requested_resolved_pair() -> None:
     with pytest.raises(ValueError, match="cannot resolve advisory placement to jail"):
         RunExecutionEvidence(
@@ -1470,6 +1505,7 @@ def test_run_vcscore_projection_cites_existing_run_record_identities() -> None:
             "resolved_placement": "advisory",
             "enforcement_basis": "legacy_advisory",
             "execution_descriptor": None,
+            "effective_feature_flags": None,
         },
         "runtime_operation": "op-runtime",
         "authority_operation": "op-authority",
@@ -1524,6 +1560,22 @@ def test_workspace_control_cli_lists_tasks_runs_and_raw_output_citations(monkeyp
     assert vcscore_json["operation_show"] == ["vcs-core", "operation", "show", "op-runtime"]
 
 
+def test_workspace_control_cli_run_show_renders_enforcement_line(monkeypatch: pytest.MonkeyPatch) -> None:
+    from click.testing import CliRunner
+
+    from shepherd_dialect import cli
+
+    mg = fake_mg(tasks=task_payload(task_version()), runs=run_payload(run_record(status="retained")))
+    workspace = _fake_workspace(mg)
+    monkeypatch.setattr(cli, "_open_workspace", lambda **kwargs: workspace)
+
+    result = CliRunner().invoke(cli.main, ["run", "show", "@latest"])
+    assert result.exit_code == 0, result.output
+    # Device honesty is surfaced at the CLI, not only in the durable record: the human `run show`
+    # render carries the enforcement mode and its basis. (P-030 v0.2 device-honesty gate, CLI layer.)
+    assert "enforcement:  advisory (legacy_advisory)" in result.output
+
+
 def test_workspace_control_cli_task_show_renders_signature_and_json(monkeypatch: pytest.MonkeyPatch) -> None:
     from click.testing import CliRunner
 
@@ -1545,6 +1597,71 @@ def test_workspace_control_cli_task_show_renders_signature_and_json(monkeypatch:
     payload = json.loads(raw.output)
     assert payload["task"]["task_id"] == "tasks.fix_bug"
     assert payload["artifact"]["docstring"] == "Fix one bug in the selected workspace."
+
+
+# --- 0.2.0 teaching beat: task show leads with the per-binding grant summary ----------------
+
+# Runtime import: `_signature_schema` resolves these stringized annotations via
+# `get_type_hints`, which needs them in the module globals (not a TYPE_CHECKING block).
+from shepherd_runtime.nucleus import GitRepo  # noqa: TC002
+
+from shepherd_dialect.workspace_control import May, ReadOnly, ReadWrite
+from shepherd_dialect.workspace_control.workspace import _signature_schema
+
+
+def _lane_c_docs_backend_task(docs: May[GitRepo, ReadOnly], backend: May[GitRepo, ReadWrite]) -> None:
+    """Multi-binding Lane C source used to pin the teaching-shape grant summary."""
+
+
+def _single_repo_task(repo: May[GitRepo, ReadOnly]) -> None:
+    """Single injected-repo grant source."""
+
+
+def _task_show_human_output(monkeypatch: pytest.MonkeyPatch, version: TaskDefinitionVersion) -> str:
+    from click.testing import CliRunner
+
+    from shepherd_dialect import cli
+
+    mg = fake_mg(tasks=task_payload(version))
+    workspace = _fake_workspace(mg)
+    monkeypatch.setattr(cli, "_open_workspace", lambda **kwargs: workspace)
+    result = CliRunner().invoke(cli.main, ["task", "show", version.task_id])
+    assert result.exit_code == 0, result.output
+    return result.output
+
+
+def test_task_show_leads_with_multi_binding_grant_summary(monkeypatch: pytest.MonkeyPatch) -> None:
+    version = replace(task_version(), signature_schema=_signature_schema(_lane_c_docs_backend_task))
+
+    output = _task_show_human_output(monkeypatch, version)
+
+    # The permission surface leads: the exact teaching shape is the first rendered line.
+    assert output.splitlines()[0] == "docs read-only / backend read-write"
+    # Fuller detail (including the raw signature JSON) is retained after the summary.
+    assert "Task tasks.fix_bug@v1" in output
+    assert "signature:" in output
+    assert "gitrepo_grant" in output
+
+
+def test_task_show_leads_with_single_repo_grant(monkeypatch: pytest.MonkeyPatch) -> None:
+    version = replace(task_version(), signature_schema=_signature_schema(_single_repo_task))
+
+    output = _task_show_human_output(monkeypatch, version)
+
+    assert output.splitlines()[0] == "repo read-only"
+
+
+def test_task_show_falls_back_to_may_profile_without_per_binding_grants(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Whole-run may only: signature carries no per-binding GitRepo grants.
+    version = replace(task_version(), signature_schema={"type": "object"}, may_default="ReadOnly")
+
+    output = _task_show_human_output(monkeypatch, version)
+
+    assert output.splitlines()[0] == "may: ReadOnly"
+    assert " read-only" not in output.splitlines()[0]
+    assert "read-write" not in output.splitlines()[0]
 
 
 def test_workspace_control_cli_trace_reads_run_trace(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -1811,7 +1928,7 @@ def _fake_workspace(mg: FakeVcsCore) -> object:
                     "docstring": "Fix one bug in the selected workspace.",
                     "entrypoint": {"module": "pkg.tasks", "qualname": "fix_bug"},
                     "files": [],
-                    "source_excerpt": "def fix_bug(repo):...",
+                    "source_excerpt": "def fix_bug(repo): ...",
                 },
                 "artifact_error": None,
             }

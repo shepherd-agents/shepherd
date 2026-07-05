@@ -122,37 +122,15 @@ def _initialize_vcscore(
     adopt: WorkspaceAdoptMode,
     explicit_adopt: bool,
 ) -> tuple[str, int]:
-    from vcs_core._identity import initialize_ground_world_id
-    from vcs_core.runtime_api import Store, adopt_workspace_baseline
+    # Route store bootstrap through the dialect integration home; the meta
+    # package imports no vcs-core surface directly (test_d2_boundary).
+    from shepherd_dialect import WorkspaceInitError, initialize_workspace
 
-    repo_path = workspace / ".vcscore"
-    repo_path.mkdir(exist_ok=True)
-    store = Store(str(repo_path))
-    created_store = store.is_empty
-    if created_store:
-        store.create_root_commit()
-    else:
-        initialize_ground_world_id(str(repo_path))
-
-    config_path = repo_path / "config.toml"
-    if not config_path.exists():
-        config_path.write_text("# vcs-core local configuration\n# See vcscore.toml for project-level config\n")
-
-    adopted_count = 0
-    if adopt != "none":
-        if not created_store:
-            if explicit_adopt:
-                raise click.ClickException(
-                    "baseline adoption is only supported while creating a fresh .vcscore repository"
-                )
-            return "already initialized", 0
-        try:
-            result = adopt_workspace_baseline(store, workspace, source=adopt, acknowledge_materialized=True)
-        except (RuntimeError, ValueError) as exc:
-            raise click.ClickException(str(exc)) from exc
-        adopted_count = result.effect_count
-
-    return ("created" if created_store else "already initialized"), adopted_count
+    try:
+        result = initialize_workspace(workspace, adopt=adopt, explicit_adopt=explicit_adopt)
+    except WorkspaceInitError as exc:
+        raise click.ClickException(str(exc)) from exc
+    return result.status, result.adopted_count
 
 
 def _validate_workspace(workspace: Path, *, backend: WorkspaceBackendOption) -> None:

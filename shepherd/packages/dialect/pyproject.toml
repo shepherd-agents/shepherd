@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-dialect"
-version = "0.1.0a1"
+version = "0.2.0"
 description = "The Shepherd dialect over vcs-core's execution-mechanism SPI: the run driver."
 requires-python = ">=3.11"
 dependencies = [
@@ -54,7 +54,7 @@ markers = [
     "workspace_component: fast workspace-control unit/component tests with no real retained-run workspace",
     "workspace_smoke: minimal real workspace-control canaries for the local fast lane",
     "workspace_native_jail: workspace-control tests that require a proven native syscall jail",
-    "slow: expensive/workspace-control scenario tests excluded from fast local dialect checks",
+    "slow: expensive /workspace-control scenario tests excluded from fast local dialect checks",
     "workspace_scenario: full workspace-control scenario/integration tests excluded from fast local dialect checks",
 ]
 

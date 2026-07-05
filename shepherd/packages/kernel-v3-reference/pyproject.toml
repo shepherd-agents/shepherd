@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-kernel-v3-reference"
-version = "0.1.0a1"
+version = "0.2.0"
 description = "Reference interpreter for the shepherd-kernel-v3 source calculus."
 requires-python = ">=3.11"
 dependencies = []

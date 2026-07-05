@@ -13,7 +13,7 @@ from vcs_core.runtime_api import native_jail_available
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
 
 import shepherd_dialect.workspace_control.runtime_provider as runtime_provider_module
-from shepherd_dialect.provider_runtime import ExecutionProviderResult, ProviderEvent
+from shepherd_dialect.provider_runtime import ExecutionProviderResult, ProviderEvent, ProviderInvocationError
 from shepherd_dialect.run_driver import ShepherdRunDriver
 from shepherd_dialect.workspace_control import (
     RunStartError,
@@ -227,7 +227,7 @@ def test_claude_workspace_runtime_provider_records_events_and_scrubs_inputs(
                 {
                     "path": "runtime_provider_tasks.py",
                     "content_encoding": "utf-8",
-                    "content": "def generate(repo, *, output_path):\n '''Write an HTML artifact.'''\n",
+                    "content": "def generate(repo, *, output_path):\n    '''Write an HTML artifact.'''\n",
                 }
             ],
         },
@@ -281,6 +281,88 @@ def test_claude_workspace_runtime_provider_records_events_and_scrubs_inputs(
     assert isinstance(prompt, str)
     assert "Task id: runtime_provider_tasks.generate" in prompt
     assert ".shepherd-inputs/01-candidate/candidate/index.html" in prompt
+
+
+def test_claude_workspace_runtime_provider_fails_closed_when_private_cleanup_leaves_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _FakeClaudeProvider:
+        def __init__(self, invocation: object) -> None:
+            self.provider_id = invocation.provider_id
+            self.model = invocation.model_name
+
+        def execute(
+            self,
+            task_body: object,
+            stack: object,
+            context: object,
+            args: object,
+            *,
+            execution: object,
+            confinement: object,
+        ) -> ExecutionProviderResult:
+            del task_body, stack, context, args, confinement
+            proc = execution.launch_confined(["fake-claude"], object())
+            assert proc.returncode == 0
+            event = ProviderEvent(
+                kind="provider.invocation.completed",
+                provider_id=self.provider_id,
+                invocation_id="claude:fake-scope",
+                sequence=0,
+                event_id="claude:fake-scope:completed",
+                model=self.model,
+                payload={"transport": "fake"},
+            )
+            return ExecutionProviderResult(outcome={"status": "ok"}, provider_events=(event,))
+
+    class _FakeExecution:
+        working_path = tmp_path
+        identity = SimpleNamespace(scope_instance_id="fake-scope", scope_name="fake")
+
+        def launch_confined(self, command: list[str], confinement: object) -> object:
+            del command, confinement
+            (tmp_path / "index.html").write_text("<!doctype html><title>Claude fake</title>", encoding="utf-8")
+            scratch = tmp_path / ".claude-scratch"
+            scratch.mkdir()
+            (scratch / "transcript.jsonl").write_text("private\n", encoding="utf-8")
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(
+        runtime_provider_module,
+        "_WORKSPACE_RUNTIME_PROVIDER_TRANSPORTS",
+        SimpleNamespace(claude=_FakeClaudeProvider),
+    )
+    monkeypatch.setattr(runtime_provider_module.shutil, "rmtree", lambda path: None)
+    metadata: dict[str, object] = {"launch_confined_attempted": False}
+    provider = ClaudeWorkspaceRuntimeProvider(
+        task_lock=_test_task_lock(),
+        artifact_payload={
+            "entrypoint": {"module": "runtime_provider_tasks", "qualname": "generate"},
+            "files": [
+                {
+                    "path": "runtime_provider_tasks.py",
+                    "content_encoding": "utf-8",
+                    "content": "def generate(repo, *, output_path):\n    '''Write an HTML artifact.'''\n",
+                }
+            ],
+        },
+        kwargs={"output_path": "index.html"},
+        model_name="sonnet",
+        launch_metadata=metadata,
+    )
+
+    with pytest.raises(ProviderInvocationError, match="private runtime cleanup failed"):
+        provider.execute(None, None, None, {}, execution=_FakeExecution(), confinement=object())
+
+    assert (tmp_path / "index.html").exists()
+    assert (tmp_path / ".claude-scratch").exists()
+    assert metadata["launch_confined_attempted"] is True
+    events = metadata["provider_events"]
+    assert isinstance(events, list)
+    assert [event["kind"] for event in events] == ["provider.invocation.started", "provider.invocation.failed"]
+    failed = events[1]
+    assert failed["payload"]["error_type"] == "_ClaudePrivateRuntimeCleanupError"
 
 
 def test_workspace_task_run_static_runtime_provider_publishes_retained_output(
@@ -354,7 +436,7 @@ def test_workspace_run_static_runtime_persists_args_and_artifact_input_refs(
             runtime={"provider": "static"},
         )
         output = producer.output()
-        assert output.read_text("data.json") == '{\n "selected": true\n}'
+        assert output.read_text("data.json") == '{\n  "selected": true\n}'
         assert output.read_json("data.json") == {"selected": True}
 
         artifact_ref = output.artifact("data.json").to_input(label="candidate")

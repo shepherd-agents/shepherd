@@ -73,13 +73,13 @@ SHEPHERD_KERNEL_DOMAIN = CANONICAL_VERSION  # "shepherd.kernel.canonical.v2"
 
 
 def _lift_selector(selector: Any) -> Callable[[Mapping[str, Any]], bool]:
-    """The auto-lift point (triage D1 / forward-compat).
+    """The auto-lift point (triage D1 / P-011 forward-compat).
 
     v1 lifts three forms — a kind string (``"task.invocation"``), an effect
     type (``FileCreate`` — matches recorded-effect entries by type name), or a
     predicate over the event mapping. When the spec's ``Match`` algebra lands
     it compiles to the predicate form and slots into this same parameter;
-    the ``Pattern.event`` lifts from exactly these values. No pattern
+    P-011's ``Pattern.event`` lifts from exactly these values. No pattern
     machinery lives here — this is selection, not matching structure.
     """
     if isinstance(selector, str):

@@ -29,6 +29,18 @@ class MayProfileWideningError(MayProfileError):
     """Raised when a caller tries to widen a task's declared authority."""
 
 
+class HeterogeneousBindingAuthorityError(MayProfileError):
+    """Raised when a run-wide scalar authority is read off a decision whose bindings differ.
+
+    The S2 tripwire (Lane C LC-3): collapsing ``{docs: readonly, backend: readwrite}`` to one
+    scalar either amplifies the most-restricted binding (the profile fallback would make the
+    ReadOnly ``docs`` read as ``"readwrite"``) or downgrades the granted one (the any-clause
+    clamp check). Any consumer that still reads a scalar on the multi-binding path fails loudly
+    here instead of silently mis-enforcing; multi-binding consumers read
+    :meth:`WorkspaceAuthorityDecision.repo_authority_by_binding`.
+    """
+
+
 @dataclass(frozen=True)
 class MayProfile:
     """Normalized workspace-control may profile.
@@ -67,17 +79,55 @@ class WorkspaceAuthorityDecision:
 
     @property
     def repo_authority(self) -> WorkspaceRepoAuthority:
-        """Return the temporary skeleton GitRepo authority."""
+        """Return the temporary skeleton GitRepo authority (single-binding scalar)."""
+        self._refuse_heterogeneous_scalar_read("repo_authority")
         if self.gitrepo_grant_clamp is not None and not _gitrepo_grant_clamp_allows_mutation(self.gitrepo_grant_clamp):
             return "readonly"
         return self.effective.workspace_repo_authority
 
     @property
     def workspace_selection_can_mutate(self) -> bool:
-        """Return whether retained-output selection may mutate workspace."""
+        """Return whether retained-output selection may mutate workspace (single-binding scalar)."""
+        self._refuse_heterogeneous_scalar_read("workspace_selection_can_mutate")
         if self.gitrepo_grant_clamp is not None and not _gitrepo_grant_clamp_allows_mutation(self.gitrepo_grant_clamp):
             return False
         return self.effective.workspace_selection_can_mutate
+
+    def _refuse_heterogeneous_scalar_read(self, scalar: str) -> None:
+        """The S2 tripwire: a run-wide scalar has no sound value when bindings differ.
+
+        Homogeneous decisions (single-binding, pure ``may=``, or all bindings agreeing) keep the
+        scalar surface byte-identical; a heterogeneous per-binding decision makes any scalar read
+        an amplification or loss, so it raises — turning a forgotten LC-3e call-site conversion
+        into a loud seam failure instead of a silent authority bug.
+        """
+        per_binding = self.repo_authority_by_binding()
+        if len(set(per_binding.values())) > 1:
+            raise HeterogeneousBindingAuthorityError(
+                f"WorkspaceAuthorityDecision.{scalar} was read on a per-binding decision whose "
+                f"bindings differ ({per_binding}); a run-wide scalar would amplify or lose a "
+                "binding's authority. Multi-binding consumers must read repo_authority_by_binding()."
+            )
+
+    def repo_authority_by_binding(self) -> dict[str, WorkspaceRepoAuthority]:
+        """Return per-binding GitRepo authority — the LC-3c/S2 non-collapsing view.
+
+        The scalar :attr:`repo_authority` collapses to ``"readonly"`` when *any* clause forbids
+        mutation, which would silently downgrade a ``backend: ReadWrite`` binding in a
+        ``docs: ReadOnly / backend: ReadWrite`` run. This map preserves each binding's authority:
+        a clause is read-only iff its own ``mutates`` is ``False``; otherwise it inherits the
+        effective profile authority. Empty when no per-binding grant is present (the pure ``may=``
+        path). The multi-binding run path (LC-3d/LC-3e) reads this, never the scalar, so no
+        downstream site collapses per-binding authority to one run-wide value.
+        """
+        if self.gitrepo_grant_clamp is None:
+            return {}
+        effective = getattr(self.gitrepo_grant_clamp, "effective", None)
+        clauses = getattr(effective, "clauses", ())
+        return {
+            clause.binding_ref: ("readonly" if clause.mutates is False else self.effective.workspace_repo_authority)
+            for clause in clauses
+        }
 
 
 _MAY_PROFILES: dict[str, MayProfile] = {
@@ -166,13 +216,29 @@ def _clamp_gitrepo_grant_to_profile(profile: MayProfile, gitrepo_grant: Any | No
         clamp_gitrepo_grants,
     )
 
+    # LC-3c / S1 — expand the whole-run ceiling to one clause per *requested* binding, each
+    # inheriting the profile's mutation constraint. `clamp_gitrepo_grants` cross-products
+    # parent x requested clauses and intersects only on exact `binding_ref` equality, so a single
+    # `binding_ref="workspace"` ceiling clamped against per-binding requested clauses
+    # (`docs`/`backend`) would intersect to nothing → `Match.nothing()` → deny-everything
+    # (fail-closed but non-functional). Deriving the ceiling from the requested binding_refs gives
+    # every requested binding a ceiling clause that inherits the constraint:
+    #   * `may="ReadOnly"` (can_mutate False) ⇒ every binding's ceiling clause is `mutates=False`,
+    #     so *every* binding clamps to read-only (the S1 invariant), and
+    #   * a `Permissive`/`ReadWrite` ceiling is `mutates=None` (unconstrained) ⇒ the per-binding
+    #     requested clause stands.
+    # The constraint is *inherited*, never defaulted-open: a binding is never left `mutates=None`
+    # under a read-only profile. A single-binding requested grant (one `"workspace"` clause)
+    # reproduces exactly the prior single-clause ceiling — byte-identical for the v0.1 path.
+    profile_mutates = False if not profile.workspace_selection_can_mutate else None
+    requested_binding_refs = tuple(dict.fromkeys(clause.binding_ref for clause in gitrepo_grant.clauses))
+    if not requested_binding_refs:
+        requested_binding_refs = ("workspace",)
     profile_grant = GitRepoGrantDescriptor(
         grant_ref=f"workspace-effective-profile:{profile.name}",
-        clauses=(
-            GitRepoGrantClause(
-                binding_ref="workspace",
-                mutates=False if not profile.workspace_selection_can_mutate else None,
-            ),
+        clauses=tuple(
+            GitRepoGrantClause(binding_ref=binding_ref, mutates=profile_mutates)
+            for binding_ref in requested_binding_refs
         ),
     )
     return clamp_gitrepo_grants(

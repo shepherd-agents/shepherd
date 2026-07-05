@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-07-05
+
+### Added
+
+- **Per-binding signature grants, enforced at the OS.** A task can declare a
+  read-only or read-write grant per bound `GitRepo`/`Folder` directly in its
+  signature — `docs: May[GitRepo, ReadOnly]`, `backend: May[GitRepo, ReadWrite]`.
+  On a jailed device the grant is compiled to that run's writable roots and
+  enforced at the native syscall jail (macOS Seatbelt; Linux Landlock): a write
+  to a `ReadOnly`-granted root, or to any managed path not covered by a
+  `ReadWrite` grant, is refused at the syscall — before the last undo point, not
+  advised and not caught only at a merge gate.
+- **Named multi-binding acquisition.** `ws.bind(root="backend/", name="backend")`
+  returns the bound handle; `workspace.run(task, bindings={...})` runs a task
+  against more than one named binding. Overlapping or nested binds are refused at
+  bind time (the disjoint-roots invariant that keeps per-binding enforcement
+  sound).
+- **Per-binding changeset views.** `run.changeset(name="backend")` inspects one
+  binding's world output; settlement stays consume-once via `select` / `release`
+  / `discard`.
+- **`shepherd task show`** renders the per-parameter grant surface expanded, so
+  reading the signature is reading the permission surface.
+
+### Notes
+
+- Scope: per-binding whole-profile `ReadOnly`/`ReadWrite` over disjoint named
+  bindings, jailed device, filesystem / Git substrate, same-process
+  value-children. Enforcement is exercised on macOS Seatbelt; Linux Landlock is
+  container-gated. Sub-root / `where(path=...)` grants and write-returning
+  handles are not part of this cut.
+- Internal package version pinning was unified: workspace-internal version
+  floors were removed and the framework family versions aligned to the release.
+
 ## [2.0.0a1] - 2026-01-09
 
 ### Added

@@ -86,7 +86,11 @@ class RunOutputDescriptorLocator:
         if self.frontier_id is not None:
             _require_non_empty_str(self.frontier_id, "frontier_id")
         if self.schema_ref != RUN_OUTPUT_DESCRIPTOR_SCHEMA:
-            raise ValueError("RunOutput descriptor locator schema_ref is unsupported")
+            raise ValueError(
+                f"RunOutput descriptor locator schema_ref is unsupported: {self.schema_ref!r} "
+                f"(expected {RUN_OUTPUT_DESCRIPTOR_SCHEMA!r}). This store may have been written "
+                f"by an incompatible Shepherd version; see durable-state-compatibility (D3)."
+            )
 
 
 def run_output_descriptor_locator_payload(locator: RunOutputDescriptorLocator) -> dict[str, str]:
@@ -108,7 +112,12 @@ def run_output_descriptor_locator_payload(locator: RunOutputDescriptorLocator) -
 def run_output_descriptor_locator_from_payload(payload: dict[str, Any]) -> RunOutputDescriptorLocator:
     """Rehydrate a durable RunOutput descriptor locator payload."""
     if payload.get("schema") != RUN_OUTPUT_DESCRIPTOR_LOCATOR_SCHEMA:
-        raise ValueError("RunOutput descriptor locator payload has unsupported schema")
+        raise ValueError(
+            f"RunOutput descriptor locator payload has unsupported schema: "
+            f"{payload.get('schema')!r} (expected {RUN_OUTPUT_DESCRIPTOR_LOCATOR_SCHEMA!r}). "
+            f"This store may have been written by an incompatible Shepherd version; "
+            f"see durable-state-compatibility (D3)."
+        )
     return RunOutputDescriptorLocator(
         execution_id=_payload_str(payload, "execution_id"),
         output_name=_payload_str(payload, "output_name"),

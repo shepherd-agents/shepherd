@@ -15,7 +15,7 @@ workspace itself is never modified.
 
 Usage:
     python packaging/shepherd-ai/build.py           # build sdist + wheel into dist/
-    python packaging/shepherd-ai/build.py --version 0.1.3
+    python packaging/shepherd-ai/build.py --version 0.2.0
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 STAGE = HERE / "build" / "stage"
-DEFAULT_VERSION = "0.1.3"
+DEFAULT_VERSION = "0.2.0"
 
 # Bundled import package  ->  its src/ directory in the workspace.
 # This is the runtime install closure of `shepherd[providers,contexts]`:

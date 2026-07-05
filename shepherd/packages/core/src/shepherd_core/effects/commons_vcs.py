@@ -241,7 +241,7 @@ class ShepherdCommonsRecorder:
             return
         previous = self._repo.get(previous_head)
         if previous is None or previous.schema_ref != SHEPHERD_EVENT_SCHEMA:
-            raise ShepherdStreamConflictError("previous stream head is missing or is not an shepherd event")
+            raise ShepherdStreamConflictError("previous stream head is missing or is not a shepherd event")
         if previous.body.get("stream_id") != stream_id:
             raise ShepherdStreamConflictError("previous stream head belongs to a different stream")
         expected_sequence = previous.body.get("sequence")
@@ -312,7 +312,7 @@ class ShepherdCommonsRecorder:
         if effect is None:
             raise ShepherdStreamRecoveryError(f"{context} is missing effect object")
         if effect.schema_ref != SHEPHERD_EFFECT_SCHEMA:
-            raise ShepherdStreamRecoveryError(f"{context} effect object is not an shepherd/effect/v1")
+            raise ShepherdStreamRecoveryError(f"{context} effect object is not a shepherd/effect/v1")
         effect_failure = validate_shepherd_effect_v1(effect, Resolver(obj=effect, _backend=self._backend))
         if effect_failure is not None:
             raise ShepherdStreamRecoveryError(
@@ -325,7 +325,7 @@ class ShepherdCommonsRecorder:
         if event is None:
             raise ShepherdStreamRecoveryError(f"{context} is missing event object")
         if event.schema_ref != SHEPHERD_EVENT_SCHEMA:
-            raise ShepherdStreamRecoveryError(f"{context} event object is not an shepherd/event/v1")
+            raise ShepherdStreamRecoveryError(f"{context} event object is not a shepherd/event/v1")
         event_failure = validate_shepherd_event_v1(event, Resolver(obj=event, _backend=self._backend))
         if event_failure is not None:
             raise ShepherdStreamRecoveryError(
@@ -541,7 +541,7 @@ def _validate_previous_event_edges(
 ) -> Failure | None:
     if sequence == 0:
         if previous_edges:
-            return Failure("schema", "shepherd/event/v1 sequence 0 must not have an shepherd.previous edge")
+            return Failure("schema", "shepherd/event/v1 sequence 0 must not have a shepherd.previous edge")
         return None
     if len(previous_edges) != 1:
         return Failure("schema", "shepherd/event/v1 sequence > 0 requires exactly one shepherd.previous edge")
@@ -745,7 +745,7 @@ def project_event_layer(
     if layer.sequence > 0 and previous_event_id is None:
         raise ValueError("sequence > 0 layers require previous_event_id")
     if effect.schema_ref != SHEPHERD_EFFECT_SCHEMA:
-        raise ValueError("effect must be an shepherd/effect/v1 object")
+        raise ValueError("effect must be a shepherd/effect/v1 object")
 
     body: dict[str, Any] = {
         "projection_version": SHEPHERD_EFFECT_PROJECTION_VERSION,

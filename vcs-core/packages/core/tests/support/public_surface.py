@@ -10,6 +10,7 @@ PUBLIC_LOOKING_TOP_LEVEL_MODULES = {
     "discovery",
     "git_store",
     "git_substrate",
+    "keyed_json_tree",
     "manifest",
     "materialization",
     "vcscore",

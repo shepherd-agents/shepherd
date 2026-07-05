@@ -7,11 +7,46 @@ from typing import TYPE_CHECKING
 
 from shepherd_runtime.effects.policy import Match
 from vcs_core import Store, VcsCore, build_builtin_substrate_context
+from vcs_core._permission_plan_evidence import permission_plan_digest
 from vcs_core.substrates import FilesystemSubstrate, MarkerSubstrate
 from vcs_core.types import FileState, normalize_git_filemode
 
 if TYPE_CHECKING:
     from vcs_core._authority import AuthorityOutcome, GitRepoAuthorityRequest
+
+# The authority merge seam requires PermissionPlan monitor evidence (fail-closed
+# since 2026-07-01). This carrier-diff descriptor mirrors the green pattern in
+# vcs-core's own test_authority_merge.py; the digests are opaque test tokens.
+_EFFECTIVE_MATCH_DIGEST = "test-match-integration-effective-match"
+_AUTHORITY_SURFACE_PLAN_DIGEST = "test-match-integration-surface-plan"
+_PERMISSION_PLAN_DESCRIPTOR = {
+    "schema": "shepherd.permission-plan.v1",
+    "fallback": "enforce",
+    "assignments": [
+        {
+            "monitor": "carrier_check_at_commit",
+            "timing": "commit",
+            "route": "carrier_diff",
+            "completeness_basis": "test prepared filesystem carrier diff evidence",
+            "tamper_basis": "test coordinator-owned authority merge",
+            "confinement": None,
+            "evidence": {
+                "effective_match_digest": _EFFECTIVE_MATCH_DIGEST,
+                "authority_surface_plan_digest": _AUTHORITY_SURFACE_PLAN_DIGEST,
+            },
+        }
+    ],
+}
+_PERMISSION_PLAN_DIGEST = permission_plan_digest(_PERMISSION_PLAN_DESCRIPTOR)
+
+
+def _authority_plan_kwargs() -> dict[str, object]:
+    return {
+        "effective_match_digest": _EFFECTIVE_MATCH_DIGEST,
+        "authority_surface_plan_digest": _AUTHORITY_SURFACE_PLAN_DIGEST,
+        "permission_plan_digest": _PERMISSION_PLAN_DIGEST,
+        "permission_plan_descriptor": _PERMISSION_PLAN_DESCRIPTOR,
+    }
 
 
 class _OverlayBackend:
@@ -98,6 +133,7 @@ def test_authority_merge_accepts_shepherd_match_decisions(tmp_path: Path) -> Non
             mg.ground,
             binding_roots={"backend": "backend", "docs": "docs"},
             decide=decide,
+            **_authority_plan_kwargs(),
         )
 
         denied = mg.fork(mg.ground, "match-denied", hints={"isolated": True})
@@ -107,6 +143,7 @@ def test_authority_merge_accepts_shepherd_match_decisions(tmp_path: Path) -> Non
             mg.ground,
             binding_roots={"backend": "backend", "docs": "docs"},
             decide=decide,
+            **_authority_plan_kwargs(),
         )
 
         assert allowed_result.outcome == "allowed"

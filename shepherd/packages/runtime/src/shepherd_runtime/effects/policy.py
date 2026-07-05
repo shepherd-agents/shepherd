@@ -2,7 +2,7 @@
 
 This module owns the small structural ``Match`` / ``Plan`` core used by the
 pre-launch conformance cut. It deliberately does not implement live
-``run.control`` amendment, authority modes, YAML/schema loaders, or
+``run.control`` amendment, P-004 authority modes, YAML/schema loaders, or
 handle-grant enforcement.
 """
 
@@ -328,7 +328,7 @@ class PlanNotExtractable(ValueError):  # noqa: N818
         self.task = task
         self.plan = plan
         self.reason = (
-            "Plan used as may= must declare an allow_only; add.allow_only(...) or pass a Match value directly."
+            "Plan used as may= must declare an allow_only; add .allow_only(...) or pass a Match value directly."
         )
         super().__init__(self.reason)
 
@@ -341,7 +341,7 @@ class OverbroadHandler(ValueError):  # noqa: N818
         self.canonical_form = matcher.canonical()
         self.install_site = install_site
         super().__init__(
-            f"OverbroadHandler at {install_site}: handle({matcher!r},...) installed with an overbroad matcher; "
+            f"OverbroadHandler at {install_site}: handle({matcher!r}, ...) installed with an overbroad matcher; "
             "use a narrower matcher or observe(...) for broad taps."
         )
 

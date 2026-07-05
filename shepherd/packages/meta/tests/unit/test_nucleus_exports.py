@@ -47,6 +47,13 @@ def test_top_level_facade_exposes_spine_and_handle_surface() -> None:
         assert getattr(shepherd, name) is not None
 
 
+def test_path_scoped_grant_spelling_is_not_a_top_level_export() -> None:
+    # P-030 v0.2 fence: sub-root/path-scoped grants are not part of the claim, so the GitRepoPath
+    # spelling is not exposed on the top-level handle surface.
+    assert not hasattr(shepherd, "GitRepoPath")
+    assert "GitRepoPath" not in shepherd.__all__
+
+
 def test_class_form_markers_are_not_top_level_nucleus_exports() -> None:
     removed_names = ("Input", "Output", "Context", "TaskRef", "InputMarker")
 

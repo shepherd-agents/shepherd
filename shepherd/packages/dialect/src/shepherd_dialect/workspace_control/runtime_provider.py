@@ -7,6 +7,7 @@ import json
 import shutil
 import sys
 from collections.abc import Callable, Mapping
+from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, Literal
@@ -35,6 +36,15 @@ _CLAUDE_PRIVATE_RUNTIME_DIRS = (CLAUDE_WORKSPACE_INPUT_DIR, ".claude-scratch", "
 
 class WorkspaceRuntimePlanError(ValueError):
     """Raised when a workspace-control runtime envelope cannot be planned."""
+
+
+class _ClaudePrivateRuntimeCleanupError(RuntimeError):
+    """Raised when private Claude runtime paths remain after cleanup."""
+
+    def __init__(self, details: tuple[str, ...]) -> None:
+        self.details = details
+        suffix = "; ".join(details)
+        super().__init__(f"Claude private runtime cleanup failed; refusing retained publication: {suffix}")
 
 
 @dataclass(frozen=True)
@@ -325,9 +335,11 @@ class ClaudeWorkspaceRuntimeProvider:
             provider = _WORKSPACE_RUNTIME_PROVIDER_TRANSPORTS.claude(invocation)
             result = provider.execute(None, stack, context, {}, execution=proxied_execution, confinement=confinement)
         except ProviderInvocationError as exc:
+            _scrub_claude_private_runtime_dirs_best_effort(root)
             _record_provider_events(self.launch_metadata, exc.provider_events)
             raise
         except Exception as exc:
+            _scrub_claude_private_runtime_dirs_best_effort(root)
             events = _claude_runtime_failure_events(
                 provider_id=self.provider_id,
                 model_name=self.model_name,
@@ -337,8 +349,19 @@ class ClaudeWorkspaceRuntimeProvider:
             )
             _record_provider_events(self.launch_metadata, events)
             raise ProviderInvocationError(str(exc), provider_events=events) from exc
-        finally:
+
+        try:
             _scrub_claude_private_runtime_dirs(root)
+        except _ClaudePrivateRuntimeCleanupError as exc:
+            events = _claude_runtime_failure_events(
+                provider_id=self.provider_id,
+                model_name=self.model_name,
+                execution=execution,
+                prompt=prompt,
+                exc=exc,
+            )
+            _record_provider_events(self.launch_metadata, events)
+            raise ProviderInvocationError(str(exc), provider_events=events) from exc
 
         provider_events = tuple(getattr(result, "provider_events", ()))
         _record_provider_events(self.launch_metadata, provider_events)
@@ -582,15 +605,29 @@ def _stage_claude_input_artifacts(root: Path, artifacts: tuple[WorkspaceRuntimeI
 
 
 def _scrub_claude_private_runtime_dirs(root: Path) -> None:
+    cleanup_errors: list[str] = []
     for dirname in _CLAUDE_PRIVATE_RUNTIME_DIRS:
         target = root / dirname
         try:
             if target.is_dir() and not target.is_symlink():
-                shutil.rmtree(target, ignore_errors=True)
+                shutil.rmtree(target)
             else:
                 target.unlink(missing_ok=True)
-        except OSError:
-            pass
+        except OSError as exc:
+            cleanup_errors.append(f"{dirname}: {type(exc).__name__}: {exc}")
+    remaining = [
+        dirname
+        for dirname in _CLAUDE_PRIVATE_RUNTIME_DIRS
+        if (root / dirname).exists() or (root / dirname).is_symlink()
+    ]
+    if cleanup_errors or remaining:
+        remaining_errors = tuple(f"{dirname}: still exists after cleanup" for dirname in remaining)
+        raise _ClaudePrivateRuntimeCleanupError((*cleanup_errors, *remaining_errors))
+
+
+def _scrub_claude_private_runtime_dirs_best_effort(root: Path) -> None:
+    with suppress(_ClaudePrivateRuntimeCleanupError):
+        _scrub_claude_private_runtime_dirs(root)
 
 
 def _claude_runtime_failure_events(

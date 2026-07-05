@@ -16,7 +16,9 @@ import shepherd as sp
 
 TASK_ID = "quickstart.write_note"
 TASK_SOURCE = '''
-def write_note(repo, topic: str, output_path: str, output_text: str):
+import shepherd as sp
+
+def write_note(repo: sp.May[sp.GitRepo, sp.ReadWrite], topic: str, output_path: str, output_text: str):
     """Write one quickstart note into a retained workspace output."""
     raise RuntimeError("provider-owned task bodies are prompts/contracts, not local Python")
 '''
@@ -41,7 +43,6 @@ def main() -> None:
                 "output_path": "SHEPHERD_QUICKSTART.txt",
                 "output_text": "Hello from a Shepherd retained output.\\n",
             },
-            may="ReadWrite",
             placement="advisory",
             runtime={"provider": "static"},
         )

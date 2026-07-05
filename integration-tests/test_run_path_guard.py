@@ -74,11 +74,28 @@ _SANCTIONED = "launch_confined"
 
 @dataclass(frozen=True)
 class Violation:
-    """One banned executor call: where, and which API."""
+    """One banned executor call: where, which API, and the enclosing symbol."""
 
     filename: str
     lineno: int
     api: str
+    symbol: str  # innermost def/class enclosing the call, or "<module>"
+
+
+# Each entry is a deliberate, reviewed grant of parent-side executor use on the
+# run path. A key pins (filename, api, symbol); if the pinned symbol or api
+# changes, the entry goes stale and the guard FAILS — re-review, don't rename.
+# Target size is ZERO: every entry is a debt the credential/egress broker seam
+# (W3.2 / g07) is meant to retire.
+RATIFIED_PARENT_EFFECTS: dict[tuple[str, str, str], str] = {
+    ("providers.py", "subprocess.run", "_read_host_claude_login"): (
+        "D1 2026-07-04: subscription-auth credential seeding (public PR#7). Reads the macOS "
+        "keychain (`security find-generic-password`) in the PARENT and copies raw credential "
+        "bytes into the jailed run's scratch CLAUDE_CONFIG_DIR so a signed-in `claude` CLI works "
+        "like an env-carried key. Fail-soft by design (keyless run on any error). Migrates to the "
+        "credential-broker seam (W3.2/g07); retire this entry when it does."
+    ),
+}
 
 
 def _import_maps(tree: ast.AST) -> tuple[dict[str, str], dict[str, tuple[str, str]]]:
@@ -121,17 +138,64 @@ def _resolve(call: ast.Call, amap: dict[str, str], fmap: dict[str, tuple[str, st
     return None
 
 
+def _symbol_spans(tree: ast.AST) -> list[tuple[int, int, str]]:
+    """Return (start, end, name) for every def/class in the tree.
+
+    A call line maps to its innermost enclosing symbol. Widest-first; the last
+    match at a line wins.
+    """
+    spans: list[tuple[int, int, str]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            spans.append((node.lineno, node.end_lineno or node.lineno, node.name))
+    spans.sort(key=lambda s: (s[0], -(s[1] - s[0])))
+    return spans
+
+
+def _enclosing_symbol(spans: list[tuple[int, int, str]], lineno: int) -> str:
+    """Innermost def/class containing ``lineno`` ("<module>" if none)."""
+    found = "<module>"
+    for start, end, name in spans:
+        if start <= lineno <= end:
+            found = name  # spans are outer-first at a given start; inner ones come later
+    return found
+
+
 def find_violations(source: str, filename: str, *, role: str) -> list[Violation]:
     """Scan one module; containment_impl is the sanctioned-spawn role."""
     if role == "containment_impl":
         return []  # the jail IS the sanctioned spawn; raw subprocess is its mechanism.
     tree = ast.parse(source, filename=filename)
     amap, fmap = _import_maps(tree)
+    spans = _symbol_spans(tree)
     return [
-        Violation(filename, node.lineno, api)
+        Violation(filename, node.lineno, api, _enclosing_symbol(spans, node.lineno))
         for node in ast.walk(tree)
         if isinstance(node, ast.Call) and (api := _resolve(node, amap, fmap)) is not None
     ]
+
+
+def partition_ratified(
+    violations: list[Violation],
+) -> tuple[list[Violation], list[tuple[str, str, str]]]:
+    """Split scanned violations against RATIFIED_PARENT_EFFECTS.
+
+    Returns (unratified, stale_keys):
+      - unratified: violations with no ratifying table entry — hard failures;
+      - stale_keys: table keys that matched NOTHING this scan — the pin drifted
+        (symbol/api renamed or the call removed), also a hard failure so the
+        table can never rot into a rubber stamp.
+    """
+    matched: set[tuple[str, str, str]] = set()
+    unratified: list[Violation] = []
+    for v in violations:
+        key = (v.filename, v.api, v.symbol)
+        if key in RATIFIED_PARENT_EFFECTS:
+            matched.add(key)
+        else:
+            unratified.append(v)
+    stale = [k for k in RATIFIED_PARENT_EFFECTS if k not in matched]
+    return unratified, stale
 
 
 def scan_paths(paths: list[Path], *, impl_files: frozenset[str]) -> list[Violation]:
@@ -148,11 +212,23 @@ def scan_paths(paths: list[Path], *, impl_files: frozenset[str]) -> list[Violati
 
 
 def test_run_path_invokes_no_executor_outside_launch_confined() -> None:
-    """The live invariant against the production dialect run path."""
+    """The live invariant against the production dialect run path.
+
+    Every executor call on the run path must go through ``launch_confined``,
+    OR be a deliberate, reviewed entry in ``RATIFIED_PARENT_EFFECTS``. An
+    unratified call fails; a ratified entry that no longer matches anything
+    (a stale pin) also fails — so the table stays honest.
+    """
     assert RUN_PATH.is_dir(), f"run path missing: {RUN_PATH}"
     violations = scan_paths([RUN_PATH], impl_files=IMPL_FILES)
-    assert violations == [], (
-        f"Executor call(s) outside launch_confined in the dialect run path (real ⇒ jailed, layer b): {violations!r}"
+    unratified, stale = partition_ratified(violations)
+    assert unratified == [], (
+        "Executor call(s) outside launch_confined in the dialect run path "
+        f"(real ⇒ jailed, layer b), not in RATIFIED_PARENT_EFFECTS: {unratified!r}"
+    )
+    assert stale == [], (
+        "Stale RATIFIED_PARENT_EFFECTS entries — the pinned call was renamed or "
+        f"removed; re-review and update the table: {stale!r}"
     )
 
 
@@ -187,3 +263,52 @@ def test_containment_backends_are_impl_not_run_path() -> None:
     """The jail IS the sanctioned spawn; its raw subprocess is allowed."""
     raw = "import subprocess\ndef launch(profile, root, cmd):\n    return subprocess.run(cmd)\n"
     assert find_violations(raw, "_seatbelt_containment.py", role="containment_impl") == []
+
+
+# --- The ratification mechanism (W1b.1) ---------------------------------------
+
+
+def test_violation_captures_enclosing_symbol() -> None:
+    """A violation records the innermost def enclosing the call."""
+    src = "import subprocess\ndef outer():\n    def inner():\n        subprocess.run(['x'])\n"
+    (v,) = find_violations(src, "m.py", role="run_path")
+    assert (v.api, v.symbol) == ("subprocess.run", "inner")
+
+
+def test_ratified_entry_is_accepted_and_matches_the_live_pin() -> None:
+    """The D1 keychain read is the one accepted parent-side executor call."""
+    violations = scan_paths([RUN_PATH], impl_files=IMPL_FILES)
+    unratified, stale = partition_ratified(violations)
+    assert unratified == []
+    assert stale == []
+    # exactly one ratified entry, and it is the PR#7 keychain read
+    assert set(RATIFIED_PARENT_EFFECTS) == {("providers.py", "subprocess.run", "_read_host_claude_login")}
+
+
+def test_unratified_call_still_fails() -> None:
+    """A second, unlisted parent-side spawn is reported even amid ratified ones."""
+    src = (
+        "import subprocess\n"
+        "def _read_host_claude_login():\n"
+        "    return subprocess.run(['security'])\n"  # would-be ratified symbol...
+        "def _sneaky():\n"
+        "    return subprocess.run(['curl'])\n"  # ...but this one is not
+    )
+    violations = find_violations(src, "providers.py", role="run_path")
+    unratified, _ = partition_ratified(violations)
+    assert [v.symbol for v in unratified] == ["_sneaky"]
+
+
+def test_ratification_is_symbol_specific_not_file_wide() -> None:
+    """Same file + same api but a DIFFERENT symbol is not covered by the pin."""
+    src = "import subprocess\ndef some_other_fn():\n    return subprocess.run(['security'])\n"
+    violations = find_violations(src, "providers.py", role="run_path")
+    unratified, _ = partition_ratified(violations)
+    assert [(v.filename, v.api, v.symbol) for v in unratified] == [("providers.py", "subprocess.run", "some_other_fn")]
+
+
+def test_stale_ratified_entry_is_a_failure() -> None:
+    """A table key matching nothing in a scan is surfaced as stale."""
+    violations = find_violations("def unrelated():\n    return 1\n", "providers.py", role="run_path")
+    _, stale = partition_ratified(violations)
+    assert ("providers.py", "subprocess.run", "_read_host_claude_login") in stale

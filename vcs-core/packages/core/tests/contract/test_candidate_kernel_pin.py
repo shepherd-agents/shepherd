@@ -272,7 +272,7 @@ def test_operation_final_payload_persisted_shape_frozen(tmp_path) -> None:
     # One real (stable, unpinned) digest value: content_digest hashes only the JSON
     # payload, so it pins the canonical-hash path end-to-end without clock-pinning.
     assert payload["candidate_outcomes"][0]["content_digest"] == (
-        "sha256:411cee49a625817b2b0eaf8599191cb610253f353e70f899c0fcd14161a34478"
+        "sha256:1a9417386b64865fc607b6f304225c3d6d09671f578e9da6c7861b72095df162"
     ), _FIX
 
     redacted = _redact(payload)

@@ -36,7 +36,7 @@ def _register_provider(scope: Any) -> None:
     provider_cls = providers.get("claude") or providers.get("openai") or providers.get("mock")
     if provider_cls is None:
         msg = (
-            "No LLM provider found. Install an shepherd provider package "
+            "No LLM provider found. Install a shepherd provider package "
             "(e.g. shepherd-provider-claude) or set SHEPHERD_PROVIDER."
         )
         raise RuntimeError(msg)

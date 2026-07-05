@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-coding"
-version = "0.1.0a1"
+version = "0.2.0"
 description = "Coding domain package for the Shepherd framework - GitHub integration and code review tasks"
 readme = "README.md"
 license = { text = "MIT" }
@@ -20,8 +20,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "shepherd-core>=2.0.0a1,<3.0.0",
-    "shepherd-runtime>=0.1.0a1,<1.0.0",
+    "shepherd-core",
+    "shepherd-runtime",
 ]
 
 [project.optional-dependencies]

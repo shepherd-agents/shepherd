@@ -21,6 +21,7 @@ from shepherd_dialect.workspace_control.authority import (
     May,
     ReadOnly,
     ReadWrite,
+    _allow_path_prefix_grants,
     build_gitrepo_field_authority_surface,
     clamp_gitrepo_grants,
     decide_gitrepo_authority_request,
@@ -204,10 +205,13 @@ def test_unsupported_may_profile_fails_closed() -> None:
 
 
 def test_public_may_gitrepo_grant_annotation_lowers_to_descriptor() -> None:
-    descriptor = gitrepo_grant_descriptor_from_may_annotation(
-        May[GitRepo, GitRepoPath("src/app")],
-        grant_ref="signature:repo",
-    )
+    # Path-scoped grants are fenced out of the public v0.2 seam; the internal
+    # adoption-boundary lane compiles them through the private escape.
+    with _allow_path_prefix_grants():
+        descriptor = gitrepo_grant_descriptor_from_may_annotation(
+            May[GitRepo, GitRepoPath("src/app")],
+            grant_ref="signature:repo",
+        )
 
     assert descriptor is not None
     assert descriptor.to_descriptor() == {
@@ -221,6 +225,60 @@ def test_public_may_gitrepo_grant_annotation_lowers_to_descriptor() -> None:
             }
         ],
     }
+
+
+def test_public_may_gitrepo_path_grant_refused_at_runtime_seam_by_default() -> None:
+    # P-030 v0.2 fence: without the private escape, a path-scoped grant is refused at the public
+    # runtime seam — via the GitRepoPath factory, a bare GitRepoGrant(path_prefix=...), and a
+    # pre-built descriptor carrying a path clause (including a multi-clause descriptor).
+    for annotation in (
+        May[GitRepo, GitRepoPath("src/app")],
+        May[GitRepo, GitRepoGrant(path_prefix="src/app")],
+        May[
+            GitRepo,
+            GitRepoGrantDescriptor(
+                grant_ref="signature:repo",
+                clauses=(
+                    GitRepoGrantClause(binding_ref="workspace"),
+                    GitRepoGrantClause(binding_ref="workspace", path_prefix="src/app"),
+                ),
+            ),
+        ],
+    ):
+        with pytest.raises(ValueError, match=r"not part of the P-030 v0\.2 claim"):
+            gitrepo_grant_descriptor_from_may_annotation(annotation, grant_ref="signature:repo")
+
+
+def test_public_may_gitrepo_whole_profile_grants_pass_the_seam() -> None:
+    # ReadOnly/ReadWrite are GitRepoGrant instances with path_prefix=None; they always pass.
+    for grant in (ReadOnly, ReadWrite):
+        descriptor = gitrepo_grant_descriptor_from_may_annotation(
+            May[GitRepo, grant],
+            grant_ref="signature:repo",
+        )
+        assert descriptor is not None
+        assert all(clause.path_prefix is None for clause in descriptor.clauses)
+
+
+def test_path_scoped_descriptor_rehydrates_through_read_path_without_the_fence() -> None:
+    # P-030 v0.2 fence — read-path positive control. The fence lives only at the two *public
+    # compile* seams; it must be provably ABSENT from ``from_descriptor`` rehydration, because a
+    # persisted ``RunAuthorityContext`` legitimately carries ``path_prefix`` clauses (internal
+    # adoption-boundary / settlement machinery). If the fence ever crept into the read path, a
+    # stored authority context would fail to load and settlement evidence would become unreadable.
+    stored = GitRepoGrantDescriptor(
+        grant_ref="signature:repo",
+        clauses=(
+            GitRepoGrantClause(binding_ref="workspace"),
+            GitRepoGrantClause(binding_ref="workspace", path_prefix="src/app"),
+        ),
+    ).to_descriptor()
+
+    # No ``_allow_path_prefix_grants`` scope here: rehydration is not a compile seam, so it must
+    # succeed unconditionally and preserve the path-scoped clause byte-for-byte.
+    rehydrated = GitRepoGrantDescriptor.from_descriptor(stored)
+    assert [clause.path_prefix for clause in rehydrated.clauses] == [None, "src/app"]
+    assert rehydrated.to_descriptor() == stored
 
 
 def test_public_may_gitrepo_readonly_narrows_workspace_authority_decision() -> None:

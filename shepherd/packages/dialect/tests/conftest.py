@@ -2,11 +2,22 @@
 
 from __future__ import annotations
 
+import sys
 import tempfile
 from pathlib import Path
 
 import pytest
 from vcs_core.types import FileState, normalize_git_filemode
+
+# The root pytest config uses --import-mode=importlib, which does NOT insert a
+# test's rootpath onto sys.path the way the default prepend mode does. A handful
+# of tests import the shared doubles as a top-level package (`from support...`).
+# Put this tests/ dir on sys.path so that resolves under both the standalone
+# dialect run and the aggregate `make test` (shepherd/packages) run. Safe: this
+# is the only `support` package under shepherd/packages, so no collision.
+_TESTS_DIR = str(Path(__file__).resolve().parent)
+if _TESTS_DIR not in sys.path:
+    sys.path.insert(0, _TESTS_DIR)
 
 
 class InMemoryOverlayBackend:

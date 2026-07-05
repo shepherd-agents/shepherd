@@ -63,7 +63,6 @@ if TYPE_CHECKING:
         Flow,
         FlowControlClient,
         GitRepoGrant,
-        GitRepoPath,
         May,
         ReadOnly,
         ReadWrite,
@@ -73,7 +72,7 @@ if TYPE_CHECKING:
         WorkspaceTask,
     )
 
-__version__ = "2.0.0a1"
+__version__ = "0.2.0"
 
 # The handle surface, resolved lazily (PEP 562). Every name here lives in
 # ``shepherd_dialect.workspace_control``; importing that module pulls ``vcs_core``
@@ -93,7 +92,6 @@ _LAZY: frozenset[str] = frozenset(
         "ReadOnly",
         "ReadWrite",
         "GitRepoGrant",
-        "GitRepoPath",
         "Flow",
         "FlowControlClient",
     }
@@ -185,7 +183,6 @@ __all__ = [  # noqa: RUF022
     "ReadOnly",
     "ReadWrite",
     "GitRepoGrant",
-    "GitRepoPath",
     "Flow",
     "FlowControlClient",
 ]

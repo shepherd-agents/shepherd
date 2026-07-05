@@ -18,7 +18,13 @@ _ERROR_SCHEMA = "shepherd.workspace_control.confined_task_error.v1"
 
 @dataclass(frozen=True)
 class _ConfinedCarrierGitRepo:
-    """Minimal artifact-runner GitRepo over the confined process cwd."""
+    """Minimal artifact-runner GitRepo over one bound root inside the confined process cwd.
+
+    The single-binding form roots at the working path (``binding="workspace"``); a Lane C
+    per-binding handle roots at its bound subtree, so a write path is relative to *its own*
+    root and the in-body authority check enforces that binding's clamped grant — the second
+    enforcement layer beneath the syscall jail.
+    """
 
     root: Path
     authority: str
@@ -28,10 +34,10 @@ class _ConfinedCarrierGitRepo:
         _validate_workspace_relative_path(path)
         if not isinstance(content, bytes):
             raise TypeError("content must be bytes")
-        if self.binding != "workspace":
-            raise RuntimeError("confined workspace GitRepo only supports workspace binding")
         if self.authority != "readwrite":
-            raise PermissionError(f"GitRepoHandle.write is not permitted under authority={self.authority!r}")
+            raise PermissionError(
+                f"GitRepoHandle.write is not permitted under authority={self.authority!r} for binding {self.binding!r}"
+            )
         if not isinstance(mode, int):
             raise TypeError("mode must be an int")
         target = self.root / PurePosixPath(path)
@@ -53,24 +59,66 @@ def main(argv: list[str] | None = None) -> int:
         module_name = _required_str(entrypoint, "module")
         qualname = _required_str(entrypoint, "qualname")
         kwargs = dict(_optional_mapping(request, "kwargs"))
-        repo_payload = _required_mapping(request, "repo")
-        repo = _ConfinedCarrierGitRepo(
-            root=Path.cwd(),
-            authority=_required_str(repo_payload, "authority"),
-            binding=_required_str(repo_payload, "binding"),
-        )
+        repo_payload = request.get("repo")
+        bindings_payload = request.get("bindings")
+        if (repo_payload is None) == (bindings_payload is None):
+            raise ValueError("confined task request must carry exactly one of 'repo' or 'bindings'")
         sys.path.insert(0, source_root)
         module = importlib.import_module(module_name)
         task_body = _resolve_qualname(module, qualname)
         if not callable(task_body):
             raise TypeError(f"task artifact entrypoint {module_name}:{qualname} is not callable")
-        result = task_body(repo, **kwargs)
+        if repo_payload is not None:
+            # v0.1 single-binding: one whole-working-path handle, first positional argument.
+            if not isinstance(repo_payload, Mapping):
+                raise TypeError("confined task request field 'repo' must be an object")
+            repo = _ConfinedCarrierGitRepo(
+                root=Path.cwd(),
+                authority=_required_str(repo_payload, "authority"),
+                binding=_required_str(repo_payload, "binding"),
+            )
+            result = task_body(repo, **kwargs)
+        else:
+            # Lane C LC-3e/LC-3f: one handle per named binding, injected by parameter name,
+            # each rooted at its own sub-root with its own clamped authority.
+            handles = _binding_handles(bindings_payload, kwargs)
+            result = task_body(**handles, **kwargs)
         sys.stdout.write(json.dumps({"schema": _RESULT_SCHEMA, "status": "ok", "result": _portable(result)}))
         sys.stdout.write("\n")
         return 0
     except BaseException as exc:  # noqa: BLE001 - report task/runtime failures to the parent runner.
         _write_error(exc)
         return 2
+
+
+def _binding_handles(bindings_payload: object, kwargs: Mapping[str, Any]) -> dict[str, _ConfinedCarrierGitRepo]:
+    """Build per-binding handles from a Lane C ``bindings`` request (fail-closed).
+
+    Each entry names its task parameter, binding, clamped authority, and working-path-relative
+    root. Param collisions (with ``kwargs`` or another binding) and non-relative roots refuse —
+    a malformed request never runs with ambiguous or escaped authority.
+    """
+    if not isinstance(bindings_payload, list) or not bindings_payload:
+        raise TypeError("confined task request field 'bindings' must be a non-empty array")
+    handles: dict[str, _ConfinedCarrierGitRepo] = {}
+    for raw in bindings_payload:
+        if not isinstance(raw, Mapping):
+            raise TypeError("each confined task binding entry must be an object")
+        param = _required_str(raw, "param")
+        binding = _required_str(raw, "binding")
+        authority = _required_str(raw, "authority")
+        root_rel = raw.get("root", "")
+        if not isinstance(root_rel, str):
+            raise TypeError("confined task binding field 'root' must be a string")
+        if root_rel in {"", "."}:
+            root = Path.cwd()
+        else:
+            _validate_workspace_relative_path(root_rel)
+            root = Path.cwd() / PurePosixPath(root_rel)
+        if param in kwargs or param in handles:
+            raise ValueError(f"confined task binding parameter {param!r} collides with another argument")
+        handles[param] = _ConfinedCarrierGitRepo(root=root, authority=authority, binding=binding)
+    return handles
 
 
 def _read_request(path: Path) -> Mapping[str, object]:

@@ -47,14 +47,21 @@ class WorkspaceTask:
     def run(
         self,
         *,
-        repo: GitRepo,
+        repo: GitRepo | None = None,
+        bindings: Mapping[str, GitRepo] | None = None,
         args: Mapping[str, Any] | None = None,
         may: str | None = None,
         placement: Literal["auto", "advisory", "jail"] = "auto",
         runtime: Mapping[str, object] | None = None,
     ) -> WorkspaceRun:
-        """Run this task through the workspace-control handle-in facade."""
-        return self._workspace.run(self.ref, repo=repo, args=args, may=may, placement=placement, runtime=runtime)
+        """Run this task through the workspace-control handle-in facade.
+
+        Exactly one of ``repo`` (single selected binding) / ``bindings`` (named
+        multi-binding, Lane C) is given — parity with :meth:`ShepherdWorkspace.run`.
+        """
+        return self._workspace.run(
+            self.ref, repo=repo, bindings=bindings, args=args, may=may, placement=placement, runtime=runtime
+        )
 
     def to_json(self) -> dict[str, object]:
         """Return a compact JSON-shaped projection."""

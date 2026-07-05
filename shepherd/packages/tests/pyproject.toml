@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd-tests"
-version = "1.0.0a1"
+version = "0.2.0"
 description = "Shared test utilities for Shepherd packages"
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10.0,<4.0.0"
 dependencies = [
-    "shepherd-core>=2.0.0a1",
-    "shepherd-runtime>=0.1.0a1,<1.0.0",
+    "shepherd-core",
+    "shepherd-runtime",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
 ]
