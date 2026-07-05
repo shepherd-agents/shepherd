@@ -75,15 +75,19 @@ def _coerce(value: Any, annotation: Any) -> Any:
 
 
 def task(fn=None, *, may=None, name=None, guidance=None):
-    """Declare a typed task (simulation). Mirrors the bodyless-docstring rule."""
+    """Declare a typed task (simulation).
+
+    Mirrors the real 0.2.0 validation: every parameter must be annotated (the
+    signature is the contract); a docstring is recommended but not required.
+    """
 
     def _wrap(target):
-        doc = inspect.getdoc(target)
-        if not (doc or guidance):
-            raise TypeError(
-                f"Bodyless callable task {target.__qualname__} must declare a docstring "
-                "or guidance= to use as the model-call goal"
-            )
+        sig = inspect.signature(target)
+        for pname, param in sig.parameters.items():
+            if param.annotation is inspect.Parameter.empty:
+                raise TypeError(
+                    f"Callable task {target.__qualname__} parameter {pname!r} must be annotated"
+                )
         hints = get_type_hints(target)
         ret = hints.get("return")
 

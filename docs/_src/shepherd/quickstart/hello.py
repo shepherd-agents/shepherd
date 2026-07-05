@@ -12,7 +12,7 @@ def implement(repo: sp.May[sp.GitRepo, sp.ReadWrite], feature: str) -> str:
 
 
 @sp.task
-def oversee(worker, repo: sp.May[sp.GitRepo, sp.ReadWrite], feature: str) -> str:
+def oversee(worker: object, repo: sp.May[sp.GitRepo, sp.ReadWrite], feature: str) -> str:
     """Run the worker on the feature. If its tests fail, revert and retry, then report."""
 
 

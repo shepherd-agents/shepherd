@@ -24,10 +24,12 @@ def test_main_runs_end_to_end():
     assert main().verdict == "approve"
 
 
-def test_bodyless_task_requires_docstring():
+def test_task_parameters_must_be_annotated():
+    # Real 0.2.0 rule (the signature is the contract): every task parameter must
+    # be annotated. A docstring is recommended but not required.
     import pytest
 
-    with pytest.raises(TypeError, match="docstring or guidance"):
+    with pytest.raises(TypeError, match="must be annotated"):
         @sp.task
-        def nameless(x: str) -> str:  # pragma: no cover - definition itself raises
-            pass
+        def unannotated(x) -> str:  # pragma: no cover - definition itself raises
+            """Do a thing."""
