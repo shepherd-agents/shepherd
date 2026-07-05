@@ -5,11 +5,21 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import pytest
+
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 VCS_CORE_ROOT = PACKAGE_ROOT.parents[1]
 WORKSPACE_ROOT = VCS_CORE_ROOT.parent
 CONVERGENCE_ROOT = WORKSPACE_ROOT / "docs" / "engineering" / "convergence"
 RELEASE_READINESS_DOC = WORKSPACE_ROOT / "260619-release-readiness.md"
+
+# The public source cut omits docs/engineering, vcs-core/design, and the root
+# planning notes these contracts read; skip cleanly there instead of failing on
+# FileNotFoundError (the internal tree always has them, so nothing skips here).
+requires_internal_docs = pytest.mark.skipif(
+    not (CONVERGENCE_ROOT.is_dir() and (VCS_CORE_ROOT / "design").is_dir()),
+    reason="internal engineering/design docs are not present in this checkout",
+)
 
 ROOT_READER_DOC_PATHS = (
     VCS_CORE_ROOT / "README.md",
@@ -113,6 +123,7 @@ def test_package_readme_keeps_the_package_local_testing_story_truthful() -> None
     assert "RUN_NAME" in text
 
 
+@requires_internal_docs
 def test_substrate_guide_teaches_the_public_authoring_surface() -> None:
     """The substrate-implementation guide must teach the stable public surface,
     not the private definition module, and must cover the out-of-tree and
@@ -133,6 +144,7 @@ def test_substrate_guide_teaches_the_public_authoring_surface() -> None:
     assert "from vcs_core._substrate_driver import" not in guide
 
 
+@requires_internal_docs
 def test_live_command_runtime_docs_do_not_teach_retired_record_invocation() -> None:
     for path in COMMAND_RUNTIME_CONTRACT_DOC_PATHS:
         text = _read(path)
@@ -149,6 +161,7 @@ def test_current_convergence_docs_use_installed_cli_name_for_exec() -> None:
         assert "mg exec" not in text, f"{path} reintroduced shorthand `mg exec`; use `vcs-core exec`"
 
 
+@requires_internal_docs
 def test_live_command_runtime_docs_do_not_contain_mechanical_replacement_artifacts() -> None:
     for path in COMMAND_RUNTIME_CONTRACT_TEXT_PATHS:
         text = _read(path)
@@ -156,6 +169,7 @@ def test_live_command_runtime_docs_do_not_contain_mechanical_replacement_artifac
             assert artifact not in text, f"{path} contains mechanical replacement artifact {artifact!r}"
 
 
+@requires_internal_docs
 def test_runtime_call_api_does_not_reopen_resolved_boundary_questions() -> None:
     text = _read(WORKSPACE_ROOT / "docs" / "engineering" / "convergence" / "runtime-call-api.md")
 
@@ -173,6 +187,7 @@ def test_runtime_call_api_does_not_reopen_resolved_boundary_questions() -> None:
     assert "`backend-handle-dissolves` decision removed that reach" in text
 
 
+@requires_internal_docs
 def test_live_command_runtime_docs_name_the_stable_spi_and_runtime_api_homes() -> None:
     runtime_call_api = _read(WORKSPACE_ROOT / "docs" / "engineering" / "convergence" / "runtime-call-api.md")
     execution_boundary = _read(WORKSPACE_ROOT / "docs" / "engineering" / "convergence" / "execution-boundary.md")
@@ -197,6 +212,7 @@ def test_live_command_runtime_docs_name_the_stable_spi_and_runtime_api_homes() -
     assert "The SPI is the substrate-authoring contract under `vcs_core.experimental.spi`" not in squashed_spi_reference
 
 
+@requires_internal_docs
 def test_release_readiness_doc_pins_current_command_surface() -> None:
     text = _squash(_read(RELEASE_READINESS_DOC))
 
@@ -216,6 +232,7 @@ def test_release_readiness_doc_pins_current_command_surface() -> None:
         assert phrase in text
 
 
+@requires_internal_docs
 def test_current_command_surface_docs_do_not_teach_retired_compatibility_paths() -> None:
     # These name retired symbols as data. Build the sensitive tokens with `+`
     # so no intact retired identifier ever appears in this file's source (not
@@ -244,6 +261,7 @@ def test_current_command_surface_docs_do_not_teach_retired_compatibility_paths()
             assert phrase not in text, f"{path} teaches retired command-surface guidance: {phrase!r}"
 
 
+@requires_internal_docs
 def test_primary_onboarding_docs_keep_store_first_as_default_path() -> None:
     package_readme = _read(PACKAGE_ROOT / "README.md")
     guides_index = _read(VCS_CORE_ROOT / "design" / "guides" / "README.md")
@@ -329,6 +347,7 @@ def test_contributing_mentions_standalone_review_routing() -> None:
     assert "../.github/CODEOWNERS" not in text
 
 
+@requires_internal_docs
 def test_workspace_boundary_contract_is_documented_on_durable_surfaces() -> None:
     package_readme = _read(PACKAGE_ROOT / "README.md")
     model = _read(VCS_CORE_ROOT / "design" / "overview" / "MODEL.md")
@@ -352,6 +371,7 @@ def test_workspace_boundary_contract_is_documented_on_durable_surfaces() -> None
     assert "real world" not in cli_porcelain
 
 
+@requires_internal_docs
 def test_capture_authority_docs_match_linked_reducer_contract() -> None:
     package_readme = _read(PACKAGE_ROOT / "README.md")
     model = _read(VCS_CORE_ROOT / "design" / "overview" / "MODEL.md")
@@ -386,6 +406,7 @@ def test_current_docs_do_not_reintroduce_cli_state_authority() -> None:
         assert "cli_state" not in text, f"{path} reintroduced removed CLI state authority"
 
 
+@requires_internal_docs
 def test_active_prelaunch_slice_folder_only_contains_current_active_work() -> None:
     active_dir = VCS_CORE_ROOT / "design" / "roadmap" / "prelaunch-slices" / "active"
     active_readme = _read(active_dir / "README.md")
@@ -427,6 +448,7 @@ def test_active_prelaunch_slice_folder_only_contains_current_active_work() -> No
         assert phrase not in bundle_readme
 
 
+@requires_internal_docs
 def test_current_rebase_docs_are_explicitly_deferred_and_unimplemented() -> None:
     rebase_docs = {
         path: text
@@ -443,6 +465,7 @@ def test_current_rebase_docs_are_explicitly_deferred_and_unimplemented() -> None
         assert "deferred" in text.lower(), f"{path} mentions rebase without marking it deferred"
 
 
+@requires_internal_docs
 def test_current_world_vector_docs_track_substrate_driver_cutover() -> None:
     world_vectors = VCS_CORE_ROOT / "design" / "roadmap" / "substrate-framework" / "world-vectors"
     architecture = _read(world_vectors / "ARCHITECTURE-world-vectors.md")

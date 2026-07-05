@@ -6,6 +6,7 @@ import importlib
 import re
 from pathlib import Path
 
+import pytest
 import vcs_core as vcs_core_pkg
 from vcs_core.spi import __all__ as spi_all
 
@@ -219,6 +220,13 @@ def test_only_allowlisted_guides_may_mention_internal_runtime_helper_module() ->
     assert leaking_guides == []
 
 
+requires_design_guides = pytest.mark.skipif(
+    not (Path(__file__).resolve().parents[4] / "design" / "guides").is_dir(),
+    reason="vcs-core/design guides are not present in this checkout (public source cut)",
+)
+
+
+@requires_design_guides
 def test_boundary_guides_use_supported_public_built_in_helper() -> None:
     guides_root = _vcscore_root() / "design" / "guides"
 

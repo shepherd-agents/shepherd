@@ -5,6 +5,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+import pytest
+
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 REPO_ROOT = PACKAGE_ROOT.parents[2]
 SCRIPTS = [
@@ -14,6 +16,14 @@ SCRIPTS = [
     REPO_ROOT / "scripts" / "vcs-core-capture-shakeout.sh",
     REPO_ROOT / "scripts" / "vcs-core-tour-demo.sh",
 ]
+
+
+# The public source cut omits the repo-root podman harness scripts these
+# contracts read; skip cleanly there (the internal tree always has them).
+pytestmark = pytest.mark.skipif(
+    not (REPO_ROOT / "scripts" / "vcs-core-podman.sh").exists(),
+    reason="repo-root podman harness scripts are not present in this checkout",
+)
 
 
 def test_podman_harness_scripts_have_valid_bash_syntax() -> None:
