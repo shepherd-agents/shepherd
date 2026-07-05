@@ -1,18 +1,34 @@
 {
-  "_comment": "SIMULATED capture of `shepherd --help` output (surface). A checked fixture standing in for the unshipped CLI so the generate+drift pipeline is exercised end-to-end. Re-capture from the real CLI when it ships (DESIGN Phase 3).",
-  "captured": "simulated (spec)",
-  "commands": [
-    {
-      "name": "shepherd",
-      "help": "Usage: shepherd [OPTIONS] COMMAND [ARGS]...\n\n Build and run agent systems.\n\nCommands:\n init Create or update project configuration.\n doctor Report providers, placements, and capability gaps.\n demo Run the packaged first-run demo (--offline by default).\n provider List, show, login, and check model providers.\n placement List, show, check, and configure runnable environments.\n workflow List, show, install, configure, and run packaged workflows.\n run Run a task or workflow by id.\n runs List and inspect recorded runs."
-    },
-    {
-      "name": "shepherd demo",
-      "help": "Usage: shepherd demo [--offline]\n\n Run the packaged first-run demo.\n\n --offline Use the deterministic offline provider (no credentials, no cost)."
-    },
-    {
-      "name": "shepherd workflow",
-      "help": "Usage: shepherd workflow COMMAND [ARGS]...\n\nCommands:\n list List installed workflow manifests. [--json]\n show Show one workflow's manifest. [--json]\n install Install a workflow package from PyPI.\n configure Write project/local workflow configuration.\n run Run a workflow by canonical id."
-    }
-  ]
+ "_comment": "Real capture of `shepherd --help` and subcommand help from the shipped 0.2.0 wheel (shepherd-ai). Re-capture with scripts against the installed CLI when the surface changes.",
+ "captured": "real (shepherd-ai 0.2.0)",
+ "commands": [
+  {
+   "name": "shepherd",
+   "help": "Usage: shepherd [OPTIONS] COMMAND [ARGS]...\n\n  Shepherd — effect-based AI agent framework.\n\nOptions:\n  --version  Show the version and exit.\n  --help     Show this message and exit.\n\nCommands:\n  demo     Emit checked-in quickstart demo scripts.\n  doctor   Check whether the current directory is ready for the quickstart.\n  init     Initialize PATH as a Shepherd workspace.\n  package  Create and manage Shepherd extension packages.\n  run      Inspect runs and settle retained outputs; start is a fenced...\n  task     Manage and inspect task-library entries."
+  },
+  {
+   "name": "shepherd run",
+   "help": "Usage: shepherd run [OPTIONS] COMMAND [ARGS]...\n\n  Inspect runs and settle retained outputs; start is a fenced compatibility\n  entry point.\n\nOptions:\n  --help  Show this message and exit.\n\nCommands:\n  changeset                       Inspect the read-only changeset view...\n  discard                         Discard one retained run output as...\n  list                            List run summaries from the selected...\n  output-citations                List raw run-ledger output citations...\n  outputs                         List product run outputs after...\n  publish-retained-workspace-output\n                                  Publish or repair the retained...\n  release                         Release one retained run output...\n  select                          Select one retained run output into...\n  show                            Show one run record from the...\n  start                           Run the fenced compatibility start...\n  trace                           Print the materialized trace...\n  trace-revision                  Print the run-trace summary for one...\n  vcscore                         Show the vcs-core citations carried..."
+  },
+  {
+   "name": "shepherd task",
+   "help": "Usage: shepherd task [OPTIONS] COMMAND [ARGS]...\n\n  Manage and inspect task-library entries.\n\nOptions:\n  --help  Show this message and exit.\n\nCommands:\n  list      List task summaries from the selected task ledger.\n  register  Register a task import path as an active task version.\n  resolve   Resolve a task ref to an exact artifact lock.\n  show      Show one task definition and its signature/permission surface."
+  },
+  {
+   "name": "shepherd demo",
+   "help": "Usage: shepherd demo [OPTIONS] COMMAND [ARGS]...\n\n  Emit checked-in quickstart demo scripts.\n\nOptions:\n  --help  Show this message and exit.\n\nCommands:\n  write  Write demo NAME to standard output."
+  },
+  {
+   "name": "shepherd doctor",
+   "help": "Usage: shepherd doctor [OPTIONS] [COMMAND] [ARGS]...\n\n  Check whether the current directory is ready for the quickstart.\n\nOptions:\n  --json                          Emit machine-readable readiness JSON.\n  --backend [auto|clonefile|fuse|kernel|copy]\n                                  Workspace backend to validate.  [default:\n                                  auto]\n  --help                          Show this message and exit.\n\nCommands:\n  claude  Check whether the live Claude runtime lane is available."
+  },
+  {
+   "name": "shepherd init",
+   "help": "Usage: shepherd init [OPTIONS] [PATH]\n\n  Initialize PATH as a Shepherd workspace.\n\n  This creates or reuses ``.vcscore`` in PATH, validates the workspace-control\n  substrate, and leaves ordinary Git history untouched. Use ``sp package init\n  NAME`` for package scaffolding.\n\nOptions:\n  --backend [auto|clonefile|fuse|kernel|copy]\n                                  Filesystem carrier backend to validate with.\n                                  [default: auto]\n  --adopt [none|git-head|worktree]\n                                  Record an existing project baseline into\n                                  Shepherd custody.  [default: worktree]\n  --init-git / --no-init-git      Initialize a Git repository when PATH is not\n                                  already inside one.  [default: init-git]\n  --help                          Show this message and exit."
+  },
+  {
+   "name": "shepherd package",
+   "help": "Usage: shepherd package [OPTIONS] COMMAND [ARGS]...\n\n  Create and manage Shepherd extension packages.\n\nOptions:\n  --help  Show this message and exit.\n\nCommands:\n  init  Create a new Shepherd package."
+  }
+ ]
 }

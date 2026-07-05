@@ -1,14 +1,26 @@
 {
   "facade": "shepherd",
   "generator": "scripts/gen_shepherd_api_inventory.py",
-  "note": "Pre-rename facade; DESIGN S7 retargets to `shepherd`.",
-  "symbol_count": 27,
+  "note": "Generated from the shipped `shepherd` facade __all__; the handle/grant surface is listed as runtime-resolved (offline docs build cannot import it).",
+  "symbol_count": 39,
   "symbols": {
     "Artifact": {
       "doc_hash": "471e8c479c15b415",
       "kind": "class",
       "signature": "class Artifact",
       "source": "shepherd_runtime.nucleus.Artifact"
+    },
+    "Changeset": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.Changeset"
+    },
+    "ChangesetStat": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.ChangesetStat"
     },
     "DeliveryException": {
       "doc_hash": "cd3b8c735727525e",
@@ -40,6 +52,18 @@
       "signature": "class EffectSurfaceTooWide(Exception)",
       "source": "shepherd_runtime.effects.EffectSurfaceTooWide"
     },
+    "Flow": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.Flow"
+    },
+    "FlowControlClient": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.FlowControlClient"
+    },
     "GitRepo": {
       "doc_hash": "974f810bb73184d9",
       "kind": "class",
@@ -52,11 +76,23 @@
       "signature": "class GitRepoBasis",
       "source": "shepherd_runtime.nucleus.GitRepoBasis"
     },
+    "GitRepoGrant": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.GitRepoGrant"
+    },
     "Match": {
       "doc_hash": "d5c6d0b854066bb2",
       "kind": "class",
       "signature": "class Match",
       "source": "shepherd_runtime.effects.Match"
+    },
+    "May": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.May"
     },
     "OverbroadHandler": {
       "doc_hash": "e2dc2e752866b6a9",
@@ -82,6 +118,18 @@
       "signature": "class PlanNotExtractable(ValueError)",
       "source": "shepherd_runtime.effects.PlanNotExtractable"
     },
+    "ReadOnly": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.ReadOnly"
+    },
+    "ReadWrite": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.ReadWrite"
+    },
     "Run": {
       "doc_hash": "04326a44cf18d540",
       "kind": "class",
@@ -94,11 +142,23 @@
       "signature": "class RunInProgress(_NucleusError)",
       "source": "shepherd_runtime.nucleus.RunInProgress"
     },
+    "RunOutput": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.RunOutput"
+    },
     "RunRef": {
       "doc_hash": "3f3e11670cd2d01c",
       "kind": "class",
       "signature": "class RunRef",
       "source": "shepherd_runtime.nucleus.RunRef"
+    },
+    "ShepherdWorkspace": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.ShepherdWorkspace"
     },
     "Subset": {
       "doc_hash": "a0732a24bb421696",
@@ -111,6 +171,18 @@
       "kind": "class",
       "signature": "class Workspace",
       "source": "shepherd_runtime.nucleus.Workspace"
+    },
+    "WorkspaceRun": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.WorkspaceRun"
+    },
+    "WorkspaceTask": {
+      "doc_hash": "",
+      "kind": "handle-surface (runtime-resolved)",
+      "signature": "",
+      "source": "shepherd_dialect.workspace_control.WorkspaceTask"
     },
     "ask": {
       "doc_hash": "3204b2f3607a652a",

@@ -59,6 +59,30 @@ def facade_map() -> tuple[list[str], dict[str, str]]:
     return exports, source
 
 
+def deferred_exports() -> tuple[list[str], dict[str, str]]:
+    """(names, {name: 'module.name'}) for __all__ exports whose source is the
+    lazily-imported handle surface (``shepherd_dialect``). These are real public
+    symbols; the import-light docs build cannot griffe-render them (importing
+    ``shepherd_dialect`` pulls ``vcs_core``/``pygit2``), so the inventory lists
+    them as runtime-resolved rather than dropping them."""
+    tree = ast.parse(FACADE_INIT.read_text(encoding="utf-8"))
+    exports: list[str] = []
+    source: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            for alias in node.names:
+                source[alias.asname or alias.name] = f"{node.module}.{alias.name}"
+        elif isinstance(node, ast.Assign) and any(
+            isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets
+        ):
+            exports = [e.value for e in getattr(node.value, "elts", []) if isinstance(e, ast.Constant)]
+    deferred = [
+        e for e in exports
+        if not e.startswith("__") and source.get(e, "").startswith(DEFERRED_SOURCE_PREFIX)
+    ]
+    return deferred, source
+
+
 def _fmt_sig(obj) -> str:
     kind = obj.kind.value
     if kind == "function":
@@ -118,6 +142,20 @@ def symbol_info() -> list[dict]:
         except Exception as exc: # keep generation total; surface in the page/snapshot
             info["signature"] = f"<unresolved: {type(exc).__name__}>"
         out.append(info)
+    # The lazily-imported handle/grant surface (per-binding grants, workspace
+    # run/output/settlement nouns). Real public exports; listed here as
+    # runtime-resolved because the offline docs build cannot import them.
+    deferred, dsource = deferred_exports()
+    for name in deferred:
+        target = dsource.get(name, f"{FACADE_IMPORT}.{name}")
+        out.append({
+            "name": name,
+            "source": target,
+            "target": target,
+            "kind": "handle-surface (runtime-resolved)",
+            "signature": "",
+            "doc_hash": "",
+        })
     return out
 
 

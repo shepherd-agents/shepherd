@@ -15,21 +15,27 @@ PAGE = PROTO / "docs/shepherd/reference/cli.md"
 
 HEAD = """# CLI
 
-> Page status: scaffold
-> Source state: checked-fixture
-> Applies to: Shepherd v0.1.1-dev
+> Page status: release-ready
+> Source state: shipped-source
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/gen_cli_reference.py --check
 
 *Reference. Exact, generated facts. The mental model lives in concepts, recipes in guides.*
 
-!!! warning "CLI not shipped yet"
-    The Shepherd CLI has not shipped. This page previews the planned command
-    surface; the commands below are not runnable yet.
+The `shepherd` command (also installed as `sp`) ships in 0.2.0. The help blocks
+below are captured verbatim from the shipped CLI. Read-only listings accept
+`--json` for a durable machine payload.
 
-The command groups follow: first-run (`init`, `doctor`, `demo`),
-`provider`, `placement`, `workflow`, and `run`/`runs`. Read-only listings
-support `--json`.
+**Read vs. settle — the identity rule.** Read commands (`show`, `changeset`,
+`trace`, …) accept selectors: `--latest` and a unique short run-id prefix.
+Settlement commands (`select` / `release` / `discard`) require an *exact* run
+identity and reject selectors. Settlement is consume-once: after one records its
+outcome, the others refuse for that output.
+
+`run start` is a fenced compatibility entry point, not the normal launch path —
+it fails closed unless `SHEPHERD_ENABLE_FENCED_RUN_START=1` is set. The sanctioned
+Python launch is `workspace.run(...)`.
 """
 
 
