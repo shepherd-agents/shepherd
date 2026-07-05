@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd-export"
-version = "0.1.0a1"
+version = "0.2.0"
 description = "Public trajectory export and import surfaces for the Shepherd framework"
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10.0,<4.0.0"
 dependencies = [
-    "shepherd-core>=2.0.0a1,<3.0.0",
+    "shepherd-core",
 ]
 
 [dependency-groups]

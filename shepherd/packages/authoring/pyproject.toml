@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-authoring"
-version = "0.1.0a1"
+version = "0.2.0"
 description = "Design-refinement pipeline for the Shepherd framework"
 readme = "README.md"
 license = { text = "MIT" }
@@ -19,9 +19,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "shepherd-core>=2.0.0a1,<3.0.0",
-    "shepherd-runtime>=0.1.0a1",
-    "shepherd-contexts>=0.1.0a1",
+    "shepherd-core",
+    "shepherd-runtime",
+    "shepherd-contexts",
     "pyyaml>=6.0",
 ]
 

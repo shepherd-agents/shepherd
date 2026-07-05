@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd"
-version = "2.0.0a1"
+version = "0.2.0"
 description = "Effect-based framework for building AI agents with multi-provider support"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -22,10 +22,10 @@ classifiers = [
 ]
 dependencies = [
     # Core framework (always required)
-    "shepherd-core>=2.0.0a1,<3.0.0",
-    "shepherd-dialect>=0.1.0a1,<1.0.0",
-    "shepherd-export>=0.1.0a1,<1.0.0",
-    "shepherd-runtime>=0.1.0a1,<1.0.0",
+    "shepherd-core",
+    "shepherd-dialect",
+    "shepherd-export",
+    "shepherd-runtime",
     # CLI
     "click>=8.0",
 ]
@@ -45,35 +45,35 @@ shepherd-sandboxes = { workspace = true }
 [project.optional-dependencies]
 # Provider implementations
 providers = [
-    "shepherd-providers>=1.0.0a1,<2.0.0",
+    "shepherd-providers",
 ]
 
 # Execution contexts
 contexts = [
-    "shepherd-contexts>=1.0.0a1,<2.0.0",
+    "shepherd-contexts",
 ]
 
 # Banking domain
 banking = [
-    "shepherd-banking>=0.1.0a1,<1.0.0",
+    "shepherd-banking",
 ]
 
 # Remote sandbox integrations
 sandboxes = [
-    "shepherd-sandboxes>=0.1.0a1,<1.0.0",
+    "shepherd-sandboxes",
 ]
 
 # Advanced transform / grounding tooling
 transform = [
-    "shepherd-transform>=0.1.0a1,<1.0.0",
+    "shepherd-transform",
 ]
 
 # Individual SDK dependencies (for direct installation)
 claude = [
-    "shepherd-providers[claude]>=1.0.0a1,<2.0.0",
+    "shepherd-providers[claude]",
 ]
 openai = [
-    "shepherd-providers[openai]>=1.0.0a1,<2.0.0",
+    "shepherd-providers[openai]",
 ]
 
 # Development dependencies

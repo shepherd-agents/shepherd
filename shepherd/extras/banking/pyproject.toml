@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-banking"
-version = "0.1.0a1"
+version = "0.2.0"
 description = "Banking domain package for the Shepherd framework"
 readme = "README.md"
 license = { text = "MIT" }
@@ -19,8 +19,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "shepherd-core>=2.0.0a1,<3.0.0",
-    "shepherd-runtime>=0.1.0a1,<1.0.0",
+    "shepherd-core",
+    "shepherd-runtime",
 ]
 
 [project.optional-dependencies]

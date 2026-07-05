@@ -49,7 +49,7 @@ Each context module also exports its domain-specific effects:
 
 from __future__ import annotations
 
-__version__ = "1.0.0a1"
+__version__ = "0.2.0"
 
 # Workspace context
 # App Store context

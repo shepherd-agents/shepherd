@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-trace-viewer"
-version = "0.1.0a1"
+version = "0.2.0"
 description = "Local viewer for durable Shepherd task-trace revisions"
 readme = "README.md"
 license = { text = "MIT" }

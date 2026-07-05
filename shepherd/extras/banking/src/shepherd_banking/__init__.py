@@ -53,7 +53,7 @@ from __future__ import annotations
 
 from shepherd_core.package import package
 
-__version__ = "0.1.0a1"
+__version__ = "0.2.0"
 
 # Context
 from shepherd_banking.contexts import BankingContext
