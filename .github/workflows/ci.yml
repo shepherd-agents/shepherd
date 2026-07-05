@@ -31,13 +31,6 @@ jobs:
     # needed, so these run on ubuntu-latest. Package-scoped guards run with
     # `uv run --directory <pkg>` because the `shepherd2/` project directory
     # shadows the installed `shepherd2` package under pytest's root-dir import.
-    #
-    # DEFERRED (tracked, not yet gated): integration-tests/test_run_path_guard.py,
-    # integration-tests/test_d2_boundary.py, and
-    # integration-tests/test_shepherd_vcscore_import_boundaries.py currently fail
-    # against live public source (the run-path executor read in providers.py and
-    # the meta -> vcs_core._identity boundary violation). Add them here once the
-    # WS-A boundary-seam and run-path executor fixes are exported.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,6 +43,15 @@ jobs:
           uv run pytest -q
           shepherd/integration-tests/test_import_boundaries.py
           shepherd/packages/kernel-v3-reference/tests/test_import_boundaries.py
+      - name: Boundary + run-path guards
+        # Previously documented-deferred: these failed against live public source
+        # until the 0.2.0 export landed the WS-A boundary-seam and run-path
+        # executor fixes. Now gated so the next regression is caught at the PR.
+        run: >
+          uv run pytest -q
+          integration-tests/test_run_path_guard.py
+          integration-tests/test_d2_boundary.py
+          integration-tests/test_shepherd_vcscore_import_boundaries.py
       - name: Skeleton / import guards (shepherd2)
         run: >
           uv run --directory shepherd2 pytest -q
@@ -63,6 +65,15 @@ jobs:
           uv run --directory shepherd/packages/dialect pytest -q
           -m "not workspace_smoke"
           tests/test_workspace_control_fenced_run_start.py
+      - name: Grant-vocabulary guard (dialect)
+        # Asserts the durable May/grant vocabulary constants; safe here since the
+        # 0.2.0 export shipped the constants it reads.
+        run: >
+          uv run --directory shepherd/packages/dialect pytest -q
+          tests/test_workspace_control_vocabulary.py
+      - name: Kernel-v3 conformance + goldens
+        run: >
+          uv run --directory shepherd/packages/kernel-v3-reference pytest -q
 
   test:
     name: Tests (macOS · clonefile carrier)
@@ -81,3 +92,48 @@ jobs:
         run: make baseline
       - name: Quickstart integration test
         run: uv run pytest integration-tests/test_quickstart_core.py -q
+      - name: Release evidence — Lane C jail gate (executed, not skipped)
+        # Runs the per-binding grant acceptance gate (A1-A7) to a JUnit report,
+        # then scripts/check_executed_evidence.py fails the job unless all 10
+        # gate ids were collected AND passed with the 7 jailed legs skip-free —
+        # a runner that cannot establish the Seatbelt jail reads as RED here,
+        # never as silent green. This is the same sentinel the 0.2.0 release
+        # evidence packet cites, so packet and CI assert one mechanism.
+        #
+        # Known low-frequency flake in this lane: the run-ledger publish
+        # pack-entry race (maintainers: internal register ISS-001) —
+        # load/order-sensitive, observed ~1-in-7 under narrowed mixed selections
+        # on `test_a5_all_writable_advisory_run_records_advisory`; a diagnostic
+        # trap exists for it. On its first occurrence here, open a public issue
+        # from ISS-001 and link it in this comment; until then a red on that leg
+        # is re-runnable. Do NOT wrap these legs in a retry: a retry on enforcement
+        # evidence converts a loud failure into silent flakiness, which is
+        # exactly what this sentinel exists to prevent.
+        #
+        # Test-infra note: if a parallel (-n) pytest lane is ever added to this
+        # workflow, give it a per-invocation --basetemp so the shared
+        # pytest-of-$USER tmp janitor cannot race live siblings (ISS-004).
+        run: make release-evidence-lane-c
+
+  deep-tests:
+    name: Deep tests (merge to main · macOS)
+    # Merge-only heavy lane: the suites verified on the 0.2.0 assembly host,
+    # kept off the per-PR path for budget. macOS runner because that is the
+    # platform these suites are exercised on (the vcs-core containment tests
+    # and the dialect carrier canaries are Darwin-shaped; an ubuntu leg can be
+    # added once verified there).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --all-packages --all-groups --all-extras
+      - name: vcs-core unit + contract suites
+        run: >
+          uv run pytest -q
+          vcs-core/packages/core/tests/unit
+          vcs-core/packages/core/tests/contract
+      - name: Dialect suite (workspace-control + Lane C)
+        run: uv run --directory shepherd/packages/dialect pytest -q
