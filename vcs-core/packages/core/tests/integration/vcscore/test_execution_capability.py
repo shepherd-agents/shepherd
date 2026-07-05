@@ -389,6 +389,28 @@ def test_selectable_driver_refused_at_bridge(tmp_path: Path) -> None:
 # --- PD2: the reversible wrap -------------------------------------------------
 
 
+def test_ground_scope_mount_path_is_the_real_workspace_not_a_carrier(tmp_path: Path) -> None:
+    """The auditable-ground invariant, pinned in the store's owning package (W2b).
+
+    A non-reversible / ground run writes to the *real* working copy so its
+    residue is auditable and persists through failure. PR#4's always-on
+    copy-carrier floor regressed ``overlay_mount_path_for_scope(ground)`` to a
+    carrier layer, silently breaking this — caught only by ``skeleton/tests``,
+    which the public cut drops. This pin lives where the contract is owned:
+    even with a carrier backend present, ground resolves to the real workspace.
+    """
+    root = tmp_path / "ws"
+    mg, _driver, backend = _make_env(root)
+    try:
+        assert backend is not None  # a carrier IS present — the regression condition
+        ground_mount = mg.overlay_mount_path_for_scope(mg.ground)
+        assert ground_mount.resolve() == root.resolve(), (
+            f"ground scope must mount the real workspace, never a carrier layer (got {ground_mount!r})"
+        )
+    finally:
+        mg.deactivate()
+
+
 def test_reversible_run_forks_isolated_and_merges_on_success(
     env: tuple[VcsCore, _RunDriver, MockOverlayBackend],
 ) -> None:

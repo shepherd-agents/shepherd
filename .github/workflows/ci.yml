@@ -25,6 +25,45 @@ jobs:
       - name: Ruff lint
         run: uv run ruff check .
 
+  gates:
+    name: Gates (fast guards)
+    # Fast, platform-independent guard tests. No workspace carrier or jail is
+    # needed, so these run on ubuntu-latest. Package-scoped guards run with
+    # `uv run --directory <pkg>` because the `shepherd2/` project directory
+    # shadows the installed `shepherd2` package under pytest's root-dir import.
+    #
+    # DEFERRED (tracked, not yet gated): integration-tests/test_run_path_guard.py,
+    # integration-tests/test_d2_boundary.py, and
+    # integration-tests/test_shepherd_vcscore_import_boundaries.py currently fail
+    # against live public source (the run-path executor read in providers.py and
+    # the meta -> vcs_core._identity boundary violation). Add them here once the
+    # WS-A boundary-seam and run-path executor fixes are exported.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --all-packages --all-groups --all-extras
+      - name: Import-boundary guards
+        run: >
+          uv run pytest -q
+          shepherd/integration-tests/test_import_boundaries.py
+          shepherd/packages/kernel-v3-reference/tests/test_import_boundaries.py
+      - name: Skeleton / import guards (shepherd2)
+        run: >
+          uv run --directory shepherd2 pytest -q
+          tests/test_import_boundaries.py
+          tests/test_skeleton_imports.py
+      - name: Fenced-run-start guard (dialect)
+        # Only the carrier-free fail-closed guards run here; the `workspace_smoke`
+        # canaries in this file build a real clonefile carrier (macOS-only) and
+        # belong on the carrier-capable lane, not this platform-independent job.
+        run: >
+          uv run --directory shepherd/packages/dialect pytest -q
+          -m "not workspace_smoke"
+          tests/test_workspace_control_fenced_run_start.py
+
   test:
     name: Tests (macOS · clonefile carrier)
     # The default workspace carrier is APFS clonefile, so the substrate +

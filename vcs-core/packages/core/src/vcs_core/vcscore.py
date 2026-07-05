@@ -2943,7 +2943,14 @@ class VcsCore:
         filesystem = self._filesystem_overlay_substrate()
         if filesystem is None:
             return Path(self._workspace).resolve()
-        mount_path = filesystem.overlay_mount_path(self._overlay_base_scope_name(scope))
+        base = self._overlay_base_scope_name(scope)
+        if base == self.ground.name:
+            # Ground is the real working copy, never a carrier layer. The loud
+            # non-reversible opt-out (isolation="ground") must keep writing
+            # auditable residue to the actual workspace even now that carrier
+            # auto-resolution always finds a backend (copy-carrier floor).
+            return Path(self._workspace).resolve()
+        mount_path = filesystem.overlay_mount_path(base)
         if mount_path is None:
             return Path(self._workspace).resolve()
         return mount_path

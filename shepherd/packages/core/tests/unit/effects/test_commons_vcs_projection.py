@@ -227,10 +227,10 @@ def test_project_effect_stream_has_stable_representative_object_ids() -> None:
     projected = project_effect_stream(layers, stream_id="stream-a")
 
     assert [obj.id for obj in projected.objects] == [
-        "sha256:6a121935a2b433011b7ee2c9135da49ec23259cf1000d4b8849db0f2dea2ae5a",
-        "sha256:9af987a81a87de077786253267151418f529d15b5e75709a644b833eb0cce0f3",
-        "sha256:c3e9c96a861c6870dbeb61e8e0dda42236085c638eb195dfcbb99486d9369ed8",
-        "sha256:d2820ddabc6031ea600abf17a928c7096e4233cafc1890b5acfbcd45cc42755b",
+        "sha256:3002ed5853acad390c583c528fa457ef1a236e8a0729419cbbe4cfcd39558a51",
+        "sha256:170042815bce0e3d8359bc26f040fc3a32f3442ecb5b08e6896af8dd41be88d0",
+        "sha256:daf0581af353b45b7d889621acb83e05f6723c89192f39474533d82653269349",
+        "sha256:b5eabb6b44047a37b01a6f81bde24524c4b65d9e589571f527573ad2f156bfe7",
     ]
 
 

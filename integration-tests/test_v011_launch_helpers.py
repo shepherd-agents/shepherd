@@ -6,7 +6,11 @@ import sys
 from pathlib import Path
 
 import pytest
-from shepherd_dialect.workspace_control import RUN_ARTIFACT_INPUT_SCHEMA, ShepherdWorkspace
+from shepherd_dialect.workspace_control import (
+    RUN_ARTIFACT_INPUT_SCHEMA,
+    RunArtifactInputRef,
+    ShepherdWorkspace,
+)
 
 REPO = Path(__file__).resolve().parents[1]
 VISUAL_ARTIFACT_EXAMPLE = REPO / "examples" / "notebooks" / "visual_artifact"
@@ -276,6 +280,47 @@ def test_launch_helper_rejects_non_artifact_ref_values(launch_helpers, value: ob
         assert tuple(run.run_ref for run in workspace.flow.runs()) == before
     finally:
         workspace.close()
+
+
+def _guard_ref(*, label: str | None = None) -> RunArtifactInputRef:
+    return RunArtifactInputRef(
+        run_ref="run-source",
+        output_id="output-source",
+        path="source.json",
+        label=label,
+        content_digest="sha256:" + ("1" * 64),
+    )
+
+
+def test_launch_helper_rejects_skeleton_prefixed_artifact_ref_names(launch_helpers) -> None:
+    """The reserved-name guard must fence skeleton_* refs (not every name)."""
+    ref = _guard_ref()
+
+    for reserved in ("output_path", "output_text", "output_content", "artifact_path", "artifact_text", "runtime"):
+        with pytest.raises(ValueError, match="artifact ref name is reserved"):
+            launch_helpers._validated_artifact_refs({reserved: ref})
+
+    with pytest.raises(ValueError, match="artifact ref name is reserved"):
+        launch_helpers._validated_artifact_refs({"skeleton_internal": ref})
+
+    with pytest.raises(ValueError, match="artifact refs must be a non-empty mapping"):
+        launch_helpers._validated_artifact_refs({})
+
+
+def test_launch_helper_accepts_ordinary_artifact_ref_names(launch_helpers) -> None:
+    """Regression pin for the ``startswith("")`` tautology: ordinary names pass.
+
+    The tautology rejected every ref name as reserved; an ordinary ``source``
+    ref must validate and canonicalize instead of being fenced.
+    """
+    validated = launch_helpers._validated_artifact_refs({"source": _guard_ref(label="source").to_json()})
+
+    assert set(validated) == {"source"}
+    ref = validated["source"]
+    assert isinstance(ref, RunArtifactInputRef)
+    assert ref.run_ref == "run-source"
+    assert ref.path == "source.json"
+    assert ref.label == "source"
 
 
 def _input_labels_for_run(launch_helpers: object, workspace: object, run: object) -> set[str]:

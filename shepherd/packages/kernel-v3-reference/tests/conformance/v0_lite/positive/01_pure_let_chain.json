@@ -47,8 +47,8 @@
     "completed_value": 1,
     "batches": [
       {
-        "transition_id": "kernel-replay-transition:sha256:a4f838e33b267eafa2762d8806d218290dbe922b06b3a80cd7e425c6ed2d760b",
-        "idempotency_key": "idempotency:kernel-replay-transition:sha256:a4f838e33b267eafa2762d8806d218290dbe922b06b3a80cd7e425c6ed2d760b",
+        "transition_id": "kernel-replay-transition:sha256:673c7570570f779706d35978c583a515940c85bd9cfdf95afed46ab10e6073ec",
+        "idempotency_key": "idempotency:kernel-replay-transition:sha256:673c7570570f779706d35978c583a515940c85bd9cfdf95afed46ab10e6073ec",
         "transition_kind": "initial_run_prefix",
         "admission_basis": null,
         "profile": "core_reference_v0_lite",

@@ -44,8 +44,8 @@
     "completed_value": 99,
     "batches": [
       {
-        "transition_id": "kernel-replay-transition:sha256:1d81f072d80d22f0e3a898282eaee58f6699ed3de2cd0ec8129d7e87164fb879",
-        "idempotency_key": "idempotency:kernel-replay-transition:sha256:1d81f072d80d22f0e3a898282eaee58f6699ed3de2cd0ec8129d7e87164fb879",
+        "transition_id": "kernel-replay-transition:sha256:3f73873a8b7e98334232e18134d19e1ab7770aa9e8ecf9c43112b7e5850f196c",
+        "idempotency_key": "idempotency:kernel-replay-transition:sha256:3f73873a8b7e98334232e18134d19e1ab7770aa9e8ecf9c43112b7e5850f196c",
         "transition_kind": "initial_run_prefix",
         "admission_basis": null,
         "profile": "core_reference_v0_lite",
@@ -58,39 +58,64 @@
             "program_ref": "program:sha256:c9263ad5469683fe8e630b072fc937060704142f8cdb1ea54e977a9310901c26",
             "effect_kind": "ask",
             "payload": null,
-            "full_continuation_ref": "continuation-object:sha256:631e348c7f6c67f2fb075d246c9e265149a643d50fa8bafd5876f424cc6e3437",
+            "full_continuation_ref": "continuation-object:sha256:39800ead05d1bae4da250069e704af2d91ea627d54f95a1bb71cecd2832fbde6",
             "branch_ref": "branch:root",
             "payload_schema_ref": null,
             "operation_result_schema_ref": null,
-            "execution_context_ref": "ctx:sha256:4324ada2ffb8f610a578d9bb44735911a4cf325bfe351536662114ff2125bbc3"
+            "execution_context_ref": "ctx:sha256:e03b19f0fbd53df90b5f2c7fc3ba3a88861fad5facb16626c60c2e9bd3f287bd"
           }
         ],
         "ref_map": {
           "entries": [
             [
               "declaration:0",
-              "declaration:sha256:1c2484f2062c64f55587d78c643b2326a590a37b51afd21b1b44fa5c7e9d2486"
+              "declaration:sha256:9400b732bb9fbb17214af38e397bd54131acc0a32acc241226108702b4a00877"
             ]
           ],
           "map_schema_version": "shepherd_kernel_v3_reference.canonical-ref-map.v1"
         },
         "continuation_objects": [
           {
+            "head_frame_ref": "continuation-object:sha256:f91722478d1a5284a8954b36b5fcf8b9269e8ae2e063c50e25b341ba0e30c759",
+            "tail_stack_ref": "continuation-object:sha256:acb617876a3f1b4b06b90c57c48b19ef566ac67ddefe71632fee924415c8cc98",
+            "summary": {
+              "depth": 1,
+              "required_schema_refs": [],
+              "code_identity_refs": []
+            },
+            "object_schema_version": "shepherd_kernel_v3_reference.continuation-object.v5",
+            "object_type": "stack-node"
+          },
+          {
             "program_ref": "program:sha256:c9263ad5469683fe8e630b072fc937060704142f8cdb1ea54e977a9310901c26",
             "branch_ref": "branch:root",
             "branch_scope_ref": null,
             "position": "value",
             "continuation_kind": "full",
-            "execution_context_ref": "ctx:sha256:4324ada2ffb8f610a578d9bb44735911a4cf325bfe351536662114ff2125bbc3",
+            "execution_context_ref": "ctx:sha256:e03b19f0fbd53df90b5f2c7fc3ba3a88861fad5facb16626c60c2e9bd3f287bd",
             "execution_context": {
-              "binding_env_ref": "continuation-object:sha256:f086457bb895dc4a43c467bcc53fe6be0197507f5c42d43bbce705eb6bc03d53",
+              "binding_env_ref": "continuation-object:sha256:6ab2afd1f4957c3d4bde7253ffca807e8b28e45817697a4b3c0a47e8c5c07fdc",
               "region_ref": "region:root",
               "authority_ref": "authority:root"
             },
             "result_schema_ref": null,
-            "stack_ref": "continuation-object:sha256:aa1165828f9cd27bbc2a47c622c0d775a3a6701c5e000ca2974fe809764508ba",
+            "stack_ref": "continuation-object:sha256:27222d26fc4371e668dd55e51f4cd1a5d1e8a32dd076b83b36f53dcc0f72aeac",
             "object_schema_version": "shepherd_kernel_v3_reference.continuation-object.v5",
             "object_type": "root"
+          },
+          {
+            "depth": 0,
+            "object_schema_version": "shepherd_kernel_v3_reference.continuation-object.v5",
+            "object_type": "env-empty"
+          },
+          {
+            "summary": {
+              "depth": 0,
+              "required_schema_refs": [],
+              "code_identity_refs": []
+            },
+            "object_schema_version": "shepherd_kernel_v3_reference.continuation-object.v5",
+            "object_type": "empty-stack"
           },
           {
             "object_schema_version": "shepherd_kernel_v3_reference.continuation-object.v5",
@@ -104,40 +129,15 @@
             },
             "payload": {
               "binder_ref": "binder:sha256:e57af00091c64dfccc95d292e0b3dcdb688c5aedb9260e0c5012ff20c80decaa",
-              "env_ref": "continuation-object:sha256:f086457bb895dc4a43c467bcc53fe6be0197507f5c42d43bbce705eb6bc03d53",
-              "context_ref": "ctx:sha256:4324ada2ffb8f610a578d9bb44735911a4cf325bfe351536662114ff2125bbc3",
+              "env_ref": "continuation-object:sha256:6ab2afd1f4957c3d4bde7253ffca807e8b28e45817697a4b3c0a47e8c5c07fdc",
+              "context_ref": "ctx:sha256:e03b19f0fbd53df90b5f2c7fc3ba3a88861fad5facb16626c60c2e9bd3f287bd",
               "context": {
-                "binding_env_ref": "continuation-object:sha256:f086457bb895dc4a43c467bcc53fe6be0197507f5c42d43bbce705eb6bc03d53",
+                "binding_env_ref": "continuation-object:sha256:6ab2afd1f4957c3d4bde7253ffca807e8b28e45817697a4b3c0a47e8c5c07fdc",
                 "region_ref": "region:root",
                 "authority_ref": "authority:root"
               },
               "frame_kind": "bind"
             }
-          },
-          {
-            "head_frame_ref": "continuation-object:sha256:8258d929ae0a0ec9a2e277a42eeecae6445ed1915b51252b7888bb6dd7723b86",
-            "tail_stack_ref": "continuation-object:sha256:d41d064d2452f19e4b6ac9dabe92389b10e157f74bbd25b4e0b9b1c4f3e98b4a",
-            "summary": {
-              "depth": 1,
-              "required_schema_refs": [],
-              "code_identity_refs": []
-            },
-            "object_schema_version": "shepherd_kernel_v3_reference.continuation-object.v5",
-            "object_type": "stack-node"
-          },
-          {
-            "summary": {
-              "depth": 0,
-              "required_schema_refs": [],
-              "code_identity_refs": []
-            },
-            "object_schema_version": "shepherd_kernel_v3_reference.continuation-object.v5",
-            "object_type": "empty-stack"
-          },
-          {
-            "depth": 0,
-            "object_schema_version": "shepherd_kernel_v3_reference.continuation-object.v5",
-            "object_type": "env-empty"
           }
         ],
         "external_evidence_links": [],
@@ -153,8 +153,8 @@
         "code_identity_refs": []
       },
       {
-        "transition_id": "kernel-replay-transition:sha256:bdafc15ae69dcea8476c8ccaa2057ceb754aaa24a2cbe3f4a9d0d23cacbc0e63",
-        "idempotency_key": "idem-continuation-source:sha256:fae2c6522eaf36c6f50d163b2ad9d24433c89994216908d3622b70d75001e955",
+        "transition_id": "kernel-replay-transition:sha256:6755bf1d4eb242c71cd9ee094389f8b6dea26935531a9db13a41cc5010d738f6",
+        "idempotency_key": "idem-continuation-source:sha256:a0996605616c28bd70504b6c2433d89a889f466cbe43b8e1a5dd2906db3c91d1",
         "transition_kind": "unhandled_top_level_resume",
         "admission_basis": {
           "source_ref": "declaration:0",
@@ -164,14 +164,14 @@
           },
           "observed_frontier": {
             "record_refs": [
-              "kernel-replay-transition:sha256:1d81f072d80d22f0e3a898282eaee58f6699ed3de2cd0ec8129d7e87164fb879"
+              "kernel-replay-transition:sha256:3f73873a8b7e98334232e18134d19e1ab7770aa9e8ecf9c43112b7e5850f196c"
             ]
           },
           "source_path_ref": "path:unhandled/declaration:0/branch:root",
           "input_value_or_digest": 99,
-          "idempotency_key": "idem-continuation-source:sha256:fae2c6522eaf36c6f50d163b2ad9d24433c89994216908d3622b70d75001e955",
+          "idempotency_key": "idem-continuation-source:sha256:a0996605616c28bd70504b6c2433d89a889f466cbe43b8e1a5dd2906db3c91d1",
           "one_shot_key": {
-            "value": "continuation-source:sha256:fae2c6522eaf36c6f50d163b2ad9d24433c89994216908d3622b70d75001e955"
+            "value": "continuation-source:sha256:a0996605616c28bd70504b6c2433d89a889f466cbe43b8e1a5dd2906db3c91d1"
           },
           "profile": "core_reference_v0_lite",
           "program_ref": "program:sha256:c9263ad5469683fe8e630b072fc937060704142f8cdb1ea54e977a9310901c26",
@@ -185,7 +185,7 @@
         "profile": "core_reference_v0_lite",
         "program_ref": "program:sha256:c9263ad5469683fe8e630b072fc937060704142f8cdb1ea54e977a9310901c26",
         "parent_transition_refs": [
-          "kernel-replay-transition:sha256:1d81f072d80d22f0e3a898282eaee58f6699ed3de2cd0ec8129d7e87164fb879"
+          "kernel-replay-transition:sha256:3f73873a8b7e98334232e18134d19e1ab7770aa9e8ecf9c43112b7e5850f196c"
         ],
         "records": [],
         "ref_map": {

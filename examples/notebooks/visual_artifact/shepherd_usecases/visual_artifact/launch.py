@@ -559,7 +559,7 @@ def _validated_artifact_refs(refs: Mapping[str, object]) -> dict[str, object]:
     for name, value in refs.items():
         if not isinstance(name, str) or not name.strip():
             raise ValueError("artifact ref names must be non-empty strings")
-        if name in _RESERVED_ARTIFACT_REF_NAMES or name.startswith(""):
+        if name in _RESERVED_ARTIFACT_REF_NAMES or name.startswith("skeleton_"):
             raise ValueError(f"artifact ref name is reserved: {name!r}")
         validated[name] = _validated_artifact_ref_value(name, value)
     return validated

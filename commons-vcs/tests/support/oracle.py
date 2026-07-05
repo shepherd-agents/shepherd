@@ -16,10 +16,10 @@ from support.coordinator import PhaseMinus1Coordinator
 from support.filesystem_substrate import FilesystemSubstrate
 
 ORACLE = {
-    "PARENT_COMMIT": "sha256:3c22e43e60a76fcd2a6804bdc0061b6892aa7747c36bcfa463be11faa18560d6",
-    "SHEPHERD_EFFECT": "sha256:63e893e79b3c9a20f312a57f883418cfa3fef5cf9cad0e68f81d9fd5040c0b93",
-    "VCSCORE_COMMIT": "sha256:553cebdf1ef8181c0a2db7a7ac40c1656a774c9ac91b91a9b3883371aadf375f",
-    "SGC_RECEIPT": "sha256:0327baf15aeca497b4d4d95fc80cbff3c10dc16c8e4bc9b1e30c91848d861a1a",
+    "PARENT_COMMIT": "sha256:6facdc01e639d3d4ea9feb1599138d88afd591236e1f02f506bd6e90adce0537",
+    "SHEPHERD_EFFECT": "sha256:62346f205434a6e0622ea686e7dc73ea0f1450fe618732377cf022e9a1c8a51e",
+    "VCSCORE_COMMIT": "sha256:fd9ec56e6de4ad9bc0f1eb352d2024f2d7750e78d3115d1efbc3b5d8fe35a922",
+    "SGC_RECEIPT": "sha256:44de863ce63b7380869b32d3432098a0561b05aa7c0868021c334b7ec9e70cd2",
     "TOOL_STDOUT": "sha256:fe9562d84a037e6fe860a3b43a87a53773536e4ea63c8e739e09353b80efa860",
 }
 
