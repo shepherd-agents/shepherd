@@ -33,6 +33,29 @@ _TRANSCRIPTS = json.loads(
 _ACTIVE: dict[str, Any] = {"model": None}
 
 
+# --- permission surface (simulation) -------------------------------------
+# Inert stand-ins so signature-level grants — ``repo: May[GitRepo, ReadWrite]``
+# — parse and type-check like the shipped surface. The simulation never
+# inspects them; the real facade enforces them at the native syscall jail.
+class GitRepo:
+    """Inert substrate-handle type (simulation)."""
+
+
+class ReadOnly:
+    """Inert read-only grant profile (simulation)."""
+
+
+class ReadWrite:
+    """Inert read-write grant profile (simulation)."""
+
+
+class May:
+    """Per-parameter grant marker (simulation): ``May[GitRepo, ReadWrite]``."""
+
+    def __class_getitem__(cls, _params: Any) -> type["May"]:
+        return cls
+
+
 class DeliveryFailed(RuntimeError):
     """Raised when a recorded answer cannot be coerced to the return type."""
 

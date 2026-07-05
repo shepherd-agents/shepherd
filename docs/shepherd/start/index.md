@@ -28,10 +28,10 @@ Save this as `hello.py` and run `python hello.py`:
 
 Two things are happening here:
 
-- `implement` is an ordinary task: a typed Python function with a docstring and no body. The docstring is the instruction the model gets. The `-> str` return type is the contract the answer must match. `@shp.task` makes it runnable.
+- `implement` is an ordinary task: a typed Python function with a docstring and no body. The docstring is the instruction the model gets. The `-> str` return type is the contract the answer must match. `@sp.task` makes it runnable.
 - `oversee` is a meta-agent, which is just another task. It takes `implement` as an argument and runs it. If the tests fail, it reverts and retries. That's the idea: a meta-agent is a function that takes your agents as input.
 
-`shp.workspace(model=claude("sonnet-4-5"))` pins the model every task call in the block runs against.
+`sp.workspace(model=claude("sonnet-4-5"))` pins the model every task call in the block runs against.
 
 ## Expected output
 
@@ -43,8 +43,8 @@ The output is deterministic. The offline provider replays a recorded transcript,
 
 ## If it fails
 
-- **Called a task outside the `with` block?** Shepherd won't run a task with no workspace configured. It raises right away and tells you to open one. There's no hidden default model. Move the call inside `with shp.workspace(...)`.
-- **`shp.DeliveryFailed`?** The response didn't coerce to the declared return type. Against the offline provider on this example, that means a broken install. Reinstall and rerun.
+- **Called a task outside the `with` block?** Shepherd won't run a task with no workspace configured. It raises right away and tells you to open one. There's no hidden default model. Move the call inside `with sp.workspace(...)`.
+- **`sp.DeliveryFailed`?** The response didn't coerce to the declared return type. Against the offline provider on this example, that means a broken install. Reinstall and rerun.
 
 ## Next
 
