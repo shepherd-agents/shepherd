@@ -52,7 +52,11 @@ grant on `repo` is what lets the agent write the repository
 (see [Permissions](#permissions-the-signature-is-the-permission-surface)):
 
 ```python
-def write_program(repo: sp.May[sp.GitRepo, sp.ReadWrite], prompt: str, output_path: str = "program.py") -> None:
+def write_program(
+    repo: sp.May[sp.GitRepo, sp.ReadWrite],
+    prompt: str,
+    output_path: str = "program.py",
+) -> None:
     """Write a small, self-contained Python program that does what `prompt` asks.
 
     Save it to output_path. It must run with plain `python3`, read no input,
