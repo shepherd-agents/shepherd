@@ -1,20 +1,22 @@
 """Quickstart example (tested in CI against the simulated offline provider)."""
 
 # --8<-- [start:hello]
-import shepherd as shp
+import shepherd as sp
 from shepherd.providers import claude
 
 
-@shp.task
-def implement(repo: str, feature: str) -> str:
+# The signature is the permission surface: the grant on `repo` is what lets the
+# task write the bound repository (see "Permissions" in the concepts docs).
+@sp.task
+def implement(repo: sp.May[sp.GitRepo, sp.ReadWrite], feature: str) -> str:
     """Implement the feature in the repo and report what changed."""
 
 
-@shp.task
-def oversee(worker, repo: str, feature: str) -> str:
+@sp.task
+def oversee(worker, repo: sp.May[sp.GitRepo, sp.ReadWrite], feature: str) -> str:
     """Run the worker on the feature. If its tests fail, revert and retry, then report."""
 
 
-with shp.workspace(model=claude("sonnet-4-5")):
+with sp.workspace(model=claude("sonnet-4-5")):
     print(oversee(implement, repo=".", feature="login"))
 # --8<-- [end:hello]

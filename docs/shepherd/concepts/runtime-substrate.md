@@ -8,20 +8,18 @@
 
 *Concept. The mental model behind Shepherd. Steps live in the tutorial, signatures in the reference.*
 
-!!! warning "Not shipped yet"
-    The substrate model here, typed **handles**, a content-addressed **basis**,
-    and the **`Changeset`** that reifies what a run changed, is implemented in
-    the runtime in an early slice (`GitRepo` handles, grant clamping, and
-    changesets have landed), but it is not yet re-exported on the public
-    `shepherd` surface. The unified, signature-level handle-in/handle-out API
-    shown here is the target shape, not yet the importable one. What you can rely
-    on from the public surface today is the deterministic offline provider and a
-    single workspace root.
+!!! warning "Partly shipped"
+    Part of this substrate model has shipped: `GitRepo` handles, per-binding
+    grants, and the **`Changeset`** that reifies what a run changed are on the
+    public `shepherd` surface in 0.2.0 (see [Permissions](permissions.md)). The
+    unified, signature-level handle-in/**handle-out** API shown below — output
+    handles threaded forward, and substrates beyond the filesystem / Git repo —
+    is still the target shape, not yet the importable one.
 
-A **substrate** is a kind of world a task can act on, a filesystem, a Git repo,
-a mailbox, a chat channel, a database. The runtime substrate model is about
-making a task's relationship to that world **explicit on both ends**: which
-world it operates on, and what it changed.
+A **substrate** is a kind of world a task can act on — in 0.2.0, the filesystem
+and a Git repo. The runtime substrate model is about making a task's
+relationship to that world **explicit on both ends**: which world it operates
+on, and what it changed.
 
 Today both ends are erased. A task's effect on the world reaches you implicitly,
 it mutates an ambient workspace, and to learn *what* it changed you
@@ -32,8 +30,8 @@ it produced.
 ## Handles make the world a value
 
 The substrate model hands a task a **handle**: a typed, value-shaped view of one
-bound substrate, a `GitRepo`, a `Folder`, a `Mailbox`, carrying the
-substrate's own methods. A handle is taken at a known **basis**: a
+bound substrate — for example a `GitRepo` — carrying the substrate's own
+methods. A handle is taken at a known **basis**: a
 content-addressed identity of its input state, the precise "the world as of
 *here*" the task started from. A handle is a value, not a connection or a lock,
 two views at the same basis with the same authority are interchangeable.

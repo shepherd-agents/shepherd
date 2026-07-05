@@ -52,7 +52,8 @@ Read the four pages in order, [tasks](tasks.md), [effects](effects.md),
 [runs](runs.md), [workspaces](workspaces.md). They build outward from the
 unit of work to its channel, its record, and its context.
 
-These concepts deliberately stop at the surface these docs exercise:
-tasks, effects, runs, workspaces, and provider selection. Permission policy,
-placements, workflow packaging, and live-provider operations are covered
-once their product surfaces land.
+These concepts build outward from the surface these docs exercise:
+tasks, effects, runs, workspaces, and provider selection, plus the
+[per-binding signature grants](permissions.md) enforced at the syscall jail
+in 0.2.0. Placements, workflow packaging, and live-provider operations are
+covered once their product surfaces land.

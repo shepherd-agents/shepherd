@@ -8,74 +8,109 @@
 
 *Concept. The mental model behind Shepherd. Steps live in the tutorial, signatures in the reference.*
 
-!!! warning "Not shipped yet"
-    The permission *vocabulary* here, `may=`, the per-parameter `May[...]`
-    grants, named profiles, and clamp-at-spawn, is implemented in the runtime
-    and partly enforced, but not yet re-exported on the public `shepherd`
-    surface. `may=Permissive` works today on the top-level import (and
-    `may=ReadOnly`, with `ReadOnly` imported from the `shepherd.profiles`
-    submodule); the per-parameter `May[...]` typing, the richer profile names shown below
-    (e.g. `ModelCalls`), and full clamp-at-spawn enforcement are design
-    vocabulary you can build against, not yet the importable surface.
-
 A task's **permissions are part of its signature**. Just as the return type
-declares what you get back, a task's grants declare what it is allowed to do,
-which kinds of effects it may perform, and over which resources. Reading the
-signature *is* reading the permission surface; there is no second, hidden policy
-file that the code merely approximates.
+declares what you get back, a per-parameter grant declares what the task may do
+to each resource it is handed. Reading the signature *is* reading the permission
+surface; there is no second, hidden policy file that the code merely
+approximates.
+
+A task declares a read-only or read-write grant **per bound repository**, right
+in its signature:
 
 ```python
-@shp.task(may=ModelCalls)
-def support_agent(
-    mail:   May[Mailbox, ReadOnly],
-    outbox: May[Mailbox, EmailSend.where(to__all__endswith="@acme.com")],
-    ticket: Ticket,
-) -> Resolution:
-    """Read context from the mailbox; draft a reply to the customer."""
+from shepherd import task, May, GitRepo, ReadOnly, ReadWrite
+
+@task
+def apply_documented_fix(
+    docs:    May[GitRepo, ReadOnly],   # read-only: writes refused at the OS
+    backend: May[GitRepo, ReadWrite],  # writable root
+    issue:   str,
+) -> None: ...
 ```
 
-Two homes for authority, and they never overlap:
+`docs` may be read but not written; `backend` is a writable root. The grant
+rides the parameter, so the security surface and the program are the same
+artifact — there is no separate policy document to drift out of sync.
 
-- **`may=` is the task-wide ceiling.** It carries the authority that has no
-  single parameter to live on, model calls, and the whole-task limit that
-  every parameter is also held under. `may=ModelCalls` says this task may call
-  the model and do nothing else to the world on its own.
-- **`May[Resource, ...]` is per-parameter authority.** Where authority is about
-  a *specific* resource the task is handed, it rides that parameter. `mail` may
-  only be read; `outbox` may send, but only to `@acme.com` addresses. The
-  constraint is right there in the type.
+## The grant lowers to the syscall jail
 
-## Authority narrows, never widens
+On a jailed device the grant is compiled to that run's writable roots and
+**enforced at the native syscall jail** (macOS Seatbelt; Linux Landlock). A
+write to a `ReadOnly`-granted repository, or to any managed path not covered by
+a `ReadWrite` grant, is refused at the syscall — before the last undo point, not
+merely advised and not caught only at a merge gate. Authority defaults to deny:
+a repository the signature never grants write to is read-only to the task.
 
-The load-bearing rule is **clamp at spawn**: when a resource is passed into a
-task, its authority is intersected with the grant on that parameter. You can
-hand in something broader, a fully writable mailbox, and the task still runs
-with only what its signature allows. You can never hand in something that makes
-the task *more* powerful than its declaration. Permissions only ever shrink as
-they cross into a task, so a task's declared surface is a true upper bound on
-what it can do, regardless of who called it or what they passed.
+Because the jail is the enforcement point, permissions do not depend on caller
+discipline. A careful caller and a careless one get the same enforced surface:
+the writable roots are a property of the run's grants, checked by the OS, not a
+convention the caller is trusted to honor.
 
-This is why permissions do not depend on caller discipline. A careful caller
-and a careless one get the same enforced surface, because the surface is a
-property of the *task definition*, checked at the boundary, not a convention
-the caller is trusted to honor.
+`shepherd task show <name>` renders the grant surface expanded, so you can read
+exactly what a task may touch before you run it.
 
-## Least privilege is a value-level move
+## Grants are whole-profile per binding
 
-Narrowing a resource before you pass it on, handing a child task a read-only
-view of something you can write, is ordinary hygiene, done with attenuation
-(`handle.readonly()`, `handle.allow_only(...)`). It is how you practice least
-privilege, but it is never what *enforces* the limit: enforcement is the clamp,
-which happens whether or not the caller attenuated anything.
+A grant applies to a **whole bound repository**: a bound repository is entirely
+writable or entirely read-only. Named bindings are **disjoint** — their roots do
+not overlap — so every managed path belongs to exactly one binding and is
+governed by that binding's single grant.
+
+Bindings are named when you bind a root:
+
+```python
+backend = ws.bind(root="backend/", name="backend")
+```
+
+and passed to a run by name:
+
+```python
+run = workspace.run(task, bindings={"docs": docs, "backend": backend})
+```
+
+A run with a single binding stays `repo=`:
+
+```python
+run = workspace.run(task, repo=workspace.git_repo())
+```
+
+Each binding's world output is inspected on its own, and settled once —
+**consume-once** — with `select`, `release`, or `discard`:
+
+```python
+run.changeset(name="backend")   # what the task wrote to the backend binding
+```
+
+Nothing the task wrote touches your files until you `select` it.
+
+## The whole-run floor: `may=`
+
+Below the per-parameter grants sits a whole-run ceiling that still works from
+v0.1: pass `may=` to a run to cap everything it may do.
+
+```python
+run = workspace.run(task, repo=workspace.git_repo(), may="ReadOnly")
+```
+
+`may="ReadOnly"` makes the entire run read-only; like the per-parameter grants,
+it is compiled into the jail and enforced at the syscall, not merely advised. A
+task registered with `may_default=` sets that same floor at registration time.
+
+!!! note "Scope (P-030 v0.2)"
+    Per-binding whole-profile `ReadOnly`/`ReadWrite` over disjoint named
+    bindings, on a jailed device, filesystem / Git substrate, same-process
+    value-children. Enforcement is exercised on macOS Seatbelt; Linux Landlock
+    is container-gated. Sub-root / `where(path=…)` grants are not part of this
+    cut.
 
 ## What permissions are *not*
 
 - **Not runtime trust.** A task does not ask, at runtime, whether it is allowed
-  to do something and hope the answer is yes. The allowed surface is fixed at
-  definition time and bounds the body no matter how it tries to act.
+  to write and hope the answer is yes. The writable roots are fixed by the run's
+  grants and bound the body at the syscall no matter how it tries to act.
 - **Not capabilities discovered in production.** Authority is declared up front
-  and defaults to deny: a kind of effect, or a resource, that the signature
-  never names is refused, not silently permitted.
+  and defaults to deny: a repository the signature never grants write to is
+  read-only, not silently writable.
 - **Not a sandbox bolted on beside the code.** The grant lives on the parameter,
   so the security surface and the program are the same artifact. There is no
   separate policy document to drift out of sync.
