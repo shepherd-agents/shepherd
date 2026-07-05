@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -37,16 +37,22 @@ performed, every model request and response, every nested task call, every
 artifact emission.
 
 ```python
-run = review_change.detailed(diff)
-for record in run.trace.surface:
-    print(record.sub_tag.value, record.ref)
+run = workspace.run("review_change", repo=workspace.git_repo(), args={"diff": diff})
+print(run.status)                 # the run's outcome
+cs = run.changeset()              # what it produced, as a read-only view
+print(cs.changed_paths)
+```
+
+From the CLI you read the same run's trace and changeset by reference:
+
+```bash
+shepherd run trace <run-ref>           # the ordered record of every boundary crossing
+shepherd run changeset <run-ref>       # what it produced (read-only)
 ```
 
 So debugging changes character. The question is no longer "can I reproduce
 this under a debugger?" but "what does the record say was actually sent, and
-what actually came back?" Records are typed: narrow to a kind of crossing
-with `run.trace.filter(...)`, or read the kernel and surface streams
-separately for common views like the prompts or the model exchanges. Forensics rather than archaeology: the evidence was
+what actually came back?" Forensics rather than archaeology: the evidence was
 collected at the moment it happened, not reconstructed afterward.
 
 ## Artifacts: what a task keeps besides the answer
@@ -67,10 +73,11 @@ Because the record is data, runs compose with ordinary reasoning:
   docstring wording, different day, are two values. Diff their traces,
   compare their outcomes side by side. "Did the upgrade change behavior?"
   becomes a question about two records, not two recollections.
-- **Replay.** A recorded exchange can stand in for the live model: feed
-  recorded answers back through a [handler](effects.md) and the same code
-  runs deterministically. The trace's structure, complete, ordered, typed,
-  is what branch-and-replay machinery builds on.
+- **Replay** *(direction, not yet a shipped API)*. Because the record is
+  complete, ordered, and typed, a recorded exchange can in principle stand in
+  for the live model — the structure the trace captures is what
+  branch-and-replay machinery builds on. The deterministic provider gives you
+  the reproducibility half of this today; a public replay API is future work.
 
 ## What a run is not
 

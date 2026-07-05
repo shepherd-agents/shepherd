@@ -2,7 +2,6 @@
 
 # --8<-- [start:hello]
 import shepherd as sp
-from shepherd.providers import claude
 
 
 # The signature is the permission surface: the grant on `repo` is what lets the
@@ -13,10 +12,10 @@ def implement(repo: sp.May[sp.GitRepo, sp.ReadWrite], feature: str) -> str:
 
 
 @sp.task
-def oversee(worker, repo: sp.May[sp.GitRepo, sp.ReadWrite], feature: str) -> str:
+def oversee(worker: object, repo: sp.May[sp.GitRepo, sp.ReadWrite], feature: str) -> str:
     """Run the worker on the feature. If its tests fail, revert and retry, then report."""
 
 
-with sp.workspace(model=claude("sonnet-4-5")):
+with sp.workspace(model="claude:sonnet-4-5"):
     print(oversee(implement, repo=".", feature="login"))
 # --8<-- [end:hello]

@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: checked-example
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: pytest docs_src/shepherd/quickstart/ docs_src/shepherd/tutorials/
 
@@ -22,14 +22,13 @@ run against.
    offline provider and call the task in the test body:
 
     ```python
-    import shepherd as shp
-    from shepherd.providers import claude
+    import shepherd as sp
 
     from app import SAMPLE_DIFF, Triage, triage_change
 
 
     def test_triage_matches_contract():
-        with shp.workspace(model=claude("sonnet-4-5")):
+        with sp.workspace(model="claude:sonnet-4-5"):
             triage = triage_change(SAMPLE_DIFF)
         assert isinstance(triage, Triage)
         assert (triage.category, triage.priority) == ("bugfix", "high")
@@ -50,7 +49,7 @@ run against.
     def test_bodyless_task_requires_docstring():
         with pytest.raises(TypeError, match="docstring or guidance"):
 
-            @shp.task
+            @sp.task
             def nameless(x: str) -> str:  # no docstring -> rejected at definition
                 pass
 
@@ -68,11 +67,11 @@ What the docs show is what runs, because a test runs it.
 
 ## If it fails
 
-- **`shp.DeliveryFailed`?** The recorded answer could not be coerced into the
+- **`sp.DeliveryFailed`?** The recorded answer could not be coerced into the
   declared return type, usually a return type or docstring that no longer
   matches the contract. Tighten the type, re-run.
 - **`RuntimeError` about a workspace?** A task was called outside
-  `with shp.workspace(...)`; open one in the test, as in step 1. See
+  `with sp.workspace(...)`; open one in the test, as in step 1. See
   [Debug your first run](debug-your-first-run.md).
 - **Output varies between runs?** A live provider slipped in. Keep tests on the
   offline provider, that is what makes them deterministic.

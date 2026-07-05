@@ -47,8 +47,9 @@ def test_unexcluded_scaffold_fails_leak(tmp_path):
     root = _seed(tmp_path)
     cfg = (root / "mkdocs.yml").read_text(encoding="utf-8")
     # Un-exclude a scaffold page without promoting it -> LEAK (+CONFLICT).
-    # (Uses concepts/placements.md — still a scaffold; start/install was promoted.)
-    cfg = cfg.replace("  !/index.md\n", "  !/index.md\n  !/concepts/placements.md\n")
+    # (Uses concepts/workflows.md — still a scaffold; permissions/placements were
+    # promoted to release-ready in the 0.2.0 docs truth pass.)
+    cfg = cfg.replace("  !/index.md\n", "  !/index.md\n  !/concepts/workflows.md\n")
     (root / "mkdocs.yml").write_text(cfg, encoding="utf-8")
     assert _gate(root) == 1
 

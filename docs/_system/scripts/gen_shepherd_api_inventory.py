@@ -18,7 +18,7 @@ def render() -> str:
     doc = {
         "facade": FACADE_IMPORT,
         "generator": "scripts/gen_shepherd_api_inventory.py",
-        "note": "Pre-rename facade; DESIGN S7 retargets to `shepherd`.",
+        "note": "Generated from the shipped `shepherd` facade __all__; the handle/grant surface is listed as runtime-resolved (offline docs build cannot import it).",
         "symbol_count": len(infos),
         "symbols": {i["name"]: {k: i[k] for k in ("source", "kind", "signature", "doc_hash")} for i in infos},
     }

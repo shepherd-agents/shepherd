@@ -8,8 +8,7 @@ them requires re-recording transcripts (DESIGN ground rule 3).
 # --8<-- [start:setup]
 from dataclasses import dataclass
 
-import shepherd as shp
-from shepherd.providers import claude
+import shepherd as sp
 
 
 @dataclass(frozen=True)
@@ -21,7 +20,7 @@ class Triage:
 
 
 # --8<-- [start:triage]
-@shp.task
+@sp.task
 def triage_change(diff: str) -> Triage:
     """Classify this code change.
 
@@ -38,7 +37,7 @@ class Review:
     verdict: str    # approve | request-changes
 
 
-@shp.task
+@sp.task
 def write_review(diff: str, triage: Triage) -> Review:
     """Write a short review for this change, given its triage."""
 
@@ -58,7 +57,7 @@ diff --git a/auth.py b/auth.py
 
 def main() -> Review:
     # --8<-- [start:run]
-    with shp.workspace(model=claude("sonnet-4-5")):
+    with sp.workspace(model="claude:sonnet-4-5"):
         triage = triage_change(SAMPLE_DIFF)
         review = review_change(SAMPLE_DIFF)
     # --8<-- [end:run]

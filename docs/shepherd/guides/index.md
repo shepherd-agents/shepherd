@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -16,6 +16,7 @@ They assume you have already met Shepherd (start with the
 Available now, in reading order, each building on the one before; the
 runnable code in each works today against the deterministic offline provider:
 
+- [Grant a task repository access](grant-repo-access.md)
 - [Deterministic demo](deterministic-demo.md)
 - [Debug your first run](debug-your-first-run.md)
 - [Test Shepherd code](test-shepherd-code.md)

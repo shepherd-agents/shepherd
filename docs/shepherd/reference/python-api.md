@@ -2,7 +2,7 @@
 
 > Page status: scaffold
 > Source state: generated
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/gen_shepherd_api_inventory.py --check
 
@@ -14,7 +14,7 @@
     API is still taking shape — expect names and signatures to change before a
     stable release.
 
-Shepherd's public surface is a small facade: you `import shepherd as shp` and
+Shepherd's public surface is a small facade: you `import shepherd as sp` and
 reach the task/workspace/delivery spine plus the effect and run vocabulary. Only
 the public facade appears in this reference — internal implementation packages
 are not documented here just because they happen to be importable.

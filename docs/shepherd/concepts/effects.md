@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -16,7 +16,7 @@ explicit channel, where it can be answered, watched, refused, and recorded.
 ## Model delivery is an effect
 
 The effect you meet first is the model delivery. A bodyless task performs it
-for you; a bodied task can call `shp.deliver(...)` when it wants an explicit
+for you; a bodied task can call `sp.deliver(...)` when it wants an explicit
 model step. Either way, the boundary crossing is typed, recorded, and visible
 on the run.
 
@@ -28,7 +28,7 @@ does not behave the way you expected.
 
 ## Handlers answer
 
-Effects would be inert without the receiving end. `shp.handle` installs that
+Effects would be inert without the receiving end. `sp.handle` installs that
 receiving end for a scope: it intercepts a matching boundary event, consumes
 it, and its return value becomes the answer. When handlers nest, the innermost
 handler wins; outer handlers do not see an event that was already consumed.

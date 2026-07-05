@@ -2,7 +2,7 @@
 
 > Page status: fast-follow
 > Source state: preview
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -38,10 +38,9 @@ intended workflow.
    is the planned part:
 
     ```python
-    import shepherd as shp
-    from shepherd.providers import claude
+    import shepherd as sp
 
-    with shp.workspace(model=claude("sonnet-4-5")):
+    with sp.workspace(model="claude:sonnet-4-5"):
         review = review_change(SAMPLE_DIFF)   # a real, billed model call (planned)
     ```
 

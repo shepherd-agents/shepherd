@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: checked-example
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: docs_src/tutorials/first_app/test_first_app.py
 
@@ -72,7 +72,7 @@ when the decorator runs, not silently accepted.
 
 !!! success "Checkpoint"
     You have a typed, model-backed function. Prove the docstring rule to
-    yourself: delete the docstring and re-import the module, `@shp.task`
+    yourself: delete the docstring and re-import the module, `@sp.task`
     raises `TypeError` at definition time, because a bodyless task with no
     instruction is meaningless. Put it back.
 
@@ -88,7 +88,7 @@ the ambient context that every task call inside the block inherits:
 This block is the entry point of the finished program, which is why it is
 indented, it sits inside the file's `main()`. Two things to notice:
 
-- `shp.workspace(model=claude("sonnet-4-5"))` pins the model once, at the
+- `sp.workspace(model="claude:sonnet-4-5")` pins the model once, at the
   top. The tasks themselves stay model-agnostic: change that one argument and
   the same tasks run against a different model.
 - The second call, `review_change`, is the composed reviewer you build in

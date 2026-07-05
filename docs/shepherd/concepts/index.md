@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -55,5 +55,6 @@ unit of work to its channel, its record, and its context.
 These concepts build outward from the surface these docs exercise:
 tasks, effects, runs, workspaces, and provider selection, plus the
 [per-binding signature grants](permissions.md) enforced at the syscall jail
-in 0.2.0. Placements, workflow packaging, and live-provider operations are
-covered once their product surfaces land.
+and the [placements](placements.md) that decide where they are enforced —
+both shipped in 0.2.0. Workflow packaging catalogs and live-provider
+operations are covered once their product surfaces land.

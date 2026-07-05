@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -14,14 +14,13 @@ never *who* answers. That choice is made once, in the workspace, and every task
 call in scope inherits it.
 
 ```python
-import shepherd as shp
-from shepherd.providers import claude
+import shepherd as sp
 
-with shp.workspace(model=claude("sonnet-4-5")):
+with sp.workspace(model="claude:sonnet-4-5"):
     ...  # every task call in here is answered by that provider + model
 ```
 
-`claude("sonnet-4-5")` is a provider *selection*, an inert token naming a
+`model="claude:sonnet-4-5"` is a provider *selection*, an inert token naming a
 backend and a model. You hand it to the workspace; you do not call it yourself.
 The task signatures stay untouched: point the same tasks at a different backend
 by changing only that one argument.
@@ -47,9 +46,26 @@ it is the one the docs and CI use so that what you read is what ran. Live
 providers exist alongside it; they cost money and vary run to run, which is
 exactly why everyday development and CI stay on the offline one.
 
+## Retained runs pick the provider per run
+
+The `model=` selection above governs ordinary in-process task calls. For a
+**retained run** — one whose world output you inspect and settle
+([permissions](permissions.md), [placements](placements.md)) — the provider is
+chosen on the run itself, as a `runtime=` envelope:
+
+```python
+run = workspace.run(task, repo=workspace.git_repo(),
+                    runtime={"provider": "static"})   # deterministic, offline, CI-safe
+```
+
+The deterministic offline provider is named **`static`**; a live local Claude
+lane is `{"provider": "claude"}`, which requires a jail-capable host. The
+provider decides model behavior; Shepherd still owns the run's authority,
+retained output, and settlement.
+
 ## What a provider is *not*
 
-- **Not credentials.** Selecting a provider in code (`claude("sonnet-4-5")`) is
+- **Not credentials.** Selecting a provider in code (`model="claude:sonnet-4-5"`) is
   separate from *recording* its API key. The public docs here cover provider
   selection, not live credential management.
 - **Not a global.** There is no module-level "current provider" you set once and

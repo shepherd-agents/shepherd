@@ -33,7 +33,7 @@ def render(info: dict, see_also: dict | None) -> str:
         "",
         "> Page status: scaffold",
         "> Source state: generated",
-        "> Applies to: Shepherd v0.1.1-dev",
+        "> Applies to: Shepherd v0.2.0",
         "> Owner: @docs-system-owner (TBD)",
         "> Validation: scripts/gen_shepherd_api_inventory.py --check",
         "",
@@ -41,13 +41,31 @@ def render(info: dict, see_also: dict | None) -> str:
         "",
         f'<span class="api-kind">{kind}</span>',
         "",
-        f"::: {target}",
-        "    options:",
-        "      show_root_heading: true",
-        "      heading_level: 2",
-        "      show_root_full_path: false",
-        "",
     ]
+    if kind == "handle-surface (runtime-resolved)":
+        # The lazily-imported handle/grant surface cannot be autodoc-rendered by
+        # the import-light docs build (and `May` IS `typing.Annotated` under an
+        # alias, which griffe cannot resolve at all) — emit static facts instead
+        # of a `:::` directive that breaks the strict internal build.
+        lines += [
+            f"`{FACADE_IMPORT}.{name}` is part of the workspace-handle surface: it is",
+            "resolved lazily at runtime because its implementation imports the",
+            "substrate engine, which the offline docs build does not load.",
+            "",
+            f"- Runtime source: `{target}`",
+            "- Usage and semantics: [Permissions](../../concepts/permissions.md)",
+            "  and the run/output/settlement examples in the guides.",
+            "",
+        ]
+    else:
+        lines += [
+            f"::: {target}",
+            "    options:",
+            "      show_root_heading: true",
+            "      heading_level: 2",
+            "      show_root_full_path: false",
+            "",
+        ]
     if see_also:
         lines += ["## See also", ""]
         if see_also.get("concept"):

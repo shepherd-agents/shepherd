@@ -1,25 +1,25 @@
 {
   "schema": "shepherd-source-state/1",
-  "applies_to": "Shepherd v1.0-dev",
+  "applies_to": "Shepherd v0.2.0",
   "note": "Machine-readable mirror of docs/shepherd/reference/source-state.md ( 'Initial Source-State Inventory'). Committed, reviewable snapshot; the.md ledger is the hand-maintained source of truth.",
   "fact_families": [
     {
       "family": "Shepherd distribution and import facade",
       "expected_source": "package metadata + public `shepherd` facade",
-      "state": "scaffold",
-      "note": "facade is the internal `shepherd` package pre-rename; install/import pages stay scaffold or checked-example until it lands"
+      "state": "shipped-source",
+      "note": "shipped as the public shepherd package (PyPI shepherd-ai 0.2.0)"
     },
     {
       "family": "Python API symbols",
       "expected_source": "public `shepherd` facade modules, docstrings, signatures",
       "state": "generated",
-      "note": "generated from the shepherd facade (18 public symbols); internal build only, pre-rename banner"
+      "note": "generated from the shipped shepherd facade (39 documented public symbols; the handle/grant surface is listed as runtime-resolved)"
     },
     {
       "family": "Shepherd CLI",
       "expected_source": "`shepherd --help` and subcommand help",
-      "state": "checked-fixture",
-      "note": "CLI not shipped; cli.md generated from docs_src/shepherd/_sim/cli-help.json"
+      "state": "shipped-source",
+      "note": "shipped in 0.2.0; cli.md documents the real CLI surface (demo/doctor/init/package/run/task)"
     },
     {
       "family": "Runnable examples and transcripts",
@@ -51,13 +51,14 @@
     {
       "family": "Placement / reference environment facts",
       "expected_source": "placement registry or release placement source",
-      "state": "scaffold",
-      "note": "design vocabulary; distinguish shipped placements from design vocabulary"
+      "state": "shipped-source",
+      "note": "placement auto/advisory/jail shipped in 0.2.0 (concepts/placements.md)"
     },
     {
       "family": "Capability and permission facts",
       "expected_source": "capability registry declarations",
-      "state": "scaffold"
+      "state": "shipped-source",
+      "note": "per-binding May[GitRepo, ReadOnly|ReadWrite] grants shipped in 0.2.0, jail-enforced (concepts/permissions.md)"
     }
   ]
 }

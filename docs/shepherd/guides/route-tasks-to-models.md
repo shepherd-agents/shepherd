@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: checked-example
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: pytest docs_src/shepherd/tutorials/
 
@@ -25,15 +25,14 @@ themselves.
    call the relevant task inside it:
 
     ```python
-    import shepherd as shp
-    from shepherd.providers import claude
+    import shepherd as sp
 
     # cheap, fast model for the easy classification step
-    with shp.workspace(model=claude("haiku-4-5")):
+    with sp.workspace(model="claude:haiku-4-5"):
         triage = triage_change(diff)
 
     # stronger model for the step that needs more judgment
-    with shp.workspace(model=claude("sonnet-4-5")):
+    with sp.workspace(model="claude:sonnet-4-5"):
         review = write_review(diff, triage)
     ```
 
@@ -49,14 +48,14 @@ themselves.
 ## Expected result
 
 Each task runs against the model of its enclosing workspace; switching a step to
-another model is a one-line change to that block's `claude("...")` argument, and
+another model is a one-line change to that block's `model="claude:..."` argument, and
 the tasks stay untouched. Workspace-pins-the-model is the same behavior the
 tutorial exercises and tests.
 
 ## If it fails
 
 - **`RuntimeError` about a workspace?** A task was called between blocks, with no
-  workspace open. Every task call must sit inside a `with shp.workspace(...)`;
+  workspace open. Every task call must sit inside a `with sp.workspace(...)`;
   see [Debug your first run](debug-your-first-run.md).
 - **Both tasks ran on the same model?** They were inside the same workspace. Give
   each its own block, as in step 2.

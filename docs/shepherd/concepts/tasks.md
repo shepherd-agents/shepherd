@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -14,9 +14,9 @@ Shepherd turns that contract into a model invocation and hands you back a
 value of the declared return type, or a typed failure.
 
 ```python
-import shepherd as shp
+import shepherd as sp
 
-@shp.task
+@sp.task
 def review_for_security(diff: str, project: str) -> SecurityReview:
     """Identify security concerns in this code change."""
 ```
@@ -61,14 +61,14 @@ change as "tightened the loop condition" anywhere else.
 The bodyless form above is the purest shape: signature plus docstring, one
 synthesized model delivery. When a task needs to orchestrate, call the model
 more than once, combine intermediate results, invoke other tasks, give it a
-body, where `shp.deliver` is the explicit "go to the model now" step:
+body, where `sp.deliver` is the explicit "go to the model now" step:
 
 ```python
-@shp.task
+@sp.task
 def audit_change(diff: str) -> str:
     """Audit a code change; return a one-paragraph summary."""
-    full = shp.deliver(str, goal="Produce a detailed audit.")
-    return shp.deliver(str, goal="Summarize the audit.", evidence=[full])
+    full = sp.deliver(str, goal="Produce a detailed audit.")
+    return sp.deliver(str, goal="Summarize the audit.", evidence=[full])
 ```
 
 A bodied task is ordinary Python in the middle with model deliveries at the

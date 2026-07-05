@@ -25,6 +25,10 @@ PROTO = Path(__file__).resolve().parent.parent
 # validator script names cited in metadata (`check_shepherd_docs.py`,
 # `gen_shepherd_ref_pages.py`) are NOT — the `_` before `shepherd` is no word boundary.
 PATTERN = re.compile(r"\bagentic\w*|\bshepherd_\w+|\bdevice\b", re.IGNORECASE)
+# ALL-CAPS tokens (SHEPHERD_ENABLE_FENCED_RUN_START, ...) are public operator env
+# vars, not internal package names; the package-name intent of `shepherd_\\w+` is
+# lowercase modules, so upper-case matches are exempt.
+
 
 
 def main() -> int:
@@ -57,7 +61,7 @@ def main() -> int:
             continue
         if enumerated:
             continue
-        hits = sorted({m.group(0) for m in PATTERN.finditer(text)})
+        hits = sorted({m.group(0) for m in PATTERN.finditer(text) if not m.group(0).isupper()})
         if hits:
             errors.append(f"[NAMES] {rel}: stale name(s) on public page: {', '.join(hits[:6])}  (fix or S12 allowlist; see docs/_runbook.md)")
 

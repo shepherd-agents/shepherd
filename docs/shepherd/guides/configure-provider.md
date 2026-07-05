@@ -2,7 +2,7 @@
 
 > Page status: fast-follow
 > Source state: preview
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -47,10 +47,9 @@ The `shepherd provider ...` commands below are the planned CLI surface,
    point; the workspace pins the model for every task call inside the block:
 
     ```python
-    import shepherd as shp
-    from shepherd.providers import claude
+    import shepherd as sp
 
-    with shp.workspace(model=claude("sonnet-4-5")):
+    with sp.workspace(model="claude:sonnet-4-5"):
         ...  # every task call in here uses that model
     ```
 
@@ -59,14 +58,14 @@ The `shepherd provider ...` commands below are the planned CLI surface,
 - `shepherd provider check claude` reports the SDK installed, a credential
   present, and the provider reachable (planned contract; unshipped).
 - A task called inside the workspace runs against the selected model; the
-  same code targets a different model by changing only `claude("...")`.
+  same code targets a different model by changing only `model="claude:..."`.
 
 ## If it fails
 
 - **No credential found**, re-run `shepherd provider login claude`; check
   for an environment variable set in one shell but not another.
 - **The task raises before any model call**, it was called outside
-  `with shp.workspace(model=...)`; see
+  `with sp.workspace(model=...)`; see
   [Debug your first run](debug-your-first-run.md).
 - **Cost or flaky-output surprises**, live calls are billed and vary run to
   run; keep your tests on the deterministic offline provider.

@@ -4,7 +4,7 @@ Stands in for the unshipped ``shepherd`` package (surface) so the
 prototype's documented examples run end-to-end, deterministically, offline.
 It faithfully mirrors the load-bearing semantics the docs teach:
 
-- ``@shp.task`` on a bodyless function REQUIRES a docstring (the docstring is
+- ``@sp.task`` on a bodyless function REQUIRES a docstring (the docstring is
   the model-call goal — same contract as
   shepherd_runtime/nucleus/callable_task.py:272-278);
 - calls are answered from recorded transcripts (docs_src/_sim/transcripts.json),
@@ -75,22 +75,26 @@ def _coerce(value: Any, annotation: Any) -> Any:
 
 
 def task(fn=None, *, may=None, name=None, guidance=None):
-    """Declare a typed task (simulation). Mirrors the bodyless-docstring rule."""
+    """Declare a typed task (simulation).
+
+    Mirrors the real 0.2.0 validation: every parameter must be annotated (the
+    signature is the contract); a docstring is recommended but not required.
+    """
 
     def _wrap(target):
-        doc = inspect.getdoc(target)
-        if not (doc or guidance):
-            raise TypeError(
-                f"Bodyless callable task {target.__qualname__} must declare a docstring "
-                "or guidance= to use as the model-call goal"
-            )
+        sig = inspect.signature(target)
+        for pname, param in sig.parameters.items():
+            if param.annotation is inspect.Parameter.empty:
+                raise TypeError(
+                    f"Callable task {target.__qualname__} parameter {pname!r} must be annotated"
+                )
         hints = get_type_hints(target)
         ret = hints.get("return")
 
         @functools.wraps(target)
         def _call(*args, **kwargs):
             if _ACTIVE["model"] is None:
-                raise RuntimeError("call tasks inside `with shp.workspace(model=...)`")
+                raise RuntimeError("call tasks inside `with sp.workspace(model=...)`")
             try:
                 recorded = _TRANSCRIPTS[target.__name__]
             except KeyError as exc:

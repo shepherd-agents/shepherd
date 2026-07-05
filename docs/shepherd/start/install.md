@@ -2,7 +2,7 @@
 
 > Page status: fast-follow
 > Source state: preview
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -26,7 +26,7 @@ The tutorial and Getting Started path is always `shepherd-ai`, never
 `shepherd-base`. `shepherd-ai` is the *distribution* name; the *import* is:
 
 ```python
-import shepherd as shp
+import shepherd as sp
 ```
 
 ## Next

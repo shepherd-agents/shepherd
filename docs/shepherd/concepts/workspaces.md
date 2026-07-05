@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -14,10 +14,9 @@ silence is what keeps tasks reusable. The missing context comes from the
 **workspace**, the ambient scope your tasks run inside:
 
 ```python
-import shepherd as shp
-from shepherd.providers import claude
+import shepherd as sp
 
-with shp.workspace(model=claude("sonnet-4-5"), root="./my-project"):
+with sp.workspace(model="claude:sonnet-4-5", root="./my-project"):
     review = review_change(diff)
 ```
 
@@ -42,12 +41,19 @@ where the context begins and the exact line where it ends. Nest a second
 workspace and the inner one shadows the outer for its extent; leave the block
 and the outer context is restored. It is a scope, not a mutable setting.
 
-## The scope carries model and root
+## The scope carries model, root, and bound repositories
 
-Model and root are the workspace's public job today. The model says who answers
-the tasks in scope; the root says where the program is situated. Keeping both
-on the scope keeps task signatures clean: task parameters stay evidence for
-the model, not framework plumbing.
+Model and root are the workspace's first job: the model says who answers the
+tasks in scope; the root says where the program is situated. Keeping both on the
+scope keeps task signatures clean: task parameters stay evidence for the model,
+not framework plumbing.
+
+The workspace also **binds repositories** — the resources a run reads and writes
+under [permission grants](permissions.md). You name a bound root with
+`ws.bind(root="backend/", name="backend")` (it returns a `GitRepo` value), pass
+one or more to a run with `workspace.run(task, bindings={...})`, and settle each
+run's retained output once with `select` / `release` / `discard`. Binding is how
+the workspace hands a task exactly the world it is allowed to touch.
 
 ## The triangle: task, workspace, run
 

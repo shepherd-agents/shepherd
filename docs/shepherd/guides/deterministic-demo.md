@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: checked-example
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: pytest docs_src/shepherd/quickstart/ docs_src/shepherd/tutorials/
 
@@ -25,7 +25,7 @@ account, nothing billed.
     --8<-- "quickstart/hello.py:hello"
     ```
 
-    The workspace pins `claude("sonnet-4-5")`, but against the offline provider
+    The workspace pins `model="claude:sonnet-4-5"`, but against the offline provider
     the answer is replayed, not generated, no credential is read and no request
     leaves the machine.
 
@@ -55,7 +55,7 @@ read here is what runs.
 - **Output differs between runs?** You are not on the offline provider. The
   documented examples select it by default; check you did not swap in a live
   model.
-- **`shp.DeliveryFailed`?** On this example, against the offline provider, that
+- **`sp.DeliveryFailed`?** On this example, against the offline provider, that
   signals a broken install, reinstall and rerun.
 - **`RuntimeError` about a workspace?** The task was called outside
-  `with shp.workspace(...)`; see [Debug your first run](debug-your-first-run.md).
+  `with sp.workspace(...)`; see [Debug your first run](debug-your-first-run.md).

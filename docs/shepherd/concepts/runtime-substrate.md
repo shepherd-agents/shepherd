@@ -2,7 +2,7 @@
 
 > Page status: scaffold
 > Source state: preview
-> Applies to: Shepherd v0.1.1-dev
+> Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -37,7 +37,7 @@ content-addressed identity of its input state, the precise "the world as of
 two views at the same basis with the same authority are interchangeable.
 
 ```python
-@shp.task
+@sp.task
 def evaluate_fix(repo: May[GitRepo, ReadWrite], diff: str) -> tuple[GitRepo, Verdict]:
     """Apply the diff on a branch, run the checks, and report a verdict."""
 ```
