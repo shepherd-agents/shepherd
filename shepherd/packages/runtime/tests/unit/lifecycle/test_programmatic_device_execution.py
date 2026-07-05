@@ -12,6 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, PropertyMock
 
 import pytest
 from shepherd_core.effects import TaskCompleted, TaskStarted
+from shepherd_core.errors import TaskExecutionError
 from shepherd_core.foundation.protocols.device import (
     DeviceCapabilities,
     EffectBundle,
@@ -364,7 +365,7 @@ class TestRunExecutorDeviceRouting:
             executor=instance.execute,
             task_name="GreetTask",
         ) as lifecycle:
-            with pytest.raises(Exception):
+            with pytest.raises(TaskExecutionError):
                 await lifecycle.run_executor()
 
         device.cleanup.assert_called_once()

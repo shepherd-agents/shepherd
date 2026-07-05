@@ -14,6 +14,7 @@ from shepherd_kernel_v3_reference.source.wellformed import SourceFormError
 from shepherd_kernel_v3_reference.trace.machine import run_trace
 from shepherd_kernel_v3_reference.trace.records import EffectCapture, SelectionClosed
 from shepherd_kernel_v3_reference.trace.validate import (
+    TraceValidationError,
     validate_core0_trace,
     validate_core0_trace_prefix,
     validate_core_a_trace,
@@ -266,7 +267,7 @@ def test_static_fragment_direct_kernel_and_trace_corpus(case: CorpusCase) -> Non
     if case.core0:
         _validate_complete_or_prefix(direct, traced.trace, core0=True)
     else:
-        with pytest.raises(Exception):
+        with pytest.raises(TraceValidationError):
             _validate_complete_or_prefix(direct, traced.trace, core0=True)
 
     _validate_complete_or_prefix(direct, traced.trace, core0=False)

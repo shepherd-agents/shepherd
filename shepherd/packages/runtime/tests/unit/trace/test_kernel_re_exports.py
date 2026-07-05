@@ -12,6 +12,8 @@ Trace container, serde) can build on a stable schema base.
 
 from __future__ import annotations
 
+from dataclasses import FrozenInstanceError
+
 import pytest
 
 
@@ -32,7 +34,7 @@ def test_runref_is_frozen_dataclass_with_string_id() -> None:
     assert ref.to_payload()["schema"] == RUN_REF_SCHEMA
     assert RunRef.from_payload(ref.to_payload()) == ref
     # Frozen: cannot reassign id.
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         ref.id = "run_other"  # type: ignore[misc]
     # Hashable; equality structural.
     assert ref == RunRef(id="run_01HZX")

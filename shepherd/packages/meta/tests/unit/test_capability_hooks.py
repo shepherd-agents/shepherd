@@ -16,6 +16,7 @@ Test coverage:
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 from shepherd_contexts import WorkspaceRef
 from shepherd_core.effects import ToolCallRejected
 from shepherd_core.types import (
@@ -100,7 +101,7 @@ class TestValidationResult:
         tool_call = ToolCall(id="tc_1", name="Read", params={})
         result = ValidationResult(allowed=True, tool=tool_call)
         # Attempting to modify should raise an error
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             result.allowed = False
 
 
@@ -143,7 +144,7 @@ class TestToolCallRejectedEffect:
             reason="Not allowed",
         )
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             effect.tool_name = "Edit"
 
 

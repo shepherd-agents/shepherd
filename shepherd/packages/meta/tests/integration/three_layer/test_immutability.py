@@ -5,7 +5,7 @@ Tests the core invariant: state(t) = fold(apply_effect, effects[0:t], initial_st
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import FrozenInstanceError, dataclass
 from typing import Self
 
 import pytest
@@ -28,13 +28,13 @@ class TestScopeImmutability:
         scope = ImmutableScope()
 
         # Attempting to mutate should raise FrozenInstanceError
-        with pytest.raises(Exception):  # dataclass.FrozenInstanceError
+        with pytest.raises(FrozenInstanceError):
             scope._id = "new_id"
 
-        with pytest.raises(Exception):
+        with pytest.raises(FrozenInstanceError):
             scope._bindings = ()
 
-        with pytest.raises(Exception):
+        with pytest.raises(FrozenInstanceError):
             scope._stream = scope._stream
 
     async def test_context_binding_is_frozen(self) -> None:
@@ -43,10 +43,10 @@ class TestScopeImmutability:
         binding = ContextBinding(name="test", context=ctx)
 
         # Attempting to mutate should raise FrozenInstanceError
-        with pytest.raises(Exception):
+        with pytest.raises(FrozenInstanceError):
             binding.name = "new_name"
 
-        with pytest.raises(Exception):
+        with pytest.raises(FrozenInstanceError):
             binding.context = ctx
 
     async def test_immutable_scope_with_binding_returns_new_instance(self) -> None:

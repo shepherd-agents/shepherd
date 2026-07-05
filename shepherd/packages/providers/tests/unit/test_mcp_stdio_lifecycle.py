@@ -126,7 +126,7 @@ class TestErrorHandling:
     async def test_start_invalid_command(self):
         """Starting with a non-existent command should raise an error."""
         bridge = StdioMCPBridge()
-        with pytest.raises(Exception):
+        with pytest.raises(FileNotFoundError):
             await bridge.start("/nonexistent/binary/xyz", ["--bad"])
         # Cleanup should be safe even after failed start
         await bridge.stop()

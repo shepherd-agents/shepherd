@@ -14,6 +14,7 @@ Test coverage:
 """
 
 import pytest
+from pydantic import ValidationError
 from shepherd_contexts import KVStoreContext, SessionState
 from shepherd_core.context import compute_composite_reversibility, is_execution_context
 from shepherd_core.effects import TaskCompleted, TaskStarted
@@ -41,7 +42,7 @@ class TestKVStoreCreation:
     def test_model_is_frozen(self):
         """Model should be frozen (cannot reassign attributes)."""
         store = KVStoreContext.create({"key": "value"})
-        with pytest.raises(Exception):  # Pydantic frozen model
+        with pytest.raises(ValidationError):
             store.data = {"new": "value"}
 
     def test_str_returns_empty(self):

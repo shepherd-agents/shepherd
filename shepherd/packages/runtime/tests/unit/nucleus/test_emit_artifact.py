@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from dataclasses import dataclass
+from dataclasses import FrozenInstanceError, dataclass
 
 import pytest
 from shepherd_core.schema import SINGLE_OUTPUT_KEY
@@ -217,7 +217,7 @@ def test_emit_artifact_trace_omits_content_and_metadata_values(tmp_path) -> None
 
 def test_artifact_is_frozen_dataclass() -> None:
     artifact = Artifact(kind="report", name="x.txt", content="hi", metadata={"k": "v"})
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         artifact.kind = "other"  # type: ignore[misc]
 
 
