@@ -93,6 +93,7 @@ markdown_extensions:
 exclude_docs: |
   *
   !/index.md
+  !/roadmap.md
   !/start/index.md
   !/tutorials/index.md
   !/tutorials/first-shepherd-app.md
@@ -140,3 +141,4 @@ nav:
       - Route tasks to models: guides/route-tasks-to-models.md
   - Reference:
       - CLI: reference/cli.md
+  - Roadmap: roadmap.md
