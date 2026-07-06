@@ -6,7 +6,7 @@
 > Owner: @docs-system-owner (TBD)
 > Validation: shepherd/packages/dialect/tests/test_lane_c_acceptance_gate.py
 
-*How-to guide. New to Shepherd? Start with the tutorial. For exact APIs, see the reference.*
+*How-to guide. New to Shepherd? Start with the quickstart. For exact APIs, see the reference.*
 
 **Job.** Give a task read-write access to one bound repository and read-only
 access to another, so a violation is refused by the operating system — not

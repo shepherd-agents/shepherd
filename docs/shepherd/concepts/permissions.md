@@ -6,7 +6,7 @@
 > Owner: @docs-system-owner (TBD)
 > Validation: shepherd/packages/dialect/tests/test_lane_c_acceptance_gate.py
 
-*Concept. The mental model behind Shepherd. Steps live in the tutorial, signatures in the reference.*
+*Concept. The mental model behind Shepherd. Steps live in the quickstart, signatures in the reference.*
 
 A task's **permissions are part of its signature**. Just as the return type
 declares what you get back, a per-parameter grant declares what the task may do
@@ -81,7 +81,9 @@ Each binding's world output is inspected on its own, and settled once —
 run.changeset(name="backend")   # what the task wrote to the backend binding
 ```
 
-Nothing the task wrote touches your files until you `select` it.
+Nothing the task wrote touches your working files — the delta stays a
+retained output, read through the changeset surface; settlement records
+your decision on it exactly once.
 
 ## The whole-run floor: `may=`
 

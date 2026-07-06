@@ -8,10 +8,10 @@
 
 *Concept. The mental model behind Shepherd. Steps live in the tutorial, signatures in the reference.*
 
-Calling a task gives you more than a return value. Every call produces a
-**run**, the durable record of that one execution: what was sent, what came
-back, what was decided along the way, and what was produced besides the
-answer. The value is one field of the record, not the whole story.
+Running a [task](tasks.md) gives you more than a result. Every execution
+produces a **run**, the durable record of that one execution: what was sent,
+what came back, what was decided along the way, and what was produced besides
+the answer. The result is one part of the record, not the whole story.
 
 ## One execution, fully recorded
 
@@ -90,6 +90,7 @@ Because the record is data, runs compose with ordinary reasoning:
 
 ## Where runs sit
 
-A [task](tasks.md) declares; a [workspace](workspaces.md) situates; the run
-records. The [first Shepherd app tutorial](../tutorials/first-shepherd-app.md)
-has you reading your first trace within minutes of your first task call.
+A [task](tasks.md) declares; the run records; the run's world output is
+governed by [permissions](permissions.md) and settled explicitly. The
+[quickstart](../start/index.md) has you reading your first trace within
+minutes of your first run.
