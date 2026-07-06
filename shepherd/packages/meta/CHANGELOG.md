@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **File manifests now have stable snapshot identity and timezone-aware timestamps.**
+  `FileManifest.created_at` is recorded in UTC and no longer participates in
+  equality or hashing, so otherwise identical file snapshots do not compare
+  unequal merely because they were captured at different times.
+
 ## [0.3.0] - 2026-07-08
 
 ### Added

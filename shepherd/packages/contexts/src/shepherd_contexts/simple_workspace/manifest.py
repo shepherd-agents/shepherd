@@ -14,7 +14,7 @@ from __future__ import annotations
 import hashlib
 import os
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -84,7 +84,11 @@ class FileManifest:
     """
 
     entries: tuple[FileEntry, ...]
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(
+        default_factory=lambda: datetime.now(tz=UTC),
+        compare=False,
+        hash=False,
+    )
 
     # Lookup cache (built lazily, not part of equality)
     _path_index: dict[str, FileEntry] | None = field(default=None, compare=False, hash=False)

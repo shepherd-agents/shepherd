@@ -354,3 +354,19 @@ class TestEffectReplay:
         # Verify changeset was appended
         assert len(ws_after.pending_changesets) == 1
         assert ws_after.pending_changesets[0] is changeset
+
+
+class TestFileManifestIdentity:
+    """Regression pins for the C2 fix (tz-aware, comparison-exempt created_at)."""
+
+    def test_file_manifest_equality_ignores_created_at(self):
+        """Two manifests of identical file state are equal despite distinct timestamps."""
+        entries = (FileEntry(path="f.txt", size_bytes=10, mtime_ns=1, content_hash="x" * 64),)
+        m1 = FileManifest(entries=entries)  # default_factory timestamps differ per-instance
+        m2 = FileManifest(entries=entries)
+        assert m1 == m2
+        assert hash(m1) == hash(m2)
+
+    def test_file_manifest_created_at_is_tz_aware(self):
+        m = FileManifest(entries=())
+        assert m.created_at.tzinfo is not None
