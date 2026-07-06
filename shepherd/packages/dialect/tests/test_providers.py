@@ -271,6 +271,90 @@ def test_headless_alarm_kill_maps_to_budget_exhausted(tmp_path, monkeypatch) -> 
         _run_headless_with_proc(tmp_path, monkeypatch, _Proc())
 
 
+def test_claude_auth_status_env_and_absent(monkeypatch) -> None:
+    """Env credentials pass; no credentials is a hard offline fail."""
+    _clear_claude_auth_env(monkeypatch)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: None)
+    status = providers_module.claude_auth_status()
+    assert status.mode is None
+    assert status.ok is False
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+    status = providers_module.claude_auth_status()
+    assert status.mode == "api_key"
+    assert status.ok is True
+
+
+def test_claude_auth_status_hard_fails_on_expired_subscription_blob(monkeypatch) -> None:
+    """A readable-but-expired login is a hard fail (a jailed run cannot refresh it);
+    a valid blob is ok-but-unverified; an unrecognized shape is ok-but-unverified."""
+    import time
+
+    _clear_claude_auth_env(monkeypatch)
+    expired = int((time.time() - 3600) * 1000)
+    valid = int((time.time() + 3600) * 1000)
+
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b'{"claudeAiOauth":{"expiresAt":%d}}' % expired)
+    status = providers_module.claude_auth_status()
+    assert status.mode == "subscription_login"
+    assert status.ok is False
+    assert "expired" in status.detail
+
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b'{"claudeAiOauth":{"expiresAt":%d}}' % valid)
+    status = providers_module.claude_auth_status()
+    assert status.ok is True
+    assert "not verified" in status.detail
+
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b'{"unexpected":"shape"}')
+    status = providers_module.claude_auth_status()
+    assert status.ok is True
+    assert "not verified" in status.detail
+
+
+def test_probe_claude_auth_reports_not_logged_in(monkeypatch) -> None:
+    """The live probe classifies a not-logged-in envelope as a failed auth."""
+    _clear_claude_auth_env(monkeypatch)
+    monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "t")  # env auth ⇒ no seeding needed
+    monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
+
+    class _Proc:
+        returncode = 1
+        stdout = _NOT_LOGGED_IN_STDOUT
+        stderr = ""
+
+    monkeypatch.setattr(providers_module.subprocess, "run", lambda *a, **k: _Proc())
+    ok, detail = providers_module.probe_claude_auth()
+    assert ok is False
+    assert "Not logged in" in detail
+
+
+def test_probe_claude_auth_success(monkeypatch) -> None:
+    """A clean success envelope authenticates."""
+    _clear_claude_auth_env(monkeypatch)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+    monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
+
+    class _Proc:
+        returncode = 0
+        stdout = '{"type":"result","subtype":"success","is_error":false,"result":"ok","usage":{}}'
+        stderr = ""
+
+    monkeypatch.setattr(providers_module.subprocess, "run", lambda *a, **k: _Proc())
+    ok, detail = providers_module.probe_claude_auth()
+    assert ok is True
+    assert "authenticated" in detail
+
+
+def test_probe_claude_auth_no_credentials(monkeypatch) -> None:
+    """No resolvable credential is a failed probe, not a crash."""
+    _clear_claude_auth_env(monkeypatch)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: None)
+    monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
+    ok, detail = providers_module.probe_claude_auth()
+    assert ok is False
+    assert "no credentials" in detail
+
+
 def test_providers_import_no_sdk_and_no_legacy_reach() -> None:
     """CLI-direct posture: the dialect's dependency set is unchanged by W1."""
     probe = (

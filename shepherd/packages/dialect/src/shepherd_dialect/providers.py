@@ -13,6 +13,8 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
+import time
 from collections.abc import Mapping
 from dataclasses import dataclass
 from importlib import resources
@@ -127,6 +129,118 @@ def _read_host_claude_login() -> bytes | None:
     except Exception:  # noqa: BLE001 — fail soft: no login state means env auth or a clean CLI error
         return None
     return None
+
+
+def _claude_blob_expiry(blob: bytes | None) -> bool | None:
+    """Whether a subscription login blob's access token is expired.
+
+    ``True`` = expired, ``False`` = still valid, ``None`` = not determinable
+    (missing field / unrecognized shape). Never raises. The blob is Claude Code's
+    ``.credentials.json`` / keychain payload: ``{"claudeAiOauth": {"expiresAt": <ms>}}``.
+    """
+    if not blob:
+        return None
+    try:
+        data = json.loads(blob)
+        oauth = data.get("claudeAiOauth") if isinstance(data, Mapping) else None
+        expires_at = oauth.get("expiresAt") if isinstance(oauth, Mapping) else None
+        if not isinstance(expires_at, (int, float)):
+            return None
+        return (expires_at / 1000.0) < time.time()
+    except Exception:  # noqa: BLE001 — best-effort; an unreadable blob is "not determinable"
+        return None
+
+
+@dataclass(frozen=True)
+class ClaudeAuthStatus:
+    """The offline readiness verdict for the jailed Claude lane."""
+
+    mode: str | None
+    ok: bool
+    detail: str
+
+
+def claude_auth_status() -> ClaudeAuthStatus:
+    """Offline verdict on whether the jailed Claude lane can authenticate.
+
+    Cheap and network-free. Env credentials pass; an absent login fails; a
+    subscription login is inspected for token expiry — an expired access token
+    cannot be refreshed under the jail (keychain write-back is blocked), so it is
+    a hard fail. A valid-looking login is reported ``ok`` but *unverified*:
+    ``probe_claude_auth`` is the authoritative check. This is what makes a green
+    ``doctor`` honest rather than merely "a blob is readable".
+    """
+    mode, blob = _resolve_claude_auth()
+    if mode == "api_key":
+        return ClaudeAuthStatus(mode, True, "ANTHROPIC_API_KEY set")
+    if mode == "oauth_token":
+        return ClaudeAuthStatus(mode, True, "CLAUDE_CODE_OAUTH_TOKEN set")
+    if mode is None:
+        return ClaudeAuthStatus(
+            None, False, "set ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN, or sign in with `claude login`"
+        )
+    expired = _claude_blob_expiry(blob)
+    if expired is True:
+        return ClaudeAuthStatus(
+            mode,
+            False,
+            "signed-in `claude` CLI, but the access token is expired — a jailed run cannot "
+            "refresh it; run `claude login` or set CLAUDE_CODE_OAUTH_TOKEN",
+        )
+    unverified = "run `shepherd doctor claude --probe` to authenticate"
+    if expired is False:
+        return ClaudeAuthStatus(mode, True, f"signed-in `claude` CLI (found, not verified — {unverified})")
+    return ClaudeAuthStatus(mode, True, f"signed-in `claude` CLI (found, format unrecognized, not verified — {unverified})")
+
+
+def probe_claude_auth(*, budget_seconds: int = 30) -> tuple[bool, str]:
+    """Authenticate the jailed Claude lane for real; return ``(ok, detail)``.
+
+    Runs a minimal ``claude -p`` under the provider's scrubbed-config +
+    seeded-credential conditions (the auth-relevant half of a real run) and
+    classifies the outcome with the same envelope parser the run path uses — the
+    authoritative counterpart to the offline ``claude_auth_status``. Reaches the
+    network and may briefly call the model. Never raises.
+    """
+    cli = shutil.which("claude")
+    if cli is None:
+        return False, "`claude` not found on PATH"
+    auth_mode, login_blob = _resolve_claude_auth()
+    if auth_mode is None:
+        return False, "no credentials (set ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN, or `claude login`)"
+    provider = ClaudeHeadlessProvider(prompt="Reply with the single word: ok", max_turns=1, budget_seconds=budget_seconds)
+    with tempfile.TemporaryDirectory(prefix="shepherd-claude-probe-") as tmp:
+        working = Path(tmp)
+        scratch = working / ClaudeHeadlessProvider._SCRATCH
+        for sub in ("home", "config", "tmp"):
+            (scratch / sub).mkdir(parents=True, exist_ok=True)
+        if login_blob is not None:
+            cred = scratch / "config" / ".credentials.json"
+            cred.write_bytes(login_blob)
+            cred.chmod(0o600)
+        try:
+            proc = subprocess.run(
+                provider.command_argv(working, cli),
+                capture_output=True,
+                text=True,
+                timeout=budget_seconds + 15,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return False, f"probe timed out after ~{budget_seconds}s"
+        except Exception as exc:  # noqa: BLE001 — a probe that cannot launch is a failed probe, not a crash
+            return False, f"probe could not launch: {exc}"
+    if proc.returncode == 0:
+        try:
+            result_event, _events = _parse_claude_cli_output(proc.stdout or "")
+        except Exception:  # noqa: BLE001 — unparseable-but-zero-exit is treated as authenticated
+            return True, f"authenticated ({auth_mode})"
+        if result_event.get("is_error"):
+            diagnosis = _diagnose_claude_cli_failure(proc.returncode, proc.stdout, proc.stderr)
+            return False, str(diagnosis["summary"])
+        return True, f"authenticated ({auth_mode})"
+    diagnosis = _diagnose_claude_cli_failure(proc.returncode, proc.stdout, proc.stderr)
+    return False, str(diagnosis["summary"] or f"claude exited rc={proc.returncode}")
 
 
 def _signals_max_turns_exhaustion(signal: str) -> bool:

@@ -39,15 +39,20 @@ def doctor(ctx: click.Context, json_output: bool, backend: str) -> None:
     show_default=True,
     help="Workspace backend to validate.",
 )
-def doctor_claude(json_output: bool, backend: str) -> None:
+@click.option(
+    "--probe",
+    is_flag=True,
+    help="Authenticate the jailed Claude lane for real (reaches the network; may briefly call the model).",
+)
+def doctor_claude(json_output: bool, backend: str, probe: bool) -> None:
     """Check whether the live Claude runtime lane is available."""
-    _run_doctor(mode="claude", json_output=json_output, backend=backend)
+    _run_doctor(mode="claude", json_output=json_output, backend=backend, probe=probe)
 
 
-def _run_doctor(*, mode: DoctorMode, json_output: bool, backend: str) -> None:
+def _run_doctor(*, mode: DoctorMode, json_output: bool, backend: str, probe: bool = False) -> None:
     checks = _core_checks(backend=backend)
     if mode == "claude":
-        checks.extend(_claude_checks())
+        checks.extend(_claude_checks(probe=probe))
 
     payload = {"mode": mode, "checks": checks, "ok": all(check["ok"] or not check["required"] for check in checks)}
     if json_output:
@@ -79,7 +84,7 @@ def _core_checks(*, backend: str) -> list[dict[str, object]]:
     return checks
 
 
-def _claude_checks() -> list[dict[str, object]]:
+def _claude_checks(*, probe: bool = False) -> list[dict[str, object]]:
     checks: list[dict[str, object]] = []
     try:
         from shepherd_dialect import native_jail_available
@@ -92,20 +97,32 @@ def _claude_checks() -> list[dict[str, object]]:
 
     claude_path = shutil.which("claude")
     checks.append(_check("claude-cli", claude_path is not None, claude_path or "`claude` not found on PATH"))
-    try:
-        from shepherd_dialect import claude_auth_mode
 
-        mode = claude_auth_mode()
+    # Offline: honest about what is *knowable* without a round-trip. A readable
+    # but expired subscription blob is a hard fail — a jailed run cannot refresh
+    # it — so a green `claude-auth` predicts a working run rather than "a blob
+    # exists". `--probe` is the authoritative, network-reaching confirmation.
+    try:
+        from shepherd_dialect import claude_auth_status
+
+        status = claude_auth_status()
     except Exception as exc:  # noqa: BLE001
         checks.append(_check("claude-auth", False, f"could not check Claude auth: {exc}"))
     else:
-        messages = {
-            "api_key": "ANTHROPIC_API_KEY set",
-            "oauth_token": "CLAUDE_CODE_OAUTH_TOKEN set",
-            "subscription_login": "signed-in `claude` CLI (login is seeded into jailed runs)",
-        }
-        missing = "set ANTHROPIC_API_KEY, or sign in with `claude login`"
-        checks.append(_check("claude-auth", mode is not None, messages.get(mode or "", missing)))
+        checks.append(_check("claude-auth", status.ok, status.detail))
+
+    if probe:
+        if claude_path is None:
+            checks.append(_check("claude-auth-probe", False, "skipped: `claude` not on PATH"))
+        else:
+            try:
+                from shepherd_dialect import probe_claude_auth
+
+                probe_ok, probe_detail = probe_claude_auth()
+            except Exception as exc:  # noqa: BLE001
+                checks.append(_check("claude-auth-probe", False, f"probe error: {exc}"))
+            else:
+                checks.append(_check("claude-auth-probe", probe_ok, probe_detail))
     return checks
 
 

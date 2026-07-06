@@ -95,6 +95,15 @@ RATIFIED_PARENT_EFFECTS: dict[tuple[str, str, str], str] = {
         "like an env-carried key. Fail-soft by design (keyless run on any error). Migrates to the "
         "credential-broker seam (W3.2/g07); retire this entry when it does."
     ),
+    ("providers.py", "subprocess.run", "probe_claude_auth"): (
+        "D2 2026-07-06: `shepherd doctor claude --probe` auth preflight. Runs a minimal `claude -p` "
+        "in the PARENT to verify the signed-in CLI can actually authenticate, classifying the "
+        "outcome with the run path's own envelope parser. This is a diagnostic health check, not a "
+        "task run: it launches no user task body and carries no workspace authority, so it is "
+        "deliberately outside `launch_confined`. Never raises (a probe that cannot launch is a "
+        "failed probe). Migrates to the credential-broker seam (W3.2/g07); retire this entry when "
+        "it does."
+    ),
 }
 
 
@@ -276,13 +285,16 @@ def test_violation_captures_enclosing_symbol() -> None:
 
 
 def test_ratified_entry_is_accepted_and_matches_the_live_pin() -> None:
-    """The D1 keychain read is the one accepted parent-side executor call."""
+    """The two reviewed parent-side executor calls: the PR#7 keychain read and the doctor probe."""
     violations = scan_paths([RUN_PATH], impl_files=IMPL_FILES)
     unratified, stale = partition_ratified(violations)
     assert unratified == []
     assert stale == []
-    # exactly one ratified entry, and it is the PR#7 keychain read
-    assert set(RATIFIED_PARENT_EFFECTS) == {("providers.py", "subprocess.run", "_read_host_claude_login")}
+    # exactly these reviewed entries: the PR#7 keychain read and the `doctor claude` auth probe
+    assert set(RATIFIED_PARENT_EFFECTS) == {
+        ("providers.py", "subprocess.run", "_read_host_claude_login"),
+        ("providers.py", "subprocess.run", "probe_claude_auth"),
+    }
 
 
 def test_unratified_call_still_fails() -> None:
