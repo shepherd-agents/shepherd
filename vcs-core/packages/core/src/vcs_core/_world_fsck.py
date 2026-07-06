@@ -175,7 +175,9 @@ class WorldFsckController:
         protected_retention = _ProtectedRetention(world_oids=frozenset(), refs=frozenset())
         try:
             closure = self._pubret.compute_resume_retention_closure(oid)
-            pin_classification = self._pubret.classify_world_closure_retention(closure, authority_refs=(DEFAULT_GROUND_REF,))
+            pin_classification = self._pubret.classify_world_closure_retention(
+                closure, authority_refs=(DEFAULT_GROUND_REF,)
+            )
             protected_retention = self._pubret._protected_retention((DEFAULT_GROUND_REF,))
         except (InvalidRepositoryStateError, KeyError, TypeError, ValueError) as exc:
             issues.append(_issue("pin_classification_failed", str(exc), world_oid=oid))
@@ -218,4 +220,3 @@ class WorldFsckController:
                 ),
             )
         return WorldFsckReport(world_oid=oid, pin_classification=pin_classification, issue_details=tuple(issues))
-

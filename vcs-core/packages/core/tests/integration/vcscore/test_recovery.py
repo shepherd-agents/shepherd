@@ -1807,9 +1807,7 @@ def test_activate_auto_recovers_dead_orphaned_operation(workspace: Path) -> None
         assert m2.list_orphaned_operations() == ()
         assert m2.store.list_open_operations() == []
         # the "just run it again" run proceeds instead of raising OrphanedOperationsError
-        with m2.runtime_activity(
-            scope=m2.ground, operation_label="next-run", operation_kind="runtime-run"
-        ):
+        with m2.runtime_activity(scope=m2.ground, operation_label="next-run", operation_kind="runtime-run"):
             pass
     finally:
         m2.deactivate()
@@ -1881,8 +1879,9 @@ def test_interrupted_run_operation_is_cleaned_up_not_orphaned(workspace: Path, i
     m = VcsCore(str(workspace))
     m.activate()
     try:
-        with pytest.raises(interrupt_cls), m.runtime_activity(
-            scope=m.ground, operation_label="interrupted-run", operation_kind="runtime-run"
+        with (
+            pytest.raises(interrupt_cls),
+            m.runtime_activity(scope=m.ground, operation_label="interrupted-run", operation_kind="runtime-run"),
         ):
             raise interrupt_cls()
         assert m.store.list_open_operations() == []  # cleaned up in-flight, not orphaned
@@ -1911,8 +1910,10 @@ def test_sigterm_under_terminate_as_interrupt_discards_not_orphans(workspace: Pa
     m = VcsCore(str(workspace))
     m.activate()
     try:
-        with pytest.raises(KeyboardInterrupt), terminate_as_interrupt(), m.runtime_activity(
-            scope=m.ground, operation_label="killed-run", operation_kind="runtime-run"
+        with (
+            pytest.raises(KeyboardInterrupt),
+            terminate_as_interrupt(),
+            m.runtime_activity(scope=m.ground, operation_label="killed-run", operation_kind="runtime-run"),
         ):
             os.kill(os.getpid(), signal.SIGTERM)  # the `kill` / `docker stop` signal
         assert m.store.list_open_operations() == []  # discarded in-flight, not orphaned

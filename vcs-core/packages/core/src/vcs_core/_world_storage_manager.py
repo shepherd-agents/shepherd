@@ -175,14 +175,6 @@ class PreparedRevisionBundle:
     preparation: RevisionPreparationRecord
 
 
-
-
-
-
-
-
-
-
 class WorldStorageManager:
     """Private manager that binds one v2 world installation to its stores."""
 
@@ -245,14 +237,18 @@ class WorldStorageManager:
             pubret=self._pubret,
         )
 
-
-
     # --- WorldFsckController delegation shims (V2.3) ---
     # fsck_world is also injected into PublicationRetentionController; keep the shim.
-    def fsck_world( self, oid: str, *, authority_refs: tuple[str, ...] = (DEFAULT_GROUND_REF,), mode: Literal["structural", "deep"] = "structural" ) -> WorldFsckReport:
+    def fsck_world(
+        self,
+        oid: str,
+        *,
+        authority_refs: tuple[str, ...] = (DEFAULT_GROUND_REF,),
+        mode: Literal["structural", "deep"] = "structural",
+    ) -> WorldFsckReport:
         return self._fsck.fsck_world(oid, authority_refs=authority_refs, mode=mode)
 
-    def fsck_world_deep( self, oid: str, *, authority_refs: tuple[str, ...] = (DEFAULT_GROUND_REF,) ) -> WorldFsckReport:
+    def fsck_world_deep(self, oid: str, *, authority_refs: tuple[str, ...] = (DEFAULT_GROUND_REF,)) -> WorldFsckReport:
         return self._fsck.fsck_world_deep(oid, authority_refs=authority_refs)
 
     # --- PublicationRetentionController delegation shims (V2.2c) ---
@@ -273,14 +269,32 @@ class WorldStorageManager:
     def _active_publication_lease_targets(self) -> frozenset[str]:
         return self._pubret._active_publication_lease_targets()
 
-    def _extend_authority_lineage_retention_receipt_issues( self, issues: list[StructuredIssue], oid: str, *, authority_refs: tuple[str, ...] ) -> None:
-        return self._pubret._extend_authority_lineage_retention_receipt_issues(issues, oid, authority_refs=authority_refs)
+    def _extend_authority_lineage_retention_receipt_issues(
+        self, issues: list[StructuredIssue], oid: str, *, authority_refs: tuple[str, ...]
+    ) -> None:
+        return self._pubret._extend_authority_lineage_retention_receipt_issues(
+            issues, oid, authority_refs=authority_refs
+        )
 
     def _protected_retention(self, authority_refs: tuple[str, ...]) -> _ProtectedRetention:
         return self._pubret._protected_retention(authority_refs)
 
-    def _publish_world( self, *, ref: str, world_oid: str, expected_oid: str | None, allow_same_resource_alias: bool, authority_refs: tuple[str, ...] | None ) -> bool:
-        return self._pubret._publish_world(ref=ref, world_oid=world_oid, expected_oid=expected_oid, allow_same_resource_alias=allow_same_resource_alias, authority_refs=authority_refs)
+    def _publish_world(
+        self,
+        *,
+        ref: str,
+        world_oid: str,
+        expected_oid: str | None,
+        allow_same_resource_alias: bool,
+        authority_refs: tuple[str, ...] | None,
+    ) -> bool:
+        return self._pubret._publish_world(
+            ref=ref,
+            world_oid=world_oid,
+            expected_oid=expected_oid,
+            allow_same_resource_alias=allow_same_resource_alias,
+            authority_refs=authority_refs,
+        )
 
     def _record_lease_index(self, *, add: tuple[str, str, str] | None = None, remove: str | None = None) -> None:
         return self._pubret._record_lease_index(add=add, remove=remove)
@@ -291,11 +305,27 @@ class WorldStorageManager:
     def _reset_lease_index(self) -> None:
         return self._pubret._reset_lease_index()
 
-    def _validate_authority_retention_preflight( self, authority_refs: tuple[str, ...], *, allow_same_resource_alias: bool ) -> None:
-        return self._pubret._validate_authority_retention_preflight(authority_refs, allow_same_resource_alias=allow_same_resource_alias)
+    def _validate_authority_retention_preflight(
+        self, authority_refs: tuple[str, ...], *, allow_same_resource_alias: bool
+    ) -> None:
+        return self._pubret._validate_authority_retention_preflight(
+            authority_refs, allow_same_resource_alias=allow_same_resource_alias
+        )
 
-    def _validate_publication_plan( self, plan: PublicationPlan, *, expected_world_oid: str | None = None, expected_authority_ref: str | None = None, expected_input_world_oid: str | None = None ) -> None:
-        return self._pubret._validate_publication_plan(plan, expected_world_oid=expected_world_oid, expected_authority_ref=expected_authority_ref, expected_input_world_oid=expected_input_world_oid)
+    def _validate_publication_plan(
+        self,
+        plan: PublicationPlan,
+        *,
+        expected_world_oid: str | None = None,
+        expected_authority_ref: str | None = None,
+        expected_input_world_oid: str | None = None,
+    ) -> None:
+        return self._pubret._validate_publication_plan(
+            plan,
+            expected_world_oid=expected_world_oid,
+            expected_authority_ref=expected_authority_ref,
+            expected_input_world_oid=expected_input_world_oid,
+        )
 
     def _write_publication_leases(self, authority_refs: tuple[str, ...], world: WorldCommit) -> tuple[str, ...]:
         return self._pubret._write_publication_leases(authority_refs, world)
@@ -306,23 +336,75 @@ class WorldStorageManager:
     def advance_publication(self, prepared: PreparedPublication) -> bool:
         return self._pubret.advance_publication(prepared)
 
-    def build_advance_publication_plan( self, *, ref: str, world_oid: str, expected_oid: str, input_world_oid: str, allow_same_resource_alias: bool = False, authority_refs: tuple[str, ...] | None = None ) -> PublicationPlan:
-        return self._pubret.build_advance_publication_plan(ref=ref, world_oid=world_oid, expected_oid=expected_oid, input_world_oid=input_world_oid, allow_same_resource_alias=allow_same_resource_alias, authority_refs=authority_refs)
+    def build_advance_publication_plan(
+        self,
+        *,
+        ref: str,
+        world_oid: str,
+        expected_oid: str,
+        input_world_oid: str,
+        allow_same_resource_alias: bool = False,
+        authority_refs: tuple[str, ...] | None = None,
+    ) -> PublicationPlan:
+        return self._pubret.build_advance_publication_plan(
+            ref=ref,
+            world_oid=world_oid,
+            expected_oid=expected_oid,
+            input_world_oid=input_world_oid,
+            allow_same_resource_alias=allow_same_resource_alias,
+            authority_refs=authority_refs,
+        )
 
-    def build_publication_plan( self, *, ref: str, world_oid: str, expected_oid: str | None, input_world_oid: str | None, allow_same_resource_alias: bool = False, authority_refs: tuple[str, ...] | None = None ) -> PublicationPlan:
-        return self._pubret.build_publication_plan(ref=ref, world_oid=world_oid, expected_oid=expected_oid, input_world_oid=input_world_oid, allow_same_resource_alias=allow_same_resource_alias, authority_refs=authority_refs)
+    def build_publication_plan(
+        self,
+        *,
+        ref: str,
+        world_oid: str,
+        expected_oid: str | None,
+        input_world_oid: str | None,
+        allow_same_resource_alias: bool = False,
+        authority_refs: tuple[str, ...] | None = None,
+    ) -> PublicationPlan:
+        return self._pubret.build_publication_plan(
+            ref=ref,
+            world_oid=world_oid,
+            expected_oid=expected_oid,
+            input_world_oid=input_world_oid,
+            allow_same_resource_alias=allow_same_resource_alias,
+            authority_refs=authority_refs,
+        )
 
-    def build_root_publication_plan( self, *, ref: str, world_oid: str, allow_same_resource_alias: bool = False, authority_refs: tuple[str, ...] | None = None ) -> PublicationPlan:
-        return self._pubret.build_root_publication_plan(ref=ref, world_oid=world_oid, allow_same_resource_alias=allow_same_resource_alias, authority_refs=authority_refs)
+    def build_root_publication_plan(
+        self,
+        *,
+        ref: str,
+        world_oid: str,
+        allow_same_resource_alias: bool = False,
+        authority_refs: tuple[str, ...] | None = None,
+    ) -> PublicationPlan:
+        return self._pubret.build_root_publication_plan(
+            ref=ref,
+            world_oid=world_oid,
+            allow_same_resource_alias=allow_same_resource_alias,
+            authority_refs=authority_refs,
+        )
 
-    def classify_world_closure_retention( self, closure: WorldClosure, *, authority_refs: tuple[str, ...] = (DEFAULT_GROUND_REF,) ) -> dict[str, tuple[str, ...]]:
+    def classify_world_closure_retention(
+        self, closure: WorldClosure, *, authority_refs: tuple[str, ...] = (DEFAULT_GROUND_REF,)
+    ) -> dict[str, tuple[str, ...]]:
         return self._pubret.classify_world_closure_retention(closure, authority_refs=authority_refs)
 
-    def cleanup_orphan_pins( self, oid: str, *, authority_refs: tuple[str, ...] = (DEFAULT_GROUND_REF,) ) -> tuple[str, ...]:
+    def cleanup_orphan_pins(
+        self, oid: str, *, authority_refs: tuple[str, ...] = (DEFAULT_GROUND_REF,)
+    ) -> tuple[str, ...]:
         return self._pubret.cleanup_orphan_pins(oid, authority_refs=authority_refs)
 
-    def cleanup_stale_publication_leases( self, *, authority_refs: tuple[str, ...] = (DEFAULT_GROUND_REF,), abandon_journalless: bool = False ) -> tuple[str, ...]:
-        return self._pubret.cleanup_stale_publication_leases(authority_refs=authority_refs, abandon_journalless=abandon_journalless)
+    def cleanup_stale_publication_leases(
+        self, *, authority_refs: tuple[str, ...] = (DEFAULT_GROUND_REF,), abandon_journalless: bool = False
+    ) -> tuple[str, ...]:
+        return self._pubret.cleanup_stale_publication_leases(
+            authority_refs=authority_refs, abandon_journalless=abandon_journalless
+        )
 
     def cleanup_stale_terminal_operation_open_ref(self, operation_id: str, *, terminal_family: str) -> bool:
         return self._pubret.cleanup_stale_terminal_operation_open_ref(operation_id, terminal_family=terminal_family)
@@ -342,29 +424,60 @@ class WorldStorageManager:
     def prepare_publication(self, plan: PublicationPlan) -> PreparedPublication:
         return self._pubret.prepare_publication(plan)
 
-    def publish_root_world( self, *, ref: str, world_oid: str, allow_same_resource_alias: bool = False, authority_refs: tuple[str, ...] | None = None ) -> bool:
-        return self._pubret.publish_root_world(ref=ref, world_oid=world_oid, allow_same_resource_alias=allow_same_resource_alias, authority_refs=authority_refs)
+    def publish_root_world(
+        self,
+        *,
+        ref: str,
+        world_oid: str,
+        allow_same_resource_alias: bool = False,
+        authority_refs: tuple[str, ...] | None = None,
+    ) -> bool:
+        return self._pubret.publish_root_world(
+            ref=ref,
+            world_oid=world_oid,
+            allow_same_resource_alias=allow_same_resource_alias,
+            authority_refs=authority_refs,
+        )
 
     def rebuild_active_lease_index(self) -> None:
         return self._pubret.rebuild_active_lease_index()
 
-    def record_operation_published( self, operation_id: str, *, world_oid: str ) -> OperationJournalEntry:
+    def record_operation_published(self, operation_id: str, *, world_oid: str) -> OperationJournalEntry:
         return self._pubret.record_operation_published(operation_id, world_oid=world_oid)
 
-    def record_operation_publishing( self, operation_id: str, *, world_oid: str, publication_plan: PublicationPlan ) -> OperationJournalEntry:
-        return self._pubret.record_operation_publishing(operation_id, world_oid=world_oid, publication_plan=publication_plan)
+    def record_operation_publishing(
+        self, operation_id: str, *, world_oid: str, publication_plan: PublicationPlan
+    ) -> OperationJournalEntry:
+        return self._pubret.record_operation_publishing(
+            operation_id, world_oid=world_oid, publication_plan=publication_plan
+        )
 
-    def validate_publish_closure( self, oid: str, *, authority_refs: tuple[str, ...] = (), allow_same_resource_alias: bool = False ) -> WorldClosure:
-        return self._pubret.validate_publish_closure(oid, authority_refs=authority_refs, allow_same_resource_alias=allow_same_resource_alias)
+    def validate_publish_closure(
+        self, oid: str, *, authority_refs: tuple[str, ...] = (), allow_same_resource_alias: bool = False
+    ) -> WorldClosure:
+        return self._pubret.validate_publish_closure(
+            oid, authority_refs=authority_refs, allow_same_resource_alias=allow_same_resource_alias
+        )
 
     def verify_active_lease_index(self) -> Health:
         return self._pubret.verify_active_lease_index()
 
-    def write_world_fork_origin_receipt( self, *, authority_ref: str, first_world_oid: str, forked_from_authority_ref: str, forked_from_world_oid: str ) -> str:
-        return self._pubret.write_world_fork_origin_receipt(authority_ref=authority_ref, first_world_oid=first_world_oid, forked_from_authority_ref=forked_from_authority_ref, forked_from_world_oid=forked_from_world_oid)
+    def write_world_fork_origin_receipt(
+        self, *, authority_ref: str, first_world_oid: str, forked_from_authority_ref: str, forked_from_world_oid: str
+    ) -> str:
+        return self._pubret.write_world_fork_origin_receipt(
+            authority_ref=authority_ref,
+            first_world_oid=first_world_oid,
+            forked_from_authority_ref=forked_from_authority_ref,
+            forked_from_world_oid=forked_from_world_oid,
+        )
 
-    def write_world_retention_receipt( self, *, authority_ref: str, world_oid: str, closure: WorldClosure, retained_refs: tuple[str, ...] ) -> str:
-        return self._pubret.write_world_retention_receipt(authority_ref=authority_ref, world_oid=world_oid, closure=closure, retained_refs=retained_refs)
+    def write_world_retention_receipt(
+        self, *, authority_ref: str, world_oid: str, closure: WorldClosure, retained_refs: tuple[str, ...]
+    ) -> str:
+        return self._pubret.write_world_retention_receipt(
+            authority_ref=authority_ref, world_oid=world_oid, closure=closure, retained_refs=retained_refs
+        )
 
     @classmethod
     def open_or_init(
@@ -510,7 +623,10 @@ class WorldStorageManager:
     ) -> str:
         """Create a provenance-free JSON revision for tests and migration tools."""
         return self.store(store_id).create_unsafe_unprepared_json_revision(
-            ref, payload, parents=parents, message=message,
+            ref,
+            payload,
+            parents=parents,
+            message=message,
         )
 
     def create_unsafe_unprepared_candidate(
@@ -922,7 +1038,6 @@ class WorldStorageManager:
             selection_policy_digest=selection_policy_digest,
         )
 
-
     def _read_world_ref_payload(self, head: SubstrateHead) -> WorldRefPayload:
         return self._transition_coordinator.read_world_ref_payload(head)
 
@@ -1112,8 +1227,6 @@ class WorldStorageManager:
     ) -> OperationJournalEntry:
         return self._journal.record_operation_world_committed(operation_id, world_oid=world_oid)
 
-
-
     def close_operation_journal(
         self,
         operation_id: str,
@@ -1127,7 +1240,6 @@ class WorldStorageManager:
 
     def archive_operation_journal(self, operation_id: str, *, error: str | None = None) -> OperationJournalEntry:
         return self._journal.archive_operation_journal(operation_id, error=error)
-
 
     def read_operation_journal(self, operation_id: str, *, family: str = "open") -> OperationJournalHistory:
         return self._journal.read_operation_journal(operation_id, family=family)
@@ -1202,7 +1314,6 @@ class WorldStorageManager:
             )
         return OperationJournalsFsckReport(scanned=len(items), issue_details=tuple(issues))
 
-
     def advance_world_ref(
         self,
         *,
@@ -1224,13 +1335,6 @@ class WorldStorageManager:
         published = self.advance_publication(prepared)
         self.complete_publication(prepared)
         return published
-
-
-
-
-
-
-
 
     def fork_world_ref(
         self,
@@ -1285,45 +1389,6 @@ class WorldStorageManager:
         if expected_forked_from_ref is not None and receipt.forked_from_authority_ref != expected_forked_from_ref:
             raise InvalidRepositoryStateError("fork origin receipt parent authority disagrees with retained handoff")
         return receipt.forked_from_world_oid
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     def _authority_lineage_segments(
         self,
@@ -1508,8 +1573,6 @@ def _candidate_outcome_candidate_id(outcome: Mapping[str, object]) -> str:
     return candidate_id
 
 
-
-
 _TERMINAL_JOURNAL_DIAGNOSTIC_HINT = (
     "Diagnostic only: corrupt or unknown-family operation-journal refs no longer block admission. "
     "Inspect via `vcs-core inspect --domain operation_journal`; they are not auto-recoverable."
@@ -1525,65 +1588,11 @@ def _usable_journal_operation_id(fields: dict[str, object]) -> str | None:
     return None
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def _read_optional_world_fork_origin_receipt(repo: pygit2.Repository, ref: str) -> _ForkOriginReceipt | None:
     try:
         return _read_world_fork_origin_receipt(repo, ref)
     except KeyError:
         return None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def _validate_relative_locator(locator: str) -> None:

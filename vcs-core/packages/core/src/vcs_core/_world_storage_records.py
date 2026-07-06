@@ -309,10 +309,12 @@ def _read_blob_bytes(repo: pygit2.Repository, tree: pygit2.Tree, path: str) -> b
 # --- shared ref/receipt helpers hoisted from WSM (V2.2c) ---
 DEFAULT_GROUND_REF = "refs/vcscore/ground"
 
+
 @dataclass(frozen=True)
 class _ProtectedRetention:
     world_oids: frozenset[str]
     refs: frozenset[str]
+
 
 @dataclass(frozen=True)
 class _ForkOriginReceipt:
@@ -333,6 +335,7 @@ class _ForkOriginReceipt:
         }
         return {**payload, "receipt_digest": canonical_digest(payload)}
 
+
 def _world_operation_id(world: WorldCommit) -> str:
     operation_id = world.operation_final.get("operation_id")
     if not isinstance(operation_id, str) or not operation_id:
@@ -341,6 +344,7 @@ def _world_operation_id(world: WorldCommit) -> str:
     if operation_id != transition_operation_id:
         raise InvalidRepositoryStateError("world operation-final operation_id disagrees with transition")
     return operation_id
+
 
 def _read_world_fork_origin_receipt(repo: pygit2.Repository, ref: str) -> _ForkOriginReceipt:
     try:
@@ -378,6 +382,7 @@ def _read_world_fork_origin_receipt(repo: pygit2.Repository, ref: str) -> _ForkO
         forked_from_world_oid=_required_payload_str(payload, "fork origin receipt", "forked_from_world_oid"),
     )
 
+
 def _world_selected_pins_are_authoritative(
     closure: WorldClosure,
     *,
@@ -398,6 +403,7 @@ def _world_selected_pins_are_authoritative(
     }
     return not selected_pin_refs.intersection(bad_refs)
 
+
 def _validate_advance_basis(world: WorldCommit, *, input_world_oid: str) -> None:
     if not input_world_oid:
         raise InvalidRepositoryStateError("advance publication requires input_world_oid")
@@ -406,6 +412,7 @@ def _validate_advance_basis(world: WorldCommit, *, input_world_oid: str) -> None
         raise InvalidRepositoryStateError("advance publication input_world_oid disagrees with world transition")
     if input_world_oid not in world.parent_oids:
         raise InvalidRepositoryStateError("advance publication input_world_oid must be a Git parent of the world")
+
 
 def _current_ref_target(repo: pygit2.Repository, ref: str) -> str | None:
     try:
@@ -438,4 +445,3 @@ class _AuthorityLineageSegments:
     local_world_oids: tuple[str, ...]
     fork_origin: _ForkOriginReceipt | None = None
     corrupt_fork_origin: str | None = None
-
