@@ -1,0 +1,83 @@
+name: "Bug report: X doesn't work"
+description: >-
+  Something you ran against the shipped wheel did not behave as the docs
+  claim. Walks through what you ran and which published claim it contradicts.
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Thanks for the report. Two minutes of routing first: Shepherd's docs
+        distinguish **what ships** (Settlement Core) from **the named road**
+        (Dataflow) on the
+        [roadmap page](https://docs.shepherd-agents.ai/roadmap/). If the
+        surface you tried is listed there under *Dataflow* (for example the
+        ambient `with sp.workspace(model=...): task(...)` call, returned
+        handles, or task-as-value delegation), it has not shipped — please
+        comment on the pinned "State of the project" discussion instead of
+        filing a bug. If a **published page says it works and it doesn't**,
+        this is exactly the right form.
+  - type: textarea
+    id: what-you-ran
+    attributes:
+      label: What you ran
+      description: >-
+        The exact commands and/or the smallest complete script, from
+        `shepherd init` (or `pip install`) onward. Paste it so we can run it
+        verbatim.
+      placeholder: |
+        mkdir demo && cd demo
+        shepherd init
+        python hero.py   # <paste the script too>
+    validations:
+      required: true
+  - type: textarea
+    id: expected-claim
+    attributes:
+      label: The claim it contradicts
+      description: >-
+        Link the published docs page (or README section) that says this
+        should work, and quote the sentence. Every published page carries an
+        "Applies to" version — include it. If you can't find a page that
+        claims it works, check the roadmap first.
+      placeholder: >-
+        https://docs.shepherd-agents.ai/start/ ("Applies to: Shepherd
+        v0.2.0") says: "..."
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What actually happened
+      description: >-
+        Full output / traceback. If a run started, include `shepherd run
+        show --latest` and, if useful, `shepherd run trace --latest
+        --events`.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: >-
+        `shepherd --version` (or `pip show shepherd-ai`), `python
+        --version`, OS. Note that Windows is unsupported (use WSL) and Linux
+        Landlock enforcement is container-gated in 0.2.0.
+      placeholder: |
+        shepherd-ai 0.2.0
+        Python 3.12.x
+        macOS 15 / Ubuntu 24.04 (container? yes/no)
+    validations:
+      required: true
+  - type: dropdown
+    id: lane
+    attributes:
+      label: Which lane were you on?
+      options:
+        - Retained run, offline `static` provider (the quickstart path)
+        - Retained run, live `claude` provider
+        - A direct/ambient task call (`my_task(...)` under `sp.workspace`)
+        - CLI only
+        - Other / not sure
+    validations:
+      required: true
