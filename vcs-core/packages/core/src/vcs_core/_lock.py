@@ -27,7 +27,7 @@ from vcs_core._errors import ActivationError
 try:  # psutil is not a declared dependency; the lock degrades safely without it.
     import psutil
 except ImportError:  # pragma: no cover - exercised only where psutil is absent
-    psutil = None  # type: ignore[assignment]
+    psutil = None
 
 
 class _LockHolder(NamedTuple):
