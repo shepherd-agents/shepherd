@@ -95,22 +95,14 @@ exclude_docs: |
   !/index.md
   !/roadmap.md
   !/start/index.md
-  !/tutorials/index.md
-  !/tutorials/first-shepherd-app.md
   !/concepts/index.md
   !/concepts/tasks.md
   !/concepts/effects.md
   !/concepts/runs.md
-  !/concepts/workspaces.md
-  !/concepts/providers.md
   !/concepts/permissions.md
   !/concepts/placements.md
   !/guides/index.md
   !/guides/grant-repo-access.md
-  !/guides/deterministic-demo.md
-  !/guides/debug-your-first-run.md
-  !/guides/test-shepherd-code.md
-  !/guides/route-tasks-to-models.md
   !/reference/cli.md
   !stylesheets/**
   !assets/**
@@ -120,9 +112,6 @@ nav:
   - Home: index.md
   - Getting Started:
       - start/index.md
-  - Tutorials:
-      - tutorials/index.md
-      - First Shepherd app: tutorials/first-shepherd-app.md
   - Concepts:
       - concepts/index.md
       - Tasks: concepts/tasks.md
@@ -130,15 +119,9 @@ nav:
       - Permissions: concepts/permissions.md
       - Placements: concepts/placements.md
       - Runs: concepts/runs.md
-      - Workspaces: concepts/workspaces.md
-      - Providers: concepts/providers.md
   - Guides:
       - guides/index.md
       - Grant a task repo access: guides/grant-repo-access.md
-      - Deterministic demo: guides/deterministic-demo.md
-      - Debug your first run: guides/debug-your-first-run.md
-      - Test Shepherd code: guides/test-shepherd-code.md
-      - Route tasks to models: guides/route-tasks-to-models.md
   - Reference:
       - CLI: reference/cli.md
   - Roadmap: roadmap.md

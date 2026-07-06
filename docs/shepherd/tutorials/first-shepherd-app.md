@@ -1,12 +1,21 @@
 # Your first Shepherd app
 
-> Page status: release-ready
+> Page status: fast-follow
 > Source state: checked-example
 > Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
 > Validation: docs_src/tutorials/first_app/test_first_app.py
 
 *Tutorial. A learning path, in order. For task-specific recipes, see the guides. For exact APIs, see the reference.*
+
+!!! warning "Not published — docs firewall (2026-07-06)"
+    This page teaches (or routes readers into) the ambient model-call idiom —
+    `with sp.workspace(model=...): task(...)` — which does not run on the
+    shipped `shepherd-ai` 0.2.0 wheel. It is retained as source material for a
+    future rewrite and is excluded from the published site until the surface
+    it teaches actually ships. Do not re-add it to the public nav until then.
+    What ships today, and the named road, are mapped on
+    [Settlement Core / Dataflow](../roadmap.md).
 
 > **Achievement.** Build and run a two-task change reviewer: one task that
 > classifies a code change, one that reviews it, composed with plain Python.
