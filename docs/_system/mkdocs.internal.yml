@@ -8,7 +8,7 @@ INHERIT: mkdocs.yml
 site_dir: site/internal
 
 extra:
-  shepherd_docs_version: "0.1.1-dev (prototype, INTERNAL REVIEWER BUILD)"
+  shepherd_docs_version: "0.2.0 (INTERNAL REVIEWER BUILD)"
 
 # extra_css REPLACES the parent's list under INHERIT, so re-list the base styles
 # WITHOUT hide-status.css — that is how the reviewer build keeps showing the

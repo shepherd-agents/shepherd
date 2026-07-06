@@ -10,7 +10,7 @@ site_dir: site/shepherd
 use_directory_urls: true
 
 extra:
-  shepherd_docs_version: "0.1.1-dev (prototype)"
+  shepherd_docs_version: "0.2.0"
 
 # THEME — "Research-Framework Documentation Theme" (locked handoff): warm paper,
 # a single teal accent (legacy Shepherd #178D8C), IBM Plex type, light tracked
