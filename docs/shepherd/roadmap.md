@@ -24,7 +24,8 @@ ships. This page is its forwarding address.
 ## Settlement Core — ships in 0.2.0
 
 The shipped product is a **settlement machine**: agent work is captured to one
-side, reviewed as data, and applied only when you say so. Concretely:
+side, reviewed as data, and settled — kept or rejected — explicitly, exactly
+once. Concretely:
 
 - **Retained runs** *(shipped)*. `workspace.run(...)` executes a task and holds
   its world output as a **retained output** — a proposal to one side of your
@@ -42,7 +43,10 @@ side, reviewed as data, and applied only when you say so. Concretely:
   See [Grant a task repo access](guides/grant-repo-access.md).
 - **Explicit settlement** *(shipped)*. Every retained output is settled
   **once**, explicitly, with `select`, `release`, or `discard` — consume-once,
-  recorded, and refused on re-settlement.
+  recorded, and refused on re-settlement. Settlement records your decision; in
+  0.2.0 you read retained content through the changeset surface
+  (`shepherd run changeset --latest --read <path>`), and an `apply`-style verb
+  that materializes a kept output onto your working tree has **not** shipped.
 - **The recorded trace** *(shipped)*. Every run leaves a durable record;
   `shepherd run trace <run-ref>` reads it back. Debugging is reading the
   record, not guessing.
