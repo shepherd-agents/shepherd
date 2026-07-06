@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import importlib
 import inspect
+import logging
 import os
 import sys
 import tempfile
@@ -180,6 +181,51 @@ _CURRENT_TASK_RUNTIME: ContextVar[TaskRuntimeContext | None] = ContextVar(
     "shepherd_workspace_control_task_runtime",
     default=None,
 )
+
+_logger = logging.getLogger(__name__)
+
+# Shepherd-level remedy for the vcs-core OrphanedOperationsError wedge — names a command a
+# Shepherd user can actually run, instead of the bare `archive_orphaned_operations()` the
+# substrate error names. Kept here so the CLI and the run path present one sentence.
+ORPHANED_OPERATIONS_REMEDY = (
+    "an earlier run was interrupted and left recovery state. Run `shepherd run repair` to clear "
+    "it — or just start another run, which reclaims a dead run's leftovers automatically."
+)
+
+
+def reclaim_dead_orphaned_operations_before_run(mg: Any) -> None:
+    """Reclaim a dead prior run's orphaned operation refs before starting a new run.
+
+    The wedge this dissolves: a run interrupted by Ctrl-C, a kill, or a crash leaves an
+    orphaned operation ref that blocks the next run. The workspace is already activated
+    here (the vcs-core session lock is held, so a genuinely live session was refused at
+    open), which is exactly what makes reclaiming safe — every orphaned operation is a
+    crashed/killed prior run's bookkeeping, and the reversible substrate never published
+    its world state. Best-effort and loud: a reclaim that vcs-core declines (recovery
+    blocked by an interrupted lifecycle, sibling-group blocker, or entangled orphaned
+    scope) leaves the orphan in place for `shepherd run repair`, and never blocks the run.
+    """
+    list_orphans = getattr(mg, "list_orphaned_operations", None)
+    archive = getattr(mg, "archive_orphaned_operations", None)
+    if not callable(list_orphans) or not callable(archive):
+        return
+    try:
+        if not list_orphans():
+            return
+        reclaimed = list(archive())
+    except Exception:  # noqa: BLE001 — recovery must never turn a run-start into a failure
+        _logger.warning(
+            "reclaim of orphaned operation refs before run was declined; leaving them for "
+            "`shepherd run repair`",
+            exc_info=True,
+        )
+        return
+    if reclaimed:
+        _logger.warning(
+            "reclaimed %d interrupted run(s) from a dead prior session before starting: %s",
+            len(reclaimed),
+            ", ".join(reclaimed),
+        )
 
 
 class TaskNotFoundError(WorkspaceControlError):
@@ -890,6 +936,10 @@ class ShepherdWorkspace:
         should reacquire ``workspace.git_repo()`` after selecting an output before
         starting the next run.
         """
+        # An interrupted prior run must not wedge this one: reclaim a dead run's orphaned
+        # operation refs first ("just run it again"). Safe — the workspace is activated, so a
+        # live session was already refused; declined reclaims fall back to `shepherd run repair`.
+        reclaim_dead_orphaned_operations_before_run(self.mg)
         selected_repo, binding_roots = self._resolve_run_targets(repo, bindings)
         if binding_roots is not None:
             # Lane C LC-4: the per-binding staging path is live. `_resolve_run_targets` already

@@ -315,6 +315,34 @@ def run_publish_retained_workspace_output(run_ref: str) -> None:
         _close_workspace(workspace)
 
 
+@run.command("repair")
+@click.option("--json", "json_output", is_flag=True, help="Emit the result as JSON.")
+def run_repair(json_output: bool) -> None:
+    """Reclaim orphaned operation refs left by an interrupted run.
+
+    A run interrupted by Ctrl-C, a kill, or a crash can leave an orphaned operation
+    ref that blocks the next run. Starting another run reclaims it automatically; this
+    command does it explicitly. Only orphaned *operations* (a dead run's bookkeeping)
+    are reclaimed — orphaned scopes (work-in-progress) are left for review.
+    """
+    from vcs_core import VcsCoreError
+
+    workspace = _open_workspace(activate=True)
+    try:
+        try:
+            reclaimed = list(workspace.mg.archive_orphaned_operations())
+        except VcsCoreError as exc:
+            raise click.ClickException(f"could not reclaim orphaned operations: {exc}") from exc
+        if json_output:
+            _emit_json({"reclaimed": reclaimed})
+        elif reclaimed:
+            click.echo(f"Reclaimed {len(reclaimed)} interrupted run(s): {', '.join(reclaimed)}")
+        else:
+            click.echo("Nothing to repair — no orphaned operations.")
+    finally:
+        _close_workspace(workspace)
+
+
 @task.command("list")
 @click.option("--status", help="Only include task versions with this status.")
 @click.option("--prefix", help="Only include task ids with this prefix.")
@@ -451,8 +479,14 @@ def _settle_run_output(
 
 
 def _query(callback: Any) -> Any:
+    from vcs_core import OrphanedOperationsError
+
     try:
         return callback()
+    except OrphanedOperationsError as exc:
+        from shepherd_dialect.workspace_control.workspace import ORPHANED_OPERATIONS_REMEDY
+
+        raise click.ClickException(ORPHANED_OPERATIONS_REMEDY) from exc
     except (KeyError, TypeError, ValueError, RuntimeError) as exc:
         raise click.ClickException(str(exc)) from exc
 
