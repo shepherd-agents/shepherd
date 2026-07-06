@@ -17,7 +17,17 @@ from vcs_core.spi import ExecutionAuthorityRequired
 
 from shepherd_dialect import ClaudeAgentProvider, DeterministicFakeProvider
 from shepherd_dialect import providers as providers_module
-from shepherd_dialect.providers import ClaudeHeadlessProvider, claude_auth_mode
+from shepherd_dialect.providers import ClaudeHeadlessProvider, _HostLoginLookup, claude_auth_mode
+
+
+def _found(blob: bytes) -> _HostLoginLookup:
+    """A host-login lookup that found a credential in the default config file."""
+    return _HostLoginLookup(blob, (("default_config", "default_config_found"),))
+
+
+def _absent() -> _HostLoginLookup:
+    """A host-login lookup that found no credential anywhere."""
+    return _HostLoginLookup(None, (("default_config", "default_config_missing"),))
 
 
 @pytest.mark.parametrize("provider", [DeterministicFakeProvider(), ClaudeAgentProvider(prompt="x")])
@@ -46,14 +56,19 @@ def test_command_argv_is_the_s1_shape(tmp_path) -> None:
 
 
 def _clear_claude_auth_env(monkeypatch) -> None:
-    for var in ("ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "SHEPHERD_NO_CREDENTIAL_SEEDING"):
+    for var in (
+        "ANTHROPIC_API_KEY",
+        "CLAUDE_CODE_OAUTH_TOKEN",
+        "SHEPHERD_NO_CREDENTIAL_SEEDING",
+        "SHEPHERD_ALLOW_KEYLESS_CLAUDE",
+    ):
         monkeypatch.delenv(var, raising=False)
 
 
 def test_claude_auth_prefers_env_credentials(monkeypatch) -> None:
     """Env-carried credentials win; no host login is read."""
     _clear_claude_auth_env(monkeypatch)
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b"{}")
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _found(b"{}"))
     monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
     assert claude_auth_mode() == "api_key"
     monkeypatch.delenv("ANTHROPIC_API_KEY")
@@ -64,7 +79,7 @@ def test_claude_auth_prefers_env_credentials(monkeypatch) -> None:
 def test_claude_auth_uses_host_login_with_opt_out(monkeypatch) -> None:
     """Keyless + signed-in CLI → subscription seeding; opt-out env disables it."""
     _clear_claude_auth_env(monkeypatch)
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b"{}")
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _found(b"{}"))
     assert claude_auth_mode() == "subscription_login"
     monkeypatch.setenv("SHEPHERD_NO_CREDENTIAL_SEEDING", "1")
     assert claude_auth_mode() is None
@@ -72,14 +87,14 @@ def test_claude_auth_uses_host_login_with_opt_out(monkeypatch) -> None:
 
 def test_claude_auth_none_without_any_credentials(monkeypatch) -> None:
     _clear_claude_auth_env(monkeypatch)
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: None)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _absent())
     assert claude_auth_mode() is None
 
 
 def test_headless_execute_seeds_login_into_scratch_and_scrubs(tmp_path, monkeypatch) -> None:
     """Keyless launch seeds .credentials.json (0600) into the scratch config; scrub removes it."""
     _clear_claude_auth_env(monkeypatch)
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b'{"probe": true}')
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _found(b'{"probe": true}'))
     monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
     seen = {}
 
@@ -178,10 +193,29 @@ _NOT_LOGGED_IN_STDOUT = (
 )
 
 
+# An org-policy denial: valid credential, but the account/organization is not
+# permitted (HTTP 403). The human message is in `result`, `api_error_status:403`
+# is the machine signal, and the model was never called (empty modelUsage).
+_ORG_403_STDOUT = (
+    '{"type":"assistant","message":{"content":[{"type":"text",'
+    '"text":"Your organization has disabled Claude subscription access for this account."}],'
+    '"error":"permission_error"}}\n'
+    '{"type":"result","subtype":"success","is_error":true,"api_error_status":403,'
+    '"result":"Your organization has disabled Claude subscription access for this account.",'
+    '"usage":{"iterations":[]},"modelUsage":{},"terminal_reason":"completed",'
+    '"uuid":"00000000-0000-0000-0000-000000000000"}\n'
+)
+
+
 def _run_headless_with_proc(tmp_path, monkeypatch, proc):
-    """Drive ClaudeHeadlessProvider.execute against a fake confined process."""
+    """Drive ClaudeHeadlessProvider.execute against a fake confined process.
+
+    Opts into ``SHEPHERD_ALLOW_KEYLESS_CLAUDE`` so the body actually launches:
+    these tests exercise the *CLI-envelope diagnosis* of a returned proc, not the
+    keyless preflight (which is covered separately below)."""
     _clear_claude_auth_env(monkeypatch)
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: None)
+    monkeypatch.setenv("SHEPHERD_ALLOW_KEYLESS_CLAUDE", "1")
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _absent())
     monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
 
     class _Cap:
@@ -258,6 +292,59 @@ def test_headless_root_permission_failure_is_actionable(tmp_path, monkeypatch) -
     assert excinfo.value.provider_events[-1].payload["failure_classification"] == "root_permission"
 
 
+def test_headless_access_denied_403_is_classified(tmp_path, monkeypatch) -> None:
+    """An org-policy 403 is `access_denied` (not `auth_failure`): the human message
+    is surfaced, the 403 status is preserved, and the remedy is not "re-login"."""
+    from shepherd_dialect.provider_runtime import ProviderInvocationError
+
+    class _Proc:
+        returncode = 1
+        stderr = ""
+        stdout = _ORG_403_STDOUT
+
+    with pytest.raises(ProviderInvocationError) as excinfo:
+        _run_headless_with_proc(tmp_path, monkeypatch, _Proc())
+
+    message = str(excinfo.value)
+    assert "disabled Claude subscription access" in message, "the CLI's own reason must be surfaced"
+    assert "organization policy" in message or "organization" in message
+    assert "setup-token" not in message, "a 403 is not a login problem; do not steer to re-login first"
+    payload = excinfo.value.provider_events[-1].payload
+    assert payload["failure_classification"] == "access_denied"
+    assert payload["cli_api_error_status"] == 403
+    assert payload["cli_is_error"] is True
+    assert payload["cli_assistant_error"] == "permission_error"
+
+
+def test_access_denied_classified_from_assistant_error_without_status() -> None:
+    """A `permission_error` assistant message classifies `access_denied` even when the
+    envelope omits `api_error_status` and the `result` text matches no policy phrase —
+    the extracted assistant error must drive classification, not just be recorded."""
+    stdout = (
+        '{"type":"assistant","message":{"content":[{"type":"text","text":"..."}],'
+        '"error":"permission_error"}}\n'
+        '{"type":"result","subtype":"success","is_error":true,'
+        '"result":"Request failed with status 403","modelUsage":{},'
+        '"terminal_reason":"completed","uuid":"0"}\n'
+    )
+    diagnosis = providers_module._diagnose_claude_cli_failure(1, stdout, "")
+    assert diagnosis.classification == "access_denied"
+    assert diagnosis.cli_api_error_status is None
+    assert diagnosis.cli_assistant_error == "permission_error"
+    assert "setup-token" not in (diagnosis.remedy or ""), "a 403 is not a login problem"
+
+
+def test_access_denied_classified_from_bare_403_result_text() -> None:
+    """A bare `403`/`forbidden` in the result text classifies `access_denied` even with
+    no assistant error and no structured status (a differently-phrased policy denial)."""
+    stdout = (
+        '{"type":"result","subtype":"success","is_error":true,'
+        '"result":"HTTP 403 Forbidden returned by the API","modelUsage":{},"uuid":"0"}\n'
+    )
+    diagnosis = providers_module._diagnose_claude_cli_failure(1, stdout, "")
+    assert diagnosis.classification == "access_denied"
+
+
 def test_headless_alarm_kill_maps_to_budget_exhausted(tmp_path, monkeypatch) -> None:
     """SIGALRM (rc -14) from the budget alarm is a trace-preserving Exhausted, not a refusal."""
     from shepherd_dialect.nucleus import BudgetExhausted
@@ -271,10 +358,113 @@ def test_headless_alarm_kill_maps_to_budget_exhausted(tmp_path, monkeypatch) -> 
         _run_headless_with_proc(tmp_path, monkeypatch, _Proc())
 
 
+def test_headless_alarm_kill_hints_at_hung_body_when_silent(tmp_path, monkeypatch) -> None:
+    """rc=-14 with zero output reads as a hung body (stale CLI / blocked network),
+    not "the model ran long"; when the model produced output, no hint is added."""
+    from shepherd_dialect.nucleus import BudgetExhausted
+
+    class _Silent:
+        returncode = -14
+        stderr = ""
+        stdout = ""
+
+    with pytest.raises(BudgetExhausted, match="hung before starting"):
+        _run_headless_with_proc(tmp_path, monkeypatch, _Silent())
+
+    class _Ran:
+        returncode = -14
+        stderr = ""
+        stdout = '{"type":"assistant","message":{"content":[{"type":"text","text":"working..."}]}}'
+
+    with pytest.raises(BudgetExhausted) as excinfo:
+        _run_headless_with_proc(tmp_path, monkeypatch, _Ran())
+    assert "hung before starting" not in str(excinfo.value)
+
+
+class _RecordingCap:
+    """A fake ExecutionCapability that records whether launch_confined ran."""
+
+    def __init__(self, tmp_path, proc=None):
+        self.working_path = str(tmp_path)
+        self.launched = False
+        self._proc = proc
+
+    def launch_confined(self, command, confinement):
+        self.launched = True
+        return self._proc
+
+
+def _headless_with_cap(monkeypatch, cap, *, host_login, allow_keyless=False):
+    """Run ClaudeHeadlessProvider.execute against a recording cap, with env cleared."""
+    _clear_claude_auth_env(monkeypatch)
+    if allow_keyless:
+        monkeypatch.setenv("SHEPHERD_ALLOW_KEYLESS_CLAUDE", "1")
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: host_login)
+    monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
+    provider = ClaudeHeadlessProvider(prompt="x")
+    return provider.execute(None, None, None, {}, execution=cap, confinement=object())
+
+
+def test_headless_refuses_keyless_launch_before_confinement(tmp_path, monkeypatch) -> None:
+    """No env credential and no host login → refuse *before* launch_confined, naming all
+    three exits; the failed event says launch_attempted:false (a preflight, not a jail denial)."""
+    from shepherd_dialect.provider_runtime import ProviderInvocationError
+
+    cap = _RecordingCap(tmp_path)
+    with pytest.raises(ProviderInvocationError) as excinfo:
+        _headless_with_cap(monkeypatch, cap, host_login=_absent())
+
+    assert cap.launched is False, "a known-keyless run must not spend a confined launch"
+    message = str(excinfo.value)
+    assert "CLAUDE_CODE_OAUTH_TOKEN" in message
+    assert "ANTHROPIC_API_KEY" in message
+    assert "SHEPHERD_ALLOW_KEYLESS_CLAUDE" in message
+    failed = excinfo.value.provider_events[-1]
+    assert failed.payload["failure_classification"] == "auth_missing"
+    assert failed.payload["error_type"] == "ClaudeAuthMissing"
+    assert failed.payload["launch_attempted"] is False
+    assert failed.payload["auth_mode"] == "none"
+
+
+def test_headless_keyless_allow_flag_permits_launch(tmp_path, monkeypatch) -> None:
+    """SHEPHERD_ALLOW_KEYLESS_CLAUDE=1 opts a wrapper back into the launch path."""
+    from shepherd_dialect.provider_runtime import ProviderInvocationError
+
+    class _Proc:
+        returncode = 1
+        stderr = ""
+        stdout = _NOT_LOGGED_IN_STDOUT
+
+    cap = _RecordingCap(tmp_path, _Proc())
+    with pytest.raises(ProviderInvocationError):  # the CLI still fails, but the body ran
+        _headless_with_cap(monkeypatch, cap, host_login=_absent(), allow_keyless=True)
+    assert cap.launched is True
+
+
+def test_headless_refuses_expired_login_before_confinement(tmp_path, monkeypatch) -> None:
+    """An expired seeded subscription blob is refused before launch as auth_expired —
+    a jailed run cannot refresh it, so seeding-and-launching is a guaranteed failure."""
+    import time
+
+    from shepherd_dialect.provider_runtime import ProviderInvocationError
+
+    expired = int((time.time() - 3600) * 1000)
+    cap = _RecordingCap(tmp_path)
+    with pytest.raises(ProviderInvocationError) as excinfo:
+        _headless_with_cap(monkeypatch, cap, host_login=_found(b'{"claudeAiOauth":{"expiresAt":%d}}' % expired))
+
+    assert cap.launched is False
+    failed = excinfo.value.provider_events[-1]
+    assert failed.payload["failure_classification"] == "auth_expired"
+    assert failed.payload["error_type"] == "ClaudeAuthExpired"
+    assert failed.payload["launch_attempted"] is False
+    assert "CLAUDE_CODE_OAUTH_TOKEN" in str(excinfo.value)
+
+
 def test_claude_auth_status_env_and_absent(monkeypatch) -> None:
     """Env credentials pass; no credentials is a hard offline fail."""
     _clear_claude_auth_env(monkeypatch)
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: None)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _absent())
     status = providers_module.claude_auth_status()
     assert status.mode is None
     assert status.ok is False
@@ -294,21 +484,88 @@ def test_claude_auth_status_hard_fails_on_expired_subscription_blob(monkeypatch)
     expired = int((time.time() - 3600) * 1000)
     valid = int((time.time() + 3600) * 1000)
 
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b'{"claudeAiOauth":{"expiresAt":%d}}' % expired)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _found(b'{"claudeAiOauth":{"expiresAt":%d}}' % expired))
     status = providers_module.claude_auth_status()
     assert status.mode == "subscription_login"
     assert status.ok is False
     assert "expired" in status.detail
 
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b'{"claudeAiOauth":{"expiresAt":%d}}' % valid)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _found(b'{"claudeAiOauth":{"expiresAt":%d}}' % valid))
     status = providers_module.claude_auth_status()
     assert status.ok is True
     assert "not verified" in status.detail
 
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: b'{"unexpected":"shape"}')
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _found(b'{"unexpected":"shape"}'))
     status = providers_module.claude_auth_status()
     assert status.ok is True
     assert "not verified" in status.detail
+
+
+def test_claude_auth_status_names_the_keyless_source(monkeypatch) -> None:
+    """A `mode is None` verdict names the source that failed, not a flat "no credentials"."""
+    _clear_claude_auth_env(monkeypatch)
+
+    # Seeding disabled by env is distinct from "nothing found".
+    monkeypatch.setenv("SHEPHERD_NO_CREDENTIAL_SEEDING", "1")
+    status = providers_module.claude_auth_status()
+    assert status.ok is False
+    assert "seeding is disabled" in status.detail
+    monkeypatch.delenv("SHEPHERD_NO_CREDENTIAL_SEEDING")
+
+    # A keychain denial/timeout is distinguishable from a clean "not found".
+    monkeypatch.setattr(
+        providers_module,
+        "_read_host_claude_login",
+        lambda: _HostLoginLookup(None, (("macos_keychain", "keychain_timeout"),)),
+    )
+    assert "keychain lookup timed out" in providers_module.claude_auth_status().detail
+
+    monkeypatch.setattr(
+        providers_module,
+        "_read_host_claude_login",
+        lambda: _HostLoginLookup(None, (("macos_keychain", "keychain_failed"),)),
+    )
+    assert "denied or failed" in providers_module.claude_auth_status().detail
+
+    # An actionable earlier status (unreadable file) is surfaced even when a later
+    # attempt terminates the trail with a plain "not found" — the trail is scanned
+    # whole, not just its last status.
+    monkeypatch.setattr(
+        providers_module,
+        "_read_host_claude_login",
+        lambda: _HostLoginLookup(
+            None,
+            (
+                ("default_config", "default_config_unreadable"),
+                ("macos_keychain", "keychain_not_found"),
+            ),
+        ),
+    )
+    assert "unreadable" in providers_module.claude_auth_status().detail
+
+
+def test_read_host_login_records_source_trail_without_secrets(tmp_path, monkeypatch) -> None:
+    """The real reader returns a `(source_class, status)` trail — no paths, no bytes —
+    and continues past a missing configured source to the default file."""
+    _clear_claude_auth_env(monkeypatch)
+    cfg = tmp_path / "cfgdir"
+    cfg.mkdir()
+    home = tmp_path / "home"
+    (home / ".claude").mkdir(parents=True)
+    (home / ".claude" / ".credentials.json").write_bytes(b'{"claudeAiOauth":{"expiresAt":1}}')
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(cfg))  # dir exists, credential file does not
+    monkeypatch.setattr(providers_module.Path, "home", classmethod(lambda cls: home))
+
+    lookup = providers_module._read_host_claude_login()
+    assert lookup.blob == b'{"claudeAiOauth":{"expiresAt":1}}'
+    assert lookup.source == "default_config"
+    assert lookup.attempts[0] == ("configured_config", "configured_config_missing")
+    assert lookup.attempts[-1] == ("default_config", "default_config_found")
+    # The trail is source classes + coarse statuses only — never a path or bytes.
+    flat = repr(lookup.attempts)
+    assert str(cfg) not in flat
+    assert str(home) not in flat
+    assert "expiresAt" not in flat
 
 
 def test_probe_claude_auth_reports_not_logged_in(monkeypatch) -> None:
@@ -348,11 +605,11 @@ def test_probe_claude_auth_success(monkeypatch) -> None:
 def test_probe_claude_auth_no_credentials(monkeypatch) -> None:
     """No resolvable credential is a failed probe, not a crash."""
     _clear_claude_auth_env(monkeypatch)
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: None)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _absent())
     monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
     ok, detail = providers_module.probe_claude_auth()
     assert ok is False
-    assert "no credentials" in detail
+    assert "no signed-in `claude` login found" in detail
 
 
 def test_providers_import_no_sdk_and_no_legacy_reach() -> None:

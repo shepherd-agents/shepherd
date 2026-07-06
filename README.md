@@ -49,8 +49,12 @@ agent.
 > On a subscription, a sandboxed run is most reliable with a long-lived token:
 > `export CLAUDE_CODE_OAUTH_TOKEN=$(claude setup-token)`. A short-lived signed-in
 > session can't be refreshed from inside the sandbox, so it may work
-> interactively yet fail here — `shepherd doctor claude` (add `--probe` to
-> actually authenticate) tells you which credential you have before you run.
+> interactively yet fail here — `shepherd doctor claude` (add `--probe` for a real
+> auth round-trip under Shepherd's config, in the parent — not a jailed run) tells
+> you which credential you have before you run. If Claude returns an org-policy
+> error (HTTP 403), that's an account/organization limit, not a login problem — a
+> different key or your org admin is the fix. And an outright `claude` CLI hang
+> (e.g. a stale version) surfaces as a budget timeout, not an auth error.
 
 A task is a plain Python function with **no body**; the signature and docstring
 are the contract the agent fulfils at runtime — including its permissions: the

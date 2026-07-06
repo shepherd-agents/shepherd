@@ -42,7 +42,8 @@ def doctor(ctx: click.Context, json_output: bool, backend: str) -> None:
 @click.option(
     "--probe",
     is_flag=True,
-    help="Authenticate the jailed Claude lane for real (reaches the network; may briefly call the model).",
+    help="Check Claude CLI auth under Shepherd's scrubbed config/seeding conditions "
+    "(reaches the network; may briefly call the model). Not a jailed run.",
 )
 def doctor_claude(json_output: bool, backend: str, probe: bool) -> None:
     """Check whether the live Claude runtime lane is available."""
@@ -101,7 +102,8 @@ def _claude_checks(*, probe: bool = False) -> list[dict[str, object]]:
     # Offline: honest about what is *knowable* without a round-trip. A readable
     # but expired subscription blob is a hard fail — a jailed run cannot refresh
     # it — so a green `claude-auth` predicts a working run rather than "a blob
-    # exists". `--probe` is the authoritative, network-reaching confirmation.
+    # exists". `--probe` is the network-reaching confirmation under Shepherd's
+    # scrubbed-config conditions (in the parent, not through the jail).
     try:
         from shepherd_dialect import claude_auth_status
 

@@ -92,8 +92,10 @@ RATIFIED_PARENT_EFFECTS: dict[tuple[str, str, str], str] = {
         "D1 2026-07-04: subscription-auth credential seeding (public PR#7). Reads the macOS "
         "keychain (`security find-generic-password`) in the PARENT and copies raw credential "
         "bytes into the jailed run's scratch CLAUDE_CONFIG_DIR so a signed-in `claude` CLI works "
-        "like an env-carried key. Fail-soft by design (keyless run on any error). Migrates to the "
-        "credential-broker seam (W3.2/g07); retire this entry when it does."
+        "like an env-carried key. Fail-soft by design: each source is a recorded miss, and a "
+        "keyless resolution makes the public headless provider refuse before launch (unless "
+        "SHEPHERD_ALLOW_KEYLESS_CLAUDE is set). Migrates to the credential-broker seam (W3.2/g07); "
+        "retire this entry when it does."
     ),
     ("providers.py", "subprocess.run", "probe_claude_auth"): (
         "D2 2026-07-06: `shepherd doctor claude --probe` auth preflight. Runs a minimal `claude -p` "

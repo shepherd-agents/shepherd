@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **The jailed `claude` CLI lane now fails a doomed run *before* launch.** When no
+  usable credential resolves (no `ANTHROPIC_API_KEY`/`CLAUDE_CODE_OAUTH_TOKEN`, no
+  seedable host login) or a seeded subscription login is expired, the public
+  headless provider refuses at preflight (`auth_missing` / `auth_expired`,
+  `launch_attempted: false`) instead of spending a confined launch that reads like
+  a jail denial. Set `SHEPHERD_ALLOW_KEYLESS_CLAUDE=1` to opt a wrapper that
+  authenticates out-of-band back into the launch path.
+- **Actionable CLI failure diagnosis.** A nonzero `claude` exit now surfaces the
+  CLI's own reason plus a remedy (not a blind 300-char tail): not-logged-in,
+  org-policy `access_denied` (HTTP 403), and rootful `root_permission` are each
+  classified with the safe envelope scalars recorded in the trace. A
+  `budget_seconds` alarm kill (`rc=-14`) maps to `BudgetExhausted`, with a
+  hung-body hint when the CLI produced no output at all.
+
+### Added
+
+- **`shepherd doctor claude --probe`** performs a real auth round-trip (in the
+  parent, under the provider's scrubbed-config/seeding conditions — not through
+  the jail); the offline `claude-auth` check hard-fails an expired subscription
+  token rather than reporting a merely readable blob as ready.
+
 ## [0.2.0] - 2026-07-05
 
 ### Added

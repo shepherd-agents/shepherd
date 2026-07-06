@@ -60,6 +60,28 @@ boundary; command-lane effects from inside the jail are Phase E.
 Evidence of the maintainer-run demo: `spikes/260610-real-sdk-demo/FINDINGS.md`.
 Plan: [`260610-1727-real-sdk-demo-plan.md`](../../../260610-1727-real-sdk-demo-plan.md).
 
+### Triage — `confined body refused`
+
+The Claude CLI providers now name the cause in the raised error; this is the
+map from what you see to what to do:
+
+- **`rc=1`** — the CLI errored and reported it inside its result envelope; the
+  message carries the CLI's own `result` text and a remedy. `auth_missing` /
+  `auth_expired` mean no usable jailed login (set `CLAUDE_CODE_OAUTH_TOKEN` from
+  `claude setup-token`, or `ANTHROPIC_API_KEY`); `access_denied` (HTTP 403) is an
+  account/org policy limit, **not** a login problem (different key or org admin);
+  `root_permission` is the rootful `--dangerously-skip-permissions` refusal.
+- **`rc=-14`** — the `budget_seconds` alarm fired (`BudgetExhausted`). With
+  streamed output the model genuinely ran long; with **zero** output the CLI
+  likely hung before starting (a stale `claude` version or a blocked network).
+- **Rootful hosts (containers/CI):** the CLI refuses bypass permissions as root.
+  Set `IS_SANDBOX=1` **only** when you are intentionally in a sandbox/container,
+  or run as a non-root user.
+- **Wrappers that authenticate out-of-band:** a keyless jailed run is refused
+  before launch; set `SHEPHERD_ALLOW_KEYLESS_CLAUDE=1` to launch anyway, and pair
+  it with `SHEPHERD_NO_CREDENTIAL_SEEDING=1` if a stale standard credential would
+  otherwise be seeded ahead of the wrapper's real auth.
+
 ## The authoring surface (re-pinned 2026-06-10)
 
 Function-form only (triage D1): `@task` bodies are plain functions; the
