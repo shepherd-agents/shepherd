@@ -178,6 +178,20 @@ _NOT_LOGGED_IN_STDOUT = (
 )
 
 
+# An org-policy denial: valid credential, but the account/organization is not
+# permitted (HTTP 403). The human message is in `result`, `api_error_status:403`
+# is the machine signal, and the model was never called (empty modelUsage).
+_ORG_403_STDOUT = (
+    '{"type":"assistant","message":{"content":[{"type":"text",'
+    '"text":"Your organization has disabled Claude subscription access for this account."}],'
+    '"error":"permission_error"}}\n'
+    '{"type":"result","subtype":"success","is_error":true,"api_error_status":403,'
+    '"result":"Your organization has disabled Claude subscription access for this account.",'
+    '"usage":{"iterations":[]},"modelUsage":{},"terminal_reason":"completed",'
+    '"uuid":"00000000-0000-0000-0000-000000000000"}\n'
+)
+
+
 def _run_headless_with_proc(tmp_path, monkeypatch, proc):
     """Drive ClaudeHeadlessProvider.execute against a fake confined process."""
     _clear_claude_auth_env(monkeypatch)
@@ -258,6 +272,59 @@ def test_headless_root_permission_failure_is_actionable(tmp_path, monkeypatch) -
     assert excinfo.value.provider_events[-1].payload["failure_classification"] == "root_permission"
 
 
+def test_headless_access_denied_403_is_classified(tmp_path, monkeypatch) -> None:
+    """An org-policy 403 is `access_denied` (not `auth_failure`): the human message
+    is surfaced, the 403 status is preserved, and the remedy is not "re-login"."""
+    from shepherd_dialect.provider_runtime import ProviderInvocationError
+
+    class _Proc:
+        returncode = 1
+        stderr = ""
+        stdout = _ORG_403_STDOUT
+
+    with pytest.raises(ProviderInvocationError) as excinfo:
+        _run_headless_with_proc(tmp_path, monkeypatch, _Proc())
+
+    message = str(excinfo.value)
+    assert "disabled Claude subscription access" in message, "the CLI's own reason must be surfaced"
+    assert "organization policy" in message or "organization" in message
+    assert "setup-token" not in message, "a 403 is not a login problem; do not steer to re-login first"
+    payload = excinfo.value.provider_events[-1].payload
+    assert payload["failure_classification"] == "access_denied"
+    assert payload["cli_api_error_status"] == 403
+    assert payload["cli_is_error"] is True
+    assert payload["cli_assistant_error"] == "permission_error"
+
+
+def test_access_denied_classified_from_assistant_error_without_status() -> None:
+    """A `permission_error` assistant message classifies `access_denied` even when the
+    envelope omits `api_error_status` and the `result` text matches no policy phrase —
+    the extracted assistant error must drive classification, not just be recorded."""
+    stdout = (
+        '{"type":"assistant","message":{"content":[{"type":"text","text":"..."}],'
+        '"error":"permission_error"}}\n'
+        '{"type":"result","subtype":"success","is_error":true,'
+        '"result":"Request failed with status 403","modelUsage":{},'
+        '"terminal_reason":"completed","uuid":"0"}\n'
+    )
+    diagnosis = providers_module._diagnose_claude_cli_failure(1, stdout, "")
+    assert diagnosis.classification == "access_denied"
+    assert diagnosis.cli_api_error_status is None
+    assert diagnosis.cli_assistant_error == "permission_error"
+    assert "setup-token" not in (diagnosis.remedy or ""), "a 403 is not a login problem"
+
+
+def test_access_denied_classified_from_bare_403_result_text() -> None:
+    """A bare `403`/`forbidden` in the result text classifies `access_denied` even with
+    no assistant error and no structured status (a differently-phrased policy denial)."""
+    stdout = (
+        '{"type":"result","subtype":"success","is_error":true,'
+        '"result":"HTTP 403 Forbidden returned by the API","modelUsage":{},"uuid":"0"}\n'
+    )
+    diagnosis = providers_module._diagnose_claude_cli_failure(1, stdout, "")
+    assert diagnosis.classification == "access_denied"
+
+
 def test_headless_alarm_kill_maps_to_budget_exhausted(tmp_path, monkeypatch) -> None:
     """SIGALRM (rc -14) from the budget alarm is a trace-preserving Exhausted, not a refusal."""
     from shepherd_dialect.nucleus import BudgetExhausted
@@ -269,6 +336,29 @@ def test_headless_alarm_kill_maps_to_budget_exhausted(tmp_path, monkeypatch) -> 
 
     with pytest.raises(BudgetExhausted, match="budget exceeded"):
         _run_headless_with_proc(tmp_path, monkeypatch, _Proc())
+
+
+def test_headless_alarm_kill_hints_at_hung_body_when_silent(tmp_path, monkeypatch) -> None:
+    """rc=-14 with zero output reads as a hung body (stale CLI / blocked network),
+    not "the model ran long"; when the model produced output, no hint is added."""
+    from shepherd_dialect.nucleus import BudgetExhausted
+
+    class _Silent:
+        returncode = -14
+        stderr = ""
+        stdout = ""
+
+    with pytest.raises(BudgetExhausted, match="hung before starting"):
+        _run_headless_with_proc(tmp_path, monkeypatch, _Silent())
+
+    class _Ran:
+        returncode = -14
+        stderr = ""
+        stdout = '{"type":"assistant","message":{"content":[{"type":"text","text":"working..."}]}}'
+
+    with pytest.raises(BudgetExhausted) as excinfo:
+        _run_headless_with_proc(tmp_path, monkeypatch, _Ran())
+    assert "hung before starting" not in str(excinfo.value)
 
 
 def test_claude_auth_status_env_and_absent(monkeypatch) -> None:

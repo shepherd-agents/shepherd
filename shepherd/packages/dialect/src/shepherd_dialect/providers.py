@@ -237,10 +237,10 @@ def probe_claude_auth(*, budget_seconds: int = 30) -> tuple[bool, str]:
             return True, f"authenticated ({auth_mode})"
         if result_event.get("is_error"):
             diagnosis = _diagnose_claude_cli_failure(proc.returncode, proc.stdout, proc.stderr)
-            return False, str(diagnosis["summary"])
+            return False, diagnosis.summary
         return True, f"authenticated ({auth_mode})"
     diagnosis = _diagnose_claude_cli_failure(proc.returncode, proc.stdout, proc.stderr)
-    return False, str(diagnosis["summary"] or f"claude exited rc={proc.returncode}")
+    return False, diagnosis.summary or f"claude exited rc={proc.returncode}"
 
 
 def _signals_max_turns_exhaustion(signal: str) -> bool:
@@ -257,35 +257,92 @@ def _signals_max_turns_exhaustion(signal: str) -> bool:
     return "maximum number of turns" in signal or '"terminal_reason":"max_turns"' in signal
 
 
+@dataclass(frozen=True)
+class _ClaudeCliFailureDiagnosis:
+    """A parsed, classified ``claude`` CLI failure.
+
+    Carries the cause, a remedy, and the safe scalar envelope fields worth
+    preserving in the trace (never raw JSON).
+    """
+
+    classification: str
+    summary: str
+    remedy: str | None = None
+    cli_result: str | None = None
+    cli_is_error: bool | None = None
+    cli_api_error_status: int | None = None
+    cli_terminal_reason: str | None = None
+    cli_assistant_error: str | None = None
+
+
+#: Result-text fingerprints of an authorization/policy denial (an HTTP 403 class),
+#: distinct from a not-logged-in auth failure: the credential is valid, the account
+#: or organization is not permitted. Re-login does not help these.
+_ACCESS_DENIED_SIGNALS = (
+    "disabled claude subscription access",
+    "disabled subscription access",
+    "access denied",
+    "not authorized",
+    "does not have access",
+    "permission_error",
+)
+
+
 def _diagnose_claude_cli_failure(
     returncode: int, stdout: str | None, stderr: str | None
-) -> dict[str, str | None]:
+) -> _ClaudeCliFailureDiagnosis:
     """Turn a nonzero ``claude`` CLI exit into an actionable cause + remedy.
 
     The headless CLI reports real errors *inside* a well-formed stream-json
     result envelope (e.g. ``result: "Not logged in · Please run /login"`` with an
-    ``authentication_failed`` assistant message) and still exits nonzero. A blind
-    tail-slice of that ~3 KB envelope surfaces only trailing bookkeeping fields and
-    drops the cause, so this parses the ``result`` text and classifies the common
-    stops so the raised error and the recorded trace name what actually happened.
-    Best-effort: it never raises.
+    ``authentication_failed`` assistant message, or an ``api_error_status: 403``
+    org-policy denial) and still exits nonzero. A blind tail-slice of that ~3 KB
+    envelope surfaces only trailing bookkeeping fields and drops the cause, so
+    this parses the ``result`` text and the safe scalar fields and classifies the
+    common stops so the raised error and the recorded trace name what actually
+    happened. Best-effort: it never raises.
     """
     signal_text = (stderr or "") + (stdout or "")
     lowered = signal_text.lower()
     cli_result: str | None = None
+    is_error: bool | None = None
+    api_error_status: int | None = None
+    terminal_reason: str | None = None
+    assistant_error: str | None = None
     try:
-        result_event, _events = _parse_claude_cli_output(stdout or "")
+        result_event, events = _parse_claude_cli_output(stdout or "")
         raw = result_event.get("result")
         if isinstance(raw, str) and raw.strip():
             cli_result = raw.strip()
+        if isinstance(result_event.get("is_error"), bool):
+            is_error = result_event["is_error"]
+        if isinstance(result_event.get("api_error_status"), int):
+            api_error_status = result_event["api_error_status"]
+        if isinstance(result_event.get("terminal_reason"), str):
+            terminal_reason = result_event["terminal_reason"]
+        assistant_error = _first_assistant_error(events or (result_event,))
     except Exception:  # noqa: BLE001 — diagnosis must never mask the original failure
         cli_result = None
 
+    result_lowered = (cli_result or "").lower()
     if "cannot be used with root" in lowered:
         classification = "root_permission"
         remedy: str | None = (
             "the jailed `claude` CLI refuses bypass permissions when run as root; run "
             "as a non-root user, or set IS_SANDBOX=1 if you are intentionally sandboxed"
+        )
+    elif (
+        api_error_status == 403
+        or assistant_error == "permission_error"
+        or "403" in result_lowered
+        or "forbidden" in result_lowered
+        or any(sig in result_lowered for sig in _ACCESS_DENIED_SIGNALS)
+    ):
+        classification = "access_denied"
+        remedy = (
+            "Claude refused with an authorization error (HTTP 403) — this is an account or "
+            "organization policy limit, not a login problem. Use an API key your org permits "
+            "(ANTHROPIC_API_KEY) or ask your org admin; re-login will not change it"
         )
     elif (
         "not logged in" in lowered
@@ -306,12 +363,43 @@ def _diagnose_claude_cli_failure(
 
     stripped = signal_text.strip()
     summary = cli_result or (stripped[-300:] if stripped else f"no output (rc={returncode})")
-    return {
-        "classification": classification,
-        "remedy": remedy,
-        "cli_result": cli_result,
-        "summary": summary,
-    }
+    return _ClaudeCliFailureDiagnosis(
+        classification=classification,
+        summary=summary,
+        remedy=remedy,
+        cli_result=cli_result,
+        cli_is_error=is_error,
+        cli_api_error_status=api_error_status,
+        cli_terminal_reason=terminal_reason,
+        cli_assistant_error=assistant_error,
+    )
+
+
+def _first_assistant_error(events: tuple[dict[str, Any], ...]) -> str | None:
+    """The first scalar assistant-message ``error`` in a parsed stream, if any."""
+    for event in events:
+        message = event.get("message") if isinstance(event, Mapping) else None
+        err = message.get("error") if isinstance(message, Mapping) else event.get("error")
+        if isinstance(err, str) and err.strip():
+            return err.strip()
+    return None
+
+
+def _budget_exhausted_message(budget_seconds: int, stdout: str | None, stderr: str | None) -> str:
+    """The ``BudgetExhausted`` message for an alarm kill, with a hung-body hint.
+
+    A ``budget_seconds`` alarm kill (SIGALRM → rc -14) with **no** output at all
+    is usually a body that hung before it ever produced a token — a stale ``claude``
+    version or a blocked network — which reads misleadingly as "the model ran long".
+    Name that case; otherwise the model genuinely ran out of budget.
+    """
+    produced_output = bool(((stdout or "") + (stderr or "")).strip())
+    if produced_output:
+        return f"budget exceeded ({budget_seconds}s)"
+    return (
+        f"budget exceeded ({budget_seconds}s): no output before the alarm — the CLI may have hung "
+        "before starting (check for a stale `claude` version or a blocked network)"
+    )
 
 
 def _codex_runner_source() -> str:
@@ -766,13 +854,13 @@ class ClaudeAgentProvider:
             if proc.returncode == -14:
                 from shepherd_dialect.nucleus import BudgetExhausted
 
-                raise BudgetExhausted(f"budget exceeded ({self.budget_seconds}s)")
+                raise BudgetExhausted(_budget_exhausted_message(self.budget_seconds, proc.stdout, proc.stderr))
             # Same actionable diagnosis as the headless lane: surface the CLI's own
             # reason (e.g. not-logged-in) instead of a blind tail-slice that drops it.
             diagnosis = _diagnose_claude_cli_failure(proc.returncode, proc.stdout, proc.stderr)
-            message = f"confined body refused (rc={proc.returncode}): {diagnosis['summary']}"
-            if diagnosis["remedy"]:
-                message += f"\n  → {diagnosis['remedy']}"
+            message = f"confined body refused (rc={proc.returncode}): {diagnosis.summary}"
+            if diagnosis.remedy:
+                message += f"\n  → {diagnosis.remedy}"
             raise RuntimeError(message)
         return {
             "status": "ok",
@@ -939,14 +1027,14 @@ class ClaudeHeadlessProvider:
             if proc.returncode == -14:
                 from shepherd_dialect.nucleus import BudgetExhausted
 
-                raise BudgetExhausted(f"budget exceeded ({self.budget_seconds}s)")
+                raise BudgetExhausted(_budget_exhausted_message(self.budget_seconds, proc.stdout, proc.stderr))
             # Otherwise: parse the CLI's own result envelope so the raised error and
-            # the recorded trace name the cause (e.g. not-logged-in) instead of a
-            # blind tail-slice that drops it. The full stdout is kept in the event.
+            # the recorded trace name the cause (e.g. not-logged-in, org 403) instead
+            # of a blind tail-slice that drops it. The full stdout is kept in the event.
             diagnosis = _diagnose_claude_cli_failure(proc.returncode, proc.stdout, proc.stderr)
-            message = f"confined body refused (rc={proc.returncode}): {diagnosis['summary']}"
-            if diagnosis["remedy"]:
-                message += f"\n  → {diagnosis['remedy']}"
+            message = f"confined body refused (rc={proc.returncode}): {diagnosis.summary}"
+            if diagnosis.remedy:
+                message += f"\n  → {diagnosis.remedy}"
             failed = ProviderEvent(
                 kind=PROVIDER_INVOCATION_FAILED,
                 provider_id=self.provider_id,
@@ -957,11 +1045,15 @@ class ClaudeHeadlessProvider:
                 payload={
                     "returncode": proc.returncode,
                     "error_type": "ConfinedProcessRefused",
-                    "failure_classification": diagnosis["classification"],
+                    "failure_classification": diagnosis.classification,
+                    "cli_is_error": diagnosis.cli_is_error,
+                    "cli_api_error_status": diagnosis.cli_api_error_status,
+                    "cli_terminal_reason": diagnosis.cli_terminal_reason,
+                    "cli_assistant_error": diagnosis.cli_assistant_error,
                     **redacted_text_payload(message, field="error"),
                     **redacted_text_payload(proc.stdout or "", field="stdout", excerpt_limit=4000),
                     **redacted_text_payload(proc.stderr or "", field="stderr"),
-                    **redacted_text_payload(diagnosis["cli_result"] or "", field="cli_result"),
+                    **redacted_text_payload(diagnosis.cli_result or "", field="cli_result"),
                 },
             )
             raise ProviderInvocationError(message, provider_events=(started, failed))
