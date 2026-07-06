@@ -527,6 +527,22 @@ def test_claude_auth_status_names_the_keyless_source(monkeypatch) -> None:
     )
     assert "denied or failed" in providers_module.claude_auth_status().detail
 
+    # An actionable earlier status (unreadable file) is surfaced even when a later
+    # attempt terminates the trail with a plain "not found" — the trail is scanned
+    # whole, not just its last status.
+    monkeypatch.setattr(
+        providers_module,
+        "_read_host_claude_login",
+        lambda: _HostLoginLookup(
+            None,
+            (
+                ("default_config", "default_config_unreadable"),
+                ("macos_keychain", "keychain_not_found"),
+            ),
+        ),
+    )
+    assert "unreadable" in providers_module.claude_auth_status().detail
+
 
 def test_read_host_login_records_source_trail_without_secrets(tmp_path, monkeypatch) -> None:
     """The real reader returns a `(source_class, status)` trail — no paths, no bytes —

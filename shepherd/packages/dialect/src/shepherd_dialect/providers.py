@@ -270,15 +270,21 @@ _AUTH_REMEDY = "set CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`) or ANTHR
 
 
 def _keyless_detail(resolution: _ClaudeAuthResolution) -> str:
-    """A sharp offline message for a ``mode is None`` verdict, named by source status."""
+    """A sharp offline message for a ``mode is None`` verdict, named by source status.
+
+    Scans the *whole* attempt trail for the most actionable signal rather than only
+    the last status: a source that was found-but-unreadable or a keychain that was
+    denied/timed out is more useful to surface than a later "not found", which is
+    the trail's normal terminal state.
+    """
     if resolution.seeding_disabled:
         return f"credential seeding is disabled (SHEPHERD_NO_CREDENTIAL_SEEDING) and no env credential is set — {_AUTH_REMEDY}"
-    status = resolution.status
-    if status == "keychain_timeout":
+    statuses = {status for _source, status in resolution.attempts} or {resolution.status}
+    if "keychain_timeout" in statuses:
         return f"the macOS keychain lookup timed out — {_AUTH_REMEDY}"
-    if status == "keychain_failed":
+    if "keychain_failed" in statuses:
         return f"the macOS keychain lookup was denied or failed — {_AUTH_REMEDY}"
-    if status.endswith("_unreadable"):
+    if any(status.endswith("_unreadable") for status in statuses):
         return f"a `claude` credential file was found but unreadable — {_AUTH_REMEDY}"
     return f"no signed-in `claude` login found — {_AUTH_REMEDY}"
 
