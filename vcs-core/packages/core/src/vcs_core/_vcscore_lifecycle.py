@@ -153,6 +153,7 @@ def activate(
     recover: str | None = None,
     recover_lifecycle: str | None = None,
     defer_orphan_detection: bool = False,
+    auto_recover_orphaned_operations: bool = False,
 ) -> None:
     with owner._lock:
         if recover is not None and recover_lifecycle is not None:
@@ -222,6 +223,8 @@ def activate(
                     "Resume, cancel, archive, or complete these groups before mutating.",
                     ", ".join(owner._sibling_group_blockers),
                 )
+            if auto_recover_orphaned_operations and owner._orphaned_operations:
+                _auto_recover_orphaned_operations(owner)
             if not defer_orphan_detection:
                 owner._orphaned_refs = _orphaned_scope_refs_from_registry(owner)
                 if owner._orphaned_refs:
@@ -2249,6 +2252,48 @@ def _orphaned_scope_info(owner: VcsCore, ref: str) -> ScopeInfo:
         instance_id=f"orphan-{name}",
         creation_oid="",
     )
+
+
+def _auto_recover_orphaned_operations(owner: VcsCore) -> None:
+    """Reclaim orphaned operation refs left by a dead prior session, at activation.
+
+    Safe by construction: activation has already acquired the cross-process session
+    lock (``acquire_session_lock``), which reclaims a *dead* owner's lock but refuses
+    while a *live* session holds it. So reaching here means no live session owns the
+    repo, and every open operation ref is from a crashed/killed prior run whose
+    unpublished world state the reversible substrate never committed — bookkeeping,
+    not lost work.
+
+    Recovery reuses the same guarded path as the manual
+    ``archive_orphaned_operations`` (``owner._lock`` is re-entrant, so the nested
+    acquire is fine). That path fails closed on an interrupted lifecycle, a
+    sibling-group blocker, or an entangled orphaned scope; on any such block this
+    leaves the orphan in place, so the caller still gets today's detect-and-refuse
+    behavior rather than a surprise. It is loud on success — the archived operation
+    journal is durable, and the reclamation is logged — so recurring auto-recovery
+    (a symptom of repeated crashes) stays visible rather than silently smoothed over.
+    """
+    labels = ", ".join(owner._format_operation_label(op) for op in owner._orphaned_operations)
+    try:
+        recovered = archive_orphaned_operations(owner)
+    except Exception:  # noqa: BLE001 — auto-recovery must never turn a recoverable wedge
+        # into an activation failure; fall back to detect-and-refuse.
+        logger.warning(
+            "Auto-recovery of orphaned operation refs was declined (recovery is blocked by "
+            "other pending state); leaving them for explicit archive_orphaned_operations(). "
+            "Refs: %s",
+            labels,
+            exc_info=True,
+        )
+        return
+    if recovered:
+        logger.warning(
+            "Auto-recovered %d orphaned operation ref(s) from a dead prior session: %s. "
+            "A prior run was interrupted; its unpublished state was discarded and the run "
+            "journal archived.",
+            len(recovered),
+            ", ".join(recovered),
+        )
 
 
 def archive_orphaned_operations(owner: VcsCore) -> list[str]:

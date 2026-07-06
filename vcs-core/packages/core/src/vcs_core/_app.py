@@ -309,6 +309,7 @@ class VcsCoreApp:
         mode: AppOpenMode = AppOpenMode.CONTROL,
         recover: str | None = None,
         recover_lifecycle: str | None = None,
+        auto_recover_orphaned_operations: bool = False,
     ) -> Iterator[VcsCoreApp]:
         workspace_path = os.path.abspath(workspace)
         try:
@@ -325,6 +326,11 @@ class VcsCoreApp:
                     recover=recover,
                     recover_lifecycle=recover_lifecycle,
                     defer_orphan_detection=mode is AppOpenMode.CONTROL,
+                    # Reclaim a dead prior run's orphaned operation refs (bookkeeping the
+                    # reversible substrate never published) only when the caller is starting
+                    # work — never on a read-only open like `status`, which must still *report*
+                    # an interrupted run rather than silently discard it.
+                    auto_recover_orphaned_operations=auto_recover_orphaned_operations,
                 )
             except (DirtyPushError, InterruptedLifecycleError, LifecycleRecoveryRequiredError) as exc:
                 activation_blockers = (_blocker_from_exception(exc),)

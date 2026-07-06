@@ -428,12 +428,14 @@ class VcsCore:
         recover: str | None = None,
         recover_lifecycle: str | None = None,
         defer_orphan_detection: bool = False,
+        auto_recover_orphaned_operations: bool = False,
     ) -> None:
         _vcscore_lifecycle.activate(
             self,
             recover=recover,
             recover_lifecycle=recover_lifecycle,
             defer_orphan_detection=defer_orphan_detection,
+            auto_recover_orphaned_operations=auto_recover_orphaned_operations,
         )
 
     def deactivate(self, *, warn_on_open_scopes: bool = True) -> None:

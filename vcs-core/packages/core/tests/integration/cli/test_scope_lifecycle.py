@@ -427,6 +427,46 @@ def test_status_reports_orphaned_operations(tmp_path: Path) -> None:
     assert "op-status" in result.output
 
 
+def test_run_auto_recovers_orphaned_operation_while_status_still_reports(tmp_path: Path) -> None:
+    """'Just run it again': `vcs-core run` reclaims a dead prior run's orphaned operation and
+    proceeds, while read-only `status` still *reports* it — a read never silently mutates."""
+    from vcs_core._lock import release_session_lock
+
+    runner = CliRunner()
+    _init(runner, tmp_path)
+
+    # a run killed mid-operation: an open ground operation ref left behind, lock released
+    m1 = VcsCore(str(tmp_path))
+    m1.activate()
+    with m1._lock:
+        m1._pipeline.reset()
+        m1._pipeline.begin_operation(handle_id="op-run-wedge", kind="test.operation", scope=m1.ground)
+    m1._pipeline.reset()
+    m1._active_scopes.clear()
+    m1._scope_parents.clear()
+    m1._isolated_scopes.clear()
+    m1._restored_scopes.clear()
+    m1._patch_manager.uninstall_all()
+    for substrate in reversed(m1.lifecycle_substrates):
+        substrate.deactivate()
+    release_session_lock(m1._repo_path, m1._session_id)
+
+    # read-only `status` still surfaces the orphan (no silent mutation on a read)
+    status = runner.invoke(main, ["status"])
+    assert status.exit_code == 0, status.output
+    assert "op-run-wedge" in status.output
+
+    # `vcs-core run` reclaims the dead orphan and proceeds — no manual recovery step
+    script = tmp_path / "work.py"
+    script.write_text("print('ran')\n")
+    result = runner.invoke(main, ["run", str(script)])
+    assert result.exit_code == 0, result.output
+
+    # ...and the wedge is gone afterward
+    after = runner.invoke(main, ["status"])
+    assert "op-run-wedge" not in after.output
+
+
 def test_status_reports_operation_journal_recovery(tmp_path: Path) -> None:
     runner = CliRunner()
     _init(runner, tmp_path)

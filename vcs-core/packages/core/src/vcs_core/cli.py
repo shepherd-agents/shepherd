@@ -825,7 +825,12 @@ def run_cmd(
     scope_name = scope_name or f"run-{stem}"
 
     try:
-        app_context = VcsCoreApp.open_existing(".", mode=AppOpenMode.CONTROL)
+        # Starting a run reclaims a dead prior run's orphaned operation refs first, so an
+        # interrupted run does not wedge the next one ("just run it again"). The session-lock
+        # gate in activate() makes this safe: a genuinely live session is refused, not reclaimed.
+        app_context = VcsCoreApp.open_existing(
+            ".", mode=AppOpenMode.CONTROL, auto_recover_orphaned_operations=True
+        )
         with app_context as app:
             mg = app.mg
             parent_name = parent or "ground"
