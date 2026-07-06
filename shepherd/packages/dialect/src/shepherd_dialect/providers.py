@@ -143,6 +143,63 @@ def _signals_max_turns_exhaustion(signal: str) -> bool:
     return "maximum number of turns" in signal or '"terminal_reason":"max_turns"' in signal
 
 
+def _diagnose_claude_cli_failure(
+    returncode: int, stdout: str | None, stderr: str | None
+) -> dict[str, str | None]:
+    """Turn a nonzero ``claude`` CLI exit into an actionable cause + remedy.
+
+    The headless CLI reports real errors *inside* a well-formed stream-json
+    result envelope (e.g. ``result: "Not logged in · Please run /login"`` with an
+    ``authentication_failed`` assistant message) and still exits nonzero. A blind
+    tail-slice of that ~3 KB envelope surfaces only trailing bookkeeping fields and
+    drops the cause, so this parses the ``result`` text and classifies the common
+    stops so the raised error and the recorded trace name what actually happened.
+    Best-effort: it never raises.
+    """
+    signal_text = (stderr or "") + (stdout or "")
+    lowered = signal_text.lower()
+    cli_result: str | None = None
+    try:
+        result_event, _events = _parse_claude_cli_output(stdout or "")
+        raw = result_event.get("result")
+        if isinstance(raw, str) and raw.strip():
+            cli_result = raw.strip()
+    except Exception:  # noqa: BLE001 — diagnosis must never mask the original failure
+        cli_result = None
+
+    if "cannot be used with root" in lowered:
+        classification = "root_permission"
+        remedy: str | None = (
+            "the jailed `claude` CLI refuses bypass permissions when run as root; run "
+            "as a non-root user, or set IS_SANDBOX=1 if you are intentionally sandboxed"
+        )
+    elif (
+        "not logged in" in lowered
+        or "authentication_failed" in lowered
+        or "please run /login" in lowered
+        or "invalid api key" in lowered
+        or "oauth token has expired" in lowered
+    ):
+        classification = "auth_failure"
+        remedy = (
+            "the jailed `claude` CLI is not authenticated — a seeded subscription login "
+            "may be missing or expired. Set CLAUDE_CODE_OAUTH_TOKEN (from `claude "
+            "setup-token`) or ANTHROPIC_API_KEY, or sign in again with `claude login`"
+        )
+    else:
+        classification = "unknown"
+        remedy = None
+
+    stripped = signal_text.strip()
+    summary = cli_result or (stripped[-300:] if stripped else f"no output (rc={returncode})")
+    return {
+        "classification": classification,
+        "remedy": remedy,
+        "cli_result": cli_result,
+        "summary": summary,
+    }
+
+
 def _codex_runner_source() -> str:
     """Return the jailed Codex SDK worker source copied into run scratch."""
     return resources.files("shepherd_dialect.workers").joinpath("codex_runner.mjs").read_text(encoding="utf-8")
@@ -592,7 +649,17 @@ class ClaudeAgentProvider:
                 from shepherd_dialect.nucleus import BudgetExhausted
 
                 raise BudgetExhausted(f"max turns reached ({self.max_turns})")
-            raise RuntimeError(f"confined body refused (rc={proc.returncode}): {signal[-300:]}")
+            if proc.returncode == -14:
+                from shepherd_dialect.nucleus import BudgetExhausted
+
+                raise BudgetExhausted(f"budget exceeded ({self.budget_seconds}s)")
+            # Same actionable diagnosis as the headless lane: surface the CLI's own
+            # reason (e.g. not-logged-in) instead of a blind tail-slice that drops it.
+            diagnosis = _diagnose_claude_cli_failure(proc.returncode, proc.stdout, proc.stderr)
+            message = f"confined body refused (rc={proc.returncode}): {diagnosis['summary']}"
+            if diagnosis["remedy"]:
+                message += f"\n  → {diagnosis['remedy']}"
+            raise RuntimeError(message)
         return {
             "status": "ok",
             "provider": self.provider_id,
@@ -746,15 +813,26 @@ class ClaudeHeadlessProvider:
             shutil.rmtree(scratch, ignore_errors=True)
         if proc.returncode != 0:
             signal = ((proc.stderr or "") + (proc.stdout or "")).strip()
-            # The one positively identified budget stop: the CLI reports turn
-            # exhaustion distinguishably (prose + structured terminal_reason) —
-            # D3's Exhausted emitter. Ambiguous stops (incl. alarm kills, rc -14)
-            # stay refusals.
+            # Two positively identified budget stops map to the trace-preserving
+            # Exhausted outcome rather than an ambiguous refusal: the CLI's own
+            # turn-exhaustion report (prose + structured terminal_reason), and the
+            # ``budget_seconds`` alarm kill (SIGALRM → rc -14; the perl ``alarm`` in
+            # the argv is the only SIGALRM source on this path).
             if _signals_max_turns_exhaustion(signal):
                 from shepherd_dialect.nucleus import BudgetExhausted
 
                 raise BudgetExhausted(f"max turns reached ({self.max_turns})")
-            message = f"confined body refused (rc={proc.returncode}): {signal[-300:]}"
+            if proc.returncode == -14:
+                from shepherd_dialect.nucleus import BudgetExhausted
+
+                raise BudgetExhausted(f"budget exceeded ({self.budget_seconds}s)")
+            # Otherwise: parse the CLI's own result envelope so the raised error and
+            # the recorded trace name the cause (e.g. not-logged-in) instead of a
+            # blind tail-slice that drops it. The full stdout is kept in the event.
+            diagnosis = _diagnose_claude_cli_failure(proc.returncode, proc.stdout, proc.stderr)
+            message = f"confined body refused (rc={proc.returncode}): {diagnosis['summary']}"
+            if diagnosis["remedy"]:
+                message += f"\n  → {diagnosis['remedy']}"
             failed = ProviderEvent(
                 kind=PROVIDER_INVOCATION_FAILED,
                 provider_id=self.provider_id,
@@ -765,9 +843,11 @@ class ClaudeHeadlessProvider:
                 payload={
                     "returncode": proc.returncode,
                     "error_type": "ConfinedProcessRefused",
+                    "failure_classification": diagnosis["classification"],
                     **redacted_text_payload(message, field="error"),
-                    **redacted_text_payload(proc.stdout or "", field="stdout"),
+                    **redacted_text_payload(proc.stdout or "", field="stdout", excerpt_limit=4000),
                     **redacted_text_payload(proc.stderr or "", field="stderr"),
+                    **redacted_text_payload(diagnosis["cli_result"] or "", field="cli_result"),
                 },
             )
             raise ProviderInvocationError(message, provider_events=(started, failed))

@@ -164,6 +164,113 @@ def test_provider_requires_a_prompt() -> None:
         provider.execute(None, None, None, {}, execution=_Cap(), confinement=object())
 
 
+# A faithful (trimmed) headless not-logged-in envelope: the CLI reports the auth
+# failure *inside* a well-formed stream-json result and still exits 1, with the
+# reason ~900 chars before the trailing bookkeeping fields a tail-slice surfaces.
+_NOT_LOGGED_IN_STDOUT = (
+    '{"type":"assistant","message":{"content":[{"type":"text",'
+    '"text":"Not logged in \\u00b7 Please run /login"}],"error":"authentication_failed"}}\n'
+    '{"type":"result","subtype":"success","is_error":true,'
+    '"result":"Not logged in \\u00b7 Please run /login","usage":{"service_tier":"standard",'
+    '"inference_geo":"","iterations":[],"speed":"standard"},"modelUsage":{},'
+    '"permission_denials":[],"terminal_reason":"completed","fast_mode_state":"off",'
+    '"uuid":"00000000-0000-0000-0000-000000000000"}\n'
+)
+
+
+def _run_headless_with_proc(tmp_path, monkeypatch, proc):
+    """Drive ClaudeHeadlessProvider.execute against a fake confined process."""
+    _clear_claude_auth_env(monkeypatch)
+    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: None)
+    monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
+
+    class _Cap:
+        working_path = str(tmp_path)
+
+        def launch_confined(self, command, confinement):
+            return proc
+
+    provider = ClaudeHeadlessProvider(prompt="x")
+    return provider.execute(None, None, None, {}, execution=_Cap(), confinement=object())
+
+
+def test_headless_auth_failure_surfaces_cli_reason_and_remedy(tmp_path, monkeypatch) -> None:
+    """rc=1 not-logged-in envelope → the CLI's own reason + an actionable remedy,
+    not a blind tail-slice that drops the cause (the reporter's opaque case)."""
+    from shepherd_dialect.provider_runtime import ProviderInvocationError
+
+    class _Proc:
+        returncode = 1
+        stderr = ""
+        stdout = _NOT_LOGGED_IN_STDOUT
+
+    with pytest.raises(ProviderInvocationError) as excinfo:
+        _run_headless_with_proc(tmp_path, monkeypatch, _Proc())
+
+    message = str(excinfo.value)
+    assert message.startswith("confined body refused (rc=1)")
+    assert "Not logged in" in message, "the CLI's own reason must be surfaced, not dropped"
+    assert "CLAUDE_CODE_OAUTH_TOKEN" in message
+    assert "ANTHROPIC_API_KEY" in message
+    failed = excinfo.value.provider_events[-1]
+    assert failed.payload["failure_classification"] == "auth_failure"
+    # the durable trace keeps the full envelope, not just a 300-char tail
+    assert failed.payload["stdout_length"] == len(_NOT_LOGGED_IN_STDOUT)
+
+
+def test_agent_provider_auth_failure_is_actionable(tmp_path, monkeypatch) -> None:
+    """The legacy ClaudeAgentProvider gets the same actionable reason + remedy
+    (it raises RuntimeError, not ProviderInvocationError, and records no events)."""
+    monkeypatch.setattr(providers_module.shutil, "which", lambda cmd: "/fake/claude" if cmd == "claude" else None)
+
+    class _Proc:
+        returncode = 1
+        stderr = ""
+        stdout = _NOT_LOGGED_IN_STDOUT
+
+    class _Cap:
+        working_path = str(tmp_path)
+
+        def launch_confined(self, command, confinement):
+            return _Proc()
+
+    provider = ClaudeAgentProvider(prompt="x")
+    with pytest.raises(RuntimeError, match="Not logged in") as excinfo:
+        provider.execute(None, None, None, {}, execution=_Cap(), confinement=object())
+    message = str(excinfo.value)
+    assert message.startswith("confined body refused (rc=1)")
+    assert "CLAUDE_CODE_OAUTH_TOKEN" in message
+
+
+def test_headless_root_permission_failure_is_actionable(tmp_path, monkeypatch) -> None:
+    """The rootful `--dangerously-skip-permissions` refusal gets its own remedy."""
+    from shepherd_dialect.provider_runtime import ProviderInvocationError
+
+    class _Proc:
+        returncode = 1
+        stderr = "--dangerously-skip-permissions cannot be used with root/sudo privileges for security reasons"
+        stdout = ""
+
+    with pytest.raises(ProviderInvocationError) as excinfo:
+        _run_headless_with_proc(tmp_path, monkeypatch, _Proc())
+    message = str(excinfo.value)
+    assert "non-root user" in message
+    assert excinfo.value.provider_events[-1].payload["failure_classification"] == "root_permission"
+
+
+def test_headless_alarm_kill_maps_to_budget_exhausted(tmp_path, monkeypatch) -> None:
+    """SIGALRM (rc -14) from the budget alarm is a trace-preserving Exhausted, not a refusal."""
+    from shepherd_dialect.nucleus import BudgetExhausted
+
+    class _Proc:
+        returncode = -14
+        stderr = ""
+        stdout = ""
+
+    with pytest.raises(BudgetExhausted, match="budget exceeded"):
+        _run_headless_with_proc(tmp_path, monkeypatch, _Proc())
+
+
 def test_providers_import_no_sdk_and_no_legacy_reach() -> None:
     """CLI-direct posture: the dialect's dependency set is unchanged by W1."""
     probe = (
