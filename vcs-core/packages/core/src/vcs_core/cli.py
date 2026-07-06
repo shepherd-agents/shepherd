@@ -35,6 +35,7 @@ from vcs_core._cli_workspace_boundary import (
     environment_boundary_line,
     managed_workspace_line,
 )
+from vcs_core._signals import terminate_as_interrupt
 
 
 def _reject_if_session_running(command_name: str, *, guidance: str) -> None:
@@ -831,7 +832,9 @@ def run_cmd(
         app_context = VcsCoreApp.open_existing(
             ".", mode=AppOpenMode.CONTROL, auto_recover_orphaned_operations=True
         )
-        with app_context as app:
+        # SIGTERM (`kill`/`docker stop`/systemd/k8s) otherwise terminates without unwinding
+        # and orphans the open operation; route it through Ctrl-C's clean-discard path.
+        with terminate_as_interrupt(), app_context as app:
             mg = app.mg
             parent_name = parent or "ground"
             parent_scope = app.resolve_scope(parent_name)

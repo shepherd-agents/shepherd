@@ -18,7 +18,7 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, Literal, NoReturn, Protocol, get_type_hints
 
 from shepherd2.schemas.execution import execution_id_for
-from vcs_core import InvalidRepositoryStateError
+from vcs_core import InvalidRepositoryStateError, terminate_as_interrupt
 from vcs_core.runtime_api import native_jail_available
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver, resolve_task_id
 
@@ -2523,6 +2523,7 @@ class RunControlClient:
             raise RunStartError("nucleus authority workspace run did not return an authority execution outcome")
         return recorded_value, task_resolutions, task_executions
 
+    @terminate_as_interrupt()
     def _execute_nucleus_runtime_run(
         self,
         *,

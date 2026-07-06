@@ -303,6 +303,43 @@ def fix_bug(repo, issue: str):
         workspace.close()
 
 
+def test_sigterm_during_authority_run_is_caught_and_discards_not_orphans(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """End-to-end: a SIGTERM (`kill`/`docker stop`) mid-run on the real workspace-control run
+    path is routed through the clean-discard path by the ``@terminate_as_interrupt()`` decorator
+    on ``_execute_nucleus_runtime_run``, so the run leaves no orphaned operation to wedge the next.
+
+    The body first asserts a SIGTERM handler is actually installed on this path, so if the
+    decorator did not cover it the body fails loudly *instead of* the default SIGTERM disposition
+    killing the test runner.
+    """
+    source = _write_task_module(
+        tmp_path,
+        monkeypatch,
+        """
+import os
+import signal
+
+
+def fix_bug(repo, issue: str):
+    handler = signal.getsignal(signal.SIGTERM)
+    assert handler not in (signal.SIG_DFL, signal.SIG_IGN, None), "no SIGTERM handler on the run path"
+    os.kill(os.getpid(), signal.SIGTERM)  # `kill` / `docker stop`, mid-run
+    return "unreachable"
+""",
+    )
+    workspace = _make_workspace(tmp_path / "ws")
+    try:
+        workspace.tasks.register(source, may_default="ReadWrite")
+        with pytest.raises(KeyboardInterrupt):
+            workspace.runs._start_authority_workspace_run("sample_tasks.fix_bug", args={"issue": "parser"})
+        assert workspace.mg.list_orphaned_operations() == ()  # no wedge for the next run
+    finally:
+        workspace.close()
+
+
 def test_private_authority_workspace_run_merges_allowed_candidate(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

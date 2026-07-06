@@ -38,6 +38,7 @@ from vcs_core._errors import (
     WorkspaceAuthorityRecoveryRequiredError,
     WorldQuiescenceError,
 )
+from vcs_core._signals import terminate_as_interrupt
 from vcs_core._substrate_runtime import build_builtin_substrate_context
 
 # --- World-value vocabulary (product types; promoted from private modules,
@@ -170,4 +171,5 @@ __all__ = [
     "build_builtin_substrate_context",
     "canonical_bytes",
     "canonical_digest",
+    "terminate_as_interrupt",
 ]
