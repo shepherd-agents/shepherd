@@ -263,10 +263,14 @@ def claude_auth_status() -> ClaudeAuthStatus:
     unverified = "run `shepherd doctor claude --probe` to authenticate"
     if expired is False:
         return ClaudeAuthStatus(mode, True, f"signed-in `claude` CLI (found, not verified — {unverified})")
-    return ClaudeAuthStatus(mode, True, f"signed-in `claude` CLI (found, format unrecognized, not verified — {unverified})")
+    return ClaudeAuthStatus(
+        mode, True, f"signed-in `claude` CLI (found, format unrecognized, not verified — {unverified})"
+    )
 
 
-_AUTH_REMEDY = "set CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`) or ANTHROPIC_API_KEY, or sign in with `claude login`"
+_AUTH_REMEDY = (
+    "set CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`) or ANTHROPIC_API_KEY, or sign in with `claude login`"
+)
 
 
 def _keyless_detail(resolution: _ClaudeAuthResolution) -> str:
@@ -306,7 +310,9 @@ def _claude_preflight_refusal(resolution: _ClaudeAuthResolution) -> tuple[str, s
     sees a preflight refusal, not a wasted confined run that reads like a jail denial.
     """
     if resolution.mode is None:
-        message = f"Claude CLI auth is not available for a jailed run ({_keyless_detail(resolution)}). {_KEYLESS_ESCAPE}"
+        message = (
+            f"Claude CLI auth is not available for a jailed run ({_keyless_detail(resolution)}). {_KEYLESS_ESCAPE}"
+        )
         return "auth_missing", "ClaudeAuthMissing", message
     if resolution.mode == "subscription_login" and _claude_blob_expiry(resolution.blob) is True:
         message = (
@@ -339,7 +345,9 @@ def probe_claude_auth(*, budget_seconds: int = 30) -> tuple[bool, str]:
     auth_mode, login_blob = resolution.mode, resolution.blob
     if auth_mode is None:
         return False, _keyless_detail(resolution)
-    provider = ClaudeHeadlessProvider(prompt="Reply with the single word: ok", max_turns=1, budget_seconds=budget_seconds)
+    provider = ClaudeHeadlessProvider(
+        prompt="Reply with the single word: ok", max_turns=1, budget_seconds=budget_seconds
+    )
     with tempfile.TemporaryDirectory(prefix="shepherd-claude-probe-") as tmp:
         working = Path(tmp)
         scratch = working / ClaudeHeadlessProvider._SCRATCH
@@ -419,9 +427,7 @@ _ACCESS_DENIED_SIGNALS = (
 )
 
 
-def _diagnose_claude_cli_failure(
-    returncode: int, stdout: str | None, stderr: str | None
-) -> _ClaudeCliFailureDiagnosis:
+def _diagnose_claude_cli_failure(returncode: int, stdout: str | None, stderr: str | None) -> _ClaudeCliFailureDiagnosis:
     """Turn a nonzero ``claude`` CLI exit into an actionable cause + remedy.
 
     The headless CLI reports real errors *inside* a well-formed stream-json

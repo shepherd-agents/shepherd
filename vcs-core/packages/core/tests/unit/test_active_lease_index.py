@@ -309,7 +309,9 @@ def test_fsck_world_deep_surfaces_stale_lease_index(tmp_path, monkeypatch):
 
     # V2.3: fsck_world_deep moved to WorldFsckController and calls verify_active_lease_index on
     # the pub/ret controller directly; patch it there (the WSM shim is bypassed).
-    monkeypatch.setattr(manager._pubret, "verify_active_lease_index", lambda: Health("stale", "index has 0; authority has 1"))
+    monkeypatch.setattr(
+        manager._pubret, "verify_active_lease_index", lambda: Health("stale", "index has 0; authority has 1")
+    )
     report = manager.fsck_world(world_oid, mode="deep")
     assert "active_lease_index_stale" in {issue.code for issue in report.issue_details}
 

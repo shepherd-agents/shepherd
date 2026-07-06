@@ -453,7 +453,9 @@ def _required_payload_int(payload: Mapping[str, object], label: str, key: str) -
 
 
 def _world_is_protected_by_authorities(
-    repo: pygit2.Repository, world_oid: str, authority_refs: tuple[str, ...],
+    repo: pygit2.Repository,
+    world_oid: str,
+    authority_refs: tuple[str, ...],
 ) -> bool:
     return any(_world_is_protected_by_authority(repo, world_oid, authority_ref) for authority_ref in authority_refs)
 
@@ -490,7 +492,11 @@ def _delete_ref_if_targets(repo: pygit2.Repository, ref: str, oid: str) -> bool:
     if not _ref_targets(repo, ref, oid):
         return False
     result = subprocess.run(
-        ["git", "update-ref", "-d", ref, oid], cwd=repo.path, capture_output=True, check=False, text=True,
+        ["git", "update-ref", "-d", ref, oid],
+        cwd=repo.path,
+        capture_output=True,
+        check=False,
+        text=True,
     )
     if result.returncode == 0:
         return True
@@ -943,7 +949,9 @@ class PublicationRetentionController:
         publication_plan: PublicationPlan,
     ) -> OperationJournalEntry:
         return self._journal.record_operation_publishing(
-            operation_id, world_oid=world_oid, publication_plan=publication_plan,
+            operation_id,
+            world_oid=world_oid,
+            publication_plan=publication_plan,
         )
 
     def validate_publish_closure(
@@ -1259,7 +1267,9 @@ class PublicationRetentionController:
         closure = self.compute_publish_retention_closure(oid)
         classification = self.classify_world_closure_retention(closure, authority_refs=authority_refs)
         refs_by_ref = _closure_refs_by_ref(
-            closure, stores=self._stores, world_store_id=self._world_store.world_store_id,
+            closure,
+            stores=self._stores,
+            world_store_id=self._world_store.world_store_id,
         )
         deleted: list[str] = []
         for ref in classification["orphaned"]:
@@ -1485,4 +1495,3 @@ class PublicationRetentionController:
         )
         create_or_update_reference(self._world_store.repo, ref, receipt_oid, force=True)
         return ref
-

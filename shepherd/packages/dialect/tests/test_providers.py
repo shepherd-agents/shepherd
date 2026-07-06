@@ -484,13 +484,17 @@ def test_claude_auth_status_hard_fails_on_expired_subscription_blob(monkeypatch)
     expired = int((time.time() - 3600) * 1000)
     valid = int((time.time() + 3600) * 1000)
 
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _found(b'{"claudeAiOauth":{"expiresAt":%d}}' % expired))
+    monkeypatch.setattr(
+        providers_module, "_read_host_claude_login", lambda: _found(b'{"claudeAiOauth":{"expiresAt":%d}}' % expired)
+    )
     status = providers_module.claude_auth_status()
     assert status.mode == "subscription_login"
     assert status.ok is False
     assert "expired" in status.detail
 
-    monkeypatch.setattr(providers_module, "_read_host_claude_login", lambda: _found(b'{"claudeAiOauth":{"expiresAt":%d}}' % valid))
+    monkeypatch.setattr(
+        providers_module, "_read_host_claude_login", lambda: _found(b'{"claudeAiOauth":{"expiresAt":%d}}' % valid)
+    )
     status = providers_module.claude_auth_status()
     assert status.ok is True
     assert "not verified" in status.detail

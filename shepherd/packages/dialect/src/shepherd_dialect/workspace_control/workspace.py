@@ -215,8 +215,7 @@ def reclaim_dead_orphaned_operations_before_run(mg: Any) -> None:
         reclaimed = list(archive())
     except Exception:  # noqa: BLE001 — recovery must never turn a run-start into a failure
         _logger.warning(
-            "reclaim of orphaned operation refs before run was declined; leaving them for "
-            "`shepherd run repair`",
+            "reclaim of orphaned operation refs before run was declined; leaving them for `shepherd run repair`",
             exc_info=True,
         )
         return
