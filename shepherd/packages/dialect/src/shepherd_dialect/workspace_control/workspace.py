@@ -629,9 +629,7 @@ class TaskRuntimeContext:
         task_payload, task_ledger_head = _selected_task_ledger_payload_with_head(self._workspace.mg)
         task = _get_task_from_payload(task_payload, task_ref_id)
         if task is None:
-            raise TaskNotFoundError(
-                _task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref))
-            )
+            raise TaskNotFoundError(_task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref)))
         if task.status == "draft":
             raise RunStartError(f"task {task.task_id}@{task.version} is draft; activate it after dependencies resolve")
         resolution = _task_resolution_record(
@@ -1241,9 +1239,7 @@ class TaskLibraryClient:
         """
         task_source = _resolve_task_source(source)
         resolved_task_id = task_id or _default_task_id(task_source.import_path)
-        resolved_may_default, ceiling_provenance = _resolve_task_may_default_with_provenance(
-            may_default, task_source
-        )
+        resolved_may_default, ceiling_provenance = _resolve_task_may_default_with_provenance(may_default, task_source)
         resolved_metadata = _registration_metadata(
             metadata, source=source, task_source=task_source, ceiling_provenance=ceiling_provenance
         )
@@ -1316,9 +1312,7 @@ class TaskLibraryClient:
             qualname=entrypoint,
             source_text=source_text,
         )
-        resolved_may_default, ceiling_provenance = _resolve_task_may_default_with_provenance(
-            may_default, task_source
-        )
+        resolved_may_default, ceiling_provenance = _resolve_task_may_default_with_provenance(may_default, task_source)
         resolved_metadata = _registration_metadata(
             metadata, source=None, task_source=task_source, ceiling_provenance=ceiling_provenance
         )
@@ -1745,9 +1739,7 @@ class RunControlClient:
         task_payload, task_ledger_head = _selected_task_ledger_payload_with_head(self.mg)
         task = _get_task_from_payload(task_payload, task_ref_id)
         if task is None:
-            raise TaskNotFoundError(
-                _task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref))
-            )
+            raise TaskNotFoundError(_task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref)))
         if task.status == "draft":
             raise RunStartError(f"task {task.task_id}@{task.version} is draft; activate it after dependencies resolve")
         resolution = _task_resolution_record(
@@ -1810,9 +1802,7 @@ class RunControlClient:
         task_payload, task_ledger_head = _selected_task_ledger_payload_with_head(self.mg)
         task = _get_task_from_payload(task_payload, task_ref_id)
         if task is None:
-            raise TaskNotFoundError(
-                _task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref))
-            )
+            raise TaskNotFoundError(_task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref)))
         if task.status == "draft":
             raise RunStartError(f"task {task.task_id}@{task.version} is draft; activate it after dependencies resolve")
         if task.artifact_ref is None:
@@ -2111,9 +2101,7 @@ class RunControlClient:
         task_payload, task_ledger_head = _selected_task_ledger_payload_with_head(self.mg)
         task = _get_task_from_payload(task_payload, task_ref_id)
         if task is None:
-            raise TaskNotFoundError(
-                _task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref))
-            )
+            raise TaskNotFoundError(_task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref)))
         if task.status == "draft":
             raise RunStartError(f"task {task.task_id}@{task.version} is draft; activate it after dependencies resolve")
         if task.artifact_ref is None:
@@ -2990,9 +2978,7 @@ def _generated_source_from_main_callable(qualname: str, plain_body: Callable[...
     from shepherd_runtime.nucleus import classify_task_body
 
     if "<locals>" in getattr(plain_body, "__qualname__", ""):
-        raise TaskRegistrationError(
-            f"cannot register local function {qualname!r}: define the task at module scope"
-        )
+        raise TaskRegistrationError(f"cannot register local function {qualname!r}: define the task at module scope")
     classification = classify_task_body(plain_body)
     if classification != "bodyless":
         raise TaskRegistrationError(
@@ -3253,9 +3239,7 @@ def _registration_metadata(
             # record the originating script instead so ``shepherd task show`` can still
             # name where it came from.
             "source_file": (
-                str(task_source.file_path)
-                if task_source.file_path is not None
-                else _callable_source_file(source)
+                str(task_source.file_path) if task_source.file_path is not None else _callable_source_file(source)
             ),
         }
     return resolved
