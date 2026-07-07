@@ -22,8 +22,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Annotated
 
 import pytest
+
+# Runtime import by design: the task signature's annotation namespace needs the
+# noun at definition/classification time, not only for type checking.
+from shepherd_runtime.nucleus import GitRepo  # noqa: TC002
+
 from shepherd_dialect.nucleus import handle, reset_workspace_for_tests, task, workspace
-from shepherd_runtime.nucleus import GitRepo
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

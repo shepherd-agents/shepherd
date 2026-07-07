@@ -17,7 +17,6 @@ from types import SimpleNamespace
 from typing import Annotated, Optional
 
 import pytest
-
 from shepherd_core.schema import HandleReturnSlotUnsupported, find_handle_annotation
 from shepherd_runtime.nucleus import GitRepo
 from shepherd_runtime.step.output import return_type_to_output_schema
@@ -30,7 +29,9 @@ HANDLE_RETURN_TYPES = [
     Annotated[GitRepo, "metadata"],
     tuple[Annotated[GitRepo, "metadata"], str],
     list[GitRepo],
-    Optional[GitRepo],
+    # The legacy spelling is deliberate coverage: typing.Optional produces
+    # typing.Union (not types.UnionType), and the fence must catch both forms.
+    Optional[GitRepo],  # noqa: UP045
 ]
 
 PLAIN_RETURN_TYPES = [str, int, list[str], dict[str, int], tuple[str, int], None]
@@ -67,16 +68,12 @@ class TestReturnTypeToOutputSchemaFence:
 
 class TestGenerateOutputSchemaFence:
     def test_handle_output_field_refuses(self):
-        meta = SimpleNamespace(
-            outputs={"repo": SimpleNamespace(inner_type=GitRepo, description=None)}
-        )
+        meta = SimpleNamespace(outputs={"repo": SimpleNamespace(inner_type=GitRepo, description=None)})
         with pytest.raises(HandleReturnSlotUnsupported):
             generate_output_schema(meta)
 
     def test_plain_output_field_unaffected(self):
-        meta = SimpleNamespace(
-            outputs={"report": SimpleNamespace(inner_type=str, description=None)}
-        )
+        meta = SimpleNamespace(outputs={"report": SimpleNamespace(inner_type=str, description=None)})
         schema = generate_output_schema(meta)
         assert schema is not None
 

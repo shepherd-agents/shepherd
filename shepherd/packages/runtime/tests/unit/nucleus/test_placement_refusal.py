@@ -59,9 +59,12 @@ class TestHandleAnnotatedBodylessRefuses:
 
     def test_direct_call_refuses_with_provider_installed(self) -> None:
         captured: list[ModelRequest] = []
-        with workspace(model="fake"), handle("model.call", _capturing_responder(captured)):
-            with pytest.raises(AmbientWorldAccessRefused) as excinfo:
-                implement(repo=".", feature="login")
+        with (
+            workspace(model="fake"),
+            handle("model.call", _capturing_responder(captured)),
+            pytest.raises(AmbientWorldAccessRefused) as excinfo,
+        ):
+            implement(repo=".", feature="login")
         assert "declares world access" in str(excinfo.value)
         assert "workspace.run(" in str(excinfo.value)
         assert captured == []  # refused BEFORE any handler/provider dispatch
@@ -70,29 +73,29 @@ class TestHandleAnnotatedBodylessRefuses:
         # The banked .run()-spelling probe, flipped: previously fabricated
         # Finished(value='FAKE-ANSWER-VIA-RUN'); now refuses (V8).
         captured: list[ModelRequest] = []
-        with workspace(model="fake"), handle("model.call", _capturing_responder(captured)):
-            with pytest.raises(AmbientWorldAccessRefused):
-                implement.run(repo=".", feature="login")
+        with (
+            workspace(model="fake"),
+            handle("model.call", _capturing_responder(captured)),
+            pytest.raises(AmbientWorldAccessRefused),
+        ):
+            implement.run(repo=".", feature="login")
         assert captured == []
 
     def test_detailed_spelling_refuses(self) -> None:
-        with workspace(model="fake"):
-            with pytest.raises(AmbientWorldAccessRefused):
-                implement.detailed(repo=".", feature="login")
+        with workspace(model="fake"), pytest.raises(AmbientWorldAccessRefused):
+            implement.detailed(repo=".", feature="login")
 
     def test_refuses_without_any_provider(self) -> None:
         # The message beats DeliveryFailed: the user learns the placement rule,
         # not just that no handler was installed.
-        with workspace(model="fake"):
-            with pytest.raises(AmbientWorldAccessRefused):
-                implement(repo=".", feature="login")
+        with workspace(model="fake"), pytest.raises(AmbientWorldAccessRefused):
+            implement(repo=".", feature="login")
 
     def test_refusal_keys_on_annotation_not_value(self) -> None:
         # The hero passes repo="." — a plain string. The refusal names the
         # annotation's noun regardless of the passed value.
-        with workspace(model="fake"):
-            with pytest.raises(AmbientWorldAccessRefused) as excinfo:
-                implement(repo=".", feature="login")
+        with workspace(model="fake"), pytest.raises(AmbientWorldAccessRefused) as excinfo:
+            implement(repo=".", feature="login")
         assert "'GitRepo'" in str(excinfo.value)
         assert "'repo'" in str(excinfo.value)
 
@@ -101,9 +104,8 @@ class TestHandleAnnotatedBodylessRefuses:
         def produce_repo(description: str) -> tuple[GitRepo, str]:
             """Produce a repo for the description."""
 
-        with workspace(model="fake"):
-            with pytest.raises(AmbientWorldAccessRefused) as excinfo:
-                produce_repo(description="x")
+        with workspace(model="fake"), pytest.raises(AmbientWorldAccessRefused) as excinfo:
+            produce_repo(description="x")
         assert "return slot" in str(excinfo.value)
 
 

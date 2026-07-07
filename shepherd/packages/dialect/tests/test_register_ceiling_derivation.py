@@ -138,9 +138,7 @@ def test_explicit_kwarg_beats_derivation(workspace, grant_module) -> None:
     assert _provenance(version) == "explicit"
 
 
-def test_ceiling_derivation_is_uniform_across_registration_spellings(
-    workspace, grant_module
-) -> None:
+def test_ceiling_derivation_is_uniform_across_registration_spellings(workspace, grant_module) -> None:
     """The same signature yields the same ceiling + provenance however it was registered.
 
     This is the assertion a per-path fork would have made impossible: `register(fn)` and

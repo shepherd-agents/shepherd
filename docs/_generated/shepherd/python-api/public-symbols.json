@@ -2,8 +2,20 @@
   "facade": "shepherd",
   "generator": "scripts/gen_shepherd_api_inventory.py",
   "note": "Generated from the shipped `shepherd` facade __all__; the handle/grant surface is listed as runtime-resolved (offline docs build cannot import it).",
-  "symbol_count": 39,
+  "symbol_count": 41,
   "symbols": {
+    "AmbientWorldAccessRefused": {
+      "doc_hash": "0731d641070c59a1",
+      "kind": "class",
+      "signature": "class AmbientWorldAccessRefused(DeliveryException)",
+      "source": "shepherd_runtime.nucleus.AmbientWorldAccessRefused"
+    },
+    "AmbiguousTaskBody": {
+      "doc_hash": "372911a27f10a374",
+      "kind": "class",
+      "signature": "class AmbiguousTaskBody(DeliveryException)",
+      "source": "shepherd_runtime.nucleus.AmbiguousTaskBody"
+    },
     "Artifact": {
       "doc_hash": "471e8c479c15b415",
       "kind": "class",

@@ -14,13 +14,13 @@ lowering; only provider-facing *return-slot* schemas refuse.
 from typing import Annotated, Optional
 
 import pytest
+from shepherd_runtime.nucleus import GitRepo
+from shepherd_runtime.step.output import return_type_to_output_schema as runtime_rtos
 
 from shepherd_dialect._step_schema import (
     HandleReturnSlotUnsupported as DialectHandleReturnSlotUnsupported,
 )
 from shepherd_dialect.steps import return_type_to_output_schema as dialect_rtos
-from shepherd_runtime.nucleus import GitRepo
-from shepherd_runtime.step.output import return_type_to_output_schema as runtime_rtos
 
 HANDLE_RETURN_TYPES = [
     GitRepo,
@@ -28,7 +28,9 @@ HANDLE_RETURN_TYPES = [
     tuple[str, GitRepo],
     Annotated[GitRepo, "metadata"],
     list[GitRepo],
-    Optional[GitRepo],
+    # The legacy spelling is deliberate coverage: typing.Optional produces
+    # typing.Union (not types.UnionType), and the fence must catch both forms.
+    Optional[GitRepo],  # noqa: UP045
 ]
 
 PLAIN_RETURN_TYPES = [str, int, list[str], dict[str, int], tuple[str, int], None]

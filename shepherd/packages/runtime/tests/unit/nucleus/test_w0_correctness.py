@@ -30,7 +30,6 @@ from shepherd_runtime.nucleus import (
     AmbientWorldAccessRefused,
     AmbiguousTaskBody,
     GitRepo,
-    WorkspaceAlreadyConfigured,
     current_workspace,
     reset_workspace_for_tests,
     task,
@@ -76,19 +75,23 @@ class TestDualKeyShim:
         # The alias normalizes at installation, so LIFO ordering holds across
         # the two spellings rather than one key always shadowing the other.
         with workspace(model="fake"):
-            with handle("model.call", _responder("outer-legacy")):
-                with handle("model.call.requested", _responder("inner-taught")):
-                    assert summarize(text="hello") == "inner-taught"
-            with handle("model.call.requested", _responder("outer-taught")):
-                with handle("model.call", _responder("inner-legacy")):
-                    assert summarize(text="hello") == "inner-legacy"
+            with (
+                handle("model.call", _responder("outer-legacy")),
+                handle("model.call.requested", _responder("inner-taught")),
+            ):
+                assert summarize(text="hello") == "inner-taught"
+            with (
+                handle("model.call.requested", _responder("outer-taught")),
+                handle("model.call", _responder("inner-legacy")),
+            ):
+                assert summarize(text="hello") == "inner-legacy"
 
 
 def _exec_task(source: str, extra_globals: dict | None = None):
     """Define a function via exec (source unavailable to inspect.getsource)."""
     namespace: dict = {"Annotated": Annotated, "GitRepo": GitRepo}
     namespace.update(extra_globals or {})
-    exec(source, namespace)  # noqa: S102 — deliberate: simulates REPL/notebook definition
+    exec(source, namespace)
     return namespace
 
 
@@ -98,15 +101,16 @@ class TestTriStateBodyClassification:
         ghost = task(namespace["ghost"])
         assert ghost.metadata.body_ambiguous is True
         assert ghost.metadata.bodyless is False
-        with workspace(model="fake"), handle("model.call", _responder("never")):
-            with pytest.raises(AmbiguousTaskBody) as excinfo:
-                ghost(text="hello")
+        with (
+            workspace(model="fake"),
+            handle("model.call", _responder("never")),
+            pytest.raises(AmbiguousTaskBody) as excinfo,
+        ):
+            ghost(text="hello")
         assert "importable .py file" in str(excinfo.value)
 
     def test_exec_defined_bodied_task_runs(self) -> None:
-        namespace = _exec_task(
-            'def real(text: str) -> str:\n    """Doc."""\n    return text.upper()\n'
-        )
+        namespace = _exec_task('def real(text: str) -> str:\n    """Doc."""\n    return text.upper()\n')
         real = task(namespace["real"])
         assert real.metadata.body_ambiguous is False
         assert real.metadata.bodyless is False
@@ -129,9 +133,8 @@ class TestTriStateBodyClassification:
             '    """Implement the goal in the repo."""\n'
         )
         ghost_repo = task(namespace["ghost_repo"])
-        with workspace(model="fake"):
-            with pytest.raises(AmbientWorldAccessRefused):
-                ghost_repo(repo=".", goal="login")
+        with workspace(model="fake"), pytest.raises(AmbientWorldAccessRefused):
+            ghost_repo(repo=".", goal="login")
 
     def test_file_defined_bodyless_task_still_delivers(self) -> None:
         # The classifier change must not disturb the ordinary import path.
