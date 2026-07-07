@@ -1,0 +1,52 @@
+# Dedicated Lane C Linux Landlock probe (T1 W3.1 / ISS-012).
+#
+# The main `container-tests` job cannot answer the Landlock question: it dies in the
+# overlay-session step (ISS-012 env debt) before the Lane C evidence step runs. This
+# workflow runs ONLY the Lane C acceptance gate + executed-evidence sentinel in the same
+# privileged container, so the "does the per-binding syscall jail run skip-free on Linux
+# Landlock?" question gets a clean, loud answer independent of the unrelated env debt.
+#
+# The sentinel is authoritative (mirrored `|| true`, like the Makefile's `-` prefix): a
+# skipped jailed leg or a narrowed selection is RED, so Landlock unavailability surfaces as
+# a loud blocker artifact, never a silent skip. GREEN here unblocks W3.2's caveat flip.
+#
+# Triggers: push to any `probe/**` branch (zero coordination — touches nothing shared), or
+# manual `workflow_dispatch` once this file is on the default branch.
+name: Lane C Linux Probe
+
+on:
+  push:
+    branches: ["probe/**"]
+  workflow_dispatch:
+
+jobs:
+  lane-c-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.12-slim
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system dependencies
+        run: apt-get update && apt-get install -y --no-install-recommends fuse-overlayfs fuse3 git && rm -rf /var/lib/apt/lists/*
+      - name: Install uv
+        run: pip install --no-cache-dir uv
+      - name: Install dialect dependencies
+        working-directory: shepherd/packages/dialect
+        run: uv sync --group dev
+      # Run BY PATH (matching `make release-evidence-lane-c`) — the gate file carries
+      # `workspace_scenario`, not `container`, so a `-m container` selection would deselect it.
+      - name: Run Lane C acceptance gate (Landlock executed evidence)
+        working-directory: shepherd/packages/dialect
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tmp/release-evidence"
+          uv run pytest tests/test_lane_c_acceptance_gate.py -rA -q \
+            --junitxml="$GITHUB_WORKSPACE/tmp/release-evidence/lane-c-linux.junit.xml" || true
+      - name: Assert Lane C jailed legs executed (evidence sentinel)
+        run: python scripts/check_executed_evidence.py --junitxml "$GITHUB_WORKSPACE/tmp/release-evidence/lane-c-linux.junit.xml" --profile lane-c
+      - name: Upload Lane C Linux JUnit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lane-c-linux-probe-junit
+          path: tmp/release-evidence/lane-c-linux.junit.xml

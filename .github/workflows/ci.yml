@@ -120,6 +120,14 @@ jobs:
         # pytest-of-$USER tmp janitor cannot race live siblings (ISS-004).
         run: make release-evidence-lane-c
 
+      - name: Beat-0 safety sentinel (fence + refusal + W0; offline, skip-forbidden)
+        # 19 offline legs guarding the 0.3.0 safety bar: the two-stack fabrication
+        # fence (parity-tested), the ambient world-access refusal (both call
+        # spellings, both nuclei), and the W0 correctness fixes. No jail, no
+        # credentials — must be green on every PR, including community PRs.
+        # Same no-retry discipline as the lane-c step above.
+        run: make release-evidence-beat0
+
   deep-tests:
     name: Deep tests (merge to main · macOS)
     # Merge-only heavy lane: the suites verified on the 0.2.0 assembly host,
