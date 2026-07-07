@@ -38,6 +38,7 @@ mcp = "shepherd_contexts.mcp:MCPServerContext"
 database = "shepherd_contexts.database:DatabaseContext"
 kvstore = "shepherd_contexts.kvstore:KVStoreContext"
 appstore = "shepherd_contexts.appstore:AppStoreContext"
+memory = "shepherd_contexts.memory:MemoryContext"
 
 [project.entry-points."shepherd.effects"]
 workspace = "shepherd_contexts.workspace.effects"
@@ -47,6 +48,7 @@ kvstore = "shepherd_contexts.kvstore.effects"
 mcp = "shepherd_contexts.mcp.effects"
 appstore = "shepherd_contexts.appstore.effects"
 database = "shepherd_contexts.database.effects"
+memory = "shepherd_contexts.memory.effects"
 
 [dependency-groups]
 test = [
