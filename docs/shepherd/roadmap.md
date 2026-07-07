@@ -45,8 +45,10 @@ once. Concretely:
   **once**, explicitly, with `select`, `release`, or `discard` — consume-once,
   recorded, and refused on re-settlement. Settlement records your decision; in
   0.2.0 you read retained content through the changeset surface
-  (`shepherd run changeset --latest --read <path>`), and an `apply`-style verb
-  that materializes a kept output onto your working tree has **not** shipped.
+  (`shepherd run changeset --latest --read <path>`). The fourth verb — **`apply`**,
+  which three-way-settles a kept output onto a workspace that has moved on
+  (whole-output, path-disjoint or refused) — ships in **0.3.0**; it is not in
+  0.2.0.
 - **The recorded trace** *(shipped)*. Every run leaves a durable record;
   `shepherd run trace <run-ref>` reads it back. Debugging is reading the
   record, not guessing.
