@@ -1,0 +1,12 @@
+blank_issues_enabled: true
+contact_links:
+  - name: State of the project (pinned discussion)
+    url: https://github.com/shepherd-agents/shepherd/discussions
+    about: >-
+      What ships in 0.2.0 vs. what is on the named road, and how we make
+      claims. Read this first if something you expected is missing.
+  - name: "Roadmap: Settlement Core / Dataflow"
+    url: https://docs.shepherd-agents.ai/roadmap/
+    about: >-
+      The honest map. If a surface you are looking for is listed under
+      Dataflow, it has not shipped yet — that is a roadmap entry, not a bug.

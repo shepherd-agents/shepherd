@@ -11,6 +11,9 @@
 ## Requirements
 
 - Python **3.11+**.
+- **macOS**: OS-level grant enforcement is exercised (Seatbelt). **Linux**:
+  Landlock enforcement is container-gated today. **Windows**: unsupported —
+  enforcement would be advisory-only at best; use **WSL**.
 - No provider credentials for the offline path. One live provider key (for
   example `ANTHROPIC_API_KEY=<your-key>`) only when you opt into live runs.
 

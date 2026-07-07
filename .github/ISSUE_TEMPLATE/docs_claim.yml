@@ -1,0 +1,37 @@
+name: "Docs: a published claim doesn't run on the wheel"
+description: >-
+  You found a sentence, code block, or output on the published docs site (or
+  README) that does not run on the shipped release. We treat these as bugs in
+  the docs.
+labels: ["docs", "claim-surface"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        The docs' standing rule: **every published sentence runs on the
+        shipped wheel or is explicitly labeled** (roadmap / simulated /
+        illustrative). If you found an unlabeled exception, thank you —
+        this form is the fast path.
+  - type: input
+    id: page
+    attributes:
+      label: Page and "Applies to" version
+      placeholder: https://docs.shepherd-agents.ai/concepts/tasks/ — Applies to Shepherd v0.2.0
+    validations:
+      required: true
+  - type: textarea
+    id: claim
+    attributes:
+      label: The claim, quoted
+      description: Quote the exact sentence or code block.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: What you ran and what happened
+      description: >-
+        The smallest run that shows the claim failing on the shipped wheel,
+        with output.
+    validations:
+      required: true

@@ -18,7 +18,7 @@ reference:
 authored:
   # --- shipped/promoted (release-ready, public) ---
   - {page: docs/shepherd/index.md, title: Home}
-  - {page: docs/shepherd/start/index.md, title: Getting Started, code: docs/_src/shepherd/quickstart/hello.py, test: docs/_src/shepherd/quickstart/test_hello.py}
+  - {page: docs/shepherd/start/index.md, title: Getting Started, code: docs/_src/shepherd/quickstart/world_hero.py, test: docs/_src/shepherd/quickstart/test_world_hero.py}
   - {page: docs/shepherd/tutorials/first-shepherd-app.md, title: First Shepherd app, code: docs/_src/shepherd/tutorials/first_app/app.py, test: docs/_src/shepherd/tutorials/first_app/test_first_app.py}
   - {page: docs/shepherd/concepts/tasks.md, title: Tasks}
   - {page: docs/shepherd/reference/source-state.md, title: Source-state ledger}

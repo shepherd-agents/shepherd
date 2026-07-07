@@ -6,7 +6,7 @@
 > Owner: @docs-system-owner (TBD)
 > Validation: shepherd/packages/dialect/tests/test_workspace_control_workstream3.py
 
-*Concept. The mental model behind Shepherd. Steps live in the tutorial, signatures in the reference.*
+*Concept. The mental model behind Shepherd. Steps live in the quickstart, signatures in the reference.*
 
 A **placement** decides *where* a run's body executes, and therefore whether its
 [permission grants](permissions.md) are enforced by the operating system or only recorded as

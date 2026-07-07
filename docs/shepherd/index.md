@@ -9,66 +9,74 @@ Page-metadata block, kept in an HTML comment so the membership gate
 (scripts/check_shepherd_docs.py) still reads the `> Key: value` lines while the
 landing renders without a visible status banner.
 > Page status: release-ready
-> Source state: shipped-source
+> Source state: checked-example
 > Applies to: Shepherd v0.2.0
 > Owner: @docs-system-owner (TBD)
-> Validation: scripts/check_shepherd_docs.py
+> Validation: docs_src/quickstart/test_world_hero.py
 -->
 
 <div class="shp-hero" markdown>
 
 # Program meta-agents in Python
 
-Write agents as simple typed functions, and meta-agents as functions that take your agents as input.
+Agent work arrives as a **reviewable, reversible proposal**: typed tasks,
+permissions in the signature, and retained runs you inspect before you decide.
 
 [Get started](start/index.md){ .md-button .md-button--primary }
 
 </div>
 
-```python title="hello.py"
---8<-- "quickstart/hello.py:hello"
+```python title="hero.py — runs on the shipped wheel, offline (after `shepherd init`)"
+--8<-- "quickstart/world_hero.py:hero"
 ```
 
 ## Find your path
 
 <div class="grid cards" markdown>
 
--   :material-rocket-launch:{ .lg .middle } **Build your first agent**
+-   :material-rocket-launch:{ .lg .middle } **Run the quickstart**
 
     ---
 
-    A typed task, a workspace, and a small working reviewer. Offline and
-    deterministic.
+    Initialize a workspace, run a task, inspect its retained changeset, and
+    settle it. Offline and deterministic, on the shipped wheel.
 
-    [:octicons-arrow-right-24: First Shepherd app](tutorials/first-shepherd-app.md)
+    [:octicons-arrow-right-24: Getting Started](start/index.md)
 
--   :material-bug-check:{ .lg .middle } **Debug and test a run**
-
-    ---
-
-    Read typed failures, keep runs deterministic, and test model-backed
-    code without live calls.
-
-    [:octicons-arrow-right-24: Debug your first run](guides/debug-your-first-run.md)
-
--   :material-lightbulb-on:{ .lg .middle } **Understand & evaluate**
+-   :material-shield-key:{ .lg .middle } **Permissions in the signature**
 
     ---
 
-    The mental model behind tasks, effects, and runs - and how they fit together into one framework.
+    Per-repository read-only / read-write grants declared on the task's
+    parameters — enforced at the OS on a jailed placement.
 
-    [:octicons-arrow-right-24: Concepts: Tasks](concepts/tasks.md)
+    [:octicons-arrow-right-24: Grant a task repo access](guides/grant-repo-access.md)
+
+-   :material-map:{ .lg .middle } **What ships vs. what's on the road**
+
+    ---
+
+    The honest map: the Settlement Core that ships in 0.2.0, and the named
+    Dataflow road (returned handles, task-as-value delegation) ahead.
+
+    [:octicons-arrow-right-24: Settlement Core / Dataflow](roadmap.md)
 
 </div>
 
 ## Why Shepherd
 
-- **Typed.** A task is a function with a signature and a docstring. The return
-  type is the contract the model must satisfy.
-- **Observable.** Every run records what was sent and returned, so you debug by
-  reading a trace instead of guessing.
-- **Composable.** Tasks are values. Pass them, supervise them, and build bigger
-  programs out of small ones.
+- **Typed.** A task is a Python function: signature, docstring, and — right on
+  the parameters — its permission grants. Reading the signature is reading the
+  permission surface.
+- **Observable.** Every run leaves a durable trace; `shepherd run trace` reads
+  back exactly what happened, so you debug by reading a record, not guessing.
+- **Reviewable.** A run's work lands as a retained output beside your files,
+  inspected per binding and settled explicitly — `select`, `release`, or
+  `discard` — exactly once.
+
+The composable meta-agent surface — tasks passed to tasks, supervised
+retries — is the product's north star and is **not in 0.2.0**; the honest map
+is the [roadmap](roadmap.md).
 
 <br>
 

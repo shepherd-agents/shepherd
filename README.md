@@ -31,6 +31,11 @@ they are selected, released, or discarded.
 pip install shepherd-ai
 ```
 
+> **Platforms.** Shepherd requires **Python 3.11+**. OS-level grant enforcement
+> is exercised on **macOS** (Seatbelt) today; on **Linux**, Landlock enforcement
+> is container-gated. **Windows is unsupported** (enforcement would be
+> advisory-only at best) — use **WSL**.
+
 Working on Shepherd itself? Install the local editable closure instead:
 `python -m venv .venv && . .venv/bin/activate && pip install -r requirements-dev.txt`
 (see [CONTRIBUTING.md](https://github.com/shepherd-agents/shepherd/blob/main/CONTRIBUTING.md)).
