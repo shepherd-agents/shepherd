@@ -127,6 +127,8 @@ def _settlement_to_json(settlement: RetainedOutputSettlement) -> dict[str, objec
         payload["authority_settlement_operation_id"] = settlement.authority_settlement_operation_id
     if settlement.authority_outcome is not None:
         payload["authority_outcome"] = settlement.authority_outcome
+    if settlement.applied_head is not None:
+        payload["applied_head"] = settlement.applied_head
     return {**payload, "settlement_digest": canonical_digest(payload)}
 
 
@@ -152,6 +154,7 @@ def _settlement_from_json(value: dict[str, object]) -> RetainedOutputSettlement:
         "authority_operation_id",
         "authority_settlement_operation_id",
         "authority_outcome",
+        "applied_head",
         "settlement_digest",
     }
     extra = set(value) - expected
@@ -185,6 +188,7 @@ def _settlement_from_json(value: dict[str, object]) -> RetainedOutputSettlement:
         authority_operation_id=_optional_str(value, "authority_operation_id"),
         authority_settlement_operation_id=_optional_str(value, "authority_settlement_operation_id"),
         authority_outcome=_optional_str(value, "authority_outcome"),
+        applied_head=_optional_str(value, "applied_head"),
     )
 
 

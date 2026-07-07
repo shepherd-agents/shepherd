@@ -24,6 +24,7 @@ from __future__ import annotations
 from vcs_core._dirty_flag import write_dirty_flag
 from vcs_core._hooks import HookManager
 from vcs_core._ipc import SessionInfo
+from vcs_core._substrate_tree_read import read_substrate_workspace_file
 from vcs_core._world_operation_builder import CandidateSelection, OperationFinalBuilder
 from vcs_core._world_refs import operation_journal_ref
 from vcs_core._world_storage_manager import (
@@ -41,5 +42,24 @@ __all__ = [
     "SubstrateStoreSpec",
     "WorldStorageManager",
     "operation_journal_ref",
+    "read_world_workspace_file",
     "write_dirty_flag",
 ]
+
+
+def read_world_workspace_file(
+    manager: WorldStorageManager, world_oid: str, path: str, *, binding: str = "workspace"
+) -> bytes | None:
+    """Read one file's bytes from a published world's ``binding`` head (tests only).
+
+    Settlement verbs publish worlds without materializing the working directory, so tests that
+    assert on post-settlement content read from the world head rather than disk. Returns the file
+    bytes, or ``None`` when the binding/head/path does not resolve. Centralizes the
+    ``read_world`` → head → store → ``read_substrate_workspace_file`` chain that settlement tests
+    across packages would otherwise each reach into ``vcs_core._*`` to perform.
+    """
+    world = manager.read_world(world_oid)
+    head = world.snapshot.head_for(binding)
+    substrate = manager.store(head.store_id)
+    result = read_substrate_workspace_file(substrate.repo, head.head, path)
+    return None if result is None else result[0]

@@ -855,41 +855,6 @@ def test_run_record_enforcement_defaults_legacy_records_to_advisory() -> None:
     assert restored.execution_evidence == RunExecutionEvidence()
 
 
-def test_run_execution_evidence_round_trips_effective_feature_flags() -> None:
-    # P1.2 / finding #5: the recorded flag state survives to_json -> from_json
-    # for both flag states, so two runs under different flags are distinguishable.
-    for state in (True, False):
-        evidence = RunExecutionEvidence(effective_feature_flags={"seal_and_select": state})
-        payload = evidence.to_json()
-        assert payload["effective_feature_flags"] == {"seal_and_select": state}
-        assert RunExecutionEvidence.from_json(payload) == evidence
-
-
-def test_run_execution_evidence_absent_feature_flags_read_as_not_recorded() -> None:
-    # A record written before the field existed reads as None ("not recorded"),
-    # never as an empty/all-false map that would silently claim flags were off.
-    payload = RunExecutionEvidence().to_json()
-    payload.pop("effective_feature_flags")
-
-    restored = RunExecutionEvidence.from_json(payload)
-
-    assert restored.effective_feature_flags is None
-
-
-def test_run_execution_evidence_rejects_non_object_feature_flags() -> None:
-    with pytest.raises(TypeError, match="effective_feature_flags must be an object or null"):
-        RunExecutionEvidence(effective_feature_flags="seal_and_select")  # type: ignore[arg-type]
-
-
-def test_effective_feature_flags_reader_reflects_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    from shepherd_dialect.workspace_control.feature_flags import effective_feature_flags
-
-    monkeypatch.setenv("VCS_CORE_SEAL_AND_SELECT", "1")
-    assert effective_feature_flags() == {"seal_and_select": True}
-    monkeypatch.delenv("VCS_CORE_SEAL_AND_SELECT", raising=False)
-    assert effective_feature_flags() == {"seal_and_select": False}
-
-
 def test_run_execution_evidence_rejects_impossible_requested_resolved_pair() -> None:
     with pytest.raises(ValueError, match="cannot resolve advisory placement to jail"):
         RunExecutionEvidence(
@@ -1505,7 +1470,6 @@ def test_run_vcscore_projection_cites_existing_run_record_identities() -> None:
             "resolved_placement": "advisory",
             "enforcement_basis": "legacy_advisory",
             "execution_descriptor": None,
-            "effective_feature_flags": None,
         },
         "runtime_operation": "op-runtime",
         "authority_operation": "op-authority",

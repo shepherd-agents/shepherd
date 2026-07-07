@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from shepherd_dialect.workspace_control.errors import WorkspaceControlError
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 from shepherd_dialect.workspace_control.run_outputs import RunOutput
 
 if TYPE_CHECKING:
@@ -55,8 +54,7 @@ def _validate_retained_run_output_read_handle(workspace: Any, output: RunOutputR
     validator = getattr(workspace.mg, "retained_workspace_handoff", None)
     if not callable(validator):
         raise WorkspaceControlError("VcsCore.retained_workspace_handoff is required for run-output reads")
-    with _seal_and_select_enabled():
-        validator(_retained_workspace_handle_for_run_output(output))
+    validator(_retained_workspace_handle_for_run_output(output))
 
 
 def _retained_workspace_handle_for_run_output(output: RunOutputRef) -> RetainedWorkspaceHandle:

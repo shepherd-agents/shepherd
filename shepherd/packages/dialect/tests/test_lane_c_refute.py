@@ -28,7 +28,6 @@ from shepherd_dialect.workspace_control import (
     ShepherdWorkspace,
     WorkspaceControlError,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -121,8 +120,7 @@ def _make_workspace(root: Path) -> ShepherdWorkspace:
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     return ShepherdWorkspace(
         mg,
         trace_store_path=root / ".vcscore" / "shepherd" / "trace.sqlite",
@@ -140,9 +138,8 @@ def _register(workspace: ShepherdWorkspace, tmp_path: Path, monkeypatch: pytest.
 
 
 def _seed(workspace: ShepherdWorkspace) -> None:
-    with _seal_and_select_enabled():
-        workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="docs/guide.md", content=b"g\n")
-        workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="backend/app.py", content=b"a\n")
+    workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="docs/guide.md", content=b"g\n")
+    workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="backend/app.py", content=b"a\n")
 
 
 def _ws(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ShepherdWorkspace:
@@ -369,6 +366,9 @@ def test_T5_all_ro_run_select_refused_survived(tmp_path: Path, monkeypatch: pyte
         assert run.output().changed_paths == ()
         with pytest.raises(WorkspaceControlError, match="any-writable"):
             workspace.select(run.output())
+        # apply is gated by the same any-writable rule (T1 W2.4 iv: parity across mutating verbs).
+        with pytest.raises(WorkspaceControlError, match="any-writable"):
+            workspace.apply(run.output())
         # release stays allowed (consume-once semantics unchanged).
         released = workspace.release(run.output())
         assert released.settlement.action in {"released", "discarded"}

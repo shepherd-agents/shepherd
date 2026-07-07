@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-dialect"
-version = "0.2.0"
+version = "0.3.0"
 description = "The Shepherd dialect over vcs-core's execution-mechanism SPI: the run driver."
 requires-python = ">=3.11"
 dependencies = [

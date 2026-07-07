@@ -8,9 +8,11 @@ from typing import TYPE_CHECKING, Any, cast
 import pygit2
 
 from vcs_core._authority import (
+    AUTHORITY_ROUTE_BY_TRANSACTION_KIND,
     AuthorityDecision,
     AuthorityOutcome,
     AuthoritySettlement,
+    AuthorityTransactionKind,
     PendingAuthoritySettlement,
     PreparedRetainedOutputSelection,
     RetainedOutputAuthorityDecisionRecord,
@@ -175,6 +177,22 @@ def _select_retained_candidate_set(
         )
         if recovered is not None:
             return recovered
+
+        # Probe-uniformity (T1 task-10 tranche, S2 disposition): a published-but-unreceipted
+        # APPLICATION world for this output is completed here (its receipt written) and the
+        # select refuses as already-settled — never a misleading drift error. Function-local
+        # import keeps the selection/application module graph acyclic.
+        from vcs_core._retained_output_application import _recover_published_application
+
+        foreign_application = _recover_published_application(
+            owner,
+            manager,
+            retained=retained,
+            parent=parent,
+            settlement_ref=settlement_ref,
+        )
+        if foreign_application is not None:
+            raise InvalidRepositoryStateError(f"retained output is already settled: {settlement_ref}")
 
         _selection_admission(owner).require_retained_output_selection_allowed(scope_selector=parent.ref)
         parent_world_oid = owner._current_v2_world_oid(manager, parent.ref)
@@ -428,6 +446,16 @@ def _recover_current_parent_retained_selection(
     return None
 
 
+# Per-kind negative-settlement vocabulary for the shared prepare/decide flow (T1 D7): the
+# refusal/denial spelling is a function of the settling verb — the future settlement-action
+# registry's per-verb row (g10).
+_NEGATIVE_AUTHORITY_SETTLEMENT_BY_KIND: dict[str, tuple[str, str, str, str]] = {
+    # kind -> (negative settlement, refused commit outcome, denied commit outcome, verb noun)
+    "retained_output_selection": ("not_selected", "not_selected_refused", "not_selected_denied", "selection"),
+    "retained_output_application": ("not_applied", "not_applied_refused", "not_applied_denied", "application"),
+}
+
+
 def _prepare_and_decide_retained_selection_authority(
     owner: VcsCore,
     manager: WorldStorageManager,
@@ -444,14 +472,18 @@ def _prepare_and_decide_retained_selection_authority(
     permission_plan_digest: str | None,
     permission_plan_descriptor: Mapping[str, object] | None,
     authority_context: Mapping[str, object] | None,
+    transaction_kind: AuthorityTransactionKind = "retained_output_selection",
 ) -> _RetainedSelectionAuthorityContext | None:
     if decide is None:
         return None
+    negative_settlement, refused_outcome, denied_outcome, verb_noun = _NEGATIVE_AUTHORITY_SETTLEMENT_BY_KIND[
+        transaction_kind
+    ]
     try:
         validated_permission_plan_descriptor = validate_permission_plan_evidence(
             permission_plan_digest_value=permission_plan_digest,
             permission_plan_descriptor=permission_plan_descriptor,
-            expected_route="retained_output_selection",
+            expected_route=AUTHORITY_ROUTE_BY_TRANSACTION_KIND[transaction_kind],
             expected_effective_match_digest=effective_match_digest,
             expected_authority_surface_plan_digest=authority_surface_plan_digest,
         )
@@ -468,6 +500,7 @@ def _prepare_and_decide_retained_selection_authority(
         parent=parent,
         changed_paths=changed_paths,
         classification_basis=classification_basis,
+        transaction_kind=transaction_kind,
     )
     authority_operation_id = authority_operation_id or owner._new_operation_id()
     settlement_operation_id = f"{authority_operation_id}_settlement"
@@ -500,17 +533,20 @@ def _prepare_and_decide_retained_selection_authority(
         permission_plan_descriptor=validated_permission_plan_descriptor,
         authority_context=authority_context,
     )
-    if any(decision.outcome == "refused" for decision in decisions):
+    for negative_outcome, commit_outcome in (("refused", refused_outcome), ("denied", denied_outcome)):
+        if not any(decision.outcome == negative_outcome for decision in decisions):
+            continue
+        reason_code = f"{negative_outcome}_decision"
         begin_pending_authority_settlement(
             owner,
             _retained_output_authority_pending(
                 retained=retained,
                 parent=parent,
                 context=context,
-                outcome="refused",
-                settlement="not_selected",
-                commit_outcome="not_selected_refused",
-                reason_code="refused_decision",
+                outcome=cast("AuthorityOutcome", negative_outcome),
+                settlement=cast("AuthoritySettlement", negative_settlement),
+                commit_outcome=commit_outcome,
+                reason_code=reason_code,
             ).with_update(phase="discarded"),
         )
         record_retained_output_authority_final_settlement(
@@ -518,58 +554,31 @@ def _prepare_and_decide_retained_selection_authority(
             parent=parent,
             settlement_operation_id=context.settlement_operation_id,
             authority_operation_id=context.authority_operation_id,
-            selection_operation_id=context.prepared.selection_operation_id,
             cohort_id=context.prepared.cohort_id,
             candidate_digest=context.prepared.candidate_digest,
-            outcome="refused",
-            settlement="not_selected",
-            commit_outcome="not_selected_refused",
+            outcome=cast("AuthorityOutcome", negative_outcome),
+            settlement=negative_settlement,
+            commit_outcome=commit_outcome,
             decision_ids=tuple(decision.decision_id for decision in decisions),
-            reason_code="refused_decision",
+            reason_code=reason_code,
             permission_plan_digest=context.permission_plan_digest,
             permission_plan_descriptor=context.permission_plan_descriptor,
             authority_context=context.authority_context,
+            **_settling_operation_kwarg(context.prepared),
         )
         clear_pending_authority_transaction(owner, context.settlement_operation_id)
         raise InvalidRepositoryStateError(
-            "retained-output selection refused by authority: "
-            f"{_authority_decision_reason(decisions, outcome='refused')}"
-        )
-    if any(decision.outcome == "denied" for decision in decisions):
-        begin_pending_authority_settlement(
-            owner,
-            _retained_output_authority_pending(
-                retained=retained,
-                parent=parent,
-                context=context,
-                outcome="denied",
-                settlement="not_selected",
-                commit_outcome="not_selected_denied",
-                reason_code="denied_decision",
-            ).with_update(phase="discarded"),
-        )
-        record_retained_output_authority_final_settlement(
-            owner,
-            parent=parent,
-            settlement_operation_id=context.settlement_operation_id,
-            authority_operation_id=context.authority_operation_id,
-            selection_operation_id=context.prepared.selection_operation_id,
-            cohort_id=context.prepared.cohort_id,
-            candidate_digest=context.prepared.candidate_digest,
-            outcome="denied",
-            settlement="not_selected",
-            commit_outcome="not_selected_denied",
-            decision_ids=tuple(decision.decision_id for decision in decisions),
-            reason_code="denied_decision",
-            permission_plan_digest=context.permission_plan_digest,
-            permission_plan_descriptor=context.permission_plan_descriptor,
-            authority_context=context.authority_context,
-        )
-        clear_pending_authority_transaction(owner, context.settlement_operation_id)
-        raise InvalidRepositoryStateError(
-            f"retained-output selection denied by authority: {_authority_decision_reason(decisions, outcome='denied')}"
+            f"retained-output {verb_noun} {negative_outcome} by authority: "
+            f"{_authority_decision_reason(decisions, outcome=cast('AuthorityOutcome', negative_outcome))}"
         )
     return context
+
+
+def _settling_operation_kwarg(prepared: PreparedRetainedOutputSelection) -> dict[str, str]:
+    """Spell the settling operation id per transaction kind (T1 D7 evidence naming)."""
+    if prepared.transaction_kind == "retained_output_application":
+        return {"application_operation_id": prepared.selection_operation_id}
+    return {"selection_operation_id": prepared.selection_operation_id}
 
 
 def _retained_selection_authority_file_changes(
@@ -799,11 +808,11 @@ def _retained_output_authority_pending(
         commit_outcome=commit_outcome,  # type: ignore[arg-type]
         decision_ids=tuple(decision.decision_id for decision in context.decisions),
         reason_code=reason_code,
-        transaction_kind="retained_output_selection",
-        selection_operation_id=context.prepared.selection_operation_id,
+        transaction_kind=context.prepared.transaction_kind,
         authority_context=None if context.authority_context is None else dict(context.authority_context),
         permission_plan_digest=context.permission_plan_digest,
         permission_plan_descriptor=dict(context.permission_plan_descriptor),
+        **_settling_operation_kwarg(context.prepared),  # type: ignore[arg-type]
     )
 
 
@@ -813,7 +822,6 @@ def record_retained_output_authority_final_settlement(
     parent: ScopeInfo,
     settlement_operation_id: str,
     authority_operation_id: str,
-    selection_operation_id: str,
     cohort_id: str,
     candidate_digest: str,
     outcome: AuthorityOutcome,
@@ -821,10 +829,13 @@ def record_retained_output_authority_final_settlement(
     commit_outcome: str,
     decision_ids: Sequence[str],
     reason_code: str,
+    selection_operation_id: str | None = None,
+    application_operation_id: str | None = None,
     permission_plan_digest: str | None = None,
     permission_plan_descriptor: Mapping[str, object] | None = None,
     authority_context: Mapping[str, object] | None = None,
 ) -> None:
+    verb = "application" if application_operation_id is not None else "selection"
     record_authority_settlement_effect(
         owner,
         scope=parent,
@@ -833,8 +844,8 @@ def record_retained_output_authority_final_settlement(
         cohort_id=cohort_id,
         candidate_digest=candidate_digest,
         monitor_basis="carrier_check_at_commit",
-        operation_label="skeleton retained-output selection authority settlement",
-        operation_kind="skeleton.authority.retained-output-selection.settlement",
+        operation_label=f"skeleton retained-output {verb} authority settlement",
+        operation_kind=f"skeleton.authority.retained-output-{verb}.settlement",
         effect_type="RetainedOutputAuthoritySettlement",
         effect_metadata=retained_output_authority_settlement_metadata(
             operation_id=authority_operation_id,
@@ -846,6 +857,7 @@ def record_retained_output_authority_final_settlement(
             decision_ids=decision_ids,
             reason_code=reason_code,
             selection_operation_id=selection_operation_id,
+            application_operation_id=application_operation_id,
             permission_plan_digest=permission_plan_digest,
             permission_plan_descriptor=permission_plan_descriptor,
             authority_context=authority_context,

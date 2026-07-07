@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd-sandboxes"
-version = "0.2.0"
+version = "0.3.0"
 description = "Optional remote sandbox integrations for Shepherd"
 readme = "README.md"
 requires-python = ">=3.10"

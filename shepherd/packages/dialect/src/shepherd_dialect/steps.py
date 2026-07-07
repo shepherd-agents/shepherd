@@ -30,6 +30,7 @@ from shepherd_dialect._step_schema import (
     SINGLE_OUTPUT_KEY,
     SchemaGenerationError,
     merge_schema_defs,
+    refuse_handle_return_slot,
     type_to_json_schema,
 )
 
@@ -177,7 +178,12 @@ def extract_step_metadata(
 
 
 def return_type_to_output_schema(return_type: type | None) -> dict[str, Any]:
-    """Convert a return type annotation to JSON schema for structured output."""
+    """Convert a return type annotation to JSON schema for structured output.
+
+    Handle-typed return slots refuse fail-closed (handle slots are
+    custody-resolved, never provider-authored — the P-030 fabrication fence).
+    """
+    refuse_handle_return_slot(return_type)
     if return_type is None:
         inner_schema: dict[str, Any] = {"type": "string"}
         all_defs: dict[str, Any] = {}

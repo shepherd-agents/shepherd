@@ -27,7 +27,6 @@ from shepherd_dialect.workspace_control import (
     ShepherdTaskLedgerDriver,
     ShepherdWorkspace,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 
 
 def _make_workspace(
@@ -51,8 +50,7 @@ def _make_workspace(
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     trace_path = root / ".vcscore" / "shepherd" / "trace.sqlite" if explicit_trace_path else None
     return ShepherdWorkspace(mg, trace_store_path=trace_path, workspace_path=root)
 
@@ -256,11 +254,11 @@ def fix_bug(repo, issue: str):
             placement="advisory",
         )
         assert record.status == "retained"
-        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_SEAL_AND_SELECT", "VCS_CORE_NESTED_OPERATIONS"):
+        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_NESTED_OPERATIONS"):
             monkeypatch.delenv(name, raising=False)
 
         assert [ref.descriptor.output_name for ref in workspace.runs.outputs(run_ref=record.run_ref)]
-        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_SEAL_AND_SELECT", "VCS_CORE_NESTED_OPERATIONS"):
+        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_NESTED_OPERATIONS"):
             assert os.environ.get(name) is None
     finally:
         workspace.close()

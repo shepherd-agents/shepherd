@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 import pytest
 from shepherd_core.types import ProviderBinding
 from shepherd_runtime.nucleus import (
-    WorkspaceAlreadyConfigured,
     current_workspace,
     reset_workspace_for_tests,
     workspace,
@@ -57,11 +56,20 @@ def test_same_config_context_resets_to_previous_workspace(tmp_path: Path) -> Non
     assert current_workspace() is outer
 
 
-def test_conflicting_workspace_raises(tmp_path: Path) -> None:
+def test_conflicting_workspace_replaces_when_idle(tmp_path: Path) -> None:
+    # W3.4 (0.2.1 behavior change): idle reconfiguration replaces the workspace —
+    # the notebook cell-re-run idiom constructs a fresh model object and must not
+    # trap the session until kernel restart. Reconfiguring while a task run is
+    # active still raises WorkspaceAlreadyConfigured (covered in
+    # test_w0_correctness.py::TestWorkspaceReentry).
     workspace(model=MockProvider(name="first"), root=tmp_path)
 
-    with pytest.raises(WorkspaceAlreadyConfigured):
-        workspace(model=MockProvider(name="second"), root=tmp_path)
+    second = MockProvider(name="second")
+    ws = workspace(model=second, root=tmp_path)
+
+    assert ws.model is second
+    assert current_workspace() is not None
+    assert current_workspace().model is second
 
 
 def test_retired_vcscore_kwarg_is_rejected_without_ambient_state(tmp_path: Path) -> None:

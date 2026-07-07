@@ -113,7 +113,6 @@ def test_internal_nucleus_seal_mode_publishes_resolver_compatible_output(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("VCS_CORE_SEAL_AND_SELECT", "1")
     from shepherd2.vnext import skeleton
 
     def fail_bridge_session(*args: Any, **kwargs: Any) -> None:
@@ -170,7 +169,6 @@ def test_internal_nucleus_async_seal_mode_publishes_resolver_compatible_output(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("VCS_CORE_SEAL_AND_SELECT", "1")
     ws = workspace(model=object(), root=str(tmp_path))
     ws._mg.exec("filesystem", "write", scope=ws._mg.ground, path="base.txt", content=b"base\n")
 
@@ -199,7 +197,6 @@ def test_workspace_control_resolves_nucleus_produced_retained_output(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("VCS_CORE_SEAL_AND_SELECT", "1")
     ws = workspace(model=object(), root=str(tmp_path))
     ws._mg.exec("filesystem", "write", scope=ws._mg.ground, path="base.txt", content=b"base\n")
 
@@ -227,7 +224,6 @@ def test_internal_nucleus_seal_mode_failure_publishes_no_output(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("VCS_CORE_SEAL_AND_SELECT", "1")
     ws = workspace(model=object(), root=str(tmp_path))
     ws._mg.exec("filesystem", "write", scope=ws._mg.ground, path="base.txt", content=b"base\n")
 
@@ -261,7 +257,6 @@ def test_internal_nucleus_seal_mode_publication_failure_is_diagnosable(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("VCS_CORE_SEAL_AND_SELECT", "1")
     ws = workspace(model=object(), root=str(tmp_path))
     ws._mg.exec("filesystem", "write", scope=ws._mg.ground, path="base.txt", content=b"base\n")
 
@@ -319,7 +314,6 @@ def test_internal_nucleus_retained_publication_failure_publishes_hydratable_outp
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("VCS_CORE_SEAL_AND_SELECT", "1")
     ws = workspace(model=object(), root=str(tmp_path))
     ws._mg.exec("filesystem", "write", scope=ws._mg.ground, path="base.txt", content=b"base\n")
 

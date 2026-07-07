@@ -8,7 +8,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
 from shepherd_dialect.workspace_control.errors import WorkspaceControlError
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 from shepherd_dialect.workspace_control.flow_context import (
     FLOW_SCHEMA,
     FLOW_TRACE_SCHEMA,
@@ -46,8 +45,7 @@ class FlowControlClient:
             "metadata": dict(metadata or {}),
             "created_at": utc_now(),
         }
-        with _seal_and_select_enabled():
-            publish_flow_record(self._workspace.mg, record)
+        publish_flow_record(self._workspace.mg, record)
         return Flow(self._workspace, flow_id=flow_id, name=name, metadata=dict(metadata or {}))
 
     def get(self, flow_id: str) -> Flow | None:

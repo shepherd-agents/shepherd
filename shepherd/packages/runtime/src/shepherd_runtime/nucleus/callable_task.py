@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import dis
 import inspect
 import textwrap
 import time
@@ -24,6 +25,8 @@ from .delivery import (
 from .profiles import EffectSurfaceProfile
 from .task_hooks import enter_task_execution_hooks
 from .types import (
+    AmbientWorldAccessRefused,
+    AmbiguousTaskBody,
     DeliveryExhausted,
     DeliveryFailed,
     DeliveryStopped,
@@ -98,6 +101,11 @@ class TaskMetadata:
     structural_may: StructuralMay | None = None
     docstring: str | None = None
     bodyless: bool = False
+    # W3 tri-state: True when the body cannot be classified (source unavailable —
+    # exec/REPL/notebook definition) AND the compiled body is empty-shaped, so a
+    # delegating bodyless task would otherwise run to a silent None. Raises loud
+    # at call time instead.
+    body_ambiguous: bool = False
 
 
 class CallableTask(Generic[T]):
@@ -149,6 +157,10 @@ class CallableTask(Generic[T]):
     async def _run_async(self, *args: Any, **kwargs: Any) -> Run[T]:
         from shepherd_runtime.trace.runtime import pop_trace_recorder, push_trace_recorder
 
+        if self.metadata.bodyless or self.metadata.body_ambiguous:
+            _refuse_ambient_handle_delivery(self.metadata)
+        if self.metadata.body_ambiguous:
+            raise AmbiguousTaskBody(_ambiguous_body_message(self.metadata))
         context = make_task_run_context(task_name=self.metadata.qualname, is_async=True)
         task_token = push_task_run(context)
         trace_token = push_trace_recorder(context.trace_recorder)
@@ -175,6 +187,10 @@ class CallableTask(Generic[T]):
     def _run_sync(self, *args: Any, **kwargs: Any) -> Run[T]:
         from shepherd_runtime.trace.runtime import pop_trace_recorder, push_trace_recorder
 
+        if self.metadata.bodyless or self.metadata.body_ambiguous:
+            _refuse_ambient_handle_delivery(self.metadata)
+        if self.metadata.body_ambiguous:
+            raise AmbiguousTaskBody(_ambiguous_body_message(self.metadata))
         context = make_task_run_context(task_name=self.metadata.qualname, is_async=False)
         task_token = push_task_run(context)
         trace_token = push_trace_recorder(context.trace_recorder)
@@ -293,7 +309,8 @@ def extract_callable_task_metadata(
         )
 
     docstring = inspect.getdoc(fn)
-    bodyless = _is_bodyless(fn)
+    body_classification = _classify_body(fn)
+    bodyless = body_classification == "bodyless"
     if bodyless and not (guidance or docstring):
         task_label = getattr(fn, "__qualname__", repr(fn))
         raise TypeError(
@@ -317,6 +334,7 @@ def extract_callable_task_metadata(
         structural_may=structural_may,
         docstring=docstring,
         bodyless=bodyless,
+        body_ambiguous=body_classification == "ambiguous",
     )
 
 
@@ -349,41 +367,100 @@ def _capture_source(fn: Callable[..., Any]) -> str | None:
         return None
 
 
-def _is_bodyless(fn: Callable[..., Any]) -> bool:
-    """Return ``True`` when the function body is only a docstring and/or ``...``/``pass``.
+def classify_task_body(fn: Callable[..., Any]) -> str:
+    """Public tri-state body classifier: ``"bodyless"`` / ``"bodied"`` / ``"ambiguous"``.
+
+    Exposed for the workspace-control registration bridge, which routes a
+    ``__main__``-defined task by body kind (bodyless is self-contained and safe to
+    capture at definition scope; a bodied script body is refused). Wraps the same
+    classification the nucleus decorator uses.
+    """
+    return _classify_body(fn)
+
+
+def _classify_body(fn: Callable[..., Any]) -> str:
+    """Classify the task body: ``"bodyless"`` / ``"bodied"`` / ``"ambiguous"`` (W3 tri-state).
 
     A bodyless task delegates entirely to the model: the decorator synthesizes a
     single ``deliver(...)`` from the return annotation, the docstring/guidance, and
-    the bound arguments. Detection is conservative — if the source is unavailable
-    or unparseable, the task is treated as having a real body.
+    the bound arguments. When source parses, the AST decides — a bodied REPL task
+    with readable source is never misclassified. When source is unavailable
+    (exec/REPL/notebook), docstring-only and ``return None`` bodies compile
+    byte-identically, so discrimination is fundamentally ambiguous: an
+    empty-shaped compiled body classifies ``"ambiguous"`` (raises loud at call
+    time instead of running to a silent ``None``), while a non-trivial compiled
+    body classifies ``"bodied"`` and runs.
     """
     source = _capture_source(fn)
-    if source is None:
+    if source is not None:
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            return "ambiguous" if _bytecode_trivial(fn) else "bodied"
+        func = next(
+            (node for node in tree.body if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)),
+            None,
+        )
+        if func is None:
+            return "ambiguous" if _bytecode_trivial(fn) else "bodied"
+        body = func.body
+        if (
+            body
+            and isinstance(body[0], ast.Expr)
+            and isinstance(body[0].value, ast.Constant)
+            and isinstance(body[0].value.value, str)
+        ):
+            body = body[1:]
+        if not body:
+            return "bodyless"
+        trivial = all(
+            isinstance(stmt, ast.Pass)
+            or (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant) and stmt.value.value is Ellipsis)
+            for stmt in body
+        )
+        return "bodyless" if trivial else "bodied"
+    return "ambiguous" if _bytecode_trivial(fn) else "bodied"
+
+
+# Opcodes an empty-shaped body may contain: prologue/bookkeeping plus loading and
+# returning a constant (the docstring or None). Any other instruction means real
+# work — classify bodied and run it. Errs toward "bodied" (today's behavior) for
+# exotic trivial variants, never toward refusing a real body.
+_TRIVIAL_BODY_OPNAMES = frozenset(
+    {
+        "RESUME",
+        "NOP",
+        "CACHE",
+        "LOAD_CONST",
+        "RETURN_CONST",
+        "RETURN_VALUE",
+        "RETURN_GENERATOR",
+        "POP_TOP",
+    }
+)
+
+
+def _bytecode_trivial(fn: Callable[..., Any]) -> bool:
+    """Whether the compiled body is empty-shaped (docstring/``...``/``return None`` only)."""
+    code = getattr(fn, "__code__", None)
+    if code is None:
         return False
-    try:
-        tree = ast.parse(source)
-    except SyntaxError:
-        return False
-    func = next(
-        (node for node in tree.body if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)),
-        None,
-    )
-    if func is None:
-        return False
-    body = func.body
-    if (
-        body
-        and isinstance(body[0], ast.Expr)
-        and isinstance(body[0].value, ast.Constant)
-        and isinstance(body[0].value.value, str)
-    ):
-        body = body[1:]
-    if not body:
-        return True
-    return all(
-        isinstance(stmt, ast.Pass)
-        or (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant) and stmt.value.value is Ellipsis)
-        for stmt in body
+    for instruction in dis.get_instructions(code):
+        if instruction.opname not in _TRIVIAL_BODY_OPNAMES:
+            return False
+        if instruction.opname in {"LOAD_CONST", "RETURN_CONST"}:
+            value = instruction.argval
+            if value is not None and value is not Ellipsis and not isinstance(value, str):
+                return False
+    return True
+
+
+def _ambiguous_body_message(metadata: TaskMetadata) -> str:
+    return (
+        f"cannot introspect the body of task {metadata.qualname!r}: source is "
+        "unavailable (exec/REPL/notebook definition) and the compiled body is "
+        "empty-shaped, so a delegating bodyless task would silently return None. "
+        "Move the task into an importable .py file."
     )
 
 
@@ -397,6 +474,35 @@ def _bodyless_evidence(metadata: TaskMetadata, args: tuple[Any, ...], kwargs: di
     bound = metadata.signature.bind(*args, **kwargs)
     bound.apply_defaults()
     return tuple(bound.arguments.values())
+
+
+def _refuse_ambient_handle_delivery(metadata: TaskMetadata) -> None:
+    """The signature-directed placement refusal (dispatch side of the P-030 fence).
+
+    An ambient model call has no enforcing monitor for a substrate grant: the
+    grant would be silently erased into prompt evidence, and the model's answer
+    would return as a typed result claiming world work it cannot have done.
+    Refuse before any handler/provider dispatch, keyed on the annotations —
+    never the passed values. Covers every ambient spelling by construction:
+    ``task(...)``, ``task.run(...)``, and ``task.detailed(...)`` all funnel
+    through the two ``_run_*`` bodies that call this guard.
+    """
+    from shepherd_core.schema import find_handle_annotation
+
+    declared: list[str] = []
+    for parameter in metadata.parameters:
+        noun = find_handle_annotation(parameter.annotation)
+        if noun is not None:
+            declared.append(f"parameter {parameter.name!r} declares {getattr(noun, '__name__', noun)!r}")
+    return_noun = find_handle_annotation(metadata.return_base_annotation)
+    if return_noun is not None:
+        declared.append(f"return slot declares {getattr(return_noun, '__name__', return_noun)!r}")
+    if declared:
+        raise AmbientWorldAccessRefused(
+            f"task {metadata.qualname!r} declares world access in its signature "
+            f"({'; '.join(declared)}); a bodyless ambient call cannot honor it. "
+            "Run it through retained execution instead: workspace.run(...)"
+        )
 
 
 def _finished_run(

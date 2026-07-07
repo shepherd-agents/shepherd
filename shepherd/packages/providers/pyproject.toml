@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd-providers"
-version = "0.2.0"
+version = "0.3.0"
 description = "Provider implementations for shepherd-core (Claude, OpenAI)"
 license = { text = "MIT" }
 readme = "README.md"
@@ -15,7 +15,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-claude = ["claude-agent-sdk>=0.1.0"]
+# Tested range (2132 Bug-2 mitigation): floor = the version the parse/regression
+# suite runs against (uv.lock: 0.1.18); cap before the next minor — the SDK is
+# pre-1.0 and its stream/message shapes are load-bearing for the confined lane.
+claude = ["claude-agent-sdk>=0.1.18,<0.2"]
 openai = ["openai>=1.66"]
 openai-mcp = ["openai>=1.66", "mcp>=1.0"]
 litellm = ["litellm>=1.40"]

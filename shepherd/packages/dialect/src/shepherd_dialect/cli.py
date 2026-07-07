@@ -272,6 +272,27 @@ def run_select(run_ref: str, trace_store_path: str | None, output_name: str, bin
     )
 
 
+@run.command("apply")
+@click.argument("run_ref")
+@click.option("--trace-store", "trace_store_path", type=click.Path(exists=True, dir_okay=False))
+@click.option("--output-name", default="workspace", show_default=True, help="Run output name to settle.")
+@click.option("--binding", help="Only include outputs for this binding.")
+def run_apply(run_ref: str, trace_store_path: str | None, output_name: str, binding: str | None) -> None:
+    """Apply one retained run output onto its (possibly advanced) parent world.
+
+    Whole-output three-way settlement: succeeds only when the run's delta and the
+    parent's changes since the fork basis are path-disjoint; fails closed on any
+    overlap (use release/discard, or re-run against the current parent).
+    """
+    _settle_run_output(
+        "apply",
+        run_ref=run_ref,
+        trace_store_path=trace_store_path,
+        output_name=output_name,
+        binding=binding,
+    )
+
+
 @run.command("release")
 @click.argument("run_ref")
 @click.option("--trace-store", "trace_store_path", type=click.Path(exists=True, dir_okay=False))
@@ -539,10 +560,6 @@ def _emit_run_show(value: Any) -> None:
     click.echo(f"  provider:     {record.get('provider')}")
     click.echo(f"  may:          {record.get('may_profile')}")
     click.echo(f"  enforcement:  {record.get('enforcement')} ({execution.get('enforcement_basis')})")
-    flags = execution.get("effective_feature_flags")
-    if flags:
-        rendered = ", ".join(f"{name}={'on' if state else 'off'}" for name, state in sorted(flags.items()))
-        click.echo(f"  flags:        {rendered}")
     click.echo(f"  terminal:     {terminal.get('body_status')} / {terminal.get('world_disposition')}")
     click.echo(f"  publication:  {terminal.get('output_publication_status')}")
     if outputs:

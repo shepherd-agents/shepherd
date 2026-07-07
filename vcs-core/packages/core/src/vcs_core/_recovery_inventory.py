@@ -43,9 +43,7 @@ if TYPE_CHECKING:
     from vcs_core.vcscore import VcsCore
 
 
-RECLAIMABLE_SCOPE_REF_MISMATCH_KINDS: frozenset[ScopeRegistryMismatchKind] = frozenset(
-    {"ref_exists_registry_non_live", "retained_requires_seal_and_select"}
-)
+RECLAIMABLE_SCOPE_REF_MISMATCH_KINDS: frozenset[ScopeRegistryMismatchKind] = frozenset({"ref_exists_registry_non_live"})
 
 
 @dataclass(frozen=True)

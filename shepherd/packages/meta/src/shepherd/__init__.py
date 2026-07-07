@@ -32,6 +32,8 @@ from shepherd_runtime.effects import (
     handle,
 )
 from shepherd_runtime.nucleus import (
+    AmbientWorldAccessRefused,
+    AmbiguousTaskBody,
     Artifact,
     DeliveryException,
     DeliveryFailed,
@@ -72,7 +74,7 @@ if TYPE_CHECKING:
         WorkspaceTask,
     )
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 # The handle surface, resolved lazily (PEP 562). Every name here lives in
 # ``shepherd_dialect.workspace_control``; importing that module pulls ``vcs_core``
@@ -156,6 +158,8 @@ __all__ = [  # noqa: RUF022
     "Run",
     "RunRef",
     "RunInProgress",
+    "AmbientWorldAccessRefused",
+    "AmbiguousTaskBody",
     "DeliveryException",
     "DeliveryFailed",
     "emit_artifact",

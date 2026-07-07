@@ -1066,11 +1066,11 @@ class RunExecutionEvidence:
     resolved_placement: RunResolvedPlacement = "advisory"
     enforcement_basis: RunEnforcementBasis = "legacy_advisory"
     execution_descriptor: JsonObject | None = None
-    # Additive (P1.2 / finding #5): the resolved state of the flags that alter
-    # durable run behavior (e.g. ``seal_and_select``), so two runs under
-    # different flag state are distinguishable in the record. ``None`` on
-    # records written before this field existed — read as "not recorded", never
-    # as "all-false".
+    # Retired provenance (T1 D3 disposition (a); persisted-evidence-serde-policy §5, two-step
+    # retirement). `VCS_CORE_SEAL_AND_SELECT` is gone and seal-and-select is unconditional, so new
+    # code never populates this; it is kept parse-optional and render-when-present so 0.2.0-era run
+    # records (which carry `{"seal_and_select": true}`) still round-trip rather than failing the
+    # now-strict serde. Remove only via an explicit re-ratified retirement.
     effective_feature_flags: JsonObject | None = None
 
     def __post_init__(self) -> None:
@@ -1087,20 +1087,36 @@ class RunExecutionEvidence:
         _validate_run_execution_evidence(self)
 
     def to_json(self) -> JsonObject:
-        return {
+        payload: JsonObject = {
             "requested_placement": self.requested_placement,
             "resolved_placement": self.resolved_placement,
             "enforcement_basis": self.enforcement_basis,
             "execution_descriptor": None if self.execution_descriptor is None else dict(self.execution_descriptor),
-            "effective_feature_flags": (
-                None if self.effective_feature_flags is None else dict(self.effective_feature_flags)
-            ),
         }
+        # Conditional emission (the D5 `applied_head` pattern): only rendered when a parsed legacy
+        # record carried it, so new records stay clean and old ones round-trip.
+        if self.effective_feature_flags is not None:
+            payload["effective_feature_flags"] = dict(self.effective_feature_flags)
+        return payload
 
     @classmethod
     def from_json(cls, value: Mapping[str, object] | None) -> RunExecutionEvidence:
         if value is None:
             return cls()
+        # Strict serde (persisted-evidence-serde-policy §2.1): unknown fields are rejected, so this
+        # record no longer silently drops data. `effective_feature_flags` is the one legacy-optional
+        # field in the allowed set.
+        _reject_unknown_fields(
+            value,
+            {
+                "requested_placement",
+                "resolved_placement",
+                "enforcement_basis",
+                "execution_descriptor",
+                "effective_feature_flags",
+            },
+            "run.execution_evidence",
+        )
         return cls(
             requested_placement=_required_member(
                 value,

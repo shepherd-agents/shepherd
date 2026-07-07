@@ -10,6 +10,7 @@ import pytest
 from shepherd_runtime.nucleus import GitRepo, GitRepoBasis
 from vcs_core import FilesystemSubstrate, MarkerSubstrate, Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
+from vcs_core.testing import read_world_workspace_file
 
 from shepherd_dialect.run_driver import ShepherdRunDriver
 from shepherd_dialect.workspace_control import (
@@ -20,7 +21,6 @@ from shepherd_dialect.workspace_control import (
     ShepherdWorkspace,
     WorkspaceControlError,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 from shepherd_dialect.workspace_control.gitrepo_handles import same_git_binding_state
 
 if TYPE_CHECKING:
@@ -47,8 +47,7 @@ def _make_workspace(root: Path) -> ShepherdWorkspace:
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     return ShepherdWorkspace(
         mg,
         trace_store_path=root / ".vcscore" / "shepherd" / "trace.sqlite",
@@ -72,9 +71,29 @@ def propose(repo, label: str, score: int, accepted: bool = False):
     return "sample_tasks:propose"
 
 
+def _write_path_candidate_task_module(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> str:
+    """A candidate task that writes a per-label path, so parallel candidates are path-disjoint.
+
+    The fixed-``candidate.txt`` ``propose`` task above produces candidates that all touch the same
+    path (fine for select/release/discard); ``apply`` needs genuinely disjoint deltas to exercise
+    the three-way merge rather than the D2 refusal.
+    """
+    module_path = tmp_path / "path_tasks.py"
+    module_path.write_text(
+        """
+def propose_path(repo, label: str, score: int):
+    repo.write(f"{label}.txt", f"{score}:{label}\\n".encode())
+    return {"label": label, "score": score}
+""",
+        encoding="utf-8",
+    )
+    sys.modules.pop("path_tasks", None)
+    monkeypatch.syspath_prepend(str(tmp_path))
+    return "path_tasks:propose_path"
+
+
 def _seed_selected_workspace(workspace: ShepherdWorkspace) -> GitRepo:
-    with _seal_and_select_enabled():
-        workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="base.txt", content=b"base\n")
+    workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="base.txt", content=b"base\n")
     return _assert_selected_git_repo(workspace)
 
 
@@ -116,6 +135,11 @@ def _candidate_text(output: RunOutput) -> str:
     value = output.changeset().read_file("candidate.txt")
     assert value is not None
     return value[0].decode("utf-8")
+
+
+def _read_world_file(workspace: ShepherdWorkspace, world_oid: str, path: str) -> bytes | None:
+    """Read a workspace file from a published world (settlement does not materialize the dir)."""
+    return read_world_workspace_file(workspace.mg._world_storage(), world_oid, path)
 
 
 @pytest.mark.slow
@@ -220,5 +244,71 @@ def test_retry_until_acceptable_is_plain_user_code_over_explicit_settlement(
             placement="advisory",
         )
         assert _candidate_text(followup.output()) == "100:after-select:accepted\n"
+    finally:
+        workspace.close()
+
+
+@pytest.mark.slow
+def test_best_of_n_applies_a_disjoint_loser_onto_the_selected_winner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Best-of-N in the settlement spelling, but keeping a runner-up by *applying* it.
+
+    Where the select-based best-of-N discards the losers, this user program selects the winner
+    and then *applies* a path-disjoint runner-up onto the (now advanced) parent — the
+    three-way settlement that ``select`` (fast-forward-only) cannot do. Whole-output, consume-once,
+    reviewed by changeset. This is the apply-shaped companion to
+    ``test_best_of_n_is_plain_user_code_over_run_outputs``.
+    """
+    source = _write_path_candidate_task_module(tmp_path, monkeypatch)
+    workspace = _make_workspace(tmp_path / "ws")
+    try:
+        workspace.tasks.register(source, may_default="ReadWrite")
+        repo = _seed_selected_workspace(workspace)
+        task = workspace.tasks.task("path_tasks.propose_path")
+
+        # Parallel candidates forked from one basis, each writing a disjoint path.
+        runs = [
+            task.run(repo=_copy_git_repo(repo), args={"label": label, "score": score}, placement="advisory")
+            for label, score in (("alpha", 10), ("winner", 99), ("keep", 42))
+        ]
+        outputs = [run.output() for run in runs]
+
+        # Review by changeset: each candidate's whole-delta is exactly its own path.
+        for output, label in zip(outputs, ("alpha", "winner", "keep"), strict=True):
+            assert tuple(output.changeset().stat().changed_paths) == (f"{label}.txt",)
+
+        by_label = dict(zip(("alpha", "winner", "keep"), outputs, strict=True))
+        winner, keep, drop = by_label["winner"], by_label["keep"], by_label["alpha"]
+
+        # Select the winner: the parent advances past every candidate's fork basis.
+        selection = workspace.select(winner)
+        assert selection.settlement.action == "selected"
+        advanced = _assert_selected_git_repo(workspace)
+
+        # Apply a disjoint runner-up onto the advanced parent. `select` would fail closed on the
+        # drifted basis; `apply` three-way-merges because keep.txt and winner.txt are disjoint.
+        application = workspace.apply(keep.refresh())
+        assert application.settlement.action == "applied"
+        # Non-degenerate: the merged head is a fresh revision, not the candidate head.
+        assert application.settlement.applied_head != application.settlement.candidate_head
+        assert keep.refresh().state == "applied"
+
+        # The workspace now carries BOTH the selected winner and the applied runner-up.
+        merged = _assert_selected_git_repo(workspace)
+        assert merged.basis.world_oid != advanced.basis.world_oid
+        assert _read_world_file(workspace, merged.basis.world_oid, "winner.txt") == b"99:winner\n"
+        assert _read_world_file(workspace, merged.basis.world_oid, "keep.txt") == b"42:keep\n"
+
+        # Consume-once: an applied output cannot be re-settled.
+        with pytest.raises(WorkspaceControlError, match=r"unconsumed|already settled"):
+            workspace.apply(keep.refresh())
+        with pytest.raises(WorkspaceControlError, match=r"unconsumed|already settled"):
+            workspace.select(keep.refresh())
+
+        # The still-unsettled loser remains settleable by the ordinary verbs.
+        assert workspace.runs.outputs(run_ref=drop.owner.run_id, state="unconsumed")[0].output_id == drop.output_id
+        assert workspace.discard(drop.refresh()).settlement.action == "discarded"
     finally:
         workspace.close()

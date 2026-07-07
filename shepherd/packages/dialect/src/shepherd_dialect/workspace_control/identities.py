@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+import inspect
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TypeAlias
@@ -11,6 +12,28 @@ from shepherd_runtime.identities import RunRef
 
 WORKSPACE_REF_SCHEMA = "shepherd.workspace_control.workspace_ref.v1"
 TASK_REF_SCHEMA = "shepherd.workspace_control.task_ref.v1"
+
+# A task defined in a run-as-script module (__main__) is registered under a synthetic
+# module derived from its qualname (its artifact is the definition, not the script).
+# This convention is the single source of truth for both registration and lookup, so
+# `ws.run(fn)` resolves to the exact id `ws.tasks.register(fn)` produced.
+GENERATED_MODULE_PREFIX = "shepherd_generated_"
+
+
+def task_id_for_callable(fn: Callable[..., object]) -> str:
+    """Derive the registered task id for a callable (plain or ``@sp.task``-decorated).
+
+    Mirrors registration's id derivation without capturing source, so the same id is
+    used to register and to look up. Refuses unstable callables (locals, lambdas).
+    """
+    plain = inspect.unwrap(fn)
+    module = getattr(plain, "__module__", "") or ""
+    qualname = getattr(plain, "__qualname__", getattr(plain, "__name__", "")) or ""
+    if not module or not qualname or "<locals>" in qualname:
+        raise TypeError(f"callable {fn!r} does not have a stable task identity")
+    if module == "__main__":
+        return f"{GENERATED_MODULE_PREFIX}{qualname.replace('.', '_')}.{qualname}"
+    return f"{module}.{qualname}"
 
 
 @dataclass(frozen=True)
@@ -70,20 +93,27 @@ class TaskRef:
         return cls(id=_id_from_payload(payload, schema=TASK_REF_SCHEMA, noun="TaskRef"))
 
 
-TaskRefInput: TypeAlias = str | TaskRef
+TaskRefInput: TypeAlias = "str | TaskRef | Callable[..., object]"
 RunRefInput: TypeAlias = str | RunRef
 RunSelectorInput: TypeAlias = str | RunRef
 WorkspaceRefInput: TypeAlias = str | WorkspaceRef
 
 
 def coerce_task_ref(value: TaskRefInput, *, field_name: str = "task_ref") -> str:
-    """Return the string identity for a task ref boundary value."""
+    """Return the string identity for a task ref boundary value.
+
+    Accepts a task-id string, a ``TaskRef``, or the task callable itself (plain or
+    ``@sp.task``-decorated) — the callable resolves to the id registration assigned it,
+    so ``ws.run(write_note, ...)`` reads as naturally as ``ws.run("write_note", ...)``.
+    """
     if isinstance(value, TaskRef):
         return value.id
     if isinstance(value, str):
         _validate_task_ref(value, field_name=field_name)
         return value
-    raise TypeError(f"{field_name} must be a TaskRef or non-empty string")
+    if callable(value):
+        return task_id_for_callable(value)
+    raise TypeError(f"{field_name} must be a TaskRef, task callable, or non-empty string")
 
 
 def coerce_run_ref(value: RunRefInput, *, field_name: str = "run_ref") -> str:

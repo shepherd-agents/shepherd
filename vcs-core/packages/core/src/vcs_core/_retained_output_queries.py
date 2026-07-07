@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from vcs_core._errors import InvalidRepositoryStateError
 from vcs_core._retained_output_selection import _validate_retained_selection_world
@@ -260,7 +260,26 @@ def _validate_settlement_matches_handoff(
     ):
         raise InvalidRepositoryStateError("retained output settlement disagrees with seal handoff")
     manager = owner._world_storage()
-    if settlement.action in {"selected", "applied"}:
+    if settlement.action == "applied":
+        from vcs_core._retained_output_application import _validate_retained_application_world
+
+        if settlement.applied_head is None:
+            raise InvalidRepositoryStateError("retained output applied settlement is missing applied_head")
+        try:
+            _validate_retained_application_world(
+                manager,
+                retained=retained,
+                operation_id=settlement.operation_id,
+                parent_world_before=settlement.parent_world_before,
+                parent_world_after=settlement.parent_world_after,
+                applied_head=settlement.applied_head,
+            )
+        except InvalidRepositoryStateError:
+            raise
+        except (KeyError, TypeError, ValueError) as exc:
+            raise InvalidRepositoryStateError("retained output applied settlement world is unreadable") from exc
+        return
+    if settlement.action == "selected":
         try:
             _validate_retained_selection_world(
                 manager,
@@ -277,7 +296,7 @@ def _validate_settlement_matches_handoff(
 
     if settlement.action not in {"released", "discarded"}:
         raise InvalidRepositoryStateError(f"unsupported retained output settlement action: {settlement.action!r}")
-    receipt_action = cast("ReceiptOnlyAction", settlement.action)
+    receipt_action: ReceiptOnlyAction = settlement.action
     expected_operation_id = _receipt_only_operation_id(
         handoff=handoff,
         settlement_ref=settlement.settlement_ref,

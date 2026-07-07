@@ -148,18 +148,30 @@ def workspace(*, model: object, root: str | Path | None = None) -> Workspace:
     config = _EffectiveConfig(root=normalized_root, model=model)
     existing = current_workspace()
     if existing is not None:
-        if not existing._config.matches(root=normalized_root, model=model):
-            raise WorkspaceAlreadyConfigured("workspace(...) is already configured differently")
-        ws = Workspace(
-            model=model,
-            root=normalized_root,
-            scope=existing._root_owner.scope,
-            config=config,
-            owner=existing._root_owner,
-            owns_scope=False,
-        )
-        ws._activate()
-        return ws
+        if existing._config.matches(root=normalized_root, model=model):
+            ws = Workspace(
+                model=model,
+                root=normalized_root,
+                scope=existing._root_owner.scope,
+                config=config,
+                owner=existing._root_owner,
+                owns_scope=False,
+            )
+            ws._activate()
+            return ws
+        from .delivery import active_task_run
+
+        if active_task_run() is not None:
+            raise WorkspaceAlreadyConfigured(
+                "workspace(...) is already configured differently and a task run is "
+                "active; finish the run before reconfiguring"
+            )
+        # Idle reconfiguration — the notebook/REPL cell-re-run idiom. Config
+        # equality compares the model by identity, so re-running a cell that
+        # constructs a fresh model object lands here even for a same-shape
+        # workspace; trapping the session until kernel restart is the wrong
+        # behavior when nothing is running. Tear down and replace instead.
+        _teardown_current_workspace()
 
     scope = Scope(root=True)
     scope.register_provider("default", model, default=True)  # type: ignore[arg-type]
@@ -177,8 +189,8 @@ def workspace(*, model: object, root: str | Path | None = None) -> Workspace:
     return ws
 
 
-def reset_workspace_for_tests() -> None:
-    """Clear the active nucleus workspace in tests."""
+def _teardown_current_workspace() -> None:
+    """Close and uninstall the active nucleus workspace, if any."""
     global _workspace_generation
 
     _workspace_generation += 1
@@ -190,6 +202,11 @@ def reset_workspace_for_tests() -> None:
             owner._scope_active = False
             owner._closed = True
     _current_workspace.set(None)
+
+
+def reset_workspace_for_tests() -> None:
+    """Clear the active nucleus workspace in tests."""
+    _teardown_current_workspace()
 
 
 def _normalize_root(root: str | Path | None) -> Path | None:

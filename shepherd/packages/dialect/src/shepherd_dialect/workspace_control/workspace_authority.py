@@ -164,12 +164,21 @@ def workspace_retained_output_authority_policy_for_grant(
     )
 
 
-def workspace_retained_output_authority_surface_for_grant(grant: GitRepoGrantDescriptor) -> GitRepoAuthoritySurface:
-    """Lower an effective GitRepo grant to the retained-output selection Match surface."""
+def workspace_retained_output_authority_surface_for_grant(
+    grant: GitRepoGrantDescriptor,
+    *,
+    route: str = "retained_output_selection",
+) -> GitRepoAuthoritySurface:
+    """Lower an effective GitRepo grant to a retained-output settlement Match surface.
+
+    The grant is verb-independent; ``route`` picks the settlement lane the lowered clauses
+    authorize (``retained_output_selection`` for select, ``retained_output_application`` for
+    the T1 D7 apply verb).
+    """
     return gitrepo_authority_surface_for_grant(
         grant,
         label="workspace-control.retained-output.effective",
-        route="retained_output_selection",
+        route=route,
     )
 
 

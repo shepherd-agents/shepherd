@@ -21,7 +21,6 @@ from shepherd_dialect.workspace_control import (
     ShepherdTaskLedgerDriver,
     ShepherdWorkspace,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 
 pytestmark = pytest.mark.workspace_scenario
 
@@ -43,8 +42,7 @@ def _make_workspace(root: Path) -> ShepherdWorkspace:
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     return ShepherdWorkspace(
         mg,
         trace_store_path=root / ".vcscore" / "shepherd" / "trace.sqlite",
@@ -67,8 +65,7 @@ def _write_module(
 
 
 def _seed_selected_workspace(workspace: ShepherdWorkspace) -> Any:
-    with _seal_and_select_enabled():
-        workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="base.txt", content=b"base\n")
+    workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="base.txt", content=b"base\n")
     return workspace.git_repo()
 
 
@@ -411,14 +408,13 @@ def fix_bug(repo):
     workspace = _make_workspace(tmp_path / "ws")
     try:
         workspace.tasks.register(source, may_default="ReadWrite")
-        with _seal_and_select_enabled():
-            workspace.mg.exec(
-                "filesystem",
-                "write",
-                scope=workspace.mg.ground,
-                path="shepherd_dialect/workspace_control/_confined_task_runner.py",
-                content=b"raise SystemExit(42)\n",
-            )
+        workspace.mg.exec(
+            "filesystem",
+            "write",
+            scope=workspace.mg.ground,
+            path="shepherd_dialect/workspace_control/_confined_task_runner.py",
+            content=b"raise SystemExit(42)\n",
+        )
         repo = workspace.git_repo()
 
         run = workspace.run("ws3_shadow_tasks.fix_bug", repo=repo, placement="jail")

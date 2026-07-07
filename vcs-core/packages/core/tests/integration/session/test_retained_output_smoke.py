@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 from vcs_core import InvalidRepositoryStateError, Store, VcsCore, build_builtin_substrate_context
-from vcs_core._projection_store import SEAL_AND_SELECT_ENV
 from vcs_core._seal_handoff import read_seal_handoff
 from vcs_core._substrate_tree_read import read_substrate_workspace_file
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
@@ -74,7 +73,6 @@ def test_seal_read_and_select_retained_output_round_trip(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     mg = _make_mg(workspace)
     try:
         parent, child = _produce_child_workspace_output(mg)

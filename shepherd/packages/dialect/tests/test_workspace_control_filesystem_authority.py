@@ -28,7 +28,6 @@ from shepherd_dialect.workspace_control.authority import (
     GitRepoGrantDescriptor,
     clamp_gitrepo_grants,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 
 BINDING_ROOTS = {"backend": "backend", "docs": "docs"}
 
@@ -53,8 +52,7 @@ def _make_workspace(root: Path) -> ShepherdWorkspace:
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     return ShepherdWorkspace(mg, trace_store_path=root / ".vcscore" / "shepherd" / "trace.sqlite", workspace_path=root)
 
 

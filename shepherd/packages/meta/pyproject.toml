@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd"
-version = "0.2.0"
+version = "0.3.0"
 description = "Effect-based framework for building AI agents with multi-provider support"
 readme = "README.md"
 requires-python = ">=3.11"

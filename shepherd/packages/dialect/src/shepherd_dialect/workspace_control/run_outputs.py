@@ -8,7 +8,6 @@ from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any
 
 from shepherd_dialect.workspace_control.errors import WorkspaceControlError
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 
 if TYPE_CHECKING:
     from shepherd2.schemas.run_outputs import RunOutputRef
@@ -144,8 +143,7 @@ class RunOutput:
         reader = getattr(self._workspace.mg, "read_retained_workspace_file", None)
         if not callable(reader):
             raise WorkspaceControlError("VcsCore.read_retained_workspace_file is required for run-output file reads")
-        with _seal_and_select_enabled():
-            return reader(self.identity.scope_name, path)
+        return reader(self.identity.scope_name, path)
 
     def read_text(self, path: str, *, encoding: str = "utf-8") -> str:
         """Read a retained output file as text, failing closed if it is missing."""
@@ -223,6 +221,14 @@ class RunOutput:
         """Select this output through the owning workspace."""
         return self._workspace.select(self)
 
+    def apply(self) -> RetainedOutputSettlementResult:
+        """Apply this output onto the (possibly advanced) parent through the owning workspace.
+
+        Three-way whole-output settlement: succeeds only when this run's delta and the
+        parent's changes since the fork basis are path-disjoint; fails closed on overlap.
+        """
+        return self._workspace.apply(self)
+
     def release(self) -> RetainedOutputSettlementResult:
         """Release this output through the owning workspace."""
         return self._workspace.release(self)
@@ -280,8 +286,7 @@ class RunOutput:
             candidate_ref=self.candidate_ref,
             candidate_head=self.identity.candidate_head,
         )
-        with _seal_and_select_enabled():
-            row = reader(identity)
+        row = reader(identity)
         if row is None:
             raise WorkspaceControlError(f"run output {self.output_id!r} no longer has retained custody")
         return row

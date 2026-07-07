@@ -1,17 +1,15 @@
-"""Capability-C Slice 1: the `retained` scope-registry status + its flag gate.
+"""Capability-C Slice 1: the `retained` scope-registry status.
 
 `retained` is a ref-owning status — a sealed-but-undisposed scope keeps its ref
 on disk and is adoptable — but it is not runtime-open. Corruption detection
 treats it like `live` for ref ownership, NOT like `merged`/`discarded` (a
 reclaimed ref), while recovery must not treat it as abandoned live work.
 
-But `retained` is only *legitimate* while `VCS_CORE_SEAL_AND_SELECT` is on:
-recognition (parsing the status) is unconditional, but with the flag OFF (the
-default) a persisted `retained` record fails closed as a
-`retained_requires_seal_and_select` registry mismatch — it is never silently
-treated as a healthy scope. These tests pin the recognition + flag-gate
-contract that the production seal path relies on; the seal lifecycle coverage
-asserts the write path itself.
+`retained` is an unconditionally legitimate status (seal-and-select is always
+on): a structurally-sound retained record is never a registry mismatch, while a
+retained record with broken parentage or a missing ref still fails closed. These
+tests pin that recognition contract; the seal lifecycle coverage asserts the
+write path itself.
 """
 
 from __future__ import annotations
@@ -35,11 +33,9 @@ from vcs_core._projection_store import (
     REF_OWNING_SCOPE_STATUSES,
     RUNTIME_OPEN_SCOPE_STATUSES,
     SCOPE_REGISTRY_CURRENT_REF,
-    SEAL_AND_SELECT_ENV,
     TERMINAL_SCOPE_STATUSES,
     ScopeRegistryEntry,
     ScopeRegistryStatus,
-    seal_and_select_enabled,
 )
 from vcs_core._query_readiness import ReadinessRequest
 from vcs_core._recovery_inventory import (
@@ -50,12 +46,6 @@ from vcs_core.cli import main
 from vcs_core.git_store import build_tree, create_signature
 from vcs_core.store import Store
 from vcs_core.vcscore import VcsCore
-
-
-@pytest.fixture
-def seal_and_select_on(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Enable seal-and-select for tests of the flag-on world (retained legitimate)."""
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
 
 
 def _entry(
@@ -149,10 +139,6 @@ def test_ref_owning_runtime_open_and_terminal_statuses_partition_the_literal() -
     assert "live" in RUNTIME_OPEN_SCOPE_STATUSES
 
 
-def test_seal_and_select_defaults_off() -> None:
-    assert seal_and_select_enabled() is False
-
-
 def test_retained_status_round_trips(store: Store) -> None:
     # Recognition is unconditional: the parse validator/serializer accept
     # `retained` regardless of the flag (else the entry is silently dropped on
@@ -168,14 +154,14 @@ def test_retained_status_round_trips(store: Store) -> None:
     assert snapshot.entries_by_name["task"].status == "retained"
 
 
-def test_retained_ref_on_disk_is_not_corruption(store: Store, seal_and_select_on: None) -> None:
+def test_retained_ref_on_disk_is_not_corruption(store: Store) -> None:
     # Flag on: a retained scope legitimately keeps its ref (it is adoptable),
     # unlike a merged/discarded scope whose ref-on-disk *is* corruption.
     _publish_retained(store)
     assert store.scope_registry_projection_mismatches() == ()
 
 
-def test_retained_parentage_is_still_checked(store: Store, seal_and_select_on: None) -> None:
+def test_retained_parentage_is_still_checked(store: Store) -> None:
     # Exempting retained from `ref_exists_registry_non_live` must NOT exempt it
     # from parentage validation — a sealed candidate's parent linkage must be sound.
     _publish_retained(store, parent_ref="refs/vcscore/scopes/missing-parent")
@@ -183,7 +169,7 @@ def test_retained_parentage_is_still_checked(store: Store, seal_and_select_on: N
     assert [m.kind for m in mismatches] == ["parentage_disagrees"]
 
 
-def test_retained_missing_ref_is_flagged(store: Store, seal_and_select_on: None) -> None:
+def test_retained_missing_ref_is_flagged(store: Store) -> None:
     # A retained entry whose ref vanished is still corruption (its ref should exist).
     task = _publish_retained(store)
     store.discard(task)  # removes the ref from disk; the registry still says retained
@@ -191,19 +177,8 @@ def test_retained_missing_ref_is_flagged(store: Store, seal_and_select_on: None)
     assert [m.kind for m in mismatches] == ["registry_live_ref_missing"]
 
 
-def test_retained_fails_closed_when_flag_off(store: Store) -> None:
-    # Flag off (default): a structurally-fine retained record is NOT silently
-    # honored — it surfaces as a `retained_requires_seal_and_select` mismatch so
-    # the repo is not reported healthy.
-    _publish_retained(store)
-    mismatches = store.scope_registry_projection_mismatches()
-    assert [m.kind for m in mismatches] == ["retained_requires_seal_and_select"]
-    assert SEAL_AND_SELECT_ENV in mismatches[0].detail
-
-
-def test_live_scope_unaffected_when_flag_off(store: Store) -> None:
-    # The flag-off blocker fires only for `retained` — a normal live scope on a
-    # flag-off repo is untouched (no regression for ordinary repositories).
+def test_live_scope_has_no_registry_mismatch(store: Store) -> None:
+    # A normal live scope is a healthy registry entry (no mismatch).
     task = store.fork(Store.GROUND_REF, "task")
     base = store.require_scope_registry_projection()
     assert store.publish_scope_registry_projection(
@@ -212,7 +187,7 @@ def test_live_scope_unaffected_when_flag_off(store: Store) -> None:
     assert store.scope_registry_projection_mismatches() == ()
 
 
-def test_retained_ref_is_protected_from_orphan_archival(mg: VcsCore, seal_and_select_on: None) -> None:
+def test_retained_ref_is_protected_from_orphan_archival(mg: VcsCore) -> None:
     # Flag on: a retained scope's ref must be in the protected ref-owning set, so
     # `archive-orphaned-scopes` (which reclaims any ref NOT in that set) cannot destroy a
     # sealed best-of-N candidate. Mirrors the recovery-inventory orphan handling.
@@ -220,16 +195,6 @@ def test_retained_ref_is_protected_from_orphan_archival(mg: VcsCore, seal_and_se
     classification = scope_ref_recovery_classification(mg.store, mg.store.repo_path)
     assert task.ref in classification.protected_ref_owning_refs
     assert task.ref not in classification.orphaned_scope_refs
-
-
-def test_retained_ref_is_reclaimable_when_flag_off(mg: VcsCore) -> None:
-    # Flag off: a retained ref is illegitimate (a `retained_requires_seal_and_select`
-    # mismatch), so it is deliberately NOT protected — it stays reclaimable.
-    task = _publish_retained(mg.store)
-    classification = scope_ref_recovery_classification(mg.store, mg.store.repo_path)
-    assert task.ref not in classification.protected_ref_owning_refs
-    assert task.ref in classification.orphaned_scope_refs
-    assert classification.reclaimable_mismatch_item_ids
 
 
 def test_no_untriaged_live_status_comparisons() -> None:
@@ -340,7 +305,7 @@ def _contains_live_literal(node: ast.AST) -> bool:
     return False
 
 
-def test_retained_scope_survives_archive_orphaned_scopes(mg: VcsCore, seal_and_select_on: None) -> None:
+def test_retained_scope_survives_archive_orphaned_scopes(mg: VcsCore) -> None:
     # End-to-end protection (recovery-inventory candidate generation + protected-ref
     # exclusion together, exactly as `_app.archive_orphaned_scopes` wires them):
     # archive-orphaned-scopes must NOT reclaim a sealed candidate's ref.
@@ -355,47 +320,9 @@ def test_retained_scope_survives_archive_orphaned_scopes(mg: VcsCore, seal_and_s
     assert snapshot.entries_by_name[task.name].status == "retained"
 
 
-def test_recovery_app_archives_flag_off_retained_scope(mg: VcsCore, workspace: Path) -> None:
-    task = _publish_retained(mg.store)
-    mg.deactivate(warn_on_open_scopes=False)
-
-    with VcsCoreApp.open_existing(str(workspace), mode=AppOpenMode.RECOVERY) as app:
-        archived = app.archive_orphaned_scopes()
-
-    assert archived == [task.name]
-    reopened = VcsCore.from_config(str(workspace))
-    assert not reopened.store.ref_exists(task.ref)
-    entry = reopened.store.scope_registry_entry(task.name)
-    assert entry is not None
-    assert entry.status == "discarded"
-
-
-def test_direct_archive_orphaned_scopes_archives_flag_off_retained_scope(
-    mg: VcsCore,
-    workspace: Path,
-) -> None:
-    task = _publish_retained(mg.store)
-    mg.deactivate(warn_on_open_scopes=False)
-    reopened = VcsCore.from_config(str(workspace))
-    reopened.activate()
-    try:
-        assert task.ref in reopened.list_orphaned_scope_refs()
-
-        archived = reopened.archive_orphaned_scopes()
-
-        assert archived == [task.name]
-        assert not reopened.store.ref_exists(task.ref)
-        entry = reopened.store.scope_registry_entry(task.name)
-        assert entry is not None
-        assert entry.status == "discarded"
-    finally:
-        reopened.deactivate(warn_on_open_scopes=False)
-
-
 def test_recovery_app_keeps_valid_retained_scope(
     mg: VcsCore,
     workspace: Path,
-    seal_and_select_on: None,
 ) -> None:
     task = _publish_retained(mg.store)
     mg.deactivate(warn_on_open_scopes=False)
@@ -413,7 +340,6 @@ def test_recovery_app_keeps_valid_retained_scope(
 
 def test_valid_retained_is_not_recovery_orphan_for_store(
     mg: VcsCore,
-    seal_and_select_on: None,
 ) -> None:
     task = _publish_retained(mg.store)
 
@@ -430,7 +356,6 @@ def test_valid_retained_is_not_recovery_orphan_for_store(
 def test_valid_retained_absent_from_owner_and_legacy_recovery_snapshots(
     mg: VcsCore,
     workspace: Path,
-    seal_and_select_on: None,
 ) -> None:
     task = _publish_retained(mg.store)
     mg.deactivate(warn_on_open_scopes=False)
@@ -452,7 +377,6 @@ def test_valid_retained_absent_from_owner_and_legacy_recovery_snapshots(
 def test_valid_retained_readiness_has_no_orphaned_scope_blocker(
     mg: VcsCore,
     workspace: Path,
-    seal_and_select_on: None,
 ) -> None:
     task = _publish_retained(mg.store)
     mg.deactivate(warn_on_open_scopes=False)
@@ -484,7 +408,6 @@ def test_valid_retained_readiness_has_no_orphaned_scope_blocker(
 def test_valid_retained_assess_push_does_not_raise_orphaned_scope(
     mg: VcsCore,
     workspace: Path,
-    seal_and_select_on: None,
 ) -> None:
     _publish_retained(mg.store)
     mg.deactivate(warn_on_open_scopes=False)
@@ -499,7 +422,6 @@ def test_valid_retained_assess_push_does_not_raise_orphaned_scope(
 def test_direct_archive_orphaned_scopes_does_not_archive_valid_retained(
     mg: VcsCore,
     workspace: Path,
-    seal_and_select_on: None,
 ) -> None:
     task = _publish_retained(mg.store)
     mg.deactivate(warn_on_open_scopes=False)
@@ -522,7 +444,6 @@ def test_direct_archive_orphaned_scopes_does_not_archive_valid_retained(
 def test_valid_retained_repo_status_succeeds(
     mg: VcsCore,
     workspace: Path,
-    seal_and_select_on: None,
 ) -> None:
     task = _publish_retained(mg.store)
     mg.deactivate(warn_on_open_scopes=False)
@@ -537,7 +458,6 @@ def test_valid_retained_repo_status_succeeds(
 def test_cli_status_reports_retained_not_orphaned(
     mg: VcsCore,
     workspace: Path,
-    seal_and_select_on: None,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     task = _publish_retained(mg.store)
@@ -555,7 +475,6 @@ def test_cli_status_reports_retained_not_orphaned(
 def test_recovery_cli_does_not_report_valid_retained_as_orphaned(
     mg: VcsCore,
     workspace: Path,
-    seal_and_select_on: None,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     task = _publish_retained(mg.store)
@@ -583,10 +502,13 @@ def test_unreadable_scope_registry_still_fails_closed_as_recovery(mg: VcsCore) -
     assert v2_only_ref in orphaned_refs
 
 
-def test_recovery_app_keeps_retained_scope_with_additional_mismatch(
+def test_recovery_app_keeps_retained_scope_with_parentage_mismatch(
     mg: VcsCore,
     workspace: Path,
 ) -> None:
+    # A retained scope with broken parent linkage is still blocked — the
+    # parentage mismatch is the genuine structural fault (retained-ness itself
+    # is legitimate).
     _publish_retained(mg.store, parent_ref="refs/vcscore/scopes/missing-parent")
     mg.deactivate(warn_on_open_scopes=False)
 
@@ -595,7 +517,6 @@ def test_recovery_app_keeps_retained_scope_with_additional_mismatch(
         scope_registry_blockers = tuple(blocker for blocker in blockers if blocker.kind == "scope_registry_mismatch")
         assert {blocker.detail for blocker in scope_registry_blockers} == {
             "Registry parent linkage disagrees with the 'retained' scope ref topology.",
-            f"Scope 'task' is retained but {SEAL_AND_SELECT_ENV} is disabled; enable seal-and-select or discard the scope.",
         }
         with pytest.raises(AppCommandBlocked) as excinfo:
             app.archive_orphaned_scopes()
@@ -603,11 +524,10 @@ def test_recovery_app_keeps_retained_scope_with_additional_mismatch(
     assert excinfo.value.command == "archive-orphaned-scopes"
     assert {blocker.detail for blocker in excinfo.value.blockers} == {
         "Registry parent linkage disagrees with the 'retained' scope ref topology.",
-        f"Scope 'task' is retained but {SEAL_AND_SELECT_ENV} is disabled; enable seal-and-select or discard the scope.",
     }
 
 
-def test_direct_archive_orphaned_scopes_blocks_retained_with_additional_mismatch(
+def test_direct_archive_orphaned_scopes_blocks_retained_with_parentage_mismatch(
     mg: VcsCore,
     workspace: Path,
 ) -> None:
@@ -619,34 +539,16 @@ def test_direct_archive_orphaned_scopes_blocks_retained_with_additional_mismatch
         with pytest.raises(InvalidRepositoryStateError, match="readiness blocked by task"):
             reopened.archive_orphaned_scopes()
         mismatches = reopened.store.scope_registry_projection_mismatches()
-        assert {mismatch.kind for mismatch in mismatches} == {
-            "parentage_disagrees",
-            "retained_requires_seal_and_select",
-        }
+        assert {mismatch.kind for mismatch in mismatches} == {"parentage_disagrees"}
     finally:
         reopened.deactivate(warn_on_open_scopes=False)
 
 
-def test_cli_archive_orphaned_scopes_reclaims_flag_off_retained_scope(
-    mg: VcsCore,
-    workspace: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    task = _publish_retained(mg.store)
-    mg.deactivate(warn_on_open_scopes=False)
-    monkeypatch.chdir(workspace)
-
-    result = CliRunner().invoke(main, ["archive-orphaned-scopes"])
-
-    assert result.exit_code == 0, result.output
-    assert f"Archived 1 orphaned scope(s):\n  {task.name}\n" == result.output
-    reopened = VcsCore.from_config(str(workspace))
-    assert not reopened.store.ref_exists(task.ref)
-
-
 def test_legacy_three_status_snapshot_unchanged(store: Store) -> None:
     # Regression: a pre-retained registry (only live/merged/discarded) round-trips
-    # unchanged and never surfaces the new `retained_requires_seal_and_select` mismatch.
+    # unchanged. The merged/discarded refs left on disk by `fork` surface as the
+    # ordinary `ref_exists_registry_non_live` reclaim signal — never anything
+    # retained-shaped.
     live = store.fork(Store.GROUND_REF, "live-task")
     merged = store.fork(Store.GROUND_REF, "merged-task")
     discarded = store.fork(Store.GROUND_REF, "discarded-task")
@@ -667,10 +569,10 @@ def test_legacy_three_status_snapshot_unchanged(store: Store) -> None:
         "discarded-task": "discarded",
     }
     kinds = {m.kind for m in store.scope_registry_projection_mismatches()}
-    assert "retained_requires_seal_and_select" not in kinds
+    assert kinds <= {"ref_exists_registry_non_live"}
 
 
-def test_retained_scope_indexed_as_retained_not_terminal(mg: VcsCore, seal_and_select_on: None) -> None:
+def test_retained_scope_indexed_as_retained_not_terminal(mg: VcsCore) -> None:
     # Direct read-surface guard for `_build_scope_index` / ScopeIndex bucketing: a sealed
     # scope must surface via the new `.retained` bucket (active + adoptable) and has no live
     # runtime handle, so it is absent from `.entries`. Crucially it must NOT be lumped into

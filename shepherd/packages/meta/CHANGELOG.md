@@ -7,7 +7,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`apply` completes the retained-output settlement vocabulary.** `apply` joins
+  `select` / `release` / `discard` as the fourth verb: where `select` is
+  fast-forward-only (it fails closed if the workspace moved on since the run's fork
+  basis), `apply` three-way-merges a run's whole delta onto the advanced workspace
+  when the two change sets are path-disjoint, and fails closed on any overlap — no
+  content synthesis at the settlement boundary. `workspace.apply(output)` /
+  `RunOutput.apply()` / `shepherd run apply <exact-run-ref>`. This is whole-output
+  apply; per-binding and sub-root apply remain deferred. Seal-mode is now
+  unconditional (the `VCS_CORE_SEAL_AND_SELECT` flag is removed), and Linux Landlock
+  grant enforcement is now executed (retiring the 0.2.0 container-gated caveat).
+  *Note:* an in-session `select` → re-fork → run loop can misreport the second run's
+  changeset and phantom-refuse `apply`; fork all candidates before the first
+  settlement, or use one settlement chain per workspace session (ISS-013, fix
+  post-0.3.0).
+- **`ws.tasks.register(fn)` and `ws.run(fn, ...)` accept the task object directly.**
+  A task is spelled once — `@sp.task` with a signature and docstring — and registered
+  or run by passing the function, with no source-text blob. Decorated tasks register
+  (and their bodies execute under the jail as plain functions); a task defined in an
+  importable module travels as that module; a bodyless task written in a run-as-script
+  file (`__main__`) is captured at definition scope. `ws.run(fn, ...)` and
+  `ws.tasks.task(fn)` resolve the callable to the id registration assigned it. The
+  task-level `may` ceiling is derived from the signature's grants — uniformly, however
+  the task was registered; an explicit `may_default=` still overrides, and the registry
+  records which one happened.
+
 ### Changed
+
+- **A bodied task registered from a run-as-script file (`__main__`) now refuses.**
+  Previously its whole script was captured as the task artifact (embedding driver
+  code — a re-execution footgun); it now refuses with a remedy ("move it to an
+  importable module such as `tasks.py`"). Bodyless script tasks are captured at
+  definition scope instead. An unregistered task callable passed to `ws.run(...)`
+  refuses with a register-it-first hint rather than silently auto-registering.
+
+- **Ambient calls of handle-declaring bodyless tasks now refuse loudly.** A bodyless
+  task whose signature carries substrate-handle annotations (`May[GitRepo, ...]`
+  parameters or handle-typed returns) raises `AmbientWorldAccessRefused` at every
+  ambient spelling (`task(...)`, `task.run(...)`, `task.detailed(...)`) — before any
+  handler or provider dispatch, keyed on the annotation, never the passed value:
+  *"task ... declares world access in its signature ...; a bodyless ambient call
+  cannot honor it. Run it through retained execution instead: workspace.run(...)"*.
+  Previously the grant was silently erased into prompt evidence and a reachable
+  `model.call` handler returned a fabricated typed result claiming repo work no
+  in-process model call can have done. Pure-value bodyless tasks and bodied Python
+  tasks are unaffected.
+- **Handle-typed return slots refuse at schema generation (the fabrication fence).**
+  Provider-facing output schemas are never generated for substrate-handle return
+  types (`GitRepo`, including inside tuples/`Annotated`): both schema stacks raise
+  `HandleReturnSlotUnsupported` with an identical message instead of emitting an
+  object schema a model could fill with a fabricated custody claim. Returned handles
+  arrive with the projector (P-030 phase iii); until then, return ordinary values and
+  consume world output through `RunOutput`/`Changeset` settlement. Task-registration
+  *parameter* schemas are unaffected.
+- **Unclassifiable delegating task bodies raise loud instead of returning `None`.**
+  An exec/REPL/notebook-defined task whose source is unavailable and whose compiled
+  body is empty-shaped raises `AmbiguousTaskBody` at call time (with the importable-
+  `.py`-file remedy) rather than silently delivering `None`. File-defined bodyless
+  tasks and non-trivial bodies classify and run as before.
+
+### Fixed
+
+- **The documented mock idiom now intercepts model calls.** The taught
+  `handle("model.call.requested", ...)` spelling resolves (installation-time dual-key
+  shim in both nuclei); previously only the bare `"model.call"` key dispatched, so
+  documented mocks were silently ignored — and a reachable provider would take the
+  call instead. The *recorded* effect-kind string stays `"model.call"` (durable
+  vocabulary; the kind-string bump is deliberately not taken here).
+- **Notebook cell re-runs no longer trap the session.** Re-configuring
+  `workspace(...)` while idle tears down and replaces the active workspace instead of
+  raising `WorkspaceAlreadyConfigured`; reconfiguration during an active task run
+  still refuses.
+
+## [0.2.1] - 2026-07-06
+
+Auth-lane hardening for the jailed `claude` provider (batches 2a–2d), published to
+the public mirror as `v0.2.1`.
+
+### Fixed
 
 - **The jailed `claude` CLI lane now fails a doomed run *before* launch.** When no
   usable credential resolves (no `ANTHROPIC_API_KEY`/`CLAUDE_CODE_OAUTH_TOKEN`, no

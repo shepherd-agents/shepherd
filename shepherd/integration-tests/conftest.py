@@ -15,11 +15,9 @@ def _isolate_process_environment():
     """Snapshot and restore ``os.environ`` around every test (W0.2).
 
     This suite mixes in-process ``CliRunner`` invocations (test_openai_api.py)
-    with flag-sensitive tests the same way the top-level ``integration-tests/``
-    suite does. The specific CLI leak that motivated this was removed at the
-    source in W1c (the CLI now scopes ``scoped_seal_and_select()``), so this is
-    belt-and-braces: it protects against *any* test that writes process env
-    directly, which the CLI fix does not cover.
+    with env-sensitive tests the same way the top-level ``integration-tests/``
+    suite does. Belt-and-braces: it protects against *any* test that writes
+    process env directly.
     """
     saved = dict(os.environ)
     try:

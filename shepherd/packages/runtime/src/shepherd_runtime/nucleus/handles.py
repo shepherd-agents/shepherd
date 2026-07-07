@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Literal, TypeAlias, cast
+from typing import ClassVar, Literal, TypeAlias, cast
 
 GIT_REPO_BASIS_SCHEMA = "shepherd.runtime.nucleus.gitrepo.basis.v1"
 GIT_REPO_HANDLE_SCHEMA = "shepherd.runtime.nucleus.gitrepo.v1"
@@ -71,6 +71,12 @@ class GitRepo:
     authority surface; it does not own custody and does not perform substrate
     operations.
     """
+
+    # Handle-noun marker: schema/dispatch fences detect substrate handles by this
+    # attribute so the deliberately import-isolated stacks (dialect step schema)
+    # need no cross-package noun import. Future nouns (Folder, ...) carry it too;
+    # the phase-ii `Handle` base subsumes it when it lands.
+    __shepherd_handle_noun__: ClassVar[bool] = True
 
     binding: str
     basis: GitRepoBasis

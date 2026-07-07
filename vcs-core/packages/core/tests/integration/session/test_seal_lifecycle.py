@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import contextlib
 import copy
+import unicodedata
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -23,7 +24,7 @@ from vcs_core import (
 )
 from vcs_core._authority import read_pending_authority_settlement
 from vcs_core._permission_plan_evidence import permission_plan_digest
-from vcs_core._projection_store import SCOPE_REGISTRY_CURRENT_REF, SEAL_AND_SELECT_ENV
+from vcs_core._projection_store import SCOPE_REGISTRY_CURRENT_REF
 from vcs_core._retained_output_settlement import (
     SETTLEMENT_PATH,
     read_retained_output_settlement,
@@ -329,22 +330,10 @@ def _trace_payload(frontier: str) -> dict[str, object]:
     }
 
 
-def test_seal_flag_off_rejects_live_scope(workspace: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv(SEAL_AND_SELECT_ENV, raising=False)
-    mg = _make_mg(workspace)
-    try:
-        child = mg.fork(mg.ground, "seal-child")
-        with pytest.raises(Exception, match="VCS_CORE_SEAL_AND_SELECT"):
-            mg.seal(child)
-    finally:
-        mg.deactivate(warn_on_open_scopes=False)
-
-
 def test_seal_refusal_does_not_persist_lifecycle_run(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     mg = _make_mg(workspace)
     try:
         child = mg.fork(mg.ground, "seal-child")
@@ -369,7 +358,6 @@ def test_seal_retains_scope_and_exposes_retained_workspace_read(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -419,7 +407,6 @@ def test_seal_allows_multiple_retained_siblings_under_one_parent(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -469,7 +456,6 @@ def test_retained_name_reuse_fails_without_disturbing_custody(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -495,7 +481,6 @@ def test_select_retained_output_advances_parent_binding_without_scalar_merge(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -548,7 +533,6 @@ def test_retained_output_authority_allowed_selection_records_evidence(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -635,7 +619,6 @@ def test_retained_output_authority_changed_paths_fallback_is_explicit(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -693,7 +676,6 @@ def test_retained_output_authority_requires_permission_plan_evidence(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -738,7 +720,6 @@ def test_retained_output_authority_rejects_forged_permission_plan_evidence(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     provider_called = False
@@ -787,7 +768,6 @@ def test_retained_output_authority_unclassifiable_selection_refuses_without_cons
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     provider_called = False
@@ -865,7 +845,6 @@ def test_retained_output_authority_denied_selection_records_evidence_without_con
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -930,7 +909,6 @@ def test_retained_output_authority_preflights_settlement_operation_id_before_sel
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -987,7 +965,6 @@ def test_retained_output_authority_settlement_failure_leaves_recoverable_pending
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     original_record = selection_module.record_retained_output_authority_final_settlement
@@ -1062,7 +1039,6 @@ def test_retained_output_authority_recovers_pending_before_selection_action(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     original_publish = selection_module.WorldAuthorityFinalizer.publish_or_recover
@@ -1131,7 +1107,6 @@ def test_select_retained_output_is_consume_once(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1162,7 +1137,6 @@ def test_retained_output_receipt_only_settlement_is_consume_once(
     method_name: str,
     action: str,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1212,7 +1186,6 @@ def test_retained_output_terminal_settlement_blocks_other_terminal_verbs(
     expected_action: str,
     blocked_methods: tuple[str, str],
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1250,7 +1223,6 @@ def test_list_retained_outputs_classifies_terminal_receipts(
     method_name: str,
     expected_state: str,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1288,7 +1260,6 @@ def test_list_retained_outputs_reports_invalid_retained_custody(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1314,7 +1285,6 @@ def test_list_retained_outputs_reports_malformed_handoff_payload_as_invalid(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1341,7 +1311,6 @@ def test_list_retained_outputs_requires_scope_registry_projection(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     registry_target: pygit2.Oid | None = None
@@ -1363,7 +1332,6 @@ def test_list_retained_outputs_reports_malformed_terminal_receipt_as_invalid(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1400,7 +1368,6 @@ def test_list_retained_outputs_reports_invalid_forged_terminal_receipt(
     bad_operation_id: str,
     expected_reason: str,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1435,7 +1402,6 @@ def test_retained_output_receipt_only_settlement_allows_parent_workspace_drift(
     monkeypatch: pytest.MonkeyPatch,
     method_name: str,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1461,7 +1427,6 @@ def test_retained_output_receipt_only_settlement_rejects_forged_handle_identity(
     monkeypatch: pytest.MonkeyPatch,
     method_name: str,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1491,7 +1456,6 @@ def test_retained_output_receipt_only_settlement_recovers_missing_selected_recei
     monkeypatch: pytest.MonkeyPatch,
     method_name: str,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     original_write = selection_module.write_retained_output_settlement
@@ -1534,7 +1498,6 @@ def test_select_retained_output_rejects_forged_handle_identity(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1563,7 +1526,6 @@ def test_select_retained_output_allows_unrelated_parent_binding_progress_after_s
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1599,7 +1561,6 @@ def test_select_retained_output_fails_closed_when_target_binding_advanced_since_
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1635,7 +1596,6 @@ def test_select_retained_output_fresh_publication_blocks_on_sibling_group_recove
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1664,7 +1624,6 @@ def test_later_live_sibling_fails_when_selected_output_already_advanced_target_b
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1716,7 +1675,6 @@ def test_multi_candidate_query_allows_non_selected_release_after_selection(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1763,7 +1721,6 @@ def test_private_candidate_set_select_records_archived_candidate_before_release(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -1827,7 +1784,6 @@ def test_retained_candidate_set_capstone_selects_one_of_four_after_reactivation(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     original_store_merge = mg.store.merge
@@ -1947,7 +1903,6 @@ def test_private_candidate_set_selection_recovery_requires_same_archived_candida
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     original_write = selection_module.write_retained_output_settlement
@@ -2037,7 +1992,6 @@ def test_receipt_only_settlement_recovers_missing_private_candidate_set_selectio
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     original_write = selection_module.write_retained_output_settlement
@@ -2101,7 +2055,6 @@ def test_select_retained_output_recovers_ground_parent_missing_settlement_after_
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     child_name: str
@@ -2161,7 +2114,6 @@ def test_select_retained_output_recovers_missing_settlement_after_parent_world_p
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2208,7 +2160,6 @@ def test_select_retained_output_missing_settlement_recovery_requires_parent_auth
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2263,7 +2214,6 @@ def test_select_retained_output_missing_settlement_recovery_bypasses_fresh_admis
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2307,7 +2257,6 @@ def test_seal_uses_workspace_producer_when_later_operation_carries_head_forward(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2341,7 +2290,6 @@ def test_retained_workspace_read_rejects_missing_v2_scope_ref(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2360,7 +2308,6 @@ def test_retained_workspace_read_rejects_v2_scope_ref_target_mismatch(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2385,7 +2332,6 @@ def test_retained_workspace_read_rejects_missing_candidate_ref(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2405,7 +2351,6 @@ def test_retained_workspace_read_rejects_candidate_ref_target_mismatch(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2430,7 +2375,6 @@ def test_retained_workspace_read_rejects_handoff_tuple_not_selected_head_provena
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2462,7 +2406,6 @@ def test_retained_workspace_read_rejects_handoff_candidate_alias_not_selected_he
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2519,7 +2462,6 @@ def test_retained_workspace_read_rejects_parent_ref_mismatch(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2544,7 +2486,6 @@ def test_seal_closes_isolated_filesystem_runtime_layer(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2570,7 +2511,6 @@ def test_seal_retains_ordinary_isolated_filesystem_write_after_runtime_close(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2610,7 +2550,6 @@ def test_failed_seal_runtime_close_recovers_before_retained_registry_publish(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     failing_close = _CloseRetainedSubstrate(fail=True)
     mg = _make_mg(workspace, extra_substrates=(failing_close,))
@@ -2646,7 +2585,6 @@ def test_failed_seal_runtime_close_recovers_via_direct_recover_lifecycle(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     failing_close = _CloseRetainedSubstrate(fail=True)
     mg = _make_mg(workspace, extra_substrates=(failing_close,))
@@ -2665,47 +2603,10 @@ def test_failed_seal_runtime_close_recovers_via_direct_recover_lifecycle(
         mg.deactivate(warn_on_open_scopes=False)
 
 
-def test_interrupted_seal_recovery_requires_seal_flag(
-    workspace: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
-    monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
-    failing_close = _CloseRetainedSubstrate(fail=True)
-    mg = _make_mg(workspace, extra_substrates=(failing_close,))
-    try:
-        _parent, child = _produce_child_workspace_output(mg)
-
-        with pytest.raises(RuntimeError, match="Scope remains active for recovery"):
-            mg.seal(child)
-    finally:
-        with contextlib.suppress(Exception):
-            mg.deactivate(warn_on_open_scopes=False)
-
-    monkeypatch.delenv(SEAL_AND_SELECT_ENV, raising=False)
-    with pytest.raises(InvalidRepositoryStateError, match=SEAL_AND_SELECT_ENV):
-        _make_mg(workspace, recover_lifecycle="resume", extra_substrates=(_CloseRetainedSubstrate(),))
-
-    store = Store(str(workspace / ".vcscore"))
-    assert store.scope_registry_entry(child.name, status="retained") is None
-    assert read_seal_handoff(store, child) is not None
-
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
-    recovered_close = _CloseRetainedSubstrate()
-    recovered = _make_mg(workspace, recover_lifecycle="resume", extra_substrates=(recovered_close,))
-    try:
-        assert recovered.store.scope_registry_entry(child.name, status="retained") is not None
-        assert recovered_close.calls == [(child.name, "seal-parent")]
-        assert recovered.read_retained_workspace_file(child.name, "child.txt") == (b"child output\n", 0o100644)
-    finally:
-        recovered.deactivate(warn_on_open_scopes=False)
-
-
 def test_interrupted_seal_recovers_when_handoff_write_failed(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2746,35 +2647,10 @@ def test_interrupted_seal_recovers_when_handoff_write_failed(
         recovered.deactivate(warn_on_open_scopes=False)
 
 
-def test_public_retained_workspace_read_requires_seal_flag(
-    workspace: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
-    monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
-    mg = _make_mg(workspace)
-    try:
-        _parent, child = _produce_child_workspace_output(mg)
-        mg.seal(child)
-    finally:
-        mg.deactivate(warn_on_open_scopes=False)
-
-    monkeypatch.delenv(SEAL_AND_SELECT_ENV, raising=False)
-    fresh = _make_mg(workspace)
-    try:
-        with pytest.raises(Exception, match=SEAL_AND_SELECT_ENV):
-            fresh.retained_workspace_handle("seal-child")
-        with pytest.raises(Exception, match=SEAL_AND_SELECT_ENV):
-            fresh.read_retained_workspace_file("seal-child", "child.txt")
-    finally:
-        fresh.deactivate(warn_on_open_scopes=False)
-
-
 def test_public_retained_workspace_read_rejects_registry_mismatch(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2792,7 +2668,6 @@ def test_interrupted_seal_recovers_from_persisted_handoff(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2830,7 +2705,6 @@ def test_interrupted_seal_recovers_after_retained_registry_publish(
     workspace: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
     mg = _make_mg(workspace)
     try:
@@ -2863,3 +2737,267 @@ def test_interrupted_seal_recovers_after_retained_registry_publish(
         assert recovered.read_retained_workspace_file("seal-child", "child.txt") == (b"child output\n", 0o100644)
     finally:
         recovered.deactivate(warn_on_open_scopes=False)
+
+
+# ---------------------------------------------------------------------------
+# apply (whole-output three-way settlement) — T1 D1-A
+# ---------------------------------------------------------------------------
+
+
+def _seed_two_disjoint_children(mg: VcsCore, *, a_path: str, b_path: str) -> tuple[Any, Any, Any]:
+    """A parent with two sibling children that wrote disjoint files; both sealed.
+
+    The one-live-child invariant means each child is sealed (→ retained, not live)
+    before the next is forked. Both fork from the same pre-select parent world, so
+    both share the pre-advance basis.
+    """
+    mg.exec("filesystem", "write", scope=mg.ground, path="base.txt", content=b"base\n")
+    parent = mg.fork(mg.ground, "apply-parent")
+    child_a = _produce_named_child_workspace_output(
+        mg, parent, child_name="apply-child-a", operation_suffix="a", path=a_path, content=b"A\n"
+    )
+    mg.seal(child_a)
+    child_b = _produce_named_child_workspace_output(
+        mg, parent, child_name="apply-child-b", operation_suffix="b", path=b_path, content=b"B\n"
+    )
+    mg.seal(child_b)
+    return parent, child_a, child_b
+
+
+def _seed_single_apply_candidate(mg: VcsCore, *, path: str, content: bytes) -> tuple[Any, Any, Any]:
+    mg.exec("filesystem", "write", scope=mg.ground, path="base.txt", content=b"base\n")
+    parent = mg.fork(mg.ground, "apply-parent")
+    child = _produce_named_child_workspace_output(
+        mg, parent, child_name="apply-child", operation_suffix="one", path=path, content=content
+    )
+    seal_result = mg.seal(child)
+    return parent, child, seal_result
+
+
+def test_apply_retained_output_fast_forward_degenerate_publishes_application_world(
+    workspace: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Parent unmoved since fork basis: `apply` degenerates to the fast-forward head
+    # (same post-state and head as `select`) but records an *application* world +
+    # ``applied`` receipt, never a selection one (T1 D1a).
+    monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
+    mg = _make_mg(workspace)
+    try:
+        parent, child, seal_result = _seed_single_apply_candidate(mg, path="c.txt", content=b"C\n")
+
+        result = mg.apply_retained_output(child.name, parent=parent)
+        assert result.settlement.action == "applied"
+        assert result.settlement.applied_head == seal_result.handoff.candidate_head
+        published = mg._world_storage().read_world(result.parent_world_after)
+        assert published.snapshot.head_for("workspace").head == seal_result.handoff.candidate_head
+        assert published.transition.get("semantic_op") == "retained-output-application"
+        assert _read_world_workspace_file(mg, result.parent_world_after, "c.txt") == (b"C\n", 0o100644)
+        # Reads back through the applied query branch (not the selection validator).
+        assert read_retained_output_settlement(mg.store, result.settlement.settlement_ref) == result.settlement
+    finally:
+        mg.deactivate(warn_on_open_scopes=False)
+
+
+def test_apply_retained_output_is_consume_once(
+    workspace: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
+    mg = _make_mg(workspace)
+    try:
+        parent, child, _ = _seed_single_apply_candidate(mg, path="c.txt", content=b"C\n")
+        mg.apply_retained_output(child.name, parent=parent)
+
+        with pytest.raises(InvalidRepositoryStateError, match="already settled"):
+            mg.apply_retained_output(child.name, parent=parent)
+    finally:
+        mg.deactivate(warn_on_open_scopes=False)
+
+
+def test_interrupted_apply_cannot_be_released_into_a_second_receipt(
+    workspace: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # T1 W2.1(e) / ISS-008: an apply that publishes its application world but is
+    # interrupted before writing its receipt must NOT be releasable/discardable into
+    # a second terminal receipt. The receipt-only guard's application-keyed recovery
+    # probe completes the apply's receipt and refuses the release as already-settled.
+    monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
+    mg = _make_mg(workspace)
+    try:
+        parent, child, seal_result = _seed_single_apply_candidate(mg, path="c.txt", content=b"C\n")
+        handoff = seal_result.handoff
+
+        # Interrupt the apply after the application world publishes, before its receipt.
+        import vcs_core._retained_output_application as app_mod
+
+        real_write = app_mod.write_retained_output_settlement
+        calls = {"n": 0}
+
+        def _flaky_write(store: Any, settlement: Any) -> None:
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise RuntimeError("simulated interruption after publish, before receipt")
+            real_write(store, settlement)
+
+        monkeypatch.setattr(app_mod, "write_retained_output_settlement", _flaky_write)
+
+        with pytest.raises(RuntimeError, match="simulated interruption"):
+            mg.apply_retained_output(child.name, parent=parent)
+
+        # The application world is published but no receipt exists yet.
+        settlement_ref = retained_output_settlement_ref(
+            scope_name=handoff.scope_name,
+            scope_instance_id=handoff.scope_instance_id,
+            binding=handoff.binding,
+            candidate_id=handoff.candidate_id,
+        )
+        assert read_retained_output_settlement(mg.store, settlement_ref, missing_ok=True) is None
+
+        # release must fail closed (recovering the apply), never write a released receipt.
+        with pytest.raises(InvalidRepositoryStateError, match="already settled"):
+            mg.release_retained_output(child.name, parent=parent)
+
+        # The recovered receipt records the APPLY, not a release.
+        settled = read_retained_output_settlement(mg.store, settlement_ref)
+        assert settled is not None
+        assert settled.action == "applied"
+    finally:
+        mg.deactivate(warn_on_open_scopes=False)
+
+
+def test_apply_retained_output_refuses_when_candidate_delta_overlaps_parent(
+    workspace: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Sequential retained siblings accumulate: child B (forked after A sealed)
+    # inherits A's change, so after selecting A the candidate delta overlaps the
+    # parent delta. `apply` must fail closed at the D2 gate (a genuinely disjoint
+    # three-way merge needs isolated/parallel candidates — see spike
+    # 260706-apply-three-way-settlement S3 and the unit tests below).
+    monkeypatch.setenv("VCS_CORE_NESTED_OPERATIONS", "1")
+    mg = _make_mg(workspace)
+    try:
+        parent, child_a, child_b = _seed_two_disjoint_children(mg, a_path="a.txt", b_path="b.txt")
+        mg.select_retained_output(child_a.name, parent=parent)
+
+        with pytest.raises(InvalidRepositoryStateError, match="changes overlap"):
+            mg.apply_retained_output(child_b.name, parent=parent)
+
+        # No receipt was written: a second attempt still hits the D2 refusal, not
+        # a consume-once "already settled".
+        with pytest.raises(InvalidRepositoryStateError, match="changes overlap"):
+            mg.apply_retained_output(child_b.name, parent=parent)
+    finally:
+        mg.deactivate(warn_on_open_scopes=False)
+
+
+# --- unit coverage for the D2 conflict semantics + three-way merge primitive ---
+
+
+def _apply_unit_repo(tmp_path: Path) -> pygit2.Repository:
+    return pygit2.init_repository(str(tmp_path / "apply-unit"), bare=True)
+
+
+def _tree_from(repo: pygit2.Repository, files: dict[str, bytes]) -> pygit2.Oid:
+    builder = repo.TreeBuilder()
+    for name, content in files.items():
+        builder.insert(name, repo.create_blob(content), pygit2.enums.FileMode.BLOB)
+    return builder.write()
+
+
+def test_apply_three_way_merge_unit_produces_the_union_on_disjoint_writes(tmp_path: Path) -> None:
+    from vcs_core._retained_output_application import _assert_apply_disjoint, _three_way_merge
+
+    repo = _apply_unit_repo(tmp_path)
+    basis = _tree_from(repo, {"base.txt": b"base\n"})
+    current = _tree_from(repo, {"base.txt": b"base\n", "a.txt": b"A\n"})
+    candidate = _tree_from(repo, {"base.txt": b"base\n", "b.txt": b"B\n"})
+
+    _assert_apply_disjoint(repo, basis, current, candidate, scope_name="unit")  # does not raise
+    merged = _three_way_merge(repo, basis, current, candidate)
+    assert sorted(entry.name for entry in repo[merged]) == ["a.txt", "b.txt", "base.txt"]
+
+
+def test_apply_disjoint_check_refuses_overlap_prefix_and_alias(tmp_path: Path) -> None:
+    from vcs_core._retained_output_application import _assert_apply_disjoint
+
+    repo = _apply_unit_repo(tmp_path)
+    basis = _tree_from(repo, {"base.txt": b"base\n"})
+
+    # equal-path overlap
+    with pytest.raises(InvalidRepositoryStateError, match="changes overlap"):
+        _assert_apply_disjoint(
+            repo,
+            basis,
+            _tree_from(repo, {"base.txt": b"base\n", "x.txt": b"1\n"}),
+            _tree_from(repo, {"base.txt": b"base\n", "x.txt": b"2\n"}),
+            scope_name="unit",
+        )
+    # prefix overlap (file `a` on one side, `a/b` on the other): tree builders can't
+    # hold `a` and `a/b` in one tree, so model it via nested dir vs file at the same
+    # normalized head.
+    with pytest.raises(InvalidRepositoryStateError, match="changes overlap"):
+        _assert_apply_disjoint(
+            repo,
+            basis,
+            _tree_from(repo, {"base.txt": b"base\n", "d.txt": b"1\n"}),
+            _tree_from(repo, {"base.txt": b"base\n", "D.txt": b"2\n"}),  # case-alias of d.txt
+            scope_name="unit",
+        )
+    # Unicode NFC/NFD alias of the same logical name (byte-distinct, alias-equal)
+    nfc = unicodedata.normalize("NFC", "café.txt")
+    nfd = unicodedata.normalize("NFD", "café.txt")
+    assert nfc != nfd
+    with pytest.raises(InvalidRepositoryStateError, match="changes overlap"):
+        _assert_apply_disjoint(
+            repo,
+            basis,
+            _tree_from(repo, {"base.txt": b"base\n", nfc: b"1\n"}),
+            _tree_from(repo, {"base.txt": b"base\n", nfd: b"2\n"}),
+            scope_name="unit",
+        )
+
+
+def test_apply_disjoint_check_refuses_remaining_overlap_kinds(tmp_path: Path) -> None:
+    """T1 W2.4 (iii), remaining legs: delete-vs-modify, mode change, both-identical, both-delete.
+
+    The last two produce no git conflict — only the D2 path check refuses them, proving the
+    path check (not the merge index) carries the invariant.
+    """
+    from vcs_core._retained_output_application import _assert_apply_disjoint
+
+    repo = _apply_unit_repo(tmp_path)
+    basis = _tree_from(repo, {"base.txt": b"base\n", "x.txt": b"X\n"})
+
+    # delete-vs-modify: current deletes x.txt, candidate modifies it.
+    with pytest.raises(InvalidRepositoryStateError, match="changes overlap"):
+        _assert_apply_disjoint(
+            repo,
+            basis,
+            _tree_from(repo, {"base.txt": b"base\n"}),
+            _tree_from(repo, {"base.txt": b"base\n", "x.txt": b"X2\n"}),
+            scope_name="unit",
+        )
+    # mode change: current flips x.txt executable; candidate edits its bytes.
+    builder = repo.TreeBuilder()
+    builder.insert("base.txt", repo.create_blob(b"base\n"), pygit2.enums.FileMode.BLOB)
+    builder.insert("x.txt", repo.create_blob(b"X\n"), pygit2.enums.FileMode.BLOB_EXECUTABLE)
+    current_mode = builder.write()
+    with pytest.raises(InvalidRepositoryStateError, match="changes overlap"):
+        _assert_apply_disjoint(
+            repo,
+            basis,
+            current_mode,
+            _tree_from(repo, {"base.txt": b"base\n", "x.txt": b"X2\n"}),
+            scope_name="unit",
+        )
+    # both-sides-identical change: byte-identical edits still refuse (equal path; no conflict index leg).
+    identical = _tree_from(repo, {"base.txt": b"base\n", "x.txt": b"SAME\n"})
+    with pytest.raises(InvalidRepositoryStateError, match="changes overlap"):
+        _assert_apply_disjoint(repo, basis, identical, identical, scope_name="unit")
+    # both-sides-delete: both remove x.txt — refused on the equal changed path.
+    deleted = _tree_from(repo, {"base.txt": b"base\n"})
+    with pytest.raises(InvalidRepositoryStateError, match="changes overlap"):
+        _assert_apply_disjoint(repo, basis, deleted, deleted, scope_name="unit")

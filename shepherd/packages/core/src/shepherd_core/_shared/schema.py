@@ -8,7 +8,7 @@ through type_to_json_schema().
 from __future__ import annotations
 
 import warnings
-from typing import Any
+from typing import Any, get_args
 
 from pydantic import PydanticSchemaGenerationError, TypeAdapter
 
@@ -21,6 +21,61 @@ from ..errors import SchemaGenerationError
 # Key used for single-value outputs in step schemas.
 # Used by _return_type_to_output_schema() and _parse_single_output().
 SINGLE_OUTPUT_KEY = "result"
+
+
+# =============================================================================
+# Handle-return-slot fence (P-030: handle slots are custody-resolved, never
+# provider-authored)
+# =============================================================================
+
+
+class HandleReturnSlotUnsupported(TypeError):  # noqa: N818 — pinned name, parity across both schema stacks
+    """A provider-facing output schema was requested for a substrate-handle slot."""
+
+
+# One canonical message, byte-identical across the two schema stacks (the dialect
+# carries a deliberate no-core-imports port of this module; a parity test asserts
+# the fences refuse identically).
+HANDLE_RETURN_SLOT_MESSAGE = (
+    "return slot declares the substrate handle {noun}: handle-typed return slots "
+    "are not lowered to provider output schemas, because a provider-authored handle "
+    "would be a fabricated custody claim. Returned handles arrive with the projector "
+    "(P-030 phase iii); until then, return ordinary values and consume world output "
+    "through RunOutput/Changeset settlement."
+)
+
+
+def find_handle_annotation(annotation: Any) -> Any | None:
+    """Return the first substrate-handle noun inside ``annotation``, if any.
+
+    Detects the ``__shepherd_handle_noun__`` class marker directly and inside
+    generic containers (``tuple[GitRepo, str]``, ``Annotated``/``May`` wrappers,
+    ``Optional``, lists, dicts, ...). Returns ``None`` when the annotation is
+    handle-free.
+    """
+    seen: set[int] = set()
+
+    def _walk(candidate: Any) -> Any | None:
+        if candidate is None or id(candidate) in seen:
+            return None
+        seen.add(id(candidate))
+        if getattr(candidate, "__shepherd_handle_noun__", False) is True:
+            return candidate
+        for arg in get_args(candidate):
+            found = _walk(arg)
+            if found is not None:
+                return found
+        return None
+
+    return _walk(annotation)
+
+
+def refuse_handle_return_slot(annotation: Any) -> None:
+    """Raise :class:`HandleReturnSlotUnsupported` if ``annotation`` carries a handle."""
+    noun = find_handle_annotation(annotation)
+    if noun is not None:
+        name = getattr(noun, "__name__", None) or repr(noun)
+        raise HandleReturnSlotUnsupported(HANDLE_RETURN_SLOT_MESSAGE.format(noun=repr(name)))
 
 
 # =============================================================================

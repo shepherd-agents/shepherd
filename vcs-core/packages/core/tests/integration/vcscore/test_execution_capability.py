@@ -37,7 +37,6 @@ from vcs_core._execution_capability import (
 from vcs_core._fork_hints import ForkHints
 from vcs_core._lock import release_session_lock
 from vcs_core._permission_plan_evidence import permission_plan_digest
-from vcs_core._projection_store import SEAL_AND_SELECT_ENV
 from vcs_core._schema_errors import SchemaValidationError
 from vcs_core._world_transition_coordinator import dispatch_driver
 from vcs_core.runtime_api import (
@@ -434,7 +433,6 @@ def test_reversible_run_can_seal_on_success_without_advancing_parent_world(
     env: tuple[VcsCore, _RunDriver, MockOverlayBackend],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     mg, driver, backend = env
     mg.exec("filesystem", "write", scope=mg.ground, path="base.txt", content=b"base\n")
     parent_world_before = mg.world_oid(mg.ground)
@@ -649,35 +647,10 @@ def test_authority_merge_disposition_rejected_for_non_execution_command(
     assert backend.discarded == []
 
 
-def test_seal_disposition_feature_gate_refuses_before_fork_or_body(
-    env: tuple[VcsCore, _RunDriver, MockOverlayBackend],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.delenv(SEAL_AND_SELECT_ENV, raising=False)
-    mg, driver, backend = env
-
-    with pytest.raises(InvalidRepositoryStateError, match=SEAL_AND_SELECT_ENV):
-        mg.execute_recorded(
-            "runprobe",
-            "run",
-            scope=mg.ground,
-            behavior="write",
-            execution_options=CommandExecutionOptions(success_disposition="seal"),
-        )
-
-    assert driver.admissions == []
-    assert driver.seen == []
-    assert all(not name.startswith("run-") for name in backend.layers)
-    assert backend.committed == []
-    assert backend.discarded == []
-    assert all(not name.startswith("run-") for name in mg._scope_parents)
-
-
 def test_seal_disposition_discards_on_body_failure_without_retained_custody(
     env: tuple[VcsCore, _RunDriver, MockOverlayBackend],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     mg, driver, backend = env
     mg.exec("filesystem", "write", scope=mg.ground, path="base.txt", content=b"base\n")
 
@@ -701,7 +674,6 @@ def test_seal_disposition_discards_on_post_body_seal_failure_without_retained_cu
     env: tuple[VcsCore, _RunDriver, MockOverlayBackend],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(SEAL_AND_SELECT_ENV, "1")
     mg, driver, backend = env
     mg.exec("filesystem", "write", scope=mg.ground, path="base.txt", content=b"base\n")
 

@@ -1726,7 +1726,12 @@ def codex_provider_result_from_payload(
 ) -> ProviderInvocationResult:
     """Convert a recorded Codex SDK payload to native provider events."""
     final_response = str(raw.get("finalResponse") or raw.get("final_response") or "")
-    structured_output = raw.get("structuredOutput") or raw.get("structured_output") or {}
+    # Presence-based key fallback (2132 Bug-2): `or`-chaining made a present-but-empty
+    # camelCase payload fall through to the snake_case key. The present key wins;
+    # non-mapping values still coerce to {} via the guard below.
+    structured_output = raw.get("structuredOutput")
+    if structured_output is None:
+        structured_output = raw.get("structured_output")
     structured_output = dict(structured_output) if isinstance(structured_output, Mapping) else {}
     usage = raw.get("usage") if isinstance(raw.get("usage"), Mapping) else {}
     items = raw.get("items") if isinstance(raw.get("items"), list) else []

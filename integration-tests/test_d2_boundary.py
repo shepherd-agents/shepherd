@@ -108,9 +108,8 @@ def test_meta_cli_mutates_no_ambient_process_env() -> None:
 
     ``os.environ.setdefault``/``os.environ[...] = ...`` / ``os.environ.update``
     at the entrypoint leaks across in-process CliRunner invocations and poisons
-    test order. Feature flags are scoped via ``scoped_seal_and_select()``
-    (a restoring context manager) instead. This is an AST scan so it also
-    catches the templates the quickstart copies verbatim.
+    test order. This is an AST scan so it also catches the templates the
+    quickstart copies verbatim.
     """
     offenders: dict[str, list[str]] = {}
     for path in sorted(SHEPHERD_META_SRC.rglob("*.py")):

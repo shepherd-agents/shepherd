@@ -14,34 +14,26 @@ import sys
 
 import shepherd as sp
 
-TASK_ID = "quickstart.write_note"
-TASK_SOURCE = '''
-import shepherd as sp
 
-def write_note(repo: sp.May[sp.GitRepo, sp.ReadWrite], topic: str, output_path: str, output_text: str):
+# A task is a signature + docstring: the contract a sandboxed agent fulfils. The
+# grant on `repo` is the whole permission surface — nothing else authorizes the write.
+@sp.task
+def write_note(repo: sp.May[sp.GitRepo, sp.ReadWrite], topic: str, output_path: str, output_text: str) -> None:
     """Write one quickstart note into a retained workspace output."""
-    raise RuntimeError("provider-owned task bodies are prompts/contracts, not local Python")
-'''
 
 
 def main() -> None:
     """Run a deterministic retained-output workspace demo."""
     workspace = sp.open(".")
     try:
-        workspace.tasks.register_source(
-            task_id=TASK_ID,
-            module="shepherd_quickstart_tasks",
-            source_text=TASK_SOURCE,
-            entrypoint="write_note",
-            may_default="ReadWrite",
-        )
+        workspace.tasks.register(write_note)
         run = workspace.run(
-            TASK_ID,
+            write_note,
             repo=workspace.git_repo(),
             args={
                 "topic": "quickstart",
                 "output_path": "SHEPHERD_QUICKSTART.txt",
-                "output_text": "Hello from a Shepherd retained output.\\n",
+                "output_text": "Hello from a Shepherd retained output.\n",
             },
             placement="advisory",
             runtime={"provider": "static"},

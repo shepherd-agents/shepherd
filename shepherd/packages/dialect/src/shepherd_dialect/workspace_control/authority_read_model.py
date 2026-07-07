@@ -79,7 +79,7 @@ class RunOutputSettlementPolicy:
     settlement_policy: JsonObject | None
     custody_owner: str = "vcs-core.retained-output"
     consume_once: bool = True
-    settlement_verbs: tuple[str, ...] = ("select", "release", "discard")
+    settlement_verbs: tuple[str, ...] = ("select", "apply", "release", "discard")
 
     def to_json(self) -> JsonObject:
         """Return a stable JSON-shaped settlement-policy inspection payload."""

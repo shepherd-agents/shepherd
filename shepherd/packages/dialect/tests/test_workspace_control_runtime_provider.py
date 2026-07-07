@@ -24,7 +24,6 @@ from shepherd_dialect.workspace_control import (
     WorkspaceControlError,
     get_run_args,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 from shepherd_dialect.workspace_control.runtime_provider import (
     ClaudeWorkspaceRuntimeProvider,
     WorkspaceRuntimeInputArtifact,
@@ -54,8 +53,7 @@ def _make_workspace(root: Path) -> ShepherdWorkspace:
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     return ShepherdWorkspace(
         mg,
         trace_store_path=root / ".vcscore" / "shepherd" / "trace.sqlite",
@@ -78,8 +76,7 @@ def generate(repo, **kwargs):
 
 
 def _seed_selected_workspace(workspace: ShepherdWorkspace) -> GitRepo:
-    with _seal_and_select_enabled():
-        workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="base.txt", content=b"base\n")
+    workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="base.txt", content=b"base\n")
     return workspace.git_repo()
 
 

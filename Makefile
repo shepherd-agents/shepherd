@@ -292,3 +292,20 @@ release-evidence-lane-c:
 		-rA -q --junitxml=$(CURDIR)/tmp/release-evidence/lane-c.junit.xml
 	uv run python scripts/check_executed_evidence.py \
 		--junitxml tmp/release-evidence/lane-c.junit.xml --profile lane-c
+
+# Beat-0 safety bar (0.3.0): fabrication fence + placement refusal + W0 correctness.
+# All legs are offline; runs from the repo root (the profile's classnames are
+# root-relative) and forbids skips — every leg must execute on every host.
+.PHONY: release-evidence-beat0
+release-evidence-beat0:
+	@mkdir -p tmp/release-evidence
+	-uv run pytest \
+		shepherd/packages/dialect/tests/test_handle_return_fence.py \
+		shepherd/packages/dialect/tests/test_placement_refusal_dialect_lane.py \
+		shepherd/packages/dialect/tests/test_model_call_key_shim_dialect.py \
+		shepherd/packages/runtime/tests/unit/step/test_handle_return_fence.py \
+		shepherd/packages/runtime/tests/unit/nucleus/test_placement_refusal.py \
+		shepherd/packages/runtime/tests/unit/nucleus/test_w0_correctness.py \
+		-rA -q --junitxml=$(CURDIR)/tmp/release-evidence/beat0.junit.xml
+	uv run python scripts/check_executed_evidence.py \
+		--junitxml tmp/release-evidence/beat0.junit.xml --profile beat0-safety --forbid-skips

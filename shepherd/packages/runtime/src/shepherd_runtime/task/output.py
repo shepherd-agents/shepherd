@@ -7,7 +7,12 @@ from typing import Any, Literal, get_args, get_origin
 
 from shepherd_core.errors import TaskRefOutputError
 from shepherd_core.output import coerce_output_value, generate_mock_value
-from shepherd_core.schema import merge_schema_defs, type_to_json_schema, wrap_as_json_schema
+from shepherd_core.schema import (
+    merge_schema_defs,
+    refuse_handle_return_slot,
+    type_to_json_schema,
+    wrap_as_json_schema,
+)
 
 from shepherd_runtime.task.source_analysis import SourceExtractionError, extract_task_source
 from shepherd_runtime.task.source_validation import SourceValidationError
@@ -77,6 +82,7 @@ def generate_output_schema(meta: TaskMetadata) -> dict[str, Any] | None:
     all_defs: dict[str, Any] = {}
 
     for name, field_info in meta.outputs.items():
+        refuse_handle_return_slot(field_info.inner_type)
         inner_type = strip_none_from_type(field_info.inner_type)
         task_ref_kind = _task_ref_output_kind(field_info.inner_type)
         if task_ref_kind is not None:

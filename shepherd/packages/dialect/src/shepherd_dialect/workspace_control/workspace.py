@@ -9,13 +9,14 @@ import logging
 import os
 import sys
 import tempfile
+import textwrap
 import uuid
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, replace
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING, Any, Literal, NoReturn, Protocol, get_type_hints
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, NoReturn, Protocol, get_type_hints
 
 from shepherd2.schemas.execution import execution_id_for
 from vcs_core import InvalidRepositoryStateError, terminate_as_interrupt
@@ -45,8 +46,8 @@ from shepherd_dialect.workspace_control.drivers import (
     mint_ledger_write_authority,
 )
 from shepherd_dialect.workspace_control.errors import WorkspaceControlError
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled, effective_feature_flags
 from shepherd_dialect.workspace_control.identities import (
+    GENERATED_MODULE_PREFIX,
     RunRef,
     RunRefInput,
     RunSelectorInput,
@@ -368,7 +369,6 @@ class _WorkspaceRunPlacementDecision:
             resolved_placement=self.resolved,
             enforcement_basis=self.initial_enforcement_basis,
             execution_descriptor=self.execution_descriptor,
-            effective_feature_flags=effective_feature_flags(),
         )
 
 
@@ -629,7 +629,9 @@ class TaskRuntimeContext:
         task_payload, task_ledger_head = _selected_task_ledger_payload_with_head(self._workspace.mg)
         task = _get_task_from_payload(task_payload, task_ref_id)
         if task is None:
-            raise TaskNotFoundError(f"no active task matches {task_ref_id!r}")
+            raise TaskNotFoundError(
+                _task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref))
+            )
         if task.status == "draft":
             raise RunStartError(f"task {task.task_id}@{task.version} is draft; activate it after dependencies resolve")
         resolution = _task_resolution_record(
@@ -833,8 +835,7 @@ class ShepherdWorkspace:
             store=store,
         )
         if activate:
-            with _seal_and_select_enabled():
-                mg.activate()
+            mg.activate()
         return cls(mg, workspace_path=workspace)
 
     def close(self) -> None:
@@ -1032,8 +1033,11 @@ class ShepherdWorkspace:
         from shepherd_dialect.workspace_control.run_handles import WorkspaceRun
 
         require_selected_workspace_git_repo(self.mg, repo)
+        # Pass the raw ref (which may be a task callable) so a not-found refusal can name
+        # the callable-registered-under-a-custom-id case; `_start_retained_workspace_run`
+        # coerces once, internally.
         record = self.runs._start_retained_workspace_run(
-            coerce_task_ref(task_ref),
+            task_ref,
             args=args,
             may=may,
             placement=placement,
@@ -1063,8 +1067,10 @@ class ShepherdWorkspace:
         """
         from shepherd_dialect.workspace_control.run_handles import WorkspaceRun
 
+        # Raw ref through to the deep coercion (see _run_retained_workspace) so the
+        # callable-registered-under-a-custom-id refusal keeps its hint on this path too.
         record = self.runs._start_retained_workspace_run(
-            coerce_task_ref(task_ref),
+            task_ref,
             args=args,
             may=may,
             placement=placement,
@@ -1079,6 +1085,18 @@ class ShepherdWorkspace:
         """Select a resolved retained run output into its live parent world."""
         return self._settle_retained_run_output(output, method_name="select_retained_output")
 
+    def apply(self, output: RunOutput) -> RetainedOutputSettlementResult:
+        """Apply a resolved retained run output onto its (possibly advanced) parent world.
+
+        Where ``select`` is fast-forward-only (it fails closed if the parent moved since the
+        run's fork basis), ``apply`` three-way-merges the run's whole delta onto the current
+        parent when the two change sets are path-disjoint (equal-or-prefix-or-alias, T1 D2)
+        and fails closed on any overlap — no content synthesis at the settlement boundary.
+        Whole-output only: per-binding / sub-root apply stays gated on the ``commit_prepared``
+        keystone. Consume-once, like every settlement verb.
+        """
+        return self._settle_retained_run_output(output, method_name="apply_retained_output")
+
     def release(self, output: RunOutput) -> RetainedOutputSettlementResult:
         """Consume a resolved retained run output without selecting it."""
         return self._settle_retained_run_output(output, method_name="release_retained_output")
@@ -1087,14 +1105,15 @@ class ShepherdWorkspace:
         """Consume a resolved retained run output as discarded."""
         return self._settle_retained_run_output(output, method_name="discard_retained_output")
 
-    def _refuse_readonly_multi_binding_select(self, output: RunOutput) -> None:
+    def _refuse_readonly_multi_binding_mutation(self, output: RunOutput, *, verb: str) -> None:
         """Enforce the any-writable settlement rule for a heterogeneous run (Lane C LC-4b).
 
-        Selecting a per-binding run's whole-delta output is allowed iff at least one binding was
-        ReadWrite — the syscall jail guarantees the retained delta contains only authorized writes,
-        so selecting the whole delta cannot apply an unauthorized change. ``can_mutate`` is computed
-        explicitly from the recorded per-binding authority (``any(a == "readwrite")``), never via
-        the tripwired run-wide scalar. Single-binding runs (no per-binding evidence) are untouched.
+        Settling a per-binding run's whole-delta output into the parent (select or apply) is
+        allowed iff at least one binding was ReadWrite — the syscall jail guarantees the retained
+        delta contains only authorized writes, so adopting the whole delta cannot apply an
+        unauthorized change. ``can_mutate`` is computed explicitly from the recorded per-binding
+        authority (``any(a == "readwrite")``), never via the tripwired run-wide scalar.
+        Single-binding runs (no per-binding evidence) are untouched.
         """
         owner = getattr(output, "owner", None)
         if getattr(owner, "kind", None) != "run" or getattr(owner, "run_id", None) is None:
@@ -1110,17 +1129,31 @@ class ShepherdWorkspace:
         )
         if not can_mutate:
             raise WorkspaceControlError(
-                "retained-output select refused (any-writable rule): every binding in this run was "
-                "ReadOnly, so nothing was authorized to mutate the workspace — selecting the whole "
+                f"retained-output {verb} refused (any-writable rule): every binding in this run was "
+                "ReadOnly, so nothing was authorized to mutate the workspace — adopting the whole "
                 "delta is not allowed. Use release/discard instead."
             )
+
+    # Parent-mutating settlement verbs run the authority lane; the vcs-core kind→route
+    # derivation (T1 D7) keys off this map, never a free constant. The future
+    # settlement-action registry's dialect row (g10).
+    _MUTATING_SETTLEMENT_KINDS: ClassVar[dict[str, tuple[str, str]]] = {
+        "select_retained_output": ("select", "retained_output_selection"),
+        "apply_retained_output": ("apply", "retained_output_application"),
+    }
 
     def _settle_retained_run_output(self, output: RunOutput, *, method_name: str) -> Any:
         request = _validated_retained_run_output_settlement_request(self, output)
         kwargs: dict[str, Any] = {}
-        if method_name == "select_retained_output":
-            self._refuse_readonly_multi_binding_select(request.output)
-            provider = _retained_output_selection_authority_provider(self.mg, request.output)
+        mutating = self._MUTATING_SETTLEMENT_KINDS.get(method_name)
+        if mutating is not None:
+            verb, transaction_kind = mutating
+            self._refuse_readonly_multi_binding_mutation(request.output, verb=verb)
+            provider = _retained_output_settlement_authority_provider(
+                self.mg,
+                request.output,
+                transaction_kind=transaction_kind,
+            )
             kwargs["decide"] = provider
             kwargs["effective_match_digest"] = provider.effective_match_digest
             kwargs["authority_surface_plan_digest"] = provider.authority_surface_plan_digest
@@ -1131,14 +1164,17 @@ class ShepherdWorkspace:
         method = getattr(self.mg, method_name, None)
         if not callable(method):
             raise WorkspaceControlError(f"VcsCore.{method_name} is required for run-output settlement")
-        with _seal_and_select_enabled():
-            try:
-                return method(request.handle, parent=request.parent, binding=request.binding, **kwargs)
-            except InvalidRepositoryStateError as exc:
-                message = str(exc)
-                if method_name == "select_retained_output" and message.startswith("retained-output selection"):
-                    raise WorkspaceControlError(message) from exc
-                raise
+        try:
+            return method(request.handle, parent=request.parent, binding=request.binding, **kwargs)
+        except InvalidRepositoryStateError as exc:
+            message = str(exc)
+            if method_name == "select_retained_output" and message.startswith("retained-output selection"):
+                raise WorkspaceControlError(message) from exc
+            if method_name == "apply_retained_output" and message.startswith(
+                ("retained-output application", "Cannot apply retained output")
+            ):
+                raise WorkspaceControlError(message) from exc
+            raise
 
 
 class TaskLibraryClient:
@@ -1205,14 +1241,20 @@ class TaskLibraryClient:
         """
         task_source = _resolve_task_source(source)
         resolved_task_id = task_id or _default_task_id(task_source.import_path)
+        resolved_may_default, ceiling_provenance = _resolve_task_may_default_with_provenance(
+            may_default, task_source
+        )
+        resolved_metadata = _registration_metadata(
+            metadata, source=source, task_source=task_source, ceiling_provenance=ceiling_provenance
+        )
         return self._apply_mutation(
             _TaskLibraryMutation(
                 kind="create",
                 task_id=resolved_task_id,
                 source=task_source,
-                may_default=_resolve_task_may_default(may_default, task_source),
+                may_default=resolved_may_default,
                 declared_dependencies=_coerce_declared_dependencies(declared_dependencies),
-                metadata=dict(metadata or {}),
+                metadata=resolved_metadata,
                 base_version=None,
                 produced_by_run=produced_by_run,
                 derived_from=derived_from,
@@ -1274,14 +1316,20 @@ class TaskLibraryClient:
             qualname=entrypoint,
             source_text=source_text,
         )
+        resolved_may_default, ceiling_provenance = _resolve_task_may_default_with_provenance(
+            may_default, task_source
+        )
+        resolved_metadata = _registration_metadata(
+            metadata, source=None, task_source=task_source, ceiling_provenance=ceiling_provenance
+        )
         return self._apply_mutation(
             _TaskLibraryMutation(
                 kind="create",
                 task_id=task_id,
                 source=task_source,
-                may_default=_resolve_task_may_default(may_default, task_source),
+                may_default=resolved_may_default,
                 declared_dependencies=_coerce_declared_dependencies(declared_dependencies),
-                metadata=dict(metadata or {}),
+                metadata=resolved_metadata,
                 base_version=None,
                 produced_by_run=produced_by_run,
                 derived_from=derived_from,
@@ -1566,27 +1614,26 @@ class RunControlClient:
             trace_store = owned_store
         try:
             run_ref_id, exact_run_ref = _coerce_optional_run_query_input(run_ref)
-            with _seal_and_select_enabled():
-                if exact_run_ref:
-                    assert run_ref_id is not None
-                    refs = outputs_for_exact_run(
-                        self.mg,
-                        run_ref=run_ref_id,
-                        parent=parent,
-                        binding=binding,
-                        state=state,
-                        trace_store=trace_store,
-                    )
-                else:
-                    refs = outputs_for_run(
-                        self.mg,
-                        run_ref=run_ref_id,
-                        parent=parent,
-                        binding=binding,
-                        state=state,
-                        trace_store=trace_store,
-                    )
-                return tuple(RunOutput(self._workspace, ref) for ref in refs)
+            if exact_run_ref:
+                assert run_ref_id is not None
+                refs = outputs_for_exact_run(
+                    self.mg,
+                    run_ref=run_ref_id,
+                    parent=parent,
+                    binding=binding,
+                    state=state,
+                    trace_store=trace_store,
+                )
+            else:
+                refs = outputs_for_run(
+                    self.mg,
+                    run_ref=run_ref_id,
+                    parent=parent,
+                    binding=binding,
+                    state=state,
+                    trace_store=trace_store,
+                )
+            return tuple(RunOutput(self._workspace, ref) for ref in refs)
         finally:
             if owned_store is not None:
                 owned_store.close()
@@ -1660,12 +1707,11 @@ class RunControlClient:
         except ValueError as exc:
             raise WorkspaceControlError(f"run output publication requires an exact run identity; {exc}") from exc
         self._require_exact_run_identity_for_output_mutation(run_ref_id, operation="run output publication")
-        with _seal_and_select_enabled():
-            return publish_retained_workspace_output(
-                self.mg,
-                run_ref=run_ref_id,
-                trace_store_path=self._workspace.trace_store_path,
-            )
+        return publish_retained_workspace_output(
+            self.mg,
+            run_ref=run_ref_id,
+            trace_store_path=self._workspace.trace_store_path,
+        )
 
     def _require_exact_run_identity_for_output_mutation(self, run_ref: str, *, operation: str) -> None:
         if get_run(self.mg, run_ref) is not None:
@@ -1699,7 +1745,9 @@ class RunControlClient:
         task_payload, task_ledger_head = _selected_task_ledger_payload_with_head(self.mg)
         task = _get_task_from_payload(task_payload, task_ref_id)
         if task is None:
-            raise TaskNotFoundError(f"no active task matches {task_ref_id!r}")
+            raise TaskNotFoundError(
+                _task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref))
+            )
         if task.status == "draft":
             raise RunStartError(f"task {task.task_id}@{task.version} is draft; activate it after dependencies resolve")
         resolution = _task_resolution_record(
@@ -1762,7 +1810,9 @@ class RunControlClient:
         task_payload, task_ledger_head = _selected_task_ledger_payload_with_head(self.mg)
         task = _get_task_from_payload(task_payload, task_ref_id)
         if task is None:
-            raise TaskNotFoundError(f"no active task matches {task_ref_id!r}")
+            raise TaskNotFoundError(
+                _task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref))
+            )
         if task.status == "draft":
             raise RunStartError(f"task {task.task_id}@{task.version} is draft; activate it after dependencies resolve")
         if task.artifact_ref is None:
@@ -2061,7 +2111,9 @@ class RunControlClient:
         task_payload, task_ledger_head = _selected_task_ledger_payload_with_head(self.mg)
         task = _get_task_from_payload(task_payload, task_ref_id)
         if task is None:
-            raise TaskNotFoundError(f"no active task matches {task_ref_id!r}")
+            raise TaskNotFoundError(
+                _task_not_found_message(task_ref_id, from_callable=_task_ref_is_callable(task_ref))
+            )
         if task.status == "draft":
             raise RunStartError(f"task {task.task_id}@{task.version} is draft; activate it after dependencies resolve")
         if task.artifact_ref is None:
@@ -2174,12 +2226,7 @@ class RunControlClient:
             handler_env_ref=None,
             settlement_policy=settlement_policy,
         )
-        # A retained run executes under the seal-and-select lane by construction;
-        # build its execution evidence inside that scope so the recorded
-        # effective-flag provenance (P1.2) reflects the lane the run actually
-        # used, not the ambient env at record-assembly time.
-        with _seal_and_select_enabled():
-            run_execution_evidence = placement_decision.evidence()
+        run_execution_evidence = placement_decision.evidence()
         running = RunRecord(
             run_ref=run_ref,
             task_id=resolved.task_id,
@@ -2209,49 +2256,48 @@ class RunControlClient:
             resolved_task_graph=resolved_graph,
             task_resolutions=(root_resolution,),
         )
-        with _seal_and_select_enabled():
-            running = replace(
-                running,
-                operation_refs=replace(
-                    running.operation_refs,
-                    run_start_revision=self._publish_record(
-                        running,
-                        args_payload=args_payload,
-                        flow_run_payload=flow_run_payload,
-                    ),
-                ),
-            )
-            try:
-                sealed_execution, completed_resolutions, task_executions = self._execute_nucleus_retained_run(
-                    run_ref=run_ref,
-                    args=run_args,
-                    authority_decision=authority_decision,
-                    execution_plan=retained_execution,
-                    parent_scope=parent_scope,
-                    root_resolution=root_resolution,
-                    resolved_graph=resolved_graph,
-                    placement_decision=placement_decision,
-                    runtime_plan=runtime_plan,
-                    multi_binding=multi_binding,
-                )
-            except _NucleusRetainedRunExecutionError as exc:
-                self._publish_failed_retained_workspace_run(
+        running = replace(
+            running,
+            operation_refs=replace(
+                running.operation_refs,
+                run_start_revision=self._publish_record(
                     running,
-                    exc.cause,
-                    task_resolutions=exc.task_resolutions,
-                    task_executions=exc.task_executions,
-                )
-            except Exception as exc:  # noqa: BLE001 - terminalize arbitrary task/runtime failures.
-                self._publish_failed_retained_workspace_run(running, exc)
-
-            return self._publish_successful_retained_workspace_run(
-                running,
-                sealed_execution=sealed_execution,
-                completed_resolutions=completed_resolutions,
-                task_executions=task_executions,
-                trace_ref=trace_ref,
-                resolved=resolved,
+                    args_payload=args_payload,
+                    flow_run_payload=flow_run_payload,
+                ),
+            ),
+        )
+        try:
+            sealed_execution, completed_resolutions, task_executions = self._execute_nucleus_retained_run(
+                run_ref=run_ref,
+                args=run_args,
+                authority_decision=authority_decision,
+                execution_plan=retained_execution,
+                parent_scope=parent_scope,
+                root_resolution=root_resolution,
+                resolved_graph=resolved_graph,
+                placement_decision=placement_decision,
+                runtime_plan=runtime_plan,
+                multi_binding=multi_binding,
             )
+        except _NucleusRetainedRunExecutionError as exc:
+            self._publish_failed_retained_workspace_run(
+                running,
+                exc.cause,
+                task_resolutions=exc.task_resolutions,
+                task_executions=exc.task_executions,
+            )
+        except Exception as exc:  # noqa: BLE001 - terminalize arbitrary task/runtime failures.
+            self._publish_failed_retained_workspace_run(running, exc)
+
+        return self._publish_successful_retained_workspace_run(
+            running,
+            sealed_execution=sealed_execution,
+            completed_resolutions=completed_resolutions,
+            task_executions=task_executions,
+            trace_ref=trace_ref,
+            resolved=resolved,
+        )
 
     def _publish_failed_retained_workspace_run(
         self,
@@ -2857,6 +2903,25 @@ def _validate_source_identity_path(path: str) -> None:
         raise TaskRegistrationError("source_identity path must be a relative workspace path")
 
 
+def _task_not_found_message(task_ref_id: str, *, from_callable: bool = False) -> str:
+    if task_ref_id.startswith(GENERATED_MODULE_PREFIX):
+        hint = " — register it first, e.g. `ws.tasks.register(the_task)`"
+    elif from_callable:
+        # The lookup id was derived from a task callable, but registration used a
+        # different id — the caller passed `task_id=` at register time. Name that case.
+        hint = (
+            " — resolved from a task callable; register it first, or if you registered "
+            "with an explicit `task_id=`, run with that id string"
+        )
+    else:
+        hint = ""
+    return f"no active task matches {task_ref_id!r}{hint}"
+
+
+def _task_ref_is_callable(task_ref: object) -> bool:
+    return callable(task_ref) and not isinstance(task_ref, str)
+
+
 def _resolve_task_source(source: str | Callable[..., Any]) -> _TaskSource:
     if isinstance(source, str):
         task_body = resolve_task_id(source)
@@ -2875,7 +2940,17 @@ def _task_source_from_callable(import_path: str, task_body: Callable[..., Any]) 
     module_name, _, qualname = import_path.partition(":")
     if not module_name or not qualname:
         raise TaskRegistrationError(f"task source {import_path!r} is not a canonical import path")
-    source_file = inspect.getsourcefile(task_body)
+    # The executing artifact is always a plain function; `@sp.task` is a caller-side
+    # affordance. Unwrap so source capture, execution, and re-import all key off the
+    # underlying function.
+    plain_body = inspect.unwrap(task_body)
+    # A task defined in a run-as-script module (`__main__`) has no importable home:
+    # whole-file capture would embed the driver script as the artifact. Capture the
+    # definition alone instead — sound exactly for bodyless tasks (self-contained by
+    # construction); refuse a script-defined body loudly.
+    if module_name == "__main__":
+        return _generated_source_from_main_callable(qualname, plain_body)
+    source_file = inspect.getsourcefile(plain_body)
     if source_file is None:
         raise TaskRegistrationError(f"task source {import_path!r} has no readable source file")
     file_path = Path(source_file)
@@ -2889,11 +2964,95 @@ def _task_source_from_callable(import_path: str, task_body: Callable[..., Any]) 
         qualname=qualname,
         file_path=file_path,
         source_text=source_text,
-        callable=task_body,
+        callable=plain_body,
+        # Every _TaskSource carries the compiled signature schema, so the task-ceiling
+        # derivation (`_ceiling_from_signature_schema`) reads authority off one seam —
+        # the same per-parameter grant descriptors every registration path produces —
+        # rather than a second walk of the live annotations.
+        signature_schema=_signature_schema(plain_body),
         provenance_kind="imported_source",
     )
     _validate_single_file_capture_imports(task_source)
     return task_source
+
+
+def _generated_source_from_main_callable(qualname: str, plain_body: Callable[..., Any]) -> _TaskSource:
+    """Capture a ``__main__``-defined task at definition scope (bodyless only).
+
+    A run-as-script module is not importable in the confined runner, so the artifact
+    cannot be "the module file". For a bodyless task the definition is the whole
+    contract, so we synthesize a minimal module carrying just the (decorator-stripped)
+    def plus the ``shepherd`` import its annotations need. A script-defined *body* is
+    refused: its statements may reference module-level names that would not survive
+    definition-scoped extraction, and silently capturing the whole script is the
+    footgun this replaces.
+    """
+    from shepherd_runtime.nucleus import classify_task_body
+
+    if "<locals>" in getattr(plain_body, "__qualname__", ""):
+        raise TaskRegistrationError(
+            f"cannot register local function {qualname!r}: define the task at module scope"
+        )
+    classification = classify_task_body(plain_body)
+    if classification != "bodyless":
+        raise TaskRegistrationError(
+            f"task {qualname!r} is defined in a run-as-script module (__main__) with a "
+            f"{'non-empty' if classification == 'bodied' else 'non-introspectable'} body; "
+            "move it to an importable module (e.g. tasks.py) and register it from there, "
+            "so its artifact is the module rather than the whole script"
+        )
+    try:
+        definition = textwrap.dedent(inspect.getsource(plain_body))
+    except (OSError, TypeError) as exc:
+        raise TaskRegistrationError(
+            f"task {qualname!r} has no readable source; define it in an importable module"
+        ) from exc
+    definition = _strip_leading_decorators(definition, qualname)
+    module_name = f"{GENERATED_MODULE_PREFIX}{qualname.replace('.', '_')}"
+    source_text = f"import shepherd as sp\n\n{definition}"
+    _fence_generated_module_resolves(source_text, qualname)
+    return _task_source_from_source_text(
+        module_name=module_name,
+        qualname=qualname,
+        source_text=source_text,
+    )
+
+
+def _fence_generated_module_resolves(source_text: str, qualname: str) -> None:
+    """Refuse a generated artifact whose annotations name things only ``__main__`` has.
+
+    The generated module carries only ``import shepherd as sp`` plus the def, so its
+    signature annotations must resolve against the shepherd vocabulary and builtins.
+    Defining the (bodyless) function evaluates its annotations exactly as the confined
+    runner's import will — running only the import and the def statement, no body — so
+    a clean exec here turns a confusing in-jail ``NameError`` into a teachable refusal.
+    """
+    try:
+        # dont_inherit=True: the generated module has no `from __future__ import
+        # annotations`, so the confined runner's import evaluates annotations eagerly.
+        # This module (workspace.py) does have it; without dont_inherit the fence would
+        # inherit PEP 563 and never see the NameError the real import will raise.
+        code = compile(source_text, f"<shepherd-generated:{qualname}>", "exec", dont_inherit=True)
+        exec(code, {})  # noqa: S102
+    except NameError as exc:
+        raise TaskRegistrationError(
+            f"task {qualname!r} has a signature that references a name only its script defines "
+            f"({exc}); the generated task artifact carries only `import shepherd as sp`. Move the "
+            "task to an importable module so its dependencies travel with it."
+        ) from exc
+
+
+def _strip_leading_decorators(definition: str, qualname: str) -> str:
+    """Remove decorator lines above the def so the generated artifact is a plain fn."""
+    tree = ast.parse(definition)
+    func = next(
+        (node for node in tree.body if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)),
+        None,
+    )
+    if func is None:
+        raise TaskRegistrationError(f"generated task source for {qualname!r} has no function definition")
+    func.decorator_list = []
+    return ast.unparse(func)
 
 
 def _task_source_from_source_text(
@@ -2996,25 +3155,117 @@ def _default_task_id(import_path: str) -> str:
     return import_path.replace(":", ".")
 
 
+# Ceiling provenance — durable registry vocabulary (recorded on every registration so a
+# ceiling that came from the call site is never indistinguishable from one the signature
+# earned). Reserving unemitted values now is free; re-carving the enum later is a compat
+# event (the naming-vs-identity discipline).
+CEILING_PROVENANCE_EXPLICIT = "explicit"  # the registration `may_default=` kwarg
+CEILING_PROVENANCE_DECLARED = "declared"  # reserved: definition-site `@task(may=...)`,
+#   wired when the Match-surface-to-profile lowering lands (needs the Match algebra; today
+#   the decorator's `may` is not lowered to a coarse profile at registration).
+CEILING_PROVENANCE_DERIVED = "derived"  # the grant-lattice join over the signature's grants
+CEILING_PROVENANCE_DEFAULT = "default"  # no authority grants in the signature
+CEILING_PROVENANCE_DEFAULT_UNKNOWN_GRANT = "default_unknown_grant"  # reserved: a grant is
+#   present but uncompilable. The schema seam fails closed on such grants *before* this
+#   point today, so this value is not currently emitted; it is the labeled home for a
+#   future soft-profile that would admit-then-refuse rather than refuse at build.
+
+CEILING_PROVENANCE_METADATA_KEY = "shepherd.ceiling_provenance"
+
+
 def _resolve_task_may_default(explicit: str | None, source: _TaskSource) -> str:
-    raw_may = explicit if explicit is not None else _task_source_may_default(source)
+    return _resolve_task_may_default_with_provenance(explicit, source)[0]
+
+
+def _resolve_task_may_default_with_provenance(explicit: str | None, source: _TaskSource) -> tuple[str, str]:
+    """Resolve the task-level may ceiling and record where it came from.
+
+    Priority: an explicit ``may_default=`` override wins (loud, provenance ``explicit``);
+    otherwise the ceiling is derived from the signature's compiled grants — the join over
+    the grant lattice (``derived``), or the workspace default when the signature declares
+    no grants (``default``). One seam, every registration path.
+    """
+    if explicit is not None:
+        return _canonical_may(explicit), CEILING_PROVENANCE_EXPLICIT
+    ceiling, provenance = _ceiling_from_signature_schema(source.signature_schema)
+    if ceiling is None:
+        return _canonical_may(DEFAULT_WORKSPACE_MAY_PROFILE), provenance
+    return _canonical_may(ceiling), provenance
+
+
+def _canonical_may(raw_may: str) -> str:
     try:
         return canonical_may_profile_name(raw_may)
     except MayProfileError as exc:
         raise TaskRegistrationError(str(exc)) from exc
 
 
-def _task_source_may_default(source: _TaskSource) -> str:
-    if source.callable is None:
-        return DEFAULT_WORKSPACE_MAY_PROFILE
-    return _callable_may_default(source.callable)
+def _ceiling_from_signature_schema(signature_schema: JsonObject | None) -> tuple[str | None, str]:
+    """Derive the task ceiling as the join over the signature's grant lattice.
+
+    Returns ``(profile_or_None, provenance)``. ``None`` means the signature declares no
+    grants, so the caller applies the workspace default. Today the lattice is the two-point
+    ``{ReadOnly, ReadWrite}`` profile lattice; when Match-valued grants land (the T4
+    successor spec, T5 behind Wall 2) this join becomes Match union — P-030 §4's
+    the union of parameter grants — the same rule at a wider lattice.
+    """
+    grants = _workspace_gitrepo_grants_by_param(signature_schema or {})
+    if not grants:
+        return None, CEILING_PROVENANCE_DEFAULT
+    any_mutating = any(_grant_descriptor_allows_mutation(descriptor) for descriptor in grants.values())
+    return ("ReadWrite" if any_mutating else "ReadOnly"), CEILING_PROVENANCE_DERIVED
 
 
-def _callable_may_default(task_body: Callable[..., Any]) -> str:
-    may = getattr(task_body, "may_default", None)
-    if may is None:
-        may = getattr(task_body, "__shepherd_may_default__", None)
-    return may if isinstance(may, str) and may else DEFAULT_WORKSPACE_MAY_PROFILE
+def _grant_descriptor_allows_mutation(descriptor: Any) -> bool:
+    # A ReadOnly grant compiles to clauses that all deny mutation (``mutates is False``);
+    # any clause that does not deny mutation makes the grant writable. Mirrors the jail
+    # lowering's `_gitrepo_grant_clamp_allows_mutation` so ceiling and clamp agree.
+    return any(getattr(clause, "mutates", None) is not False for clause in descriptor.clauses)
+
+
+DERIVED_FROM_CALLABLE_METADATA_KEY = "shepherd.derived_from_callable"
+
+
+def _registration_metadata(
+    user_metadata: Mapping[str, object] | None,
+    *,
+    source: object,
+    task_source: _TaskSource,
+    ceiling_provenance: str,
+) -> dict[str, object]:
+    """Build the artifact metadata, recording ceiling provenance and callable origin.
+
+    User metadata may not collide with the reserved ``shepherd.*`` keys — a silent
+    overwrite of provenance would defeat the point of recording it.
+    """
+    resolved: dict[str, object] = dict(user_metadata or {})
+    for reserved in (CEILING_PROVENANCE_METADATA_KEY, DERIVED_FROM_CALLABLE_METADATA_KEY):
+        if reserved in resolved:
+            raise TaskRegistrationError(
+                f"metadata key {reserved!r} is reserved for registration provenance and cannot be set by callers"
+            )
+    resolved[CEILING_PROVENANCE_METADATA_KEY] = ceiling_provenance
+    if callable(source):
+        resolved[DERIVED_FROM_CALLABLE_METADATA_KEY] = {
+            "module": task_source.module_name,
+            "qualname": task_source.qualname,
+            # ``file_path`` is None for a definition-scoped generated (__main__) artifact;
+            # record the originating script instead so ``shepherd task show`` can still
+            # name where it came from.
+            "source_file": (
+                str(task_source.file_path)
+                if task_source.file_path is not None
+                else _callable_source_file(source)
+            ),
+        }
+    return resolved
+
+
+def _callable_source_file(source: object) -> str | None:
+    try:
+        return inspect.getsourcefile(inspect.unwrap(source))  # type: ignore[arg-type]
+    except (TypeError, OSError):
+        return None
 
 
 @dataclass(frozen=True)
@@ -3641,19 +3892,26 @@ def _runtime_operation_id_for_driver_result(driver_result: Any) -> str | None:
     return operation_id if isinstance(operation_id, str) and operation_id else None
 
 
-def _retained_output_selection_authority_provider(mg: Any, output: Any) -> Callable[[Any], AuthorityDecision]:
+def _retained_output_settlement_authority_provider(
+    mg: Any,
+    output: Any,
+    *,
+    transaction_kind: str = "retained_output_selection",
+) -> Callable[[Any], AuthorityDecision]:
+    verb = "application" if transaction_kind == "retained_output_application" else "selection"
     owner = getattr(output, "owner", None)
     if getattr(owner, "kind", None) != "run" or getattr(owner, "run_id", None) is None:
-        raise WorkspaceControlError("run-output selection authority requires a run-owned output")
+        raise WorkspaceControlError(f"run-output {verb} authority requires a run-owned output")
     record = get_run(mg, owner.run_id)
     if record is None:
-        raise WorkspaceControlError(f"run-output selection authority cannot resolve run {owner.run_id!r}")
+        raise WorkspaceControlError(f"run-output {verb} authority cannot resolve run {owner.run_id!r}")
     if record.authority_context is None:
-        raise WorkspaceControlError("run-output selection authority requires a recorded run authority context")
+        raise WorkspaceControlError(f"run-output {verb} authority requires a recorded run authority context")
     try:
         return retained_output_authority_provider_for_context(
             record.authority_context,
             shepherd_context=_workspace_authority_shepherd_context_for_record(record),
+            transaction_kind=transaction_kind,
         )
     except (TypeError, ValueError, MayProfileError) as exc:
         raise WorkspaceControlError(str(exc)) from exc

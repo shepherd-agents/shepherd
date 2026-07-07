@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-coding"
-version = "0.2.0"
+version = "0.3.0"
 description = "Coding domain package for the Shepherd framework - GitHub integration and code review tasks"
 readme = "README.md"
 license = { text = "MIT" }

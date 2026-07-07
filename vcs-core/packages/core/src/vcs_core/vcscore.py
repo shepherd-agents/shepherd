@@ -2569,6 +2569,47 @@ class VcsCore:
             authority_context=authority_context,
         )
 
+    def apply_retained_output(
+        self,
+        scope_or_handle: ScopeInfo | RetainedWorkspaceHandle | str,
+        *,
+        parent: ScopeInfo,
+        binding: str = "workspace",
+        decide: RetainedOutputDecisionProvider | None = None,
+        authority_operation_id: str | None = None,
+        effective_match_digest: str | None = None,
+        authority_surface_plan_digest: str | None = None,
+        permission_plan_digest: str | None = None,
+        permission_plan_descriptor: Mapping[str, object] | None = None,
+        authority_context: Mapping[str, object] | None = None,
+    ) -> RetainedOutputSettlementResult:
+        """Apply one retained binding output onto its (possibly advanced) parent.
+
+        Whole-output three-way settlement (T1 D1-A): where ``select`` fails closed
+        on parent drift, ``apply`` three-way-merges the candidate delta onto the
+        current parent when the changed paths are disjoint (equal-or-prefix-or-alias),
+        and publishes an application world. ``decide=`` runs the D7 authority lane
+        with signature parity to ``select_retained_output`` (kind
+        ``retained_output_application``; denied/refused publishes no world and writes
+        no receipt). Never routes through ``merge_with_authority``; whole-output only
+        (sub-root apply is gated on the commit_prepared keystone).
+        """
+        from vcs_core._retained_output_application import apply_retained_output
+
+        return apply_retained_output(
+            self,
+            scope_or_handle,
+            parent=parent,
+            binding=binding,
+            decide=decide,
+            authority_operation_id=authority_operation_id,
+            effective_match_digest=effective_match_digest,
+            authority_surface_plan_digest=authority_surface_plan_digest,
+            permission_plan_digest=permission_plan_digest,
+            permission_plan_descriptor=permission_plan_descriptor,
+            authority_context=authority_context,
+        )
+
     def release_retained_output(
         self,
         scope_or_handle: ScopeInfo | RetainedWorkspaceHandle | str,

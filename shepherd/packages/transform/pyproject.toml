@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd-transform"
-version = "0.2.0"
+version = "0.3.0"
 description = "Advanced transformation, meta-task, and behavioral grounding surfaces for Shepherd"
 license = { text = "MIT" }
 readme = "README.md"

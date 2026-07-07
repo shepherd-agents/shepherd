@@ -65,11 +65,47 @@ _LANE_C_JAILED = (
     "test_a7_per_binding_changeset_view",
 )
 
+# Beat-0 safety bar (0.3.0): the fabrication fence (both schema stacks + parity +
+# registration carve-out), the signature-directed placement refusal (both call
+# spellings, with and without a provider, both nuclei), and the W0 correctness
+# fixes (dual-key shim in both nuclei, tri-state body guard, workspace re-entry).
+# All legs are offline — no jailed subset; skips are forbidden via --forbid-skips
+# at the call site (every leg must execute on every host).
+_BEAT0_DIALECT_FENCE = "shepherd.packages.dialect.tests.test_handle_return_fence"
+_BEAT0_RUNTIME_FENCE = "shepherd.packages.runtime.tests.unit.step.test_handle_return_fence"
+_BEAT0_REFUSAL = "shepherd.packages.runtime.tests.unit.nucleus.test_placement_refusal"
+_BEAT0_W0 = "shepherd.packages.runtime.tests.unit.nucleus.test_w0_correctness"
+_BEAT0_SAFETY_REQUIRED = (
+    f"{_BEAT0_DIALECT_FENCE}.TestTwoStackParity::test_refusals_are_identical[GitRepo]",
+    f"{_BEAT0_DIALECT_FENCE}.TestTwoStackParity::test_refusals_are_identical[tuple0]",
+    f"{_BEAT0_DIALECT_FENCE}.TestRegistrationCarveOut::test_task_input_model_accepts_handle_parameter",
+    f"{_BEAT0_DIALECT_FENCE}.TestRegistrationCarveOut::test_task_prompt_refuses_handle_return",
+    f"{_BEAT0_RUNTIME_FENCE}.TestReturnTypeToOutputSchemaFence::test_str_schema_byte_identical_to_prefence_shape",
+    f"{_BEAT0_RUNTIME_FENCE}.TestStepExecutionRoutesThroughFence::test_mock_value_generation_refuses_handle_returns",
+    f"{_BEAT0_REFUSAL}.TestHandleAnnotatedBodylessRefuses::test_direct_call_refuses_with_provider_installed",
+    f"{_BEAT0_REFUSAL}.TestHandleAnnotatedBodylessRefuses::test_run_spelling_refuses_with_provider_installed",
+    f"{_BEAT0_REFUSAL}.TestHandleAnnotatedBodylessRefuses::test_refuses_without_any_provider",
+    f"{_BEAT0_REFUSAL}.TestHandleAnnotatedBodylessRefuses::test_refusal_keys_on_annotation_not_value",
+    f"{_BEAT0_REFUSAL}.TestUnaffectedShapes::test_pure_value_bodyless_still_delivers",
+    f"{_BEAT0_REFUSAL}.TestUnaffectedShapes::test_bodied_task_with_handle_params_untouched",
+    "shepherd.packages.dialect.tests.test_placement_refusal_dialect_lane::test_dialect_ambient_lane_cannot_reach_bodyless_delivery",
+    f"{_BEAT0_W0}.TestDualKeyShim::test_taught_spelling_resolves",
+    "shepherd.packages.dialect.tests.test_model_call_key_shim_dialect::test_taught_spelling_resolves_in_dialect_nucleus",
+    f"{_BEAT0_W0}.TestTriStateBodyClassification::test_exec_defined_return_none_task_raises_loud_not_silent",
+    f"{_BEAT0_W0}.TestTriStateBodyClassification::test_ambiguous_handle_annotated_gets_placement_refusal",
+    f"{_BEAT0_W0}.TestWorkspaceReentry::test_idle_reconfiguration_replaces_instead_of_trapping",
+    f"{_BEAT0_W0}.TestWorkspaceReentry::test_reconfiguration_during_active_run_refuses",
+)
+
 PROFILES: dict[str, EvidenceProfile] = {
     "lane-c": EvidenceProfile(
         name="lane-c",
         required=tuple(f"{_LANE_C_CLASS}::{name}" for name in _LANE_C_REQUIRED),
         jailed=tuple(f"{_LANE_C_CLASS}::{name}" for name in _LANE_C_JAILED),
+    ),
+    "beat0-safety": EvidenceProfile(
+        name="beat0-safety",
+        required=_BEAT0_SAFETY_REQUIRED,
     ),
 }
 

@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-authoring"
-version = "0.2.0"
+version = "0.3.0"
 description = "Design-refinement pipeline for the Shepherd framework"
 readme = "README.md"
 license = { text = "MIT" }

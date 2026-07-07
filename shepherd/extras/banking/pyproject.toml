@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-banking"
-version = "0.2.0"
+version = "0.3.0"
 description = "Banking domain package for the Shepherd framework"
 readme = "README.md"
 license = { text = "MIT" }

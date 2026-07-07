@@ -32,7 +32,6 @@ from vcs_core._execution_capability import (
     detect_containment_backend,
 )
 from vcs_core._fork_hints import ForkHints
-from vcs_core._projection_store import SEAL_AND_SELECT_ENV, seal_and_select_enabled
 from vcs_core._python_runtime_capture_adapter import (
     PYTHON_RUNTIME_EFFECT_TYPE,
 )
@@ -1024,10 +1023,6 @@ def _execute_execution_bound_driver(
     """
     driver = binding.instance
     non_reversible = execution_options.non_reversible_run
-    if execution_options.success_disposition == "seal" and not seal_and_select_enabled():
-        raise InvalidRepositoryStateError(
-            f"Cannot execute with seal success disposition: {SEAL_AND_SELECT_ENV} is not enabled."
-        )
     params = _normalize_and_admit_driver_command_params(
         owner,
         driver,

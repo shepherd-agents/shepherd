@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd-core"
-version = "0.2.0"
+version = "0.3.0"
 description = "Core framework for effect-based AI agents"
 license = { text = "MIT" }
 readme = "README.md"

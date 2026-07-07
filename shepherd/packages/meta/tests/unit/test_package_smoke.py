@@ -15,7 +15,7 @@ class TestPackageImports:
         import shepherd
 
         assert hasattr(shepherd, "__version__")
-        assert shepherd.__version__ == "0.2.0"
+        assert shepherd.__version__ == "0.3.0"
 
     def test_top_level_exposes_public_surface(self):
         """The main package exposes the full public `sp.*` surface (WS-A)."""

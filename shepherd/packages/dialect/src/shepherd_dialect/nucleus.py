@@ -328,11 +328,20 @@ def _responders() -> list[tuple[str, Any]]:
     return list(_RESPONDERS.get())
 
 
+# Dual-key compatibility shim (Bug 1, 2132 W0.1): accept the taught
+# handle("model.call.requested", ...) spelling by normalizing it onto the
+# dispatch key at installation. Dispatch and recorded vocabulary stay
+# "model.call" (the kind-string bump is a durable-vocabulary decision, D-3).
+# This fence also keeps the dialect quickstart nucleus from reintroducing a
+# key drift between the two spellings.
+_EFFECT_KEY_ALIASES: dict[str, str] = {"model.call.requested": "model.call"}
+
+
 @contextlib.contextmanager
 def handle(effect: str, responder: Any) -> Any:
     """Install an in-process responder (the offline `model.call` pattern)."""
     current = _RESPONDERS.get()
-    token = _RESPONDERS.set((*current, (effect, responder)))
+    token = _RESPONDERS.set((*current, (_EFFECT_KEY_ALIASES.get(effect, effect), responder)))
     try:
         yield
     finally:

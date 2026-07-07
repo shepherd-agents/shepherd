@@ -86,7 +86,6 @@ def _make_workspace(root: Path) -> ShepherdWorkspace:
         ShepherdTaskArtifactDriver,
         ShepherdTaskLedgerDriver,
     )
-    from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 
     root.mkdir(parents=True, exist_ok=True)
     store = Store(str(root / ".vcscore"))
@@ -104,16 +103,13 @@ def _make_workspace(root: Path) -> ShepherdWorkspace:
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     return ShepherdWorkspace(mg, trace_store_path=root / ".vcscore" / "shepherd" / "trace.sqlite", workspace_path=root)
 
 
 def _seed_selected(ws: ShepherdWorkspace) -> None:
-    from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 
-    with _seal_and_select_enabled():
-        ws.mg.exec("filesystem", "write", scope=ws.mg.ground, path="base.txt", content=b"base\n")
+    ws.mg.exec("filesystem", "write", scope=ws.mg.ground, path="base.txt", content=b"base\n")
 
 
 @_macos

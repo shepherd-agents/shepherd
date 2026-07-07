@@ -61,7 +61,6 @@ from shepherd_dialect.workspace_control._confined_task_executor import (
 )
 from shepherd_dialect.workspace_control.authority import _allow_path_prefix_grants
 from shepherd_dialect.workspace_control.drivers import mint_ledger_write_authority
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 from shepherd_dialect.workspace_control.gitrepo_handles import same_git_binding_state
 
 if TYPE_CHECKING:
@@ -93,8 +92,7 @@ def _make_workspace(
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     if trace_store_path_override is not None:
         # Point at a different/empty trace store (custody persists in vcs-core; the descriptor does not).
         trace_path: Path | None = trace_store_path_override
@@ -213,8 +211,7 @@ def _seed_selected_workspace(
     path: str = "base.txt",
     content: bytes = b"base\n",
 ) -> GitRepo:
-    with _seal_and_select_enabled():
-        workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path=path, content=content)
+    workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path=path, content=content)
     return _assert_selected_git_repo_for_workspace(workspace)
 
 
@@ -1311,7 +1308,6 @@ def fix_bug(repo, issue: str):
                 source_identity=f"world:{published_world_oid}:path:/tmp/sample_tasks.py",
             )
 
-        monkeypatch.setenv("VCS_CORE_SEAL_AND_SELECT", "1")
         (retained_row,) = workspace.mg.list_retained_outputs(parent=workspace.mg.ground, binding="workspace")
         workspace.mg.release_retained_output(retained_row.scope_name, parent=workspace.mg.ground)
 
@@ -1946,10 +1942,6 @@ def fix_bug(repo, issue: str):
             "profile": "Permissive",
             "provider": "in-process",
         }
-        # P1.2 / finding #5: a retained run records the effective flag state
-        # (seal-and-select is on for the retained lane). The load-bearing check
-        # is that this flag-carrying record then settles cleanly below.
-        assert record.execution_evidence.effective_feature_flags == {"seal_and_select": True}
         assert record.authority_context.grant_clamp["effective_digest"] == (
             record.authority_context.effective_grant_digest
         )
@@ -2424,17 +2416,16 @@ def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):
         workspace.close()
 
 
-def test_unconsumed_retained_output_blocks_task_update_and_uses_run_authority(
+def test_retained_output_select_uses_run_authority_across_task_update(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    # This test asserts the flag-OFF readiness lane: with seal-and-select
-    # enabled, a retained scope is a legitimate state and update_source is no
-    # longer "readiness blocked". The CLI entrypoint setdefaults the flag ON
-    # (cli/__init__.py), so any in-process CLI invocation earlier in the same
-    # pytest process (e.g. CliRunner in test_quickstart_core.py) — or a
-    # developer's shell env — would silently flip this test's semantics.
-    monkeypatch.delenv("VCS_CORE_SEAL_AND_SELECT", raising=False)
+    # An unconsumed retained output is a legitimate state, so updating the task
+    # definition while it is pending succeeds. Crucially, `select` still settles
+    # against the authority the RUN recorded (v1's narrow `GitRepoPath("src/app")`
+    # grant), not the task's current definition — so a run that wrote outside its
+    # recorded grant stays unselectable even after the task is widened to
+    # `ReadWrite`.
     workspace = _make_workspace(tmp_path / "ws")
     try:
         with _allow_path_prefix_grants():
@@ -2456,22 +2447,24 @@ def fix_bug(repo: May[GitRepo, GitRepoPath("src/app")]):
         run = workspace.run("generated.fix_bug", repo=repo, placement="advisory")
         output = run.output()
 
-        with pytest.raises(InvalidRepositoryStateError, match="readiness blocked"):
-            workspace.tasks.update_source(
-                "generated.fix_bug",
-                base_version=v1.version,
-                module="generated_tasks",
-                entrypoint="fix_bug",
-                source_text="""
+        # Retained-legitimate: the pending output does not block the task update.
+        workspace.tasks.update_source(
+            "generated.fix_bug",
+            base_version=v1.version,
+            module="generated_tasks",
+            entrypoint="fix_bug",
+            source_text="""
 from shepherd_runtime.nucleus import GitRepo
 from shepherd_dialect.workspace_control import May, ReadWrite
 
 def fix_bug(repo: May[GitRepo, ReadWrite]):
     return repo.write("docs/forbidden.txt", b"allowed by updated grant\\n")
 """,
-                may_default="ReadWrite",
-            )
-        assert workspace.tasks.get("generated.fix_bug").version == v1.version
+            may_default="ReadWrite",
+        )
+        assert workspace.tasks.get("generated.fix_bug").version != v1.version
+
+        # Select still uses the RUN's recorded (narrow) authority, not the widened task.
 
         with pytest.raises(
             WorkspaceControlError,
@@ -2702,13 +2695,13 @@ def test_workspace_git_repo_acquisition_success_does_not_enable_run_start_execut
     workspace = _make_workspace(tmp_path / "ws")
     try:
         _seed_selected_workspace(workspace)
-        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_SEAL_AND_SELECT", "VCS_CORE_NESTED_OPERATIONS"):
+        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_NESTED_OPERATIONS"):
             monkeypatch.delenv(name, raising=False)
 
         selected_repo = workspace.git_repo()
 
         assert selected_repo.binding == "workspace"
-        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_SEAL_AND_SELECT", "VCS_CORE_NESTED_OPERATIONS"):
+        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_NESTED_OPERATIONS"):
             assert os.environ.get(name) is None
     finally:
         workspace.close()
@@ -2892,13 +2885,13 @@ def test_workspace_git_repo_acquisition_does_not_enable_run_start_execution_flag
 ) -> None:
     workspace = _make_workspace(tmp_path / "ws")
     try:
-        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_SEAL_AND_SELECT", "VCS_CORE_NESTED_OPERATIONS"):
+        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_NESTED_OPERATIONS"):
             monkeypatch.delenv(name, raising=False)
 
         with pytest.raises(WorkspaceControlError, match="current workspace world"):
             workspace.git_repo()
 
-        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_SEAL_AND_SELECT", "VCS_CORE_NESTED_OPERATIONS"):
+        for name in ("SHEPHERD2_SKELETON", "VCS_CORE_NESTED_OPERATIONS"):
             assert os.environ.get(name) is None
     finally:
         workspace.close()
@@ -3661,8 +3654,7 @@ def fix_bug(repo, issue: str):
 
         (still_unconsumed,) = workspace.runs.outputs(run_ref=record.run_ref)
         assert still_unconsumed.state == "unconsumed"
-        with _seal_and_select_enabled():
-            (retained_row,) = workspace.mg.list_retained_outputs(parent=workspace.mg.ground, binding="workspace")
+        (retained_row,) = workspace.mg.list_retained_outputs(parent=workspace.mg.ground, binding="workspace")
         assert retained_row.state == "unconsumed"
         assert retained_row.settlement is None
 

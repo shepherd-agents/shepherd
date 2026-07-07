@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Any
 
 from shepherd_dialect.permission_plan import CarrierCheckAuthority, PermissionPlan
@@ -34,12 +34,19 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class WorkspaceRetainedOutputAuthorityProvider:
-    """Evaluate retained-output selection through helper-built ``Match``."""
+    """Evaluate retained-output settlement (selection or application) through helper-built ``Match``.
+
+    ``plan_route`` labels the settlement lane on the PermissionPlan and must equal the vcs-core
+    kind→route derivation for the settling verb (T1 D7); the authority *surface* (and its
+    digests) stays exactly as recorded at run time — the granted surface is verb-independent,
+    only the route names the lane.
+    """
 
     profile: MayProfile
     surface: GitRepoAuthoritySurface
     policy: GitRepoAuthorityDecisionPolicy
     authority_context: Mapping[str, object] | None = None
+    plan_route: str = "retained_output_selection"
 
     @property
     def effective_match(self) -> Match:
@@ -61,7 +68,7 @@ class WorkspaceRetainedOutputAuthorityProvider:
     def permission_plan(self) -> PermissionPlan:
         return install_permission_plan(
             CarrierCheckAuthority(
-                route="retained_output_selection",
+                route=self.plan_route,
                 effective_match_digest=self.effective_match_digest,
                 authority_surface_plan_digest=self.authority_surface_plan_digest,
             )
@@ -93,18 +100,37 @@ def retained_output_authority_provider_for_context(
     shepherd_context: Mapping[str, object] | None = None,
     transaction_kind: str = "retained_output_selection",
 ) -> WorkspaceRetainedOutputAuthorityProvider:
-    """Build a retained-output authority provider from persisted run metadata."""
+    """Build a retained-output authority provider from persisted run metadata.
+
+    For ``retained_output_application`` (the ``apply`` verb, T1 D7) the classifier policy and
+    PermissionPlan carry the application route while the recorded surface/digests are reused
+    verbatim — the run's granted surface is verb-independent.
+    """
     validated = validate_run_authority_context(context)
     authority_context = vcscore_authority_context_for_run_authority_context(
         validated,
         transaction_kind=transaction_kind,
         shepherd_context=shepherd_context,
     )
+    policy = validated.policy
+    surface = validated.surface
+    if transaction_kind == "retained_output_application":
+        # The recorded GRANT is the verb-independent authority (digest-verified against the run
+        # context by validate_run_authority_context); the Match surface is its per-lane lowering.
+        # Re-lower the same verified grant for the application route — the selection surface's
+        # clauses are route-pinned to retained_output_selection, so application-routed views
+        # would fall outside it and every apply would be refused outside_effective_match.
+        surface = workspace_retained_output_authority_surface_for_grant(
+            validated.effective_grant,
+            route=transaction_kind,
+        )
+        policy = replace(policy, routes=("retained_output_application",))
     return WorkspaceRetainedOutputAuthorityProvider(
         profile=validated.profile,
-        surface=validated.surface,
-        policy=validated.policy,
+        surface=surface,
+        policy=policy,
         authority_context=authority_context,
+        plan_route=transaction_kind,
     )
 
 

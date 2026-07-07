@@ -13,9 +13,9 @@ import hashlib
 import json
 import math
 import time
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, fields, replace
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast, get_args
 
 from vcs_core._errors import InvalidRepositoryStateError, VcsCoreError
 from vcs_core._permission_plan_evidence import (
@@ -34,9 +34,10 @@ if TYPE_CHECKING:
 
 
 AuthorityOutcome = Literal["allowed", "denied", "refused"]
-AuthoritySettlement = Literal["merged", "discarded", "selected", "not_selected"]
+AuthoritySettlement = Literal["merged", "discarded", "selected", "not_selected", "applied", "not_applied"]
 RetainedOutputAuthoritySettlement = Literal["selected", "not_selected"]
-AuthorityTransactionKind = Literal["filesystem_merge", "retained_output_selection"]
+RetainedOutputApplicationAuthoritySettlement = Literal["applied", "not_applied"]
+AuthorityTransactionKind = Literal["filesystem_merge", "retained_output_selection", "retained_output_application"]
 AuthoritySettlementPhase = Literal["pending_action", "adopted", "discarded"]
 RetainedOutputClassificationBasis = Literal["exact_tree_diff", "changed_paths_fallback", "unclassifiable"]
 AUTHZ_MATCH_VIEW_CLASSIFICATION_BASES = frozenset(
@@ -46,13 +47,38 @@ AuthorityCommitOutcome = Literal[
     "pending",
     "merged",
     "selected",
+    "applied",
     "discarded_with_cohort",
     "not_committed_denied",
     "not_committed_refused",
     "not_selected_denied",
     "not_selected_refused",
+    "not_applied_denied",
+    "not_applied_refused",
     "commit_failed_non_authority",
 ]
+
+# Single source of truth for the closed vocabularies above (the future settlement-action
+# registry's vocabulary column, g10): validators and parse helpers consume these derived sets so
+# a Literal member added for a new verb cannot drift out of a hand-maintained copy.
+AUTHORITY_OUTCOMES: frozenset[str] = frozenset(get_args(AuthorityOutcome))
+AUTHORITY_SETTLEMENTS: frozenset[str] = frozenset(get_args(AuthoritySettlement))
+AUTHORITY_TRANSACTION_KINDS: frozenset[str] = frozenset(get_args(AuthorityTransactionKind))
+AUTHORITY_COMMIT_OUTCOMES: frozenset[str] = frozenset(get_args(AuthorityCommitOutcome))
+AUTHORITY_SETTLEMENT_PHASES: frozenset[str] = frozenset(get_args(AuthoritySettlementPhase))
+# The kind→route derivation (T1 D7): the PermissionPlan route is a function of the transaction
+# kind, never a free constant threaded separately.
+AUTHORITY_ROUTE_BY_TRANSACTION_KIND: dict[str, str] = {
+    "filesystem_merge": "carrier_diff",
+    "retained_output_selection": "retained_output_selection",
+    "retained_output_application": "retained_output_application",
+}
+# Kind-conditional settlement vocabulary (validated in PendingAuthoritySettlement.__post_init__).
+AUTHORITY_SETTLEMENTS_BY_TRANSACTION_KIND: dict[str, frozenset[str]] = {
+    "filesystem_merge": frozenset({"merged", "discarded"}),
+    "retained_output_selection": frozenset(get_args(RetainedOutputAuthoritySettlement)),
+    "retained_output_application": frozenset(get_args(RetainedOutputApplicationAuthoritySettlement)),
+}
 
 
 class AuthorityDecisionError(VcsCoreError, ValueError):
@@ -344,7 +370,13 @@ class PreparedAuthorityMerge:
 
 @dataclass(frozen=True)
 class PreparedRetainedOutputSelection:
-    """Prepared retained-output selection authority transaction."""
+    """Prepared retained-output settlement authority transaction (selection or application).
+
+    ``transaction_kind`` discriminates the settling verb (T1 D7): for
+    ``retained_output_application`` the ``selection_operation_id`` field carries the settling
+    *apply* operation id and the pending/final records spell it ``application_operation_id`` —
+    the prepared record keeps one field so candidate/cohort identity stays verb-independent.
+    """
 
     preparation_id: str
     cohort_id: str
@@ -361,6 +393,16 @@ class PreparedRetainedOutputSelection:
     output_world_oid: str
     changed_paths: tuple[str, ...]
     classification_basis: RetainedOutputClassificationBasis
+    transaction_kind: AuthorityTransactionKind = "retained_output_selection"
+
+    def __post_init__(self) -> None:
+        if self.transaction_kind not in {"retained_output_selection", "retained_output_application"}:
+            raise ValueError(f"prepared retained-output authority kind is unsupported: {self.transaction_kind!r}")
+
+    @property
+    def route(self) -> str:
+        """The PermissionPlan route derived from the transaction kind (never a free constant)."""
+        return AUTHORITY_ROUTE_BY_TRANSACTION_KIND[self.transaction_kind]
 
     def to_metadata(
         self,
@@ -370,6 +412,7 @@ class PreparedRetainedOutputSelection:
     ) -> dict[str, object]:
         metadata: dict[str, object] = {
             "schema": "vcscore/prepared-retained-output-selection/v1",
+            "transaction_kind": self.transaction_kind,
             "authority_operation_id": operation_id,
             "preparation_id": self.preparation_id,
             "cohort_id": self.cohort_id,
@@ -458,6 +501,9 @@ class PendingAuthoritySettlement:
     reason_code: str
     transaction_kind: AuthorityTransactionKind = "filesystem_merge"
     selection_operation_id: str | None = None
+    # The settling apply operation for kind "retained_output_application" (T1 D7) — the
+    # application twin of selection_operation_id; exactly one of the two is set per kind.
+    application_operation_id: str | None = None
     workspace_publication_operation_id: str | None = None
     parent_world_before: str | None = None
     parent_world_after: str | None = None
@@ -490,25 +536,35 @@ class PendingAuthoritySettlement:
             _require_non_empty_str(self.scope_world_id, "scope_world_id")
         if self.parent_scope_world_id is not None:
             _require_non_empty_str(self.parent_scope_world_id, "parent_scope_world_id")
-        if self.outcome not in {"allowed", "denied", "refused"}:
+        if self.outcome not in AUTHORITY_OUTCOMES:
             raise ValueError(f"authority outcome is unsupported: {self.outcome!r}")
-        if self.transaction_kind not in {"filesystem_merge", "retained_output_selection"}:
+        if self.transaction_kind not in AUTHORITY_TRANSACTION_KINDS:
             raise ValueError(f"authority transaction kind is unsupported: {self.transaction_kind!r}")
-        if self.settlement not in {"merged", "discarded", "selected", "not_selected"}:
+        if self.settlement not in AUTHORITY_SETTLEMENTS:
             raise ValueError(f"authority settlement is unsupported: {self.settlement!r}")
-        if self.transaction_kind == "filesystem_merge" and self.settlement not in {"merged", "discarded"}:
-            raise ValueError("filesystem authority settlement must be merged or discarded")
-        if self.transaction_kind == "retained_output_selection" and self.settlement not in {
-            "selected",
-            "not_selected",
-        }:
-            raise ValueError("retained-output authority settlement must be selected or not_selected")
+        allowed_settlements = AUTHORITY_SETTLEMENTS_BY_TRANSACTION_KIND[self.transaction_kind]
+        if self.settlement not in allowed_settlements:
+            raise ValueError(
+                f"{self.transaction_kind} authority settlement must be one of {sorted(allowed_settlements)}; "
+                f"got {self.settlement!r}"
+            )
         if self.transaction_kind == "retained_output_selection":
             _require_non_empty_str(self.selection_operation_id, "selection_operation_id")
             if self.workspace_publication_operation_id is not None:
                 raise ValueError("retained-output authority settlement cannot carry workspace publication id")
-        elif self.selection_operation_id is not None:
-            raise ValueError("filesystem authority settlement cannot carry selection_operation_id")
+            if self.application_operation_id is not None:
+                raise ValueError("retained-output selection authority settlement cannot carry application id")
+        elif self.transaction_kind == "retained_output_application":
+            _require_non_empty_str(self.application_operation_id, "application_operation_id")
+            if self.workspace_publication_operation_id is not None:
+                raise ValueError("retained-output application authority settlement cannot carry publication id")
+            if self.selection_operation_id is not None:
+                raise ValueError("retained-output application authority settlement cannot carry selection id")
+        else:
+            if self.selection_operation_id is not None:
+                raise ValueError("filesystem authority settlement cannot carry selection_operation_id")
+            if self.application_operation_id is not None:
+                raise ValueError("filesystem authority settlement cannot carry application_operation_id")
         if self.workspace_publication_operation_id is not None:
             _require_non_empty_str(self.workspace_publication_operation_id, "workspace_publication_operation_id")
         if self.parent_world_before is not None:
@@ -531,26 +587,14 @@ class PendingAuthoritySettlement:
                 raise ValueError(f"authority settlement pending PermissionPlan descriptor is invalid: {exc}") from exc
             if compute_permission_plan_digest(permission_plan_descriptor) != self.permission_plan_digest:
                 raise ValueError("authority settlement pending PermissionPlan digest mismatch")
-            expected_route = (
-                "retained_output_selection" if self.transaction_kind == "retained_output_selection" else "carrier_diff"
-            )
+            expected_route = AUTHORITY_ROUTE_BY_TRANSACTION_KIND[self.transaction_kind]
             assignments = cast("list[dict[str, object]]", permission_plan_descriptor["assignments"])
             if len(assignments) != 1 or assignments[0].get("route") != expected_route:
                 raise ValueError("authority settlement pending PermissionPlan route mismatch")
         object.__setattr__(self, "permission_plan_descriptor", permission_plan_descriptor)
-        if self.commit_outcome not in {
-            "pending",
-            "merged",
-            "selected",
-            "discarded_with_cohort",
-            "not_committed_denied",
-            "not_committed_refused",
-            "not_selected_denied",
-            "not_selected_refused",
-            "commit_failed_non_authority",
-        }:
+        if self.commit_outcome not in AUTHORITY_COMMIT_OUTCOMES:
             raise ValueError(f"authority commit outcome is unsupported: {self.commit_outcome!r}")
-        if self.phase not in {"pending_action", "adopted", "discarded"}:
+        if self.phase not in AUTHORITY_SETTLEMENT_PHASES:
             raise ValueError(f"authority settlement phase is unsupported: {self.phase!r}")
         for index, decision_id in enumerate(self.decision_ids):
             _require_non_empty_str(decision_id, f"decision_ids[{index}]")
@@ -572,6 +616,14 @@ class PendingAuthoritySettlement:
     def from_dict(cls, data: object) -> PendingAuthoritySettlement:
         if not isinstance(data, dict):
             raise TypeError("authority settlement pending record must be an object")
+        # Strict serde (persisted-evidence-serde-policy §2.1): reject unknown fields rather than
+        # silently dropping them, so a drifted writer fails closed instead of losing evidence. The
+        # allowed set is derived from the dataclass fields, so it auto-tracks additive vocabulary
+        # (e.g. the D7 application-authority fields) without a second list to maintain.
+        allowed = {f.name for f in fields(cls)}
+        unknown = sorted(set(data) - allowed)
+        if unknown:
+            raise ValueError(f"authority settlement pending record has unsupported field(s): {', '.join(unknown)}")
         return cls(
             settlement_operation_id=_required_str(data, "settlement_operation_id"),
             authority_operation_id=_required_str(data, "authority_operation_id"),
@@ -592,6 +644,7 @@ class PendingAuthoritySettlement:
             reason_code=_required_str(data, "reason_code"),
             transaction_kind=_authority_transaction_kind(data.get("transaction_kind", "filesystem_merge")),
             selection_operation_id=_optional_str(data, "selection_operation_id"),
+            application_operation_id=_optional_str(data, "application_operation_id"),
             workspace_publication_operation_id=_optional_str(data, "workspace_publication_operation_id"),
             parent_world_before=_optional_str(data, "parent_world_before"),
             parent_world_after=_optional_str(data, "parent_world_after"),
@@ -878,6 +931,7 @@ def prepare_retained_output_selection_authority(
     parent: ScopeInfo,
     changed_paths: Sequence[str],
     classification_basis: RetainedOutputClassificationBasis,
+    transaction_kind: AuthorityTransactionKind = "retained_output_selection",
 ) -> PreparedRetainedOutputSelection:
     candidate_digest = _short_digest(
         {
@@ -914,6 +968,7 @@ def prepare_retained_output_selection_authority(
         output_world_oid=handoff.output_world_oid,
         changed_paths=tuple(changed_paths),
         classification_basis=classification_basis,
+        transaction_kind=transaction_kind,
     )
 
 
@@ -974,7 +1029,7 @@ def classify_retained_output_authority_request(
                 reversibility="reversible",
                 control_plane=control_plane,
                 monitor_basis=monitor_basis,
-                route="retained_output_selection",
+                route=prepared.route,
                 classification_basis=classification_basis,
             ),
         )
@@ -1001,7 +1056,7 @@ def classify_retained_output_authority_request(
             reversibility="reversible",
             control_plane=False,
             monitor_basis=monitor_basis,
-            route="retained_output_selection",
+            route=prepared.route,
             classification_basis=classification_basis,
         ),
     )
@@ -1157,19 +1212,26 @@ def retained_output_authority_settlement_metadata(
     cohort_id: str,
     candidate_digest: str,
     outcome: AuthorityOutcome,
-    settlement: RetainedOutputAuthoritySettlement,
+    settlement: RetainedOutputAuthoritySettlement | RetainedOutputApplicationAuthoritySettlement,
     commit_outcome: str,
     decision_ids: Sequence[str],
     reason_code: str,
-    selection_operation_id: str,
+    selection_operation_id: str | None = None,
+    application_operation_id: str | None = None,
     permission_plan_digest: str | None = None,
     permission_plan_descriptor: Mapping[str, object] | None = None,
     authority_context: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
+    if (selection_operation_id is None) == (application_operation_id is None):
+        raise ValueError(
+            "retained-output authority settlement metadata requires exactly one of "
+            "selection_operation_id / application_operation_id"
+        )
+    settling_key = "selection_operation_id" if selection_operation_id is not None else "application_operation_id"
     metadata: dict[str, object] = {
         "schema": "vcscore/retained-output-authority-settlement/v1",
         "authority_operation_id": operation_id,
-        "selection_operation_id": selection_operation_id,
+        settling_key: selection_operation_id if selection_operation_id is not None else application_operation_id,
         "cohort_id": cohort_id,
         "candidate_digest": candidate_digest,
         "outcome": outcome,
@@ -1446,34 +1508,24 @@ def _authority_outcome(value: object) -> AuthorityOutcome:
 
 
 def _authority_settlement(value: object) -> AuthoritySettlement:
-    if value in {"merged", "discarded", "selected", "not_selected"}:
+    if value in AUTHORITY_SETTLEMENTS:
         return cast("AuthoritySettlement", value)
     raise ValueError(f"authority settlement is unsupported: {value!r}")
 
 
 def _authority_transaction_kind(value: object) -> AuthorityTransactionKind:
-    if value in {"filesystem_merge", "retained_output_selection"}:
+    if value in AUTHORITY_TRANSACTION_KINDS:
         return cast("AuthorityTransactionKind", value)
     raise ValueError(f"authority transaction kind is unsupported: {value!r}")
 
 
 def _authority_commit_outcome(value: object) -> AuthorityCommitOutcome:
-    if value in {
-        "pending",
-        "merged",
-        "selected",
-        "discarded_with_cohort",
-        "not_committed_denied",
-        "not_committed_refused",
-        "not_selected_denied",
-        "not_selected_refused",
-        "commit_failed_non_authority",
-    }:
+    if value in AUTHORITY_COMMIT_OUTCOMES:
         return cast("AuthorityCommitOutcome", value)
     raise ValueError(f"authority commit outcome is unsupported: {value!r}")
 
 
 def _authority_settlement_phase(value: object) -> AuthoritySettlementPhase:
-    if value in {"pending_action", "adopted", "discarded"}:
+    if value in AUTHORITY_SETTLEMENT_PHASES:
         return cast("AuthoritySettlementPhase", value)
     raise ValueError(f"authority settlement phase is unsupported: {value!r}")

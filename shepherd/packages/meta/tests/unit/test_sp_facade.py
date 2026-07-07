@@ -32,6 +32,8 @@ EXPECTED_MANIFEST = [
     "Run",
     "RunRef",
     "RunInProgress",
+    "AmbientWorldAccessRefused",
+    "AmbiguousTaskBody",
     "DeliveryException",
     "DeliveryFailed",
     "emit_artifact",

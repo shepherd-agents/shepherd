@@ -64,7 +64,10 @@ def test_public_floor_absence_guards_are_component_checks(monkeypatch: pytest.Mo
     assert not hasattr(WorkspaceRun, "select")
     assert not hasattr(WorkspaceRun, "release")
     assert not hasattr(WorkspaceRun, "discard")
-    assert not hasattr(RunOutput, "apply")
+    # 0.3.0: `apply` joined the settlement vocabulary (T1) — the absence guard flips
+    # to a placement assertion: the verb lives on the settlement surfaces
+    # (RunOutput / workspace), never on the value noun or the view (guards adjacent).
+    assert hasattr(RunOutput, "apply")
     assert not hasattr(Changeset, "apply")
     assert not hasattr(Changeset, "select")
     assert not hasattr(Changeset, "release")

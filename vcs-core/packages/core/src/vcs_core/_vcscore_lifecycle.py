@@ -52,7 +52,7 @@ from vcs_core._lifecycle_state import LifecycleRunState
 from vcs_core._lock import acquire_session_lock, release_session_lock
 from vcs_core._parent_tree_manifest import capture_parent_tree_manifest, diff_parent_tree_manifest
 from vcs_core._permission_plan_evidence import PermissionPlanEvidenceError, validate_permission_plan_evidence
-from vcs_core._projection_store import ScopeRegistryEntry, ScopeRegistryStatus, seal_and_select_enabled
+from vcs_core._projection_store import ScopeRegistryEntry, ScopeRegistryStatus
 from vcs_core._readiness_admission import (
     authority_settlement_recovery_targets,
     recovery_operation_targets_for_scope_refs,
@@ -999,8 +999,6 @@ def _complete_seal_locked(
     prepared: PreparedSealHandoff | None = None,
     output_binding: str | None = None,
 ) -> SealResult:
-    if not seal_and_select_enabled():
-        raise InvalidRepositoryStateError("Cannot complete seal: VCS_CORE_SEAL_AND_SELECT is not enabled.")
     _update_lifecycle_run(owner, phase="seal_handoff")
     if prepared is None:
         prepared = owner._seal.prepare_seal_handoff(scope=scope, parent=parent, output_binding=output_binding)
@@ -1876,20 +1874,25 @@ def recover_authority_settlements(owner: VcsCore) -> tuple[str, ...]:
             pending_records = read_valid_authority_settlement_pending_records(owner._repo_path)
         for pending in pending_records:
             settled_pending, callback = _recover_one_authority_settlement(owner, pending)
-            if settled_pending.transaction_kind == "retained_output_selection":
+            if settled_pending.transaction_kind in {"retained_output_selection", "retained_output_application"}:
                 from vcs_core._retained_output_selection import record_retained_output_authority_final_settlement
 
-                if settled_pending.selection_operation_id is None:
+                settling_operation_id = _retained_pending_settling_operation_id(settled_pending)
+                if settling_operation_id is None:
                     raise InvalidRepositoryStateError(
                         f"Cannot recover authority settlement {settled_pending.settlement_operation_id!r}: "
-                        "missing retained-output selection operation id"
+                        f"missing retained-output settling operation id for {settled_pending.transaction_kind}"
                     )
+                settling_kwarg = (
+                    {"application_operation_id": settling_operation_id}
+                    if settled_pending.transaction_kind == "retained_output_application"
+                    else {"selection_operation_id": settling_operation_id}
+                )
                 record_retained_output_authority_final_settlement(
                     owner,
                     parent=_pending_parent_scope(owner, settled_pending),
                     settlement_operation_id=settled_pending.settlement_operation_id,
                     authority_operation_id=settled_pending.authority_operation_id,
-                    selection_operation_id=settled_pending.selection_operation_id,
                     cohort_id=settled_pending.cohort_id,
                     candidate_digest=settled_pending.candidate_digest,
                     outcome=settled_pending.outcome,
@@ -1900,6 +1903,7 @@ def recover_authority_settlements(owner: VcsCore) -> tuple[str, ...]:
                     permission_plan_digest=settled_pending.permission_plan_digest,
                     permission_plan_descriptor=settled_pending.permission_plan_descriptor,
                     authority_context=settled_pending.authority_context,
+                    **settling_kwarg,
                 )
             else:
                 _record_authority_final_settlement(
@@ -1938,7 +1942,7 @@ def _recover_one_authority_settlement(
     owner: VcsCore,
     pending: PendingAuthoritySettlement,
 ) -> tuple[PendingAuthoritySettlement, tuple[str, str] | None]:
-    if pending.transaction_kind == "retained_output_selection":
+    if pending.transaction_kind in {"retained_output_selection", "retained_output_application"}:
         return _recover_one_retained_output_authority_settlement(owner, pending), None
     if pending.phase in {"adopted", "discarded"}:
         return pending, None
@@ -2013,15 +2017,41 @@ def _recover_one_authority_settlement(
     return recovered, ("discard", scope_name)
 
 
+# Per-kind recovery vocabulary for retained-output authority settlements (T1 D7): the future
+# settlement-action registry's recovery column (g10).
+_RETAINED_AUTHORITY_RECOVERY_VOCAB: dict[str, tuple[str, str, str, str]] = {
+    # kind -> (positive settlement, negative settlement, adopted reason code, discarded reason code)
+    "retained_output_selection": (
+        "selected",
+        "not_selected",
+        "selected_after_allowed_decision",
+        "recovered_before_retained_output_selection",
+    ),
+    "retained_output_application": (
+        "applied",
+        "not_applied",
+        "applied_after_allowed_decision",
+        "recovered_before_retained_output_application",
+    ),
+}
+
+
+def _retained_pending_settling_operation_id(pending: PendingAuthoritySettlement) -> str | None:
+    if pending.transaction_kind == "retained_output_application":
+        return pending.application_operation_id
+    return pending.selection_operation_id
+
+
 def _recover_one_retained_output_authority_settlement(
     owner: VcsCore,
     pending: PendingAuthoritySettlement,
 ) -> PendingAuthoritySettlement:
+    positive, negative, adopted_reason, discarded_reason = _RETAINED_AUTHORITY_RECOVERY_VOCAB[pending.transaction_kind]
     if pending.phase in {"adopted", "discarded"}:
         return pending
-    if pending.settlement == "not_selected":
+    if pending.settlement == negative:
         return update_pending_authority_settlement(owner, pending, phase="discarded")
-    if pending.settlement != "selected":
+    if pending.settlement != positive:
         raise InvalidRepositoryStateError(
             f"Cannot recover retained-output authority settlement {pending.settlement_operation_id!r}: "
             f"unsupported settlement {pending.settlement!r}"
@@ -2029,24 +2059,25 @@ def _recover_one_retained_output_authority_settlement(
     if pending.outcome != "allowed":
         raise InvalidRepositoryStateError(
             f"Cannot recover retained-output authority settlement {pending.settlement_operation_id!r}: "
-            "non-allowed pending record requests selection"
+            f"non-allowed pending record requests {pending.transaction_kind}"
         )
-    if pending.selection_operation_id is not None and owner._store.operation_id_exists(pending.selection_operation_id):
+    settling_operation_id = _retained_pending_settling_operation_id(pending)
+    if settling_operation_id is not None and owner._store.operation_id_exists(settling_operation_id):
         recovered = update_pending_authority_settlement(
             owner,
             pending,
             phase="adopted",
-            commit_outcome="selected",
-            reason_code="selected_after_allowed_decision",
+            commit_outcome=positive,
+            reason_code=adopted_reason,
         )
     else:
         recovered = update_pending_authority_settlement(
             owner,
             pending,
             phase="discarded",
-            settlement="not_selected",
+            settlement=negative,
             commit_outcome="commit_failed_non_authority",
-            reason_code="recovered_before_retained_output_selection",
+            reason_code=discarded_reason,
         )
     return recovered
 
@@ -2152,8 +2183,6 @@ def discard(owner: VcsCore, scope: ScopeInfo) -> str:
 
 def seal(owner: VcsCore, scope: ScopeInfo, *, output_binding: str | None = None) -> SealResult:
     with owner._lock:
-        if not seal_and_select_enabled():
-            raise InvalidRepositoryStateError("Cannot seal scope: VCS_CORE_SEAL_AND_SELECT is not enabled.")
         _admission(owner).require_lifecycle_mutation_allowed("seal")
         owner._validate_scope(scope)
         scope = owner._live_scope(scope)

@@ -272,6 +272,11 @@ class RetainedOutputSettlement:
     authority_operation_id: str | None = None
     authority_settlement_operation_id: str | None = None
     authority_outcome: str | None = None
+    # The published binding head after an ``apply`` three-way settlement. For a
+    # fast-forward-degenerate apply (parent unmoved) this equals candidate_head;
+    # for a genuine three-way apply it is the merged revision head. ``None`` for
+    # every non-apply action.
+    applied_head: str | None = None
 
 
 @dataclass(frozen=True)
@@ -299,6 +304,11 @@ class RetainedOutputSettlementResult:
     parent_world_before: str
     parent_world_after: str
     settlement: RetainedOutputSettlement
+    # Authority evidence for verbs that run the decide lane (apply, T1 D7) — parity with
+    # RetainedOutputSelectionResult; None for authority-less settlements and recoveries.
+    authority_operation_id: str | None = None
+    authority_settlement_operation_id: str | None = None
+    authority_outcome: str | None = None
 
 
 RetainedOutputState = Literal["unconsumed", "selected", "applied", "released", "discarded", "invalid"]

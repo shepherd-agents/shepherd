@@ -4,11 +4,21 @@ from __future__ import annotations
 
 from typing import Any, get_args, get_origin
 
-from shepherd_core.schema import SINGLE_OUTPUT_KEY, merge_schema_defs, type_to_json_schema
+from shepherd_core.schema import (
+    SINGLE_OUTPUT_KEY,
+    merge_schema_defs,
+    refuse_handle_return_slot,
+    type_to_json_schema,
+)
 
 
 def return_type_to_output_schema(return_type: type | None) -> dict[str, Any]:
-    """Convert a return type annotation to JSON schema for structured output."""
+    """Convert a return type annotation to JSON schema for structured output.
+
+    Handle-typed return slots refuse fail-closed (handle slots are
+    custody-resolved, never provider-authored — the P-030 fabrication fence).
+    """
+    refuse_handle_return_slot(return_type)
     if return_type is None:
         inner_schema = {"type": "string"}
         all_defs: dict[str, Any] = {}

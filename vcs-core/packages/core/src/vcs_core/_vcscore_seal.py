@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING
 import pygit2
 
 from vcs_core._errors import InvalidRepositoryStateError
-from vcs_core._projection_store import SEAL_AND_SELECT_ENV, seal_and_select_enabled
 from vcs_core._seal_handoff import LoadedSealHandoff, read_seal_handoff, seal_handoff_ref, write_seal_handoff
 from vcs_core._substrate_tree_read import read_substrate_workspace_file
 from vcs_core.git_store import diff_workspace_trees
@@ -220,8 +219,6 @@ class SealController:
 
     def require_public_retained_read_allowed(self) -> None:
         """Public: also consumed by `_retained_output_queries` via ``owner._seal``."""
-        if not seal_and_select_enabled():
-            raise InvalidRepositoryStateError(f"Cannot read retained workspace: {SEAL_AND_SELECT_ENV} is not enabled.")
         mismatches = self._store.scope_registry_projection_mismatches()
         if mismatches:
             raise InvalidRepositoryStateError(

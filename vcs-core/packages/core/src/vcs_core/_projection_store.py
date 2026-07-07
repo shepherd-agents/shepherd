@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import time
 from dataclasses import dataclass
 from typing import Any, Literal, cast
@@ -79,25 +78,10 @@ def scope_status_is_terminal(status: ScopeRegistryStatus) -> bool:
     return status in TERMINAL_SCOPE_STATUSES
 
 
-SEAL_AND_SELECT_ENV = "VCS_CORE_SEAL_AND_SELECT"
-
-
-def seal_and_select_enabled() -> bool:
-    """Whether the capability-C seal-and-select substrate is enabled (default off).
-
-    `retained` scopes are only legitimate while this is on. Off, a persisted
-    `retained` record fails closed as a registry mismatch — never silently
-    treated as a healthy active scope. (The seal verb that writes `retained` is
-    Slice 2 and is gated by the same flag.)
-    """
-    return os.environ.get(SEAL_AND_SELECT_ENV, "").strip().lower() in {"1", "true", "yes", "on"}
-
-
 ScopeRegistryIsolationMode = Literal["shared", "isolated"]
 ScopeRegistryMismatchKind = Literal[
     "ref_exists_registry_non_live",
     "registry_live_ref_missing",
-    "retained_requires_seal_and_select",
     "parentage_disagrees",
     "registry_format_unreadable",
 ]
@@ -472,11 +456,7 @@ def publish_scope_registry_snapshot(
     return True
 
 
-def scope_registry_mismatches(
-    repo: pygit2.Repository, *, seal_and_select: bool | None = None
-) -> tuple[ScopeRegistryMismatch, ...]:
-    if seal_and_select is None:
-        seal_and_select = seal_and_select_enabled()
+def scope_registry_mismatches(repo: pygit2.Repository) -> tuple[ScopeRegistryMismatch, ...]:
     if SCOPE_REGISTRY_CURRENT_REF not in repo.references:
         return ()
     snapshot = load_scope_registry_snapshot(repo)
@@ -535,20 +515,6 @@ def scope_registry_mismatches(
                 )
             )
 
-    if not seal_and_select:
-        for entry in snapshot.entries:
-            if entry.status == "retained":
-                mismatches.append(
-                    ScopeRegistryMismatch(
-                        kind="retained_requires_seal_and_select",
-                        ref=entry.ref,
-                        scope_name=entry.name,
-                        detail=(
-                            f"Scope {entry.name!r} is retained but {SEAL_AND_SELECT_ENV} is disabled; "
-                            "enable seal-and-select or discard the scope."
-                        ),
-                    )
-                )
     return tuple(mismatches)
 
 

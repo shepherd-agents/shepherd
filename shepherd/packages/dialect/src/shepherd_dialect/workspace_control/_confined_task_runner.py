@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import inspect
 import json
 import sys
 import traceback
@@ -151,7 +152,11 @@ def _resolve_qualname(module: Any, qualname: str) -> Any:
         if part == "<locals>":
             raise RuntimeError("task artifact entrypoint cannot reference a local function")
         value = getattr(value, part)
-    return value
+    # The executing artifact is always a plain function. When the module spells the
+    # task with `@sp.task`, the exported attribute is the CallableTask wrapper, whose
+    # __call__ expects the ambient nucleus workspace (unavailable in the confined
+    # runner). Unwrap to the underlying function so the body runs directly.
+    return inspect.unwrap(value)
 
 
 def _portable(value: object) -> object:

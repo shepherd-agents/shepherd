@@ -36,6 +36,37 @@ class DeliveryFailed(DeliveryException):
         self.run = run
 
 
+class AmbientWorldAccessRefused(DeliveryException):
+    """Refusal for an ambient call of a bodyless task that declares world access.
+
+    A bodyless task whose signature carries substrate-handle annotations
+    (``May[GitRepo, ...]`` parameters or handle-typed returns) cannot be honored
+    by an in-process ambient model call: the grant would be silently erased and
+    a "successful" delivery would be a fabricated report of world work the model
+    cannot have done. Run the task through retained execution (``workspace.run(...)``)
+    instead. The refusal keys on the annotation, never the passed value.
+    """
+
+    def __init__(self, message: str = "Ambient world access refused", *, run: Any | None = None) -> None:
+        super().__init__(message)
+        self.run = run
+
+
+class AmbiguousTaskBody(DeliveryException):
+    """The task body cannot be classified and would run to a silent ``None``.
+
+    Source is unavailable (exec/REPL/notebook definition) and the compiled body
+    is empty-shaped — docstring-only and ``return None`` bodies compile
+    byte-identically, so the runtime cannot tell a delegating bodyless task
+    from a deliberate no-op. Raised loud at call time instead of silently
+    returning ``None``. Remedy: move the task into an importable ``.py`` file.
+    """
+
+    def __init__(self, message: str = "Ambiguous task body", *, run: Any | None = None) -> None:
+        super().__init__(message)
+        self.run = run
+
+
 class DeliveryExhausted(DeliveryException):
     """Ordinary-call exception for an exhausted terminal run."""
 

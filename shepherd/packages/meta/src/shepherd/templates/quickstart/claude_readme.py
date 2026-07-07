@@ -13,18 +13,15 @@ import sys
 
 import shepherd as sp
 
-TASK_ID = "quickstart.claude_readme"
-TASK_SOURCE = '''
-import shepherd as sp
 
-def update_readme(repo: sp.May[sp.GitRepo, sp.ReadWrite], goal: str, output_path: str = "README.md"):
+# A bodyless task: the docstring is the contract Claude fulfils under the jail.
+@sp.task
+def update_readme(repo: sp.May[sp.GitRepo, sp.ReadWrite], goal: str, output_path: str = "README.md") -> None:
     """Use Claude to make the README clearer for a first-time developer.
 
     Keep the edit small. Preserve existing factual claims. Write the proposed
     README to output_path inside the retained workspace output.
     """
-    raise RuntimeError("Claude owns this task body at runtime")
-'''
 
 
 def _live_ready() -> tuple[bool, str]:
@@ -54,15 +51,9 @@ def main() -> None:
 
     workspace = sp.open(".")
     try:
-        workspace.tasks.register_source(
-            task_id=TASK_ID,
-            module="shepherd_quickstart_claude_tasks",
-            source_text=TASK_SOURCE,
-            entrypoint="update_readme",
-            may_default="ReadWrite",
-        )
+        workspace.tasks.register(update_readme)
         run = workspace.run(
-            TASK_ID,
+            update_readme,
             repo=workspace.git_repo(),
             args={"goal": "tighten the quickstart section"},
             placement="jail",

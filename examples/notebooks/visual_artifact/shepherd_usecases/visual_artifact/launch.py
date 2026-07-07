@@ -24,7 +24,6 @@ from shepherd_dialect.workspace_control import (
     WorkspaceRun,
     get_run_args,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 from vcs_core import FilesystemSubstrate, MarkerSubstrate, Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_api import native_jail_available
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
@@ -164,16 +163,15 @@ def open_workspace(
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
-        if prompt is not None:
-            mg.exec(
-                "filesystem",
-                "write",
-                scope=mg.ground,
-                path="brief.json",
-                content=(json.dumps({"prompt": prompt}, indent=2, sort_keys=True) + "\n").encode(),
-            )
+    mg.activate()
+    if prompt is not None:
+        mg.exec(
+            "filesystem",
+            "write",
+            scope=mg.ground,
+            path="brief.json",
+            content=(json.dumps({"prompt": prompt}, indent=2, sort_keys=True) + "\n").encode(),
+        )
     control = ShepherdWorkspace(
         mg,
         trace_store_path=root / ".vcscore" / "shepherd" / "trace.sqlite",

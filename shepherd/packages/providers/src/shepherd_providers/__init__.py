@@ -34,7 +34,7 @@ from __future__ import annotations
 
 from typing import Any
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 # Lazy-loaded provider classes
 _PROVIDER_MAP = {

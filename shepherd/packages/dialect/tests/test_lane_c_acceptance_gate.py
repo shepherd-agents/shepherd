@@ -35,7 +35,6 @@ from shepherd_dialect.workspace_control import (
     ShepherdWorkspace,
     WorkspaceControlError,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -95,7 +94,12 @@ def read_only_pair(docs: May[GitRepo, ReadOnly], backend: May[GitRepo, ReadOnly]
 def _make_workspace(root: Path) -> ShepherdWorkspace:
     root.mkdir(parents=True, exist_ok=True)
     store = Store(str(root / ".vcscore"))
-    context = build_builtin_substrate_context(store=store, workspace=root, config={"backend": "clonefile"})
+    # Carrier follows the platform pairing (Seatbelt x clonefile on macOS,
+    # Landlock x fuse-overlayfs on Linux — the same split as test_jailed_run.py
+    # vs test_jailed_run_linux.py), so the gate's jailed legs execute on both
+    # platforms instead of failing on the macOS-only clonefile backend.
+    carrier_backend = "clonefile" if sys.platform == "darwin" else "fuse"
+    context = build_builtin_substrate_context(store=store, workspace=root, config={"backend": carrier_backend})
     mg = VcsCore(
         str(root),
         substrates=[
@@ -109,8 +113,7 @@ def _make_workspace(root: Path) -> ShepherdWorkspace:
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     return ShepherdWorkspace(
         mg,
         trace_store_path=root / ".vcscore" / "shepherd" / "trace.sqlite",
@@ -136,9 +139,8 @@ def _register_gate_tasks(workspace: ShepherdWorkspace, tmp_path: Path, monkeypat
 
 def _seed_bound_workspace(workspace: ShepherdWorkspace) -> None:
     """Seed `docs/` and `backend/` content into ground so the run clone mirrors them."""
-    with _seal_and_select_enabled():
-        workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="docs/guide.md", content=b"guide\n")
-        workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="backend/app.py", content=b"app\n")
+    workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="docs/guide.md", content=b"guide\n")
+    workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="backend/app.py", content=b"app\n")
 
 
 def _bound_workspace(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ShepherdWorkspace:

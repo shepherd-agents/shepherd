@@ -79,6 +79,17 @@ async def invoke_handler(binding: HandlerBinding, payload: object) -> Any:
     return result
 
 
+# Dual-key compatibility shim (Bug 1, 2132 W0.1): the spec and curriculum teach
+# handle("model.call.requested", ...) while dispatch resolves "model.call", so the
+# documented mock idiom was silently ignored and a reachable provider would take
+# the call instead. Installation normalizes the taught spelling onto the dispatch
+# key: both spellings resolve, innermost-wins is preserved across mixed keys, and
+# the *recorded* effect-kind string stays "model.call" — flipping the recorded
+# kind is a durable-vocabulary decision (arch-notes #2 / D-3), deliberately not
+# taken here.
+_KEY_ALIASES: dict[str, str] = {"model.call.requested": "model.call"}
+
+
 def _normalize_key(key: object) -> str | type:
     if isinstance(key, str):
         mode, kind = parse_matcher_kind_sugar(key)
@@ -87,7 +98,7 @@ def _normalize_key(key: object) -> str | type:
                 "handle(...) wildcard and Match-backed handler activation is deferred in this cut; "
                 f"use an exact effect-kind string or effect class, got {key!r}"
             )
-        return kind
+        return _KEY_ALIASES.get(kind, kind)
     if isinstance(key, type):
         return key
     raise HandlerSignatureError(

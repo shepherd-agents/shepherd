@@ -150,6 +150,10 @@ def _require_receipt_only_settlement_available(
     if read_retained_output_settlement(owner.store, settlement_ref, missing_ok=True) is not None:
         raise InvalidRepositoryStateError(f"retained output is already settled: {settlement_ref}")
 
+    # Per-verb published-world recovery probes. These form the (future) settlement-action registry's
+    # recovery column (g10) — one probe per verb that can publish a terminal world without yet having
+    # written its receipt. Each completes an interrupted settlement's receipt and, by returning
+    # non-None, makes this receipt-only verb refuse rather than write a SECOND terminal receipt.
     selected_operation_id = _settlement_operation_id(handoff=handoff, settlement_ref=settlement_ref)
     recovered = _recover_published_retained_selection(
         owner,
@@ -169,6 +173,22 @@ def _require_receipt_only_settlement_available(
         settlement_ref=settlement_ref,
     )
     if recovered is not None:
+        raise InvalidRepositoryStateError(f"retained output is already settled: {settlement_ref}")
+    # Application-keyed probe (T1 W2.1(e) / ISS-008): an interrupted `apply` publishes an
+    # application world under the `apply_retained_*` op-id scheme — invisible to the selection
+    # probes above. Without this, release/discard after an interrupted apply would write a second
+    # terminal receipt over an already-applied world (a consume-once violation). Function-local
+    # import mirrors the `vcscore.py` facade idiom and keeps the module import graph acyclic.
+    from vcs_core._retained_output_application import _recover_published_application
+
+    recovered_application = _recover_published_application(
+        owner,
+        manager,
+        retained=retained,
+        parent=parent,
+        settlement_ref=settlement_ref,
+    )
+    if recovered_application is not None:
         raise InvalidRepositoryStateError(f"retained output is already settled: {settlement_ref}")
     return settlement_ref
 

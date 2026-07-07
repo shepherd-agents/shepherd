@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shepherd-runtime"
-version = "0.2.0"
+version = "0.3.0"
 description = "Public runtime surfaces for the Shepherd framework"
 requires-python = ">=3.11"
 license = { text = "MIT" }

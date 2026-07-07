@@ -3223,7 +3223,7 @@ wheels = [
 
 [[package]]
 name = "shepherd"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/meta" }
 dependencies = [
     { name = "click" },
@@ -3306,7 +3306,7 @@ provides-extras = ["providers", "contexts", "banking", "sandboxes", "transform",
 
 [[package]]
 name = "shepherd-authoring"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/authoring" }
 dependencies = [
     { name = "pyyaml" },
@@ -3356,7 +3356,7 @@ typing = [{ name = "mypy", specifier = ">=1.10.0,<2.0.0" }]
 
 [[package]]
 name = "shepherd-banking"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/extras/banking" }
 dependencies = [
     { name = "shepherd-core" },
@@ -3402,7 +3402,7 @@ typing = [{ name = "mypy", specifier = ">=1.10.0,<2.0.0" }]
 
 [[package]]
 name = "shepherd-coding"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/extras/coding" }
 dependencies = [
     { name = "shepherd-core" },
@@ -3452,7 +3452,7 @@ typing = [{ name = "mypy", specifier = ">=1.10.0,<2.0.0" }]
 
 [[package]]
 name = "shepherd-contexts"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/contexts" }
 dependencies = [
     { name = "shepherd-core" },
@@ -3522,7 +3522,7 @@ typing = [{ name = "mypy", specifier = ">=1.10.0,<2.0.0" }]
 
 [[package]]
 name = "shepherd-core"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/core" }
 dependencies = [
     { name = "commons-vcs" },
@@ -3572,7 +3572,7 @@ typing = [{ name = "mypy", specifier = ">=1.10.0,<2.0.0" }]
 
 [[package]]
 name = "shepherd-dialect"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/dialect" }
 dependencies = [
     { name = "click" },
@@ -3609,7 +3609,7 @@ lint = [{ name = "ruff", specifier = ">=0.13.0" }]
 
 [[package]]
 name = "shepherd-export"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/export" }
 dependencies = [
     { name = "shepherd-core" },
@@ -3636,7 +3636,7 @@ typing = [{ name = "mypy", specifier = ">=1.10.0,<2.0.0" }]
 
 [[package]]
 name = "shepherd-kernel-v3-reference"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/kernel-v3-reference" }
 
 [package.dev-dependencies]
@@ -3655,7 +3655,7 @@ lint = [{ name = "ruff", specifier = ">=0.13.0" }]
 
 [[package]]
 name = "shepherd-providers"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/providers" }
 dependencies = [
     { name = "shepherd-core" },
@@ -3706,7 +3706,7 @@ typing = [
 
 [package.metadata]
 requires-dist = [
-    { name = "claude-agent-sdk", marker = "extra == 'claude'", specifier = ">=0.1.0" },
+    { name = "claude-agent-sdk", marker = "extra == 'claude'", specifier = ">=0.1.18,<0.2" },
     { name = "litellm", marker = "extra == 'litellm'", specifier = ">=1.40" },
     { name = "mcp", marker = "extra == 'openai-mcp'", specifier = ">=1.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8.0" },
@@ -3736,7 +3736,7 @@ typing = [{ name = "mypy", specifier = ">=1.10.0,<2.0.0" }]
 
 [[package]]
 name = "shepherd-runtime"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/runtime" }
 dependencies = [
     { name = "shepherd-core" },
@@ -3790,12 +3790,12 @@ typing = [{ name = "mypy", specifier = ">=1.10.0,<2.0.0" }]
 
 [[package]]
 name = "shepherd-sandboxes"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/sandboxes" }
 
 [[package]]
 name = "shepherd-tests"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/tests" }
 dependencies = [
     { name = "pytest" },
@@ -3831,7 +3831,7 @@ provides-extras = ["vcr", "all", "dev"]
 
 [[package]]
 name = "shepherd-trace-viewer"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/extras/trace-viewer" }
 
 [package.optional-dependencies]
@@ -3871,7 +3871,7 @@ test = [
 
 [[package]]
 name = "shepherd-transform"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "shepherd/packages/transform" }
 dependencies = [
     { name = "shepherd-runtime" },
@@ -3902,7 +3902,7 @@ typing = [{ name = "mypy", specifier = ">=1.10.0,<2.0.0" }]
 
 [[package]]
 name = "shepherd-workspace"
-version = "0.2.0"
+version = "0.3.0"
 source = { virtual = "." }
 dependencies = [
     { name = "commons-vcs" },

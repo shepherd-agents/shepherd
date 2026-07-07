@@ -23,18 +23,18 @@
 **Shepherd** is a runtime substrate for agent work that needs inspection,
 reversibility, and supervision. It records agent runs as durable, inspectable
 execution traces, with retained workspace outputs that can be reviewed before
-they are selected, released, or discarded.
+they are selected, applied, released, or discarded.
+
+> **Platforms.** Shepherd requires **Python 3.11+**. OS-level grant enforcement
+> is exercised on **macOS** (Seatbelt) today; on **Linux**, Landlock enforcement
+> is container-gated. **Windows is unsupported** (enforcement would be
+> advisory-only at best) — use **WSL**.
 
 ## Installation
 
 ```bash
 pip install shepherd-ai
 ```
-
-> **Platforms.** Shepherd requires **Python 3.11+**. OS-level grant enforcement
-> is exercised on **macOS** (Seatbelt) today; on **Linux**, Landlock enforcement
-> is container-gated. **Windows is unsupported** (enforcement would be
-> advisory-only at best) — use **WSL**.
 
 Working on Shepherd itself? Install the local editable closure instead:
 `python -m venv .venv && . .venv/bin/activate && pip install -r requirements-dev.txt`
@@ -108,6 +108,7 @@ you like it, keep it; if not, throw it away — the trace remembers either way
 
 ```bash
 shepherd run select <run-ref>     # keep it
+shepherd run apply  <run-ref>     # ...or merge it onto a workspace that moved on
 shepherd run discard <run-ref>    # ...or not
 ```
 
@@ -162,7 +163,9 @@ whole-profile per binding (a bound repository is entirely writable or entirely
 read-only). Bindings are named with `ws.bind(root="backend/", name="backend")`
 and passed to a run with `workspace.run(task, bindings={...})`; each run's world
 output is inspected per binding with `run.changeset(name="backend")` and settled
-once with `select` / `release` / `discard`.
+once with `select` / `apply` / `release` / `discard` (`apply` three-way-merges a
+candidate onto a workspace that already moved on, when their changes are
+path-disjoint).
 
 > **Scope (P-030 v0.2).** Per-binding whole-profile `ReadOnly`/`ReadWrite` over
 > disjoint named bindings, on a jailed device, filesystem / Git substrate,

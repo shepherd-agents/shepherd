@@ -41,7 +41,6 @@ from shepherd_dialect.workspace_control import (
     WorkspaceRun,
     WorkspaceTask,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 from shepherd_dialect.workspace_control.gitrepo_handles import same_git_binding_state
 
 if TYPE_CHECKING:
@@ -68,8 +67,7 @@ def _make_workspace(root: Path) -> ShepherdWorkspace:
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     return ShepherdWorkspace(
         mg,
         trace_store_path=root / ".vcscore" / "shepherd" / "trace.sqlite",
@@ -92,8 +90,7 @@ def fix_bug(repo, issue: str):
 
 
 def _seed_selected_workspace(workspace: ShepherdWorkspace) -> GitRepo:
-    with _seal_and_select_enabled():
-        workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="base.txt", content=b"base\n")
+    workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="base.txt", content=b"base\n")
     return _assert_selected_git_repo(workspace)
 
 
@@ -244,7 +241,7 @@ def test_public_handle_surface_select_reacquire_run_loop(
         assert output_evidence.settlement_action is None
         assert output_policy.consume_once is True
         assert output_policy.custody_owner == "vcs-core.retained-output"
-        assert output_policy.settlement_verbs == ("select", "release", "discard")
+        assert output_policy.settlement_verbs == ("select", "apply", "release", "discard")
         assert output_policy.authority == run_authority
         assert output_policy.settlement_policy is not None
         execution_enforcement = output_policy.settlement_policy["execution_enforcement"]

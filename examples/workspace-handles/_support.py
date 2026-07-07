@@ -19,7 +19,6 @@ from shepherd_dialect.workspace_control import (
     ShepherdTaskLedgerDriver,
     ShepherdWorkspace,
 )
-from shepherd_dialect.workspace_control.feature_flags import _seal_and_select_enabled
 from shepherd_runtime.nucleus import GitRepo, GitRepoBasis
 from vcs_core import FilesystemSubstrate, MarkerSubstrate, Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
@@ -70,8 +69,7 @@ def open_workspace(root: Path) -> ShepherdWorkspace:
         ],
         store=store,
     )
-    with _seal_and_select_enabled():
-        mg.activate()
+    mg.activate()
     return ShepherdWorkspace(
         mg,
         trace_store_path=root / ".vcscore" / "shepherd" / "trace.sqlite",
@@ -80,8 +78,7 @@ def open_workspace(root: Path) -> ShepherdWorkspace:
 
 
 def seed_selected_workspace(workspace: ShepherdWorkspace) -> GitRepo:
-    with _seal_and_select_enabled():
-        workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="base.txt", content=b"base\n")
+    workspace.mg.exec("filesystem", "write", scope=workspace.mg.ground, path="base.txt", content=b"base\n")
     return workspace.git_repo()
 
 
@@ -106,6 +103,27 @@ def candidate_text(output: RunOutput) -> str:
     return value[0].decode("utf-8")
 
 
+def changeset_stat(output: RunOutput) -> dict[str, object]:
+    """Review one candidate through its `Changeset` — the settlement-spelling judging surface.
+
+    Goal 15's capstone judges N retained candidates *by their changesets* (what each one
+    changed), not by a rendered artifact the caller trusts blindly. `read_file` reads through
+    the same changeset custody.
+    """
+    stat = output.changeset().stat()
+    return {"changed_paths": list(stat.changed_paths), "changed_path_count": stat.changed_path_count}
+
+
+def enforcement_of(run: object) -> str:
+    """The honestly-recorded enforcement for a run (`"jail"` or `"advisory"`; A6).
+
+    Handle-bearing runs default to `placement="auto"`: the native syscall jail on a jail-capable
+    host, advisory in the in-process dev column. The recorded value is what actually happened —
+    never a hard-coded assumption.
+    """
+    return run.record.enforcement  # type: ignore[attr-defined]
+
+
 def basis_summary(basis: GitRepoBasis) -> dict[str, str]:
     return {
         "world_oid": basis.world_oid,
@@ -124,6 +142,7 @@ def output_summary(output: RunOutput) -> dict[str, object]:
         "run_ref": output.owner.run_id,
         "state": output.refresh().state,
         "text": candidate_text(output),
+        "changeset": changeset_stat(output),
         "authority": {
             "effective_may": authority.effective_may,
             "effective_grant_digest": authority.effective_grant_digest,
