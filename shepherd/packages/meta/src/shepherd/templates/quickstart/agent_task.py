@@ -34,7 +34,7 @@ if not _auth.ok:
     sys.exit(f"not ready — {_auth.detail}")
 
 with sp.open(".") as workspace:
-    workspace.tasks.register(write_program, task_id="quickstart.write_program", may_default="ReadWrite")
+    workspace.tasks.register(write_program, task_id="quickstart.write_program")
     run = workspace.run(
         "quickstart.write_program",
         repo=workspace.git_repo(),

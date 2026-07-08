@@ -62,10 +62,15 @@ def define_in_main() -> Iterator[Callable[[str, str], Callable[..., object]]]:
 
 
 _GRANT_MODULE_SOURCE = '''
+from __future__ import annotations
+
 import shepherd as sp
 
 def ro_only(docs: sp.May[sp.GitRepo, sp.ReadOnly], note: str) -> None:
     """All grants read-only."""
+
+def bare_rw(repo: sp.GitRepo, note: str) -> None:
+    """Bare GitRepo is the writable workspace-handle spelling."""
 
 def rw_only(repo: sp.May[sp.GitRepo, sp.ReadWrite], note: str) -> None:
     """One read-write grant."""
@@ -109,6 +114,10 @@ def test_all_readonly_signature_derives_readonly_ceiling(workspace, grant_module
 
 def test_any_readwrite_grant_joins_to_readwrite(workspace, grant_module) -> None:
     import ceiling_grant_tasks
+
+    bare = workspace.tasks.register(ceiling_grant_tasks.bare_rw, task_id="ceiling.bare_rw")
+    assert bare.may_default == "ReadWrite"
+    assert _provenance(bare) == "derived"
 
     rw = workspace.tasks.register(ceiling_grant_tasks.rw_only)
     assert rw.may_default == "ReadWrite"
@@ -162,6 +171,30 @@ def test_ceiling_derivation_is_uniform_across_registration_spellings(workspace, 
     )
     assert via_callable.may_default == "ReadOnly"
     assert via_source.may_default == "ReadOnly"
+    assert _provenance(via_callable) == "derived"
+    assert _provenance(via_source) == "derived"
+
+
+def test_bare_gitrepo_derivation_is_uniform_across_registration_spellings(workspace, grant_module) -> None:
+    """The clean writer spelling derives ReadWrite through runtime and AST paths."""
+    import ceiling_grant_tasks
+
+    via_callable = workspace.tasks.register(ceiling_grant_tasks.bare_rw, task_id="bare.callable")
+    via_source = workspace.tasks.register_source(
+        task_id="bare.source",
+        module="bare_source_tasks",
+        source_text=textwrap.dedent(
+            """
+            import shepherd as sp
+
+            def bare_rw(repo: sp.GitRepo, note: str) -> None:
+                \"\"\"Bare GitRepo is a writable workspace handle.\"\"\"
+            """
+        ),
+        entrypoint="bare_rw",
+    )
+    assert via_callable.may_default == "ReadWrite"
+    assert via_source.may_default == "ReadWrite"
     assert _provenance(via_callable) == "derived"
     assert _provenance(via_source) == "derived"
 

@@ -39,11 +39,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **The beginner workspace-handle spelling is now `repo: GitRepo`.** A bare
-  `GitRepo` parameter in a task signature is an explicit writable workspace handle
-  grant, equivalent to the read-write case of `May[GitRepo, ...]`. Use
-  `May[GitRepo, ReadOnly]` when the handle must be read-only. Pre-0.3 unannotated
-  `repo` parameters are no longer treated as handles; annotate them or pass an
-  ordinary value through `args={"repo": ...}` when `repo` is truly a value argument.
+  `GitRepo` parameter in a task signature is an explicit writable workspace-handle
+  grant, equivalent to the read-write case of `May[GitRepo, ...]`; it is not
+  inferred from the parameter name. Use `May[GitRepo, ReadOnly]` when the handle
+  must be read-only. Pre-0.3 unannotated `repo` parameters are no longer treated
+  as handles; annotate them or pass an ordinary value through `args={"repo": ...}`
+  when `repo` is truly a value argument.
 - **A bodied task registered from a run-as-script file (`__main__`) now refuses.**
   Previously its whole script was captured as the task artifact (embedding driver
   code — a re-execution footgun); it now refuses with a remedy ("move it to an
