@@ -37,7 +37,7 @@ from vcs_core._python_runtime_capture_adapter import (
 )
 from vcs_core._runtime_types import ExecutionContext
 from vcs_core._schema_errors import SchemaValidationError
-from vcs_core._substrate_driver import CapabilitySet, CommandRequest, DriverContext, SubstrateDriver
+from vcs_core._substrate_driver import CapabilitySet, CommandRequest, DriverContext, DriverSchema, SubstrateDriver
 from vcs_core._world_transition_coordinator import dispatch_driver
 from vcs_core.recording import NestedParentAuthorization
 from vcs_core.types import (
@@ -803,6 +803,7 @@ def _execute_spi_driver_in_operation(
             scope=scope,
             params=params,
             capabilities=resolved.schema.capabilities,
+            schema=resolved.schema,
         )
     if isinstance(driver, ExecutionBoundDriver) and command in driver.execution_commands:
         # PD1/PD2: the driver opted into execution authority for THIS command —
@@ -824,6 +825,7 @@ def _execute_spi_driver_in_operation(
             command_param_source=command_param_source,
             execution_options=execution_options,
             capabilities=resolved.schema.capabilities,
+            schema=resolved.schema,
         )
     _reject_execution_options_for_plain_command(binding.binding_name, command, execution_options)
     params = _normalize_and_admit_driver_command_params(
@@ -865,6 +867,7 @@ def _execute_spi_driver_in_operation(
                 context,
                 CommandRequest(command=command, params=dict(params)),
                 capabilities=resolved.schema.capabilities,
+                schema=resolved.schema,
             )
             oids: tuple[str, ...] = ()
             if result.effects:
@@ -892,6 +895,7 @@ def _execute_selectable_spi_driver(
     scope: ScopeInfo,
     params: dict[str, Any],
     capabilities: CapabilitySet,
+    schema: DriverSchema,
 ) -> RecordedCommandOutcome:
     """The selectable arm of the dispatch bridge (B4b W2).
 
@@ -935,6 +939,7 @@ def _execute_selectable_spi_driver(
         context,
         CommandRequest(command=command, params=dict(params)),
         capabilities=capabilities,
+        schema=schema,
     )
     bundle = manager.create_prepared_driver_candidate_bundle(
         store_id,
@@ -1004,6 +1009,7 @@ def _execute_execution_bound_driver(
     command_param_source: CommandValueSource,
     execution_options: CommandExecutionOptions,
     capabilities: CapabilitySet,
+    schema: DriverSchema,
 ) -> RecordedCommandOutcome:
     """The reversible-transaction wrap (PD2) around an execution-bound dispatch.
 
@@ -1082,6 +1088,7 @@ def _execute_execution_bound_driver(
                 context,
                 CommandRequest(command=command, params=dict(params)),
                 capabilities=capabilities,
+                schema=schema,
                 execution=capability,
             )
     except BaseException:
