@@ -1143,8 +1143,10 @@ class ShepherdWorkspace:
         if (repo is None) == (bindings is None):
             raise WorkspaceControlError("run requires exactly one of repo= or bindings=")
         if bindings is not None:
+            if not isinstance(bindings, Mapping):
+                raise WorkspaceControlError("bindings= must be a non-empty mapping of name -> GitRepo")
             if not bindings:
-                raise WorkspaceControlError("bindings= must be a non-empty mapping of name → GitRepo")
+                raise WorkspaceControlError("bindings= must be a non-empty mapping of name -> GitRepo")
             roots: dict[str, str] = {}
             for name, handle in bindings.items():
                 bound = self._bound_handles.get(name)

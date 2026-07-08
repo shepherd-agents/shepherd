@@ -367,6 +367,8 @@ def test_a7_per_binding_changeset_view(tmp_path: Path, monkeypatch: pytest.Monke
         assert run.changeset(name="backend").changed_paths == ("backend/candidate.py",)
         assert run.changeset(name="backend").binding == "backend"
         assert run.changeset(name="docs").changed_paths == ()
+        assert run.changeset(name="backend").inspect()["changed_paths"] == ["backend/candidate.py"]
+        assert run.changeset(name="docs").inspect()["changed_paths"] == []
         # The whole-workspace view still shows the whole delta.
         assert run.changeset().changed_paths == ("backend/candidate.py",)
         # An unknown binding / output name fails closed.

@@ -97,6 +97,7 @@ def run_output_ref(
     owner: RunOutputOwner | None = None,
     materialization_kind: str = "tree",
     settlement_ref: str | None = None,
+    changed_paths: tuple[str, ...] = ("candidate.txt",),
 ) -> RunOutputRef:
     identity = run_output_identity()
     owner = owner or RunOutputOwner(kind="run", run_id=run_id, execution_id="exec-1", frontier_id="frontier-1")
@@ -125,7 +126,7 @@ def run_output_ref(
         candidate_ref="refs/vcscore/candidates/1",
         store_id="store-workspace",
         resource_id="workspace",
-        changed_paths=("candidate.txt",),
+        changed_paths=changed_paths,
         settlement_ref=settlement_ref,
         descriptor_locator=descriptor_locator,
     )

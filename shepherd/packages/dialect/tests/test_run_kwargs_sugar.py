@@ -295,6 +295,19 @@ def test_args_must_be_mapping(workspace: ShepherdWorkspace, define_in_main) -> N
         )
 
 
+def test_bindings_must_be_mapping(workspace: ShepherdWorkspace, define_in_main) -> None:
+    fn = _register(workspace, define_in_main, _WRITE_NOTE, "write_note")
+    with pytest.raises(WorkspaceControlError, match="bindings= must be a non-empty mapping"):
+        workspace.run(
+            fn,
+            bindings="not-a-mapping",  # type: ignore[arg-type]
+            topic="shepherd",
+            output_path="NOTE.txt",
+            output_text="x\n",
+            runtime={"provider": "static"},
+        )
+
+
 def test_unpassed_shadow_option_does_not_false_fire(workspace: ShepherdWorkspace, define_in_main) -> None:
     # `runtime={"provider": ...}` is not one of the shadowed values here; the task declares a
     # `runtime` value param but the caller supplies it via args=, and does not pass may/placement.
