@@ -5,6 +5,8 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass
 
+from shepherd_runtime.nucleus import GitRepo
+
 from shepherd_dialect.workspace_control.authority import (
     GitRepoGrant,
     GitRepoGrantDescriptor,
@@ -49,7 +51,13 @@ def compile_gitrepo_grant_from_annotation(
     *,
     parameter_name: str,
 ) -> GitRepoGrantDescriptor | None:
-    """Compile a resolved runtime annotation into a GitRepo grant descriptor."""
+    """Compile a resolved runtime annotation into a GitRepo grant descriptor.
+
+    Bare ``GitRepo`` is the ergonomic whole-workspace writable handle spelling.
+    ``May[GitRepo, ...]`` remains the explicit permission spelling.
+    """
+    if annotation is GitRepo:
+        return ReadWrite.to_descriptor(grant_ref=f"signature:{parameter_name}")
     try:
         descriptor = gitrepo_grant_descriptor_from_may_annotation(
             annotation,
@@ -69,9 +77,11 @@ def compile_gitrepo_grant_from_ast_annotation(
     *,
     parameter_name: str,
 ) -> GitRepoGrantDescriptor | None:
-    """Compile supported generated-source ``May[GitRepo, ...]`` syntax without ``eval``."""
+    """Compile supported generated-source GitRepo authority syntax without ``eval``."""
     if annotation is None:
         return None
+    if _expr_name(annotation) == "GitRepo":
+        return ReadWrite.to_descriptor(grant_ref=f"signature:{parameter_name}")
     if not isinstance(annotation, ast.Subscript):
         return None
     root_name = _expr_name(annotation.value)
@@ -109,7 +119,9 @@ def raw_annotation_looks_like_authority(annotation: object) -> bool:
     if not isinstance(annotation, str):
         return False
     text = annotation.replace(" ", "")
-    return "May[" in text or ("Annotated[" in text and "GitRepo" in text)
+    return text in {"GitRepo", "sp.GitRepo"} or text.endswith(".GitRepo") or "May[" in text or (
+        "Annotated[" in text and "GitRepo" in text
+    )
 
 
 def _subscript_args(node: ast.Subscript) -> tuple[ast.expr, ...]:

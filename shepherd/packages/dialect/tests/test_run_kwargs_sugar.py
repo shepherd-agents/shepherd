@@ -96,9 +96,14 @@ _WRITE_NOTE = '''
 import shepherd as sp
 
 @sp.task
-def write_note(repo: sp.May[sp.GitRepo, sp.ReadWrite], topic: str,
+def write_note(repo: sp.GitRepo, topic: str,
                output_path: str, output_text: str) -> None:
     """Write one note about `topic` into the repository."""
+'''
+
+_UNANNOTATED_REPO = '''
+def unannotated_repo(repo, output_path: str, output_text: str) -> None:
+    """Unannotated repo is an ordinary value parameter, not a workspace handle."""
 '''
 
 # A task whose *value* parameter `runtime` shadows the run option of the same name.
@@ -106,9 +111,36 @@ _SHADOWING = '''
 import shepherd as sp
 
 @sp.task
-def shadowing(repo: sp.May[sp.GitRepo, sp.ReadWrite], runtime: str,
+def shadowing(repo: sp.GitRepo, runtime: str,
               output_path: str, output_text: str) -> None:
     """A task whose `runtime` value parameter shadows the `runtime` run option."""
+'''
+
+_SHADOWING_REPO = '''
+import shepherd as sp
+
+@sp.task
+def shadow_repo(target: sp.GitRepo, repo: str,
+                output_path: str, output_text: str) -> None:
+    """A task whose `repo` value parameter shadows the `repo` run option."""
+'''
+
+_SHADOWING_BINDINGS = '''
+import shepherd as sp
+
+@sp.task
+def shadow_bindings(target: sp.GitRepo, bindings: str,
+                    output_path: str, output_text: str) -> None:
+    """A task whose `bindings` value parameter shadows the `bindings` run option."""
+'''
+
+_SHADOWING_ARGS = '''
+import shepherd as sp
+
+@sp.task
+def shadow_args(target: sp.GitRepo, args: str,
+                output_path: str, output_text: str) -> None:
+    """A task whose `args` value parameter shadows the `args` run option."""
 '''
 
 
@@ -203,6 +235,66 @@ def test_shadow_name_disambiguated_via_args(workspace: ShepherdWorkspace, define
     assert run.output().changeset().inspect()["changed_paths"] == ["S.txt"]
 
 
+def test_repo_value_param_shadow_refused_with_args_remedy(workspace: ShepherdWorkspace, define_in_main) -> None:
+    fn = _register(workspace, define_in_main, _SHADOWING_REPO, "shadow_repo")
+    with pytest.raises(WorkspaceControlError, match=r"shadow reserved run option.*args=\{"):
+        workspace.run(
+            fn,
+            repo=workspace.git_repo(),
+            output_path="R.txt",
+            output_text="r\n",
+            runtime={"provider": "static"},
+        )
+
+
+def test_repo_value_param_disambiguated_via_args(workspace: ShepherdWorkspace, define_in_main) -> None:
+    fn = _register(workspace, define_in_main, _SHADOWING_REPO, "shadow_repo")
+    run = workspace.run(
+        fn,
+        repo=workspace.git_repo(),
+        args={"repo": "value", "output_path": "R.txt", "output_text": "r\n"},
+        runtime={"provider": "static"},
+    )
+    assert run.output().changeset().changed_paths == ("R.txt",)
+
+
+def test_bindings_value_param_shadow_refused_before_target_validation(
+    workspace: ShepherdWorkspace, define_in_main
+) -> None:
+    fn = _register(workspace, define_in_main, _SHADOWING_BINDINGS, "shadow_bindings")
+    with pytest.raises(WorkspaceControlError, match=r"shadow reserved run option.*args=\{"):
+        workspace.run(
+            fn,
+            repo=workspace.git_repo(),
+            bindings="value",  # type: ignore[arg-type]
+            output_path="B.txt",
+            output_text="b\n",
+            runtime={"provider": "static"},
+        )
+
+
+def test_args_value_param_shadow_refused_with_args_remedy(workspace: ShepherdWorkspace, define_in_main) -> None:
+    fn = _register(workspace, define_in_main, _SHADOWING_ARGS, "shadow_args")
+    with pytest.raises(WorkspaceControlError, match=r"shadow reserved run option.*args=\{"):
+        workspace.run(
+            fn,
+            repo=workspace.git_repo(),
+            args={"output_path": "A.txt", "output_text": "a\n"},
+            runtime={"provider": "static"},
+        )
+
+
+def test_args_must_be_mapping(workspace: ShepherdWorkspace, define_in_main) -> None:
+    fn = _register(workspace, define_in_main, _WRITE_NOTE, "write_note")
+    with pytest.raises(WorkspaceControlError, match="args= must be a mapping"):
+        workspace.run(
+            fn,
+            repo=workspace.git_repo(),
+            args="topic=bad",  # type: ignore[arg-type]
+            runtime={"provider": "static"},
+        )
+
+
 def test_unpassed_shadow_option_does_not_false_fire(workspace: ShepherdWorkspace, define_in_main) -> None:
     # `runtime={"provider": ...}` is not one of the shadowed values here; the task declares a
     # `runtime` value param but the caller supplies it via args=, and does not pass may/placement.
@@ -224,6 +316,26 @@ def test_handle_param_is_excluded_from_value_params(define_in_main) -> None:
     names = _task_value_param_names(_signature_schema(inspect.unwrap(fn)))
     assert names == {"topic", "output_path", "output_text"}
     assert "repo" not in names  # the May[GitRepo, ...] handle param, fed by repo=
+
+
+def test_unannotated_repo_param_is_a_value_param(define_in_main) -> None:
+    fn = define_in_main(_UNANNOTATED_REPO, "unannotated_repo")
+    names = _task_value_param_names(_signature_schema(inspect.unwrap(fn)))
+    assert names == {"repo", "output_path", "output_text"}
+
+
+def test_unannotated_repo_param_refused_with_annotation_remedy(
+    workspace: ShepherdWorkspace, define_in_main
+) -> None:
+    fn = define_in_main(_UNANNOTATED_REPO, "unannotated_repo")
+    with pytest.raises(WorkspaceControlError, match="annotate it as GitRepo"):
+        workspace.run(
+            fn,
+            repo=workspace.git_repo(),
+            output_path="R.txt",
+            output_text="r\n",
+            runtime={"provider": "static"},
+        )
 
 
 def test_run_signature_is_keyword_task_args_with_positional_only_ref() -> None:

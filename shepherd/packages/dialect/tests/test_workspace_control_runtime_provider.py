@@ -65,7 +65,10 @@ def _write_static_probe_task(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     module_path = tmp_path / "runtime_provider_tasks.py"
     module_path.write_text(
         """
-def generate(repo, **kwargs):
+from shepherd_runtime.nucleus import GitRepo
+
+
+def generate(repo: GitRepo, **kwargs):
     raise AssertionError("static runtime provider should own execution")
 """,
         encoding="utf-8",
@@ -224,7 +227,8 @@ def test_claude_workspace_runtime_provider_records_events_and_scrubs_inputs(
                 {
                     "path": "runtime_provider_tasks.py",
                     "content_encoding": "utf-8",
-                    "content": "def generate(repo, *, output_path):\n    '''Write an HTML artifact.'''\n",
+                    "content": "from shepherd_runtime.nucleus import GitRepo\n\n"
+                    "def generate(repo: GitRepo, *, output_path):\n    '''Write an HTML artifact.'''\n",
                 }
             ],
         },
@@ -340,7 +344,8 @@ def test_claude_workspace_runtime_provider_fails_closed_when_private_cleanup_lea
                 {
                     "path": "runtime_provider_tasks.py",
                     "content_encoding": "utf-8",
-                    "content": "def generate(repo, *, output_path):\n    '''Write an HTML artifact.'''\n",
+                    "content": "from shepherd_runtime.nucleus import GitRepo\n\n"
+                    "def generate(repo: GitRepo, *, output_path):\n    '''Write an HTML artifact.'''\n",
                 }
             ],
         },

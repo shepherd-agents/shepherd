@@ -133,10 +133,27 @@ def _write_module(
     attr_name: str,
 ) -> str:
     module_path = tmp_path / f"{module_name}.py"
-    module_path.write_text(body, encoding="utf-8")
+    module_path.write_text(_body_with_gitrepo_import(body), encoding="utf-8")
     sys.modules.pop(module_name, None)
     monkeypatch.syspath_prepend(str(tmp_path))
     return f"{module_name}:{attr_name}"
+
+
+def _body_with_gitrepo_import(body: str) -> str:
+    if "GitRepo" not in body:
+        return body
+    stripped = body.lstrip("\n")
+    leading = body[: len(body) - len(stripped)]
+    future = "from __future__ import annotations\n"
+    gitrepo_import = "from shepherd_runtime.nucleus import GitRepo\n"
+    if stripped.startswith(gitrepo_import):
+        return body
+    if stripped.startswith(future):
+        rest = stripped[len(future) :]
+        if rest.startswith(gitrepo_import):
+            return body
+        return f"{leading}{future}{gitrepo_import}{rest}"
+    return f"{leading}{gitrepo_import}{stripped}"
 
 
 # Legacy core-loop tests below still exercise task resolution and run-ledger behavior through
@@ -222,7 +239,7 @@ def test_task_register_publishes_versioned_selected_task_ledger(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"fixed: {issue}\\n".encode())
 """,
     )
@@ -255,7 +272,7 @@ def test_task_register_rejects_unsupported_may_default_before_ledger_update(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return repo
 """,
     )
@@ -277,7 +294,7 @@ def test_artifact_backed_task_versions_do_not_execute_live_import_path(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     raise RuntimeError(f"artifact-v1: {issue}")
 """,
     )
@@ -288,7 +305,7 @@ def fix_bug(repo, issue: str):
             tmp_path,
             monkeypatch,
             """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     raise RuntimeError(f"live-v2: {issue}")
 """,
         )
@@ -320,7 +337,7 @@ import os
 import signal
 
 
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     handler = signal.getsignal(signal.SIGTERM)
     assert handler not in (signal.SIG_DFL, signal.SIG_IGN, None), "no SIGTERM handler on the run path"
     os.kill(os.getpid(), signal.SIGTERM)  # `kill` / `docker stop`, mid-run
@@ -345,7 +362,7 @@ def test_private_authority_workspace_run_merges_allowed_candidate(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     repo.write("candidate.txt", f"fixed: {issue}\\n".encode())
     return "body-completed"
 """,
@@ -415,7 +432,7 @@ def test_private_authority_workspace_run_denies_bypassed_readonly_candidate(
 from pathlib import Path
 
 
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     Path(repo.root, "candidate.txt").write_text(f"bypassed: {issue}\\n", encoding="utf-8")
     return "body-completed"
 """,
@@ -470,7 +487,7 @@ def test_private_authority_workspace_run_recovers_settlement_failure_before_term
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     repo.write("candidate.txt", f"fixed after recovery: {issue}\\n".encode())
     return "body-completed"
 """,
@@ -530,7 +547,7 @@ def test_private_authority_workspace_run_recovers_pre_adoption_failure_from_fina
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     repo.write("candidate.txt", f"fixed after pre-adoption recovery: {issue}\\n".encode())
     return "body-completed"
 """,
@@ -590,7 +607,7 @@ def test_parent_task_can_register_before_child_then_activate_and_call_child(
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     child_result = current_task_context().call_task("repair", issue=issue)
     return repo.write("candidate.txt", child_result.encode())
 """,
@@ -613,7 +630,7 @@ def fix_bug(repo, issue: str):
             monkeypatch,
             "child_tasks",
             """
-def repair(repo, issue: str):
+def repair(repo: GitRepo, issue: str):
     return f"child-v1: {issue}\\n"
 """,
             "repair",
@@ -651,7 +668,7 @@ def test_nested_declared_task_aliases_resolve_in_child_namespace(
         monkeypatch,
         "grand_tasks",
         """
-def finish(repo):
+def finish(repo: GitRepo):
     return "grand-ok\\n"
 """,
         "finish",
@@ -664,7 +681,7 @@ def finish(repo):
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def repair(repo):
+def repair(repo: GitRepo):
     return current_task_context().call_task("finish")
 """,
         "repair",
@@ -677,7 +694,7 @@ def repair(repo):
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     result = current_task_context().call_task("repair")
     return repo.write("candidate.txt", result.encode())
 """,
@@ -720,7 +737,7 @@ def test_task_context_can_dynamically_resolve_and_run_task(
         monkeypatch,
         "dynamic_child_tasks",
         """
-def repair(repo, issue: str):
+def repair(repo: GitRepo, issue: str):
     return f"dynamic-child: {issue}\\n"
 """,
         "repair",
@@ -733,7 +750,7 @@ def repair(repo, issue: str):
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     context = current_task_context()
     resolution = context.resolve_task("dynamic_child_tasks.repair", reason="dynamic_lookup")
     result = context.run_task(resolution, issue=issue)
@@ -771,7 +788,7 @@ def test_declared_task_handle_fails_closed_on_in_run_task_library_mutation(
         monkeypatch,
         "declared_child_tasks",
         """
-def repair(repo, issue: str):
+def repair(repo: GitRepo, issue: str):
     return f"child-v1: {issue}"
 """,
         "repair",
@@ -784,7 +801,7 @@ def repair(repo, issue: str):
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     ctx = current_task_context()
     first = ctx.call_task("repair", issue=issue)
     ctx.tasks.update_source(
@@ -792,7 +809,7 @@ def fix_bug(repo, issue: str):
         base_version="v1",
         module="declared_child_generated_v2",
         entrypoint="repair",
-        source_text='def repair(repo, issue: str):\\n return f"child-v2: {issue}"\\n',
+        source_text='def repair(repo: GitRepo, issue: str):\\n return f"child-v2: {issue}"\\n',
         may_default="ReadWrite",
     )
     second = ctx.call_task("repair", issue=issue)
@@ -841,7 +858,7 @@ def test_live_task_handle_fails_closed_on_in_run_generated_versions(
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     ctx = current_task_context()
     handle = ctx.tasks.handle("generated_repair.repair", policy="live")
     seen = []
@@ -850,7 +867,7 @@ def fix_bug(repo):
             task_id="generated_repair.repair",
             module=f"generated_repair_v{index}",
             entrypoint="repair",
-            source_text=f'def repair(repo):\\n return "v{index}"\\n',
+            source_text=f'def repair(repo: GitRepo):\\n return "v{index}"\\n',
             may_default="ReadWrite",
         )
         if index == 1:
@@ -886,7 +903,7 @@ def test_pinned_task_handle_fails_closed_on_in_run_task_library_mutation(
         monkeypatch,
         "pinned_child_tasks",
         """
-def repair(repo, issue: str):
+def repair(repo: GitRepo, issue: str):
     return f"pinned-v1: {issue}"
 """,
         "repair",
@@ -899,7 +916,7 @@ def repair(repo, issue: str):
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     ctx = current_task_context()
     resolution = ctx.resolve_task("pinned_child_tasks.repair", reason="dynamic_lookup")
     handle = ctx.tasks.pinned(resolution)
@@ -908,7 +925,7 @@ def fix_bug(repo, issue: str):
         base_version="v1",
         module="pinned_child_generated_v2",
         entrypoint="repair",
-        source_text='def repair(repo, issue: str):\\n return f"pinned-v2: {issue}"\\n',
+        source_text='def repair(repo: GitRepo, issue: str):\\n return f"pinned-v2: {issue}"\\n',
         may_default="ReadWrite",
     )
     result = handle(issue=issue)
@@ -947,8 +964,9 @@ def test_in_run_register_source_fails_closed_without_executing_generated_top_lev
     marker = tmp_path / "generated-registration-marker.txt"
     generated_source = (
         "from pathlib import Path\n"
+        "from shepherd_runtime.nucleus import GitRepo\n"
         f"Path({str(marker)!r}).write_text('registered', encoding='utf-8')\n"
-        "def repair(repo):\n"
+        "def repair(repo: GitRepo):\n"
         " return 'executed'\n"
     )
     parent_source = _write_module(
@@ -963,7 +981,7 @@ from shepherd_dialect.workspace_control import current_task_context
 MARKER = {str(marker)!r}
 
 
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     ctx = current_task_context()
     ctx.tasks.register_source(
         task_id="generated_no_exec.repair",
@@ -1007,7 +1025,8 @@ def test_update_source_derives_from_active_base_and_rejects_stale_base(tmp_path:
             task_id="source_update.repair",
             module="source_update_v1",
             entrypoint="repair",
-            source_text='def repair(repo):\n return "v1"\n',
+            source_text='from shepherd_runtime.nucleus import GitRepo\n\n'
+            'def repair(repo: GitRepo):\n return "v1"\n',
             may_default="ReadWrite",
         )
         v2 = workspace.tasks.update_source(
@@ -1015,7 +1034,8 @@ def test_update_source_derives_from_active_base_and_rejects_stale_base(tmp_path:
             base_version=v1.version,
             module="source_update_v2",
             entrypoint="repair",
-            source_text='def repair(repo):\n return "v2"\n',
+            source_text='from shepherd_runtime.nucleus import GitRepo\n\n'
+            'def repair(repo: GitRepo):\n return "v2"\n',
             may_default="ReadWrite",
         )
 
@@ -1029,7 +1049,8 @@ def test_update_source_derives_from_active_base_and_rejects_stale_base(tmp_path:
                 base_version=v1.version,
                 module="source_update_v3",
                 entrypoint="repair",
-                source_text='def repair(repo):\n return "v3"\n',
+                source_text='from shepherd_runtime.nucleus import GitRepo\n\n'
+                'def repair(repo: GitRepo):\n return "v3"\n',
                 may_default="ReadWrite",
             )
     finally:
@@ -1045,7 +1066,7 @@ def test_lock_only_pinned_handle_records_exact_lock_without_task_ledger_head(
         monkeypatch,
         "lock_only_child_tasks",
         """
-def repair(repo, issue: str):
+def repair(repo: GitRepo, issue: str):
     return f"lock-only-v1: {issue}"
 """,
         "repair",
@@ -1058,7 +1079,7 @@ def repair(repo, issue: str):
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     ctx = current_task_context()
     resolution = ctx.resolve_task("lock_only_child_tasks.repair", reason="dynamic_lookup")
     handle = ctx.tasks.pinned(resolution.task_lock)
@@ -1103,7 +1124,7 @@ def test_single_file_task_registration_rejects_local_sibling_import(
 import helper
 
 
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return helper.VALUE
 """,
         "fix_bug",
@@ -1127,9 +1148,10 @@ def test_single_file_task_registration_rejects_same_package_import(
     (package_dir / "task.py").write_text(
         """
 import pkg_tasks.helper
+from shepherd_runtime.nucleus import GitRepo
 
 
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return pkg_tasks.helper.VALUE
 """,
         encoding="utf-8",
@@ -1152,14 +1174,16 @@ def test_dependency_preflight_rejects_task_index_cache_drift(tmp_path: Path) -> 
             task_id="drift_child.repair",
             module="drift_child",
             entrypoint="repair",
-            source_text='def repair(repo):\n return "child"\n',
+            source_text='from shepherd_runtime.nucleus import GitRepo\n\n'
+            'def repair(repo: GitRepo):\n return "child"\n',
             may_default="ReadWrite",
         )
         parent = workspace.tasks.register_source(
             task_id="drift_parent.run",
             module="drift_parent",
             entrypoint="run",
-            source_text='def run(repo):\n return "parent"\n',
+            source_text='from shepherd_runtime.nucleus import GitRepo\n\n'
+            'def run(repo: GitRepo):\n return "parent"\n',
             may_default="ReadWrite",
         )
         drifted_parent = replace(
@@ -1198,7 +1222,8 @@ def test_run_start_rejects_cyclic_task_dependency_graph(tmp_path: Path) -> None:
             task_id="cycle.a",
             module="cycle_a",
             entrypoint="run",
-            source_text="def run(repo):\n return None\n",
+            source_text="from shepherd_runtime.nucleus import GitRepo\n\n"
+            "def run(repo: GitRepo):\n return None\n",
             may_default="ReadWrite",
             declared_dependencies={"b": {"task_id": "cycle.b", "selector": "active"}},
         )
@@ -1206,7 +1231,8 @@ def test_run_start_rejects_cyclic_task_dependency_graph(tmp_path: Path) -> None:
             task_id="cycle.b",
             module="cycle_b",
             entrypoint="run",
-            source_text="def run(repo):\n return None\n",
+            source_text="from shepherd_runtime.nucleus import GitRepo\n\n"
+            "def run(repo: GitRepo):\n return None\n",
             may_default="ReadWrite",
             declared_dependencies={"a": {"task_id": "cycle.a", "selector": "active"}},
         )
@@ -1238,7 +1264,7 @@ def test_task_update_rejects_missing_or_stale_base_version(tmp_path: Path, monke
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"fixed: {issue}\\n".encode())
 """,
     )
@@ -1267,7 +1293,7 @@ def test_task_update_validates_run_produced_source_identity(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"fixed: {issue}\\n".encode())
 """,
     )
@@ -1335,7 +1361,7 @@ def test_task_update_rejects_run_without_published_workspace_output(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"fixed: {issue}\\n".encode())
 """,
     )
@@ -1438,7 +1464,7 @@ def test_workspace_control_cli_reopens_real_workspace_for_reads(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -1553,7 +1579,7 @@ def test_workspace_control_cli_release_and_discard_settle_run_outputs_once(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -1618,7 +1644,7 @@ def test_workspace_control_cli_select_settles_output_and_advances_selected_bindi
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -1674,7 +1700,7 @@ def test_workspace_control_cli_settlement_requires_exact_run_and_named_output(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -1723,7 +1749,7 @@ def test_workspace_control_cli_parent_run_attachment_fails_closed(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -1760,7 +1786,7 @@ def test_workspace_defaults_trace_store_to_documented_sqlite_path(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -1789,7 +1815,7 @@ def test_workspace_reopen_resolves_outputs_from_persisted_default_sqlite(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -1828,7 +1854,7 @@ def test_runs_outputs_fails_closed_when_trace_descriptor_unresolvable(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -1863,7 +1889,7 @@ def test_runs_publish_retained_workspace_output_repairs_missing_trace_descriptor
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -1913,7 +1939,7 @@ def test_workspace_select_run_output_consumes_once_and_reflects_state(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -1993,7 +2019,7 @@ def fix_bug(repo, issue: str):
             authority_decision["authority_surface_plan_digest"]
             == record.authority_context.authority_surface_plan_digest
         )
-        assert authority_decision["reason_code"] == "may_ReadWrite_retained_output_selection_match"
+        assert authority_decision["reason_code"] == "gitrepo_grant_retained_output_selection_match"
         assert authority_decision["monitor_basis"] == "carrier_check_at_commit"
         assert authority_decision["permission_plan_digest"]
         assert authority_decision["permission_plan_digest"] != authority_decision["authority_surface_plan_digest"]
@@ -2041,7 +2067,7 @@ def test_public_workspace_run_explicit_readonly_uses_confined_process_for_raw_wr
         """
 from pathlib import Path
 
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     Path("raw-write.txt").write_text("must be denied by the jail\\n", encoding="utf-8")
     return "unreachable"
 """,
@@ -2098,7 +2124,7 @@ def test_readonly_workspace_run_fails_before_producing_mutating_output(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return repo.write("candidate.txt", b"readonly must not write\\n")
 """,
     )
@@ -2521,7 +2547,7 @@ def test_workspace_run_output_settlement_reflects_after_reopen(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -2560,7 +2586,7 @@ def test_workspace_run_output_git_repo_hydrates_after_reopen_unconsumed(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -2601,7 +2627,7 @@ def test_workspace_run_output_git_repo_hydrates_after_reopen_receipt_only_settle
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -2665,7 +2691,7 @@ def test_workspace_git_repo_acquisition_reflects_selected_retained_output(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -2718,7 +2744,7 @@ def test_workspace_git_repo_acquisition_release_and_discard_do_not_create_select
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -2750,7 +2776,7 @@ def test_workspace_run_facade_accepts_same_state_gitrepo_with_different_world_pr
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -2845,7 +2871,7 @@ def test_workspace_git_repo_acquisition_release_and_discard_preserve_selected_bi
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -2906,7 +2932,7 @@ def test_workspace_run_facade_supports_select_reacquire_run_select_loop(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -2983,7 +3009,7 @@ def test_workspace_run_facade_uses_nucleus_retained_producer_without_bridge(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -3012,7 +3038,7 @@ def fix_bug(repo, issue: str):
             for effect in _authority_effects(authority_history)
             if effect["type"] == "RetainedOutputAuthorityDecision"
         )
-        assert authority_decision["reason_code"] == "may_ReadWrite_retained_output_selection_match"
+        assert authority_decision["reason_code"] == "gitrepo_grant_retained_output_selection_match"
         assert authority_decision["monitor_basis"] == "carrier_check_at_commit"
         assert authority_decision["permission_plan_digest"]
         assert output.refresh().state == "selected"
@@ -3028,7 +3054,7 @@ def test_workspace_run_facade_records_failed_root_execution(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     raise RuntimeError(f"cannot fix {issue}")
 """,
     )
@@ -3079,7 +3105,7 @@ def test_workspace_run_facade_lowers_readonly_may_to_non_writable_repo(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return repo.write("candidate.txt", b"not allowed\\n")
 """,
     )
@@ -3107,7 +3133,7 @@ def test_workspace_run_task_default_readonly_uses_confined_process(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return repo.write("candidate.txt", b"not allowed by task default\\n")
 """,
     )
@@ -3284,7 +3310,7 @@ def test_workspace_run_readonly_noop_succeeds_under_confined_process(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return {"issue": issue, "repo": repo}
 """,
     )
@@ -3325,7 +3351,7 @@ def test_workspace_run_readonly_confined_process_records_no_jail_refusal(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return "unreachable"
 """,
     )
@@ -3373,7 +3399,8 @@ def test_confined_provider_rejects_non_relative_artifact_paths_before_launch() -
                 {
                     "path": "../escape.py",
                     "content_encoding": "utf-8",
-                    "content": "def fix_bug(repo):\n return None\n",
+                    "content": "from shepherd_runtime.nucleus import GitRepo\n\n"
+                    "def fix_bug(repo: GitRepo):\n return None\n",
                 }
             ],
         },
@@ -3397,7 +3424,7 @@ def test_workspace_run_readonly_confined_process_records_prelaunch_refusal(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return "unreachable"
 """,
     )
@@ -3450,7 +3477,7 @@ def test_workspace_run_facade_rejects_unsupported_may_before_run_record(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return repo
 """,
     )
@@ -3475,7 +3502,7 @@ def test_workspace_run_facade_rejects_widening_may_before_run_record(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return repo
 """,
     )
@@ -3500,7 +3527,7 @@ def test_workspace_run_output_settlement_resolves_non_ground_parent_scope(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -3545,7 +3572,7 @@ def test_workspace_receipt_only_run_output_settlement_reflects_state(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -3582,7 +3609,7 @@ def test_workspace_run_output_settlement_fails_closed_for_forged_or_stale_output
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -3683,7 +3710,7 @@ def test_output_resolution_does_not_read_the_trace_carrier_behaviorally(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )

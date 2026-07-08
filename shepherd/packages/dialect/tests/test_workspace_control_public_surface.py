@@ -79,7 +79,10 @@ def _write_task_module(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> str:
     module_path = tmp_path / "sample_tasks.py"
     module_path.write_text(
         """
-def fix_bug(repo, issue: str):
+from shepherd_runtime.nucleus import GitRepo
+
+
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
         encoding="utf-8",

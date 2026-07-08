@@ -28,7 +28,10 @@ if TYPE_CHECKING:
 
 CANDIDATE_TASK_ID = "examples.workspace_handles.propose"
 CANDIDATE_SOURCE = """
-def propose(repo, label: str, score: int, accepted: bool = False):
+from shepherd_runtime.nucleus import GitRepo
+
+
+def propose(repo: GitRepo, label: str, score: int, accepted: bool = False):
     status = "accepted" if accepted else "rejected"
     repo.write("candidate.txt", f"{score}:{label}:{status}\\n".encode())
     return {"label": label, "score": score, "accepted": accepted}

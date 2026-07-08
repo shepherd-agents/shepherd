@@ -68,7 +68,7 @@ grant on `repo` is what lets the agent write the repository
 
 ```python
 def write_program(
-    repo: sp.May[sp.GitRepo, sp.ReadWrite],
+    repo: sp.GitRepo,
     prompt: str,
     output_path: str = "program.py",
 ) -> None:

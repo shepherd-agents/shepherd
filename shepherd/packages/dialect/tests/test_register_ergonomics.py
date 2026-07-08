@@ -4,7 +4,7 @@ The hero spelling is `@sp.task` + `ws.tasks.register(fn)` + `ws.run(fn, ...)` â€
 source-text blob. This covers the six-row matrix from the hero-ergonomics plan:
 module-defined plain/decorated register and resolve; `__main__` bodyless captures at
 definition scope; `__main__` bodied and bare-`__main__`-annotation refuse; locals
-refuse; and the callable resolves to the exact id registration assigned.
+refuse; and callable lookup follows the default identity convention.
 
 The one end-to-end jailed run (decorated bodied module task) proves the executing
 artifact is the plain body, not the wrapper (which would fail WorkspaceNotConfigured).

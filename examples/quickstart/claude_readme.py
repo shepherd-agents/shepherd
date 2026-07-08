@@ -16,7 +16,7 @@ import shepherd as sp
 
 # A bodyless task: the docstring is the contract Claude fulfils under the jail.
 @sp.task
-def update_readme(repo: sp.May[sp.GitRepo, sp.ReadWrite], goal: str, output_path: str = "README.md") -> None:
+def update_readme(repo: sp.GitRepo, goal: str, output_path: str = "README.md") -> None:
     """Use Claude to make the README clearer for a first-time developer.
 
     Keep the edit small. Preserve existing factual claims. Write the proposed
@@ -49,8 +49,7 @@ def main() -> None:
         sys.stdout.write(json.dumps({"skipped": True, "reason": reason}, indent=2, sort_keys=True) + "\n")
         return
 
-    workspace = sp.open(".")
-    try:
+    with sp.open(".") as workspace:
         workspace.tasks.register(update_readme)
         run = workspace.run(
             update_readme,
@@ -60,12 +59,13 @@ def main() -> None:
             runtime={"provider": "claude"},
         )
         output = run.output()
+        changeset = output.changeset()
         sys.stdout.write(
             json.dumps(
                 {
                     "run_ref": run.run_ref,
                     "status": run.status,
-                    "changed_paths": list(output.changed_paths),
+                    "changed_paths": list(changeset.changed_paths),
                     "state": output.state,
                     "next": [
                         "sp run changeset --latest",
@@ -77,8 +77,6 @@ def main() -> None:
             )
             + "\n"
         )
-    finally:
-        workspace.close()
 
 
 if __name__ == "__main__":

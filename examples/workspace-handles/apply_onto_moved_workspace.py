@@ -31,7 +31,10 @@ from _support import (
 # the second can be applied onto the first without conflict.
 PATH_TASK_ID = "examples.workspace_handles.write_path"
 PATH_TASK_SOURCE = """
-def write_path(repo, path: str, text: str):
+from shepherd_runtime.nucleus import GitRepo
+
+
+def write_path(repo: GitRepo, path: str, text: str):
     repo.write(path, text.encode())
     return {"path": path}
 """

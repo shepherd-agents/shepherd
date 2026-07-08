@@ -125,7 +125,6 @@ def test_workspace_task_handle_delegates_definition_json_and_run() -> None:
             "args": {"issue": "parser"},
             "may": "ReadWrite",
             "placement": "advisory",
-            "runtime": None,
         }
     ]
 

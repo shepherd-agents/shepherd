@@ -18,7 +18,7 @@ PROMPT = "a mesmerizing spinning 3D ASCII donut animation in the terminal"
 
 # The signature is the permission surface: the grant on `repo` is what lets the
 # agent write the bound repository (see "Permissions" in the README).
-def write_program(repo: sp.May[sp.GitRepo, sp.ReadWrite], prompt: str, output_path: str = "program.py") -> None:
+def write_program(repo: sp.GitRepo, prompt: str, output_path: str = "program.py") -> None:
     """Write a small, self-contained Python program that does what `prompt` asks.
 
     Save it to output_path. It must run with plain `python3`, read no input,
@@ -33,8 +33,7 @@ if not _auth.ok:
     # An expired/absent login is caught here rather than failing mid-run.
     sys.exit(f"not ready — {_auth.detail}")
 
-workspace = sp.open(".")
-try:
+with sp.open(".") as workspace:
     workspace.tasks.register(write_program, task_id="quickstart.write_program", may_default="ReadWrite")
     run = workspace.run(
         "quickstart.write_program",
@@ -44,7 +43,8 @@ try:
         placement="jail",
         runtime={"provider": "claude"},
     )
-    changed = ", ".join(run.output().changed_paths)
+    output = run.output()
+    changed = ", ".join(output.changeset().changed_paths)
     print(f"retained: {run.run_ref} wrote {changed} (nothing applied to your files)")
     print()
     print("run the agent's program straight from the retained output:")
@@ -53,5 +53,3 @@ try:
     print("keep it, or not:")
     print(f"  shepherd run select {run.run_ref}")
     print(f"  shepherd run discard {run.run_ref}")
-finally:
-    workspace.close()

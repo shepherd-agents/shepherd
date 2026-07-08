@@ -413,7 +413,10 @@ def test_T6_single_binding_has_no_per_binding_evidence_survived(
         # register a single-repo task
         module_path = tmp_path / "single_task.py"
         module_path.write_text(
-            "def propose(repo, label: str):\n    repo.write('c.txt', label.encode())\n    return {'label': label}\n",
+            "from shepherd_runtime.nucleus import GitRepo\n\n"
+            "def propose(repo: GitRepo, label: str):\n"
+            "    repo.write('c.txt', label.encode())\n"
+            "    return {'label': label}\n",
             encoding="utf-8",
         )
         sys.modules.pop("single_task", None)
