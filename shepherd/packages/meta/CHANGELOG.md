@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-08
+
 ### Added
 
 - **`apply` completes the retained-output settlement vocabulary.** `apply` joins
@@ -35,6 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   task-level `may` ceiling is derived from the signature's grants — uniformly, however
   the task was registered; an explicit `may_default=` still overrides, and the registry
   records which one happened.
+- **Registrations record the `GitRepo` grant spelling.** Each registration records
+  whether a `GitRepo` grant was written bare (`repo: GitRepo`) or explicit
+  (`May[GitRepo, ...]`) as registration provenance (`gitrepo_grant_spelling` in the
+  signature schema). The two compile to a byte-identical grant, so this is the only
+  discriminator; it feeds the future no-defaulted-grants lint. No behavior change, no
+  effect on grant identity, enforcement, or the content-addressed task artifact.
 
 ### Changed
 

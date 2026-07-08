@@ -35,6 +35,8 @@ from shepherd_dialect.workspace_control.authority_declarations import (
     AuthorityDeclarationError,
     compile_gitrepo_grant_from_annotation,
     compile_gitrepo_grant_from_ast_annotation,
+    gitrepo_grant_spelling,
+    gitrepo_grant_spelling_from_ast,
     raw_annotation_looks_like_authority,
 )
 from shepherd_dialect.workspace_control.drivers import (
@@ -4266,6 +4268,7 @@ def _ast_parameter_schema(arg: ast.arg, *, kind: str, default: ast.expr | None) 
         raise TaskRegistrationError(str(exc)) from exc
     if gitrepo_grant is not None:
         parameter_schema["gitrepo_grant"] = gitrepo_grant.to_descriptor()
+        parameter_schema["gitrepo_grant_spelling"] = gitrepo_grant_spelling_from_ast(arg.annotation)
     return parameter_schema
 
 
@@ -4303,6 +4306,7 @@ def _signature_schema(task_body: Callable[..., Any]) -> JsonObject:
         gitrepo_grant = _gitrepo_grant_from_annotation(annotation, parameter_name=name)
         if gitrepo_grant is not None:
             parameter_schema["gitrepo_grant"] = gitrepo_grant.to_descriptor()
+            parameter_schema["gitrepo_grant_spelling"] = gitrepo_grant_spelling(annotation)
         parameters.append(parameter_schema)
     return {
         "parameters": parameters,

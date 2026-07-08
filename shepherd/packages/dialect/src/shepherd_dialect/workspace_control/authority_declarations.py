@@ -114,6 +114,29 @@ def compile_gitrepo_grant_from_ast_annotation(
     return None
 
 
+def gitrepo_grant_spelling(annotation: object) -> str:
+    """Classify a resolved GitRepo grant annotation's spelling: ``"bare"`` or ``"may"``.
+
+    Recorded as registration provenance beside the compiled grant (P-030 §4 item 4: a bare
+    handle annotation defaults permissive-for-that-binding and must be recorded so the default
+    is countable and lintable). Provenance only — the compiled ``GitRepoGrantDescriptor`` and its
+    content-addressed digest are *identical* for ``GitRepo`` and ``May[GitRepo, ReadWrite]``, so
+    the spelling is deliberately **not** a descriptor field. Precondition: ``annotation`` already
+    compiled to a GitRepo grant via :func:`compile_gitrepo_grant_from_annotation`.
+    """
+    return "bare" if annotation is GitRepo else "may"
+
+
+def gitrepo_grant_spelling_from_ast(annotation: ast.expr | None) -> str:
+    """AST (generated-source) twin of :func:`gitrepo_grant_spelling`.
+
+    Mirrors :func:`compile_gitrepo_grant_from_ast_annotation`'s bare arm (a plain ``GitRepo`` /
+    ``sp.GitRepo`` name); every other compiling shape is ``May[GitRepo, ...]``. Same precondition:
+    the annotation already compiled to a grant.
+    """
+    return "bare" if annotation is not None and _expr_name(annotation) == "GitRepo" else "may"
+
+
 def raw_annotation_looks_like_authority(annotation: object) -> bool:
     """Return whether an unresolved annotation appears to carry authority syntax."""
     if not isinstance(annotation, str):

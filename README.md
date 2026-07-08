@@ -26,8 +26,8 @@ execution traces, with retained workspace outputs that can be reviewed before
 they are selected, applied, released, or discarded.
 
 > **Platforms.** Shepherd requires **Python 3.11+**. OS-level grant enforcement
-> is exercised on **macOS** (Seatbelt) today; on **Linux**, Landlock enforcement
-> is container-gated. **Windows is unsupported** (enforcement would be
+> is executed on **both macOS** (Seatbelt) and **Linux** (Landlock, in a privileged
+> container). **Windows is unsupported** (enforcement would be
 > advisory-only at best) — use **WSL**.
 
 ## Installation
@@ -175,9 +175,9 @@ path-disjoint).
 
 > **Scope (P-030 v0.2).** Per-binding whole-profile `ReadOnly`/`ReadWrite` over
 > disjoint named bindings, on a jailed device, filesystem / Git substrate,
-> same-process value-children. Enforcement is exercised on macOS Seatbelt; Linux
-> Landlock is container-gated. Sub-root / `where(path=…)` grants are not part of
-> this cut.
+> same-process value-children. Enforcement is executed on both macOS Seatbelt and
+> Linux Landlock (the latter in a privileged container). Sub-root / `where(path=…)`
+> grants are not part of this cut.
 
 ## Examples
 
