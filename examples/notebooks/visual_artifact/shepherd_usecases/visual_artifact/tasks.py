@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from shepherd_runtime.nucleus import GitRepo  # noqa: TC002 - task registration resolves this at runtime
+
 STATIC_ARTIFACT_TASK_REF = "shepherd_usecases.visual_artifact.tasks.static_artifact_task"
 LIVE_ARTIFACT_TASK_REF = "shepherd_usecases.visual_artifact.tasks.live_artifact_task"
 LIVE_REVIEW_TASK_REF = "shepherd_usecases.visual_artifact.tasks.live_review_task"
 
 
 def static_artifact_task(
-    repo: object,
+    repo: GitRepo,
     *,
     output_path: str,
     output_text: str | None = None,
@@ -20,7 +22,7 @@ def static_artifact_task(
 
 
 def live_artifact_task(
-    repo: object,
+    repo: GitRepo,
     *,
     prompt: str,
     variant: str,
@@ -37,7 +39,7 @@ def live_artifact_task(
 
 
 def live_review_task(
-    repo: object,
+    repo: GitRepo,
     *,
     prompt: str,
     output_path: str = "verdict.json",

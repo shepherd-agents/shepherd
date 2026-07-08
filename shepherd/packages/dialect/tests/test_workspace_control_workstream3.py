@@ -58,10 +58,21 @@ def _write_module(
     entrypoint: str,
 ) -> str:
     module_path = tmp_path / f"{module_name}.py"
-    module_path.write_text(source_text, encoding="utf-8")
+    module_path.write_text(_source_with_gitrepo_import(source_text), encoding="utf-8")
     sys.modules.pop(module_name, None)
     monkeypatch.syspath_prepend(str(tmp_path))
     return f"{module_name}:{entrypoint}"
+
+
+def _source_with_gitrepo_import(source_text: str) -> str:
+    if "GitRepo" not in source_text:
+        return source_text
+    stripped = source_text.lstrip("\n")
+    leading = source_text[: len(source_text) - len(stripped)]
+    gitrepo_import = "from shepherd_runtime.nucleus import GitRepo\n"
+    if stripped.startswith(gitrepo_import):
+        return source_text
+    return f"{leading}{gitrepo_import}{stripped}"
 
 
 def _seed_selected_workspace(workspace: ShepherdWorkspace) -> Any:
@@ -78,7 +89,7 @@ def test_public_workspace_run_records_advisory_for_in_process_execution(
         monkeypatch,
         "ws3_advisory_tasks",
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return repo
 """,
         "fix_bug",
@@ -124,7 +135,7 @@ def test_public_workspace_run_required_jail_fails_closed_without_containment(
         monkeypatch,
         "ws3_no_jail_tasks",
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     raise AssertionError("task artifact should not execute without a jail")
 """,
         "fix_bug",
@@ -174,7 +185,7 @@ def test_public_workspace_run_confined_permissive_publishes_retained_output(
         monkeypatch,
         "ws3_confined_write_tasks",
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
         "fix_bug",
@@ -215,7 +226,7 @@ def test_public_workspace_run_readonly_confined_read_only_task_publishes_empty_c
         monkeypatch,
         "ws3_readonly_success_tasks",
         """
-def inspect(repo):
+def inspect(repo: GitRepo):
     return {"binding": repo.binding, "authority": repo.authority}
 """,
         "inspect",
@@ -268,7 +279,7 @@ def test_public_workspace_run_readonly_denies_direct_filesystem_write_at_jail(
 from pathlib import Path
 
 
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     Path(repo.root, "bypass.txt").write_text("bypass\\n", encoding="utf-8")
     return {"wrote": True}
 """,
@@ -310,7 +321,7 @@ def test_public_workspace_run_confined_linked_task_calls_refuse_before_advisory_
         monkeypatch,
         "ws3_child_tasks",
         """
-def repair(repo):
+def repair(repo: GitRepo):
     return "child result"
 """,
         "repair",
@@ -323,7 +334,7 @@ def repair(repo):
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return current_task_context().call_task("repair")
 """,
         "fix_bug",
@@ -362,7 +373,7 @@ def test_public_workspace_run_prelaunch_serialization_failure_stays_advisory(
         monkeypatch,
         "ws3_prelaunch_tasks",
         """
-def fix_bug(repo, payload):
+def fix_bug(repo: GitRepo, payload):
     return {"payload": str(payload)}
 """,
         "fix_bug",
@@ -400,7 +411,7 @@ def test_public_workspace_run_confined_runner_entrypoint_is_not_shadowed_by_work
         monkeypatch,
         "ws3_shadow_tasks",
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return {"trusted_worker": True}
 """,
         "fix_bug",
@@ -442,7 +453,7 @@ def test_public_workspace_run_auto_resolves_to_jail_on_jail_capable_host(
         monkeypatch,
         "ws3_auto_jail_tasks",
         """
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return {"auto": True}
 """,
         "fix_bug",
@@ -478,7 +489,7 @@ def test_public_workspace_run_auto_resolves_to_advisory_when_no_native_jail(
         monkeypatch,
         "ws3_auto_advisory_child_tasks",
         """
-def repair(repo):
+def repair(repo: GitRepo):
     return "child result"
 """,
         "repair",
@@ -491,7 +502,7 @@ def repair(repo):
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return {"child": current_task_context().call_task("repair")}
 """,
         "fix_bug",
@@ -529,7 +540,7 @@ def test_public_workspace_run_advisory_preserves_same_process_linked_task_calls(
         monkeypatch,
         "ws3_advisory_child_tasks",
         """
-def repair(repo):
+def repair(repo: GitRepo):
     return "child result"
 """,
         "repair",
@@ -542,7 +553,7 @@ def repair(repo):
 from shepherd_dialect.workspace_control import current_task_context
 
 
-def fix_bug(repo):
+def fix_bug(repo: GitRepo):
     return {"child": current_task_context().call_task("repair")}
 """,
         "fix_bug",

@@ -62,10 +62,15 @@ def define_in_main() -> Iterator[Callable[[str, str], Callable[..., object]]]:
 
 
 _GRANT_MODULE_SOURCE = '''
+from __future__ import annotations
+
 import shepherd as sp
 
 def ro_only(docs: sp.May[sp.GitRepo, sp.ReadOnly], note: str) -> None:
     """All grants read-only."""
+
+def bare_rw(repo: sp.GitRepo, note: str) -> None:
+    """Bare GitRepo is the writable workspace-handle spelling."""
 
 def rw_only(repo: sp.May[sp.GitRepo, sp.ReadWrite], note: str) -> None:
     """One read-write grant."""
@@ -109,6 +114,10 @@ def test_all_readonly_signature_derives_readonly_ceiling(workspace, grant_module
 
 def test_any_readwrite_grant_joins_to_readwrite(workspace, grant_module) -> None:
     import ceiling_grant_tasks
+
+    bare = workspace.tasks.register(ceiling_grant_tasks.bare_rw, task_id="ceiling.bare_rw")
+    assert bare.may_default == "ReadWrite"
+    assert _provenance(bare) == "derived"
 
     rw = workspace.tasks.register(ceiling_grant_tasks.rw_only)
     assert rw.may_default == "ReadWrite"
@@ -166,6 +175,30 @@ def test_ceiling_derivation_is_uniform_across_registration_spellings(workspace, 
     assert _provenance(via_source) == "derived"
 
 
+def test_bare_gitrepo_derivation_is_uniform_across_registration_spellings(workspace, grant_module) -> None:
+    """The clean writer spelling derives ReadWrite through runtime and AST paths."""
+    import ceiling_grant_tasks
+
+    via_callable = workspace.tasks.register(ceiling_grant_tasks.bare_rw, task_id="bare.callable")
+    via_source = workspace.tasks.register_source(
+        task_id="bare.source",
+        module="bare_source_tasks",
+        source_text=textwrap.dedent(
+            """
+            import shepherd as sp
+
+            def bare_rw(repo: sp.GitRepo, note: str) -> None:
+                \"\"\"Bare GitRepo is a writable workspace handle.\"\"\"
+            """
+        ),
+        entrypoint="bare_rw",
+    )
+    assert via_callable.may_default == "ReadWrite"
+    assert via_source.may_default == "ReadWrite"
+    assert _provenance(via_callable) == "derived"
+    assert _provenance(via_source) == "derived"
+
+
 def test_derived_ceiling_bites_at_admission_before_the_body(workspace, grant_module) -> None:
     """The derived value is a task-level *ceiling* refused at admission, not the jail.
 
@@ -215,6 +248,46 @@ def test_generated_main_registration_records_originating_script(workspace, defin
     assert origin["qualname"] == "scripted"
     # file_path is None for a generated artifact; the originating script is recorded instead.
     assert origin["source_file"] is not None
+
+
+def test_generated_main_bare_gitrepo_import_derives_readwrite(workspace, define_in_main) -> None:
+    fn = define_in_main(
+        """
+        import shepherd as sp
+        from shepherd import GitRepo
+
+        @sp.task
+        def scripted_writer(repo: GitRepo, note: str) -> None:
+            \"\"\"Bare GitRepo import is the same writable handle syntax in a script.\"\"\"
+        """,
+        "scripted_writer",
+    )
+
+    version = workspace.tasks.register(fn)
+
+    assert version.task_id == "shepherd_generated_scripted_writer.scripted_writer"
+    assert version.may_default == "ReadWrite"
+    assert _provenance(version) == "derived"
+
+
+def test_generated_main_bare_may_import_derives_readonly(workspace, define_in_main) -> None:
+    fn = define_in_main(
+        """
+        import shepherd as sp
+        from shepherd import GitRepo, May, ReadOnly
+
+        @sp.task
+        def scripted_reader(repo: May[GitRepo, ReadOnly], note: str) -> None:
+            \"\"\"Bare May/GitRepo imports are valid generated-main permission syntax.\"\"\"
+        """,
+        "scripted_reader",
+    )
+
+    version = workspace.tasks.register(fn)
+
+    assert version.task_id == "shepherd_generated_scripted_reader.scripted_reader"
+    assert version.may_default == "ReadOnly"
+    assert _provenance(version) == "derived"
 
 
 def test_register_source_records_ceiling_provenance_but_no_callable_origin(workspace) -> None:

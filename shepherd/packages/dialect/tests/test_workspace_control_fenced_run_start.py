@@ -57,10 +57,21 @@ def _make_workspace(
 
 def _write_task_module(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, body: str) -> str:
     module_path = tmp_path / "sample_tasks.py"
-    module_path.write_text(body, encoding="utf-8")
+    module_path.write_text(_body_with_gitrepo_import(body), encoding="utf-8")
     sys.modules.pop("sample_tasks", None)
     monkeypatch.syspath_prepend(str(tmp_path))
     return "sample_tasks:fix_bug"
+
+
+def _body_with_gitrepo_import(body: str) -> str:
+    if "GitRepo" not in body:
+        return body
+    stripped = body.lstrip("\n")
+    leading = body[: len(body) - len(stripped)]
+    gitrepo_import = "from shepherd_runtime.nucleus import GitRepo\n"
+    if stripped.startswith(gitrepo_import):
+        return body
+    return f"{leading}{gitrepo_import}{stripped}"
 
 
 def _start_fenced_run(
@@ -157,7 +168,7 @@ def test_fenced_run_start_routes_through_retained_nucleus_spine(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -239,7 +250,7 @@ def test_runs_outputs_does_not_enable_run_start_execution_flags(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     return repo.write("candidate.txt", f"selected candidate: {issue}\\n".encode())
 """,
     )
@@ -273,7 +284,7 @@ def test_fenced_run_start_records_failed_terminal_record(
         tmp_path,
         monkeypatch,
         """
-def fix_bug(repo, issue: str):
+def fix_bug(repo: GitRepo, issue: str):
     raise RuntimeError(f"cannot fix {issue}")
 """,
     )

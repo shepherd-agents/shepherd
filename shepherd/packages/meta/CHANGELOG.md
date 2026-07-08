@@ -29,13 +29,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (and their bodies execute under the jail as plain functions); a task defined in an
   importable module travels as that module; a bodyless task written in a run-as-script
   file (`__main__`) is captured at definition scope. `ws.run(fn, ...)` and
-  `ws.tasks.task(fn)` resolve the callable to the id registration assigned it. The
+  `ws.tasks.task(fn)` resolve the callable by the default callable-identity
+  convention; a callable registered with an explicit `task_id=` must still be run by
+  that id. The
   task-level `may` ceiling is derived from the signature's grants — uniformly, however
   the task was registered; an explicit `may_default=` still overrides, and the registry
   records which one happened.
 
 ### Changed
 
+- **The beginner workspace-handle spelling is now `repo: GitRepo`.** A bare
+  `GitRepo` parameter in a task signature is an explicit writable workspace-handle
+  grant, equivalent to the read-write case of `May[GitRepo, ...]`; it is not
+  inferred from the parameter name. Use `May[GitRepo, ReadOnly]` when the handle
+  must be read-only. Pre-0.3 unannotated `repo` parameters are no longer treated
+  as handles; annotate them or pass an ordinary value through `args={"repo": ...}`
+  when `repo` is truly a value argument.
 - **A bodied task registered from a run-as-script file (`__main__`) now refuses.**
   Previously its whole script was captured as the task artifact (embedding driver
   code — a re-execution footgun); it now refuses with a remedy ("move it to an

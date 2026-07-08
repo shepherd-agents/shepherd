@@ -200,6 +200,7 @@ class TaskArtifactLock:
     artifact_ref: TaskArtifactRef
     artifact_digest: str
     schema_digest: str
+    signature_schema: JsonObject = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         for field_name, value in (
@@ -221,6 +222,7 @@ class TaskArtifactLock:
             "artifact_ref": self.artifact_ref.to_json(),
             "artifact_digest": self.artifact_digest,
             "schema_digest": self.schema_digest,
+            "signature_schema": dict(self.signature_schema),
         }
 
     @classmethod
@@ -231,6 +233,7 @@ class TaskArtifactLock:
             artifact_ref=TaskArtifactRef.from_json(_required_mapping(value, "artifact_ref")),
             artifact_digest=_required_str(value, "artifact_digest"),
             schema_digest=_required_str(value, "schema_digest"),
+            signature_schema=dict(_optional_mapping(value, "signature_schema")),
         )
 
 
@@ -245,6 +248,7 @@ class TaskDependencyLock:
     artifact_ref: TaskArtifactRef
     artifact_digest: str
     schema_digest: str
+    signature_schema: JsonObject = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         for field_name, value in (
@@ -270,6 +274,7 @@ class TaskDependencyLock:
             "artifact_ref": self.artifact_ref.to_json(),
             "artifact_digest": self.artifact_digest,
             "schema_digest": self.schema_digest,
+            "signature_schema": dict(self.signature_schema),
         }
 
     @classmethod
@@ -282,6 +287,7 @@ class TaskDependencyLock:
             artifact_ref=TaskArtifactRef.from_json(_required_mapping(value, "artifact_ref")),
             artifact_digest=_required_str(value, "artifact_digest"),
             schema_digest=_required_str(value, "schema_digest"),
+            signature_schema=dict(_optional_mapping(value, "signature_schema")),
         )
 
 

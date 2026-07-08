@@ -62,13 +62,14 @@ agent.
 > (e.g. a stale version) surfaces as a budget timeout, not an auth error.
 
 A task is a plain Python function with **no body**; the signature and docstring
-are the contract the agent fulfils at runtime — including its permissions: the
-grant on `repo` is what lets the agent write the repository
-(see [Permissions](#permissions-the-signature-is-the-permission-surface)):
+are the contract the agent fulfils at runtime — including its permissions:
+`repo: sp.GitRepo` is the explicit writable workspace-handle grant that lets the
+agent write the repository (see
+[Permissions](#permissions-the-signature-is-the-permission-surface)):
 
 ```python
 def write_program(
-    repo: sp.May[sp.GitRepo, sp.ReadWrite],
+    repo: sp.GitRepo,
     prompt: str,
     output_path: str = "program.py",
 ) -> None:
@@ -139,8 +140,13 @@ read command for the durable machine payload); see the
 
 ## Permissions: the signature is the permission surface
 
-A task can declare a read-only or read-write grant **per bound repository**, in
-its signature:
+For the common single-workspace writer, `repo: sp.GitRepo` is the clean spelling:
+an explicit read-write handle grant. Use `May[GitRepo, ReadOnly]` when a task
+must inspect without mutating; an unannotated `repo` parameter is just an
+ordinary value parameter, not a handle.
+
+A task can also declare a read-only or read-write grant **per bound repository**,
+in its signature:
 
 ```python
 from shepherd import task, May, GitRepo, ReadOnly, ReadWrite

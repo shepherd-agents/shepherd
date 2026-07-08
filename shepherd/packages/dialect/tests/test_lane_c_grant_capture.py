@@ -7,10 +7,15 @@ which is what the multi-binding path (fenced until LC-4) reads. Single-binding c
 
 from __future__ import annotations
 
+import ast
+
 from shepherd_runtime.nucleus import GitRepo
 
 from shepherd_dialect.workspace_control import May, ReadOnly, ReadWrite
-from shepherd_dialect.workspace_control.authority_declarations import compile_gitrepo_grant_from_annotation
+from shepherd_dialect.workspace_control.authority_declarations import (
+    compile_gitrepo_grant_from_annotation,
+    compile_gitrepo_grant_from_ast_annotation,
+)
 
 
 def test_non_repo_param_captures_readonly_grant() -> None:
@@ -34,9 +39,29 @@ def test_repo_param_capture_unchanged() -> None:
     assert descriptor.grant_ref == "signature:repo"
 
 
-def test_non_may_annotation_is_not_a_grant() -> None:
-    assert compile_gitrepo_grant_from_annotation(GitRepo, parameter_name="docs") is None
+def test_bare_gitrepo_annotation_defaults_to_readwrite_grant() -> None:
+    descriptor = compile_gitrepo_grant_from_annotation(GitRepo, parameter_name="docs")
+    assert descriptor is not None
+    assert descriptor.grant_ref == "signature:docs"
+    assert descriptor.clauses[0].mutates is None
+
+
+def test_non_gitrepo_annotation_is_not_a_grant() -> None:
     assert compile_gitrepo_grant_from_annotation(str, parameter_name="issue") is None
+
+
+def test_ast_bare_gitrepo_annotations_default_to_readwrite_grant() -> None:
+    tree = ast.parse("def fix(repo: GitRepo, backend: sp.GitRepo):\n    return None\n")
+    fn = tree.body[0]
+    assert isinstance(fn, ast.FunctionDef)
+    repo = compile_gitrepo_grant_from_ast_annotation(fn.args.args[0].annotation, parameter_name="repo")
+    backend = compile_gitrepo_grant_from_ast_annotation(fn.args.args[1].annotation, parameter_name="backend")
+    assert repo is not None
+    assert backend is not None
+    assert repo.grant_ref == "signature:repo"
+    assert backend.grant_ref == "signature:backend"
+    assert repo.clauses[0].mutates is None
+    assert backend.clauses[0].mutates is None
 
 
 # --- LC-3b: per-param reader + fail-closed join --------------------------------------------

@@ -117,7 +117,6 @@ def bootstrap(*, example_root: str | Path | None = None) -> None:
     _require_example_root(example_root)
     _require_importable("shepherd_dialect", "Shepherd workspace-control")
     _require_importable("vcs_core", "VcsCore retained-output custody")
-    _require_importable("IPython", "notebook display")
     _require_overlay_backend()
 
 

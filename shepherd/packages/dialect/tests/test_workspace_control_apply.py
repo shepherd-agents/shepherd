@@ -24,7 +24,10 @@ from shepherd_dialect.workspace_control import WorkspaceControlError
 
 _PATH_TASK_ID = "tests.apply_facade.write_path"
 _PATH_TASK_SOURCE = """
-def write_path(repo, path: str, text: str):
+from shepherd_runtime.nucleus import GitRepo
+
+
+def write_path(repo: GitRepo, path: str, text: str):
     repo.write(path, text.encode())
     return {"path": path}
 """

@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, replace
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, NoReturn, Protocol, get_type_hints
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, NoReturn, Protocol, Self, get_type_hints
 
 from shepherd2.schemas.execution import execution_id_for
 from vcs_core import InvalidRepositoryStateError, terminate_as_interrupt
@@ -152,6 +152,8 @@ from shepherd_dialect.workspace_control.workspace_authority import (
 )
 
 if TYPE_CHECKING:
+    from types import TracebackType
+
     from shepherd_runtime.nucleus import GitRepo
     from vcs_core.runtime_api import AuthorityDecision
     from vcs_core.types import RetainedOutputSelectionResult, RetainedOutputSettlementResult
@@ -165,6 +167,28 @@ if TYPE_CHECKING:
 JsonObject = dict[str, object]
 LaunchSurfaceValue = Literal["python", "cli", "model_tool", "sdk", "operator"]
 WorkspaceRunPlacement = Literal["auto", "advisory", "jail"]
+
+
+class _UnsetType:
+    """Sentinel distinguishing an explicitly-passed run option from its default.
+
+    ``run(...)`` needs this to tell ``placement="jail"`` (an explicit choice that might
+    collide with a task parameter of the same name) apart from an unpassed option that
+    merely defaulted — the shadow-name guard fires only on the former.
+    """
+
+    def __repr__(self) -> str:
+        return "<unset>"
+
+
+_UNSET: Final = _UnsetType()
+
+# Keyword names ``run(...)`` reserves for its own options. A task value argument can never
+# be passed as a bare keyword under one of these names (Python binds it to the option), so
+# a task whose *value* parameter shares one of these names must route that argument through
+# ``args={...}``. Handle parameters are excluded below: ``repo=`` / ``bindings=`` are how
+# those grants enter the run.
+_SHADOWABLE_RUN_OPTIONS: Final = ("repo", "bindings", "args", "may", "placement", "runtime")
 WorkspaceBackend = Literal["clonefile", "fuse", "kernel", "copy"]
 BindingPolicy = Literal["pinned", "once_per_run", "live"]
 TaskLibraryMutationKind = Literal["create", "derive"]
@@ -729,6 +753,7 @@ class TaskRuntimeContext:
     ) -> Any:
         self._task_stack.append(lock)
         self._alias_path_stack.append(alias_path)
+        bindings = _linked_call_handle_bindings(lock.signature_schema, repo=self._repo, kwargs=kwargs)
         request = TaskExecutionRequest(
             run_ref=self._run_ref,
             task_lock=lock,
@@ -738,6 +763,7 @@ class TaskRuntimeContext:
             resolution_id=None if resolution is None else resolution.resolution_id,
             alias_path=alias_path,
             metadata=dict(self._task_execution_metadata),
+            bindings=bindings,
         )
         started = _started_task_execution_record(self._workspace.task_executor, request)
         try:
@@ -780,6 +806,7 @@ class ShepherdWorkspace:
         self.task_executor = task_executor or InProcessTaskExecutor()
         self.tasks = TaskLibraryClient(self)
         self.runs = RunControlClient(self)
+        self._closed = False
         from shepherd_dialect.workspace_control.flows import FlowControlClient
 
         self.flows = FlowControlClient(self)
@@ -838,9 +865,51 @@ class ShepherdWorkspace:
 
     def close(self) -> None:
         """Deactivate the underlying vcs-core handle when supported."""
+        if self._closed:
+            return
+        self._closed = True
         deactivate = getattr(self.mg, "deactivate", None)
         if callable(deactivate):
             deactivate()
+
+    def __enter__(self) -> Self:
+        """Return this workspace for ``with sp.open(...) as workspace`` blocks."""
+        self._ensure_open("enter workspace context")
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> bool:
+        """Close the facade while preserving a body exception as the primary failure."""
+        if exc_type is None:
+            self.close()
+            return False
+        try:
+            self.close()
+        except Exception as close_exc:  # noqa: BLE001 - cleanup failures are secondary during unwind
+            note = f"Shepherd workspace close() also failed during exception cleanup: {close_exc!r}"
+            if exc is not None and hasattr(exc, "add_note"):
+                exc.add_note(note)
+            _logger.warning(
+                "Shepherd workspace close() failed during exception cleanup",
+                exc_info=(type(close_exc), close_exc, close_exc.__traceback__),
+            )
+        return False
+
+    @property
+    def closed(self) -> bool:
+        """Whether this facade has been closed."""
+        return self._closed
+
+    def _ensure_open(self, operation: str) -> None:
+        if self._closed:
+            raise WorkspaceControlError(
+                f"cannot {operation}: this Shepherd workspace facade is closed. "
+                "Open the workspace again with sp.open(...) and reacquire live handles before retrying."
+            )
 
     @property
     def ref(self) -> WorkspaceRef:
@@ -853,6 +922,7 @@ class ShepherdWorkspace:
         """Return the current selected workspace binding as a GitRepo value noun."""
         from shepherd_dialect.workspace_control.gitrepo_handles import selected_workspace_git_repo
 
+        self._ensure_open("acquire workspace GitRepo")
         return selected_workspace_git_repo(self.mg)
 
     def bind(self, *, root: str | Path, name: str) -> GitRepo:
@@ -874,6 +944,7 @@ class ShepherdWorkspace:
             named_subroot_git_repo,
         )
 
+        self._ensure_open("bind a GitRepo")
         if not name or name == WORKSPACE_GIT_REPO_BINDING:
             raise WorkspaceControlError(f"invalid binding name {name!r}")
         if name in self._bound_roots:
@@ -905,6 +976,7 @@ class ShepherdWorkspace:
 
     def __getitem__(self, name: str) -> GitRepo:
         """Look up a bound ``GitRepo`` by name (Lane C, LC-1)."""
+        self._ensure_open("look up a bound GitRepo")
         try:
             return self._bound_handles[name]
         except KeyError:
@@ -913,13 +985,15 @@ class ShepherdWorkspace:
     def run(
         self,
         task_ref: TaskRefInput,
+        /,
         *,
         repo: GitRepo | None = None,
         bindings: Mapping[str, GitRepo] | None = None,
         args: Mapping[str, Any] | None = None,
-        may: str | None = None,
-        placement: WorkspaceRunPlacement = "auto",
-        runtime: Mapping[str, object] | RuntimeOptions | None = None,
+        may: str | None | _UnsetType = _UNSET,
+        placement: WorkspaceRunPlacement | _UnsetType = _UNSET,
+        runtime: Mapping[str, object] | RuntimeOptions | None | _UnsetType = _UNSET,
+        **task_args: Any,
     ) -> WorkspaceRun:
         """Run a task against a selected or named-bound GitRepo basis.
 
@@ -928,12 +1002,31 @@ class ShepherdWorkspace:
         ``bindings={"docs": docs, "backend": backend}`` (Lane C) runs against named
         sub-root handles from :meth:`bind`, each with its own signature grant.
 
+        A task's own arguments are passed as keywords — ``run(task, repo=h, topic="x",
+        output_path="y")`` — matching the spec's ``task.run(args)`` call shape. ``args={...}``
+        remains the equivalent explicit form (and the only way to pass an argument whose name
+        collides with a run option — see below); passing the same key both ways is refused.
+
         Execution routes through the nucleus/vcs-core retained-output producer.
         ``placement="auto"`` uses the native jail on jail-capable hosts and records
         advisory execution otherwise; ``placement="jail"`` is fail-closed. Callers
         should reacquire ``workspace.git_repo()`` after selecting an output before
         starting the next run.
         """
+        self._ensure_open("start a run")
+        resolved_args = self._resolve_run_task_args(
+            task_ref,
+            repo=repo,
+            bindings=bindings,
+            args=args,
+            task_args=task_args,
+            may=may,
+            placement=placement,
+            runtime=runtime,
+        )
+        resolved_may = None if isinstance(may, _UnsetType) else may
+        resolved_placement: WorkspaceRunPlacement = "auto" if isinstance(placement, _UnsetType) else placement
+        resolved_runtime = None if isinstance(runtime, _UnsetType) else runtime
         # An interrupted prior run must not wedge this one: reclaim a dead run's orphaned
         # operation refs first ("just run it again"). Safe — the workspace is activated, so a
         # live session was already refused; declined reclaims fall back to `shepherd run repair`.
@@ -946,22 +1039,95 @@ class ShepherdWorkspace:
             return self._run_retained_multi_binding_workspace(
                 task_ref,
                 binding_roots=binding_roots,
-                args=args,
-                may=may,
-                placement=placement,
-                runtime=runtime,
+                args=resolved_args,
+                may=resolved_may,
+                placement=resolved_placement,
+                runtime=resolved_runtime,
                 flow_context=None,
             )
         assert selected_repo is not None  # _resolve_run_targets guarantees exactly one target
         return self._run_retained_workspace(
             task_ref,
             repo=selected_repo,
-            args=args,
-            may=may,
-            placement=placement,
-            runtime=runtime,
+            args=resolved_args,
+            may=resolved_may,
+            placement=resolved_placement,
+            runtime=resolved_runtime,
             flow_context=None,
         )
+
+    def _resolve_run_task_args(
+        self,
+        task_ref: TaskRefInput,
+        *,
+        repo: GitRepo | None,
+        bindings: Mapping[str, GitRepo] | None,
+        args: Mapping[str, Any] | None,
+        task_args: Mapping[str, Any],
+        may: str | None | _UnsetType,
+        placement: WorkspaceRunPlacement | _UnsetType,
+        runtime: Mapping[str, object] | RuntimeOptions | None | _UnsetType,
+    ) -> dict[str, Any] | None:
+        """Merge keyword task arguments with ``args=``, refusing collisions (call-shape sugar).
+
+        Two fail-closed checks:
+
+        * **shadow-name guard** — a task *value* parameter named like a run option
+          (``repo`` / ``bindings`` / ``args`` / ``may`` / ``placement`` / ``runtime``)
+          can never receive its value as a bare keyword, because Python binds that
+          keyword to the option. If such an option is passed explicitly and the task
+          declares a value parameter of that name that ``args=`` did not supply, the
+          argument would silently vanish into the option, so the call is refused with
+          the ``args={...}`` remedy. Handle parameters (``May[GitRepo, ...]``) are
+          exempt: they are fed by ``repo=`` / ``bindings=``.
+        * **duplicate-key guard** — a key given both in ``args=`` and as a keyword is refused
+          rather than silently resolved by precedence.
+        """
+        if args is not None and not isinstance(args, Mapping):
+            raise WorkspaceControlError("args= must be a mapping of task argument names to values")
+        explicit_args = dict(args or {})
+        passed_shadowable = set()
+        if repo is not None:
+            passed_shadowable.add("repo")
+        if bindings is not None:
+            passed_shadowable.add("bindings")
+        if args is not None:
+            passed_shadowable.add("args")
+        option_values = {"may": may, "placement": placement, "runtime": runtime}
+        passed_shadowable.update(
+            name for name in ("may", "placement", "runtime") if not isinstance(option_values[name], _UnsetType)
+        )
+        if passed_shadowable:
+            value_params = _task_value_param_names(self._signature_schema_for_ref(task_ref))
+            if value_params:
+                shadowed = sorted((passed_shadowable & value_params) - explicit_args.keys())
+                if shadowed:
+                    raise WorkspaceControlError(_shadowed_run_option_message(shadowed))
+        duplicate = sorted(task_args.keys() & explicit_args.keys())
+        if duplicate:
+            raise WorkspaceControlError(
+                f"argument(s) {duplicate} given both in args= and as keyword arguments; pass each once"
+            )
+        merged = {**explicit_args, **task_args}
+        return merged or None
+
+    def _signature_schema_for_ref(self, task_ref: TaskRefInput) -> JsonObject | None:
+        """Best-effort signature schema for a task ref — for the shadow-name guard only.
+
+        Returns ``None`` when the schema cannot be resolved (an unregistered ref, a callable
+        with unresolved authority annotations). The guard then simply does not fire; a
+        genuinely malformed call still fails closed downstream at task resolution/dispatch.
+        """
+        if _task_ref_is_callable(task_ref):
+            try:
+                return _signature_schema(inspect.unwrap(task_ref))
+            except Exception:  # noqa: BLE001 - best-effort guard; failing to introspect must not break a valid run
+                return None
+        try:
+            definition = self.tasks.get(task_ref)
+        except Exception:  # noqa: BLE001 - best-effort guard; failing to introspect must not break a valid run
+            return None
+        return None if definition is None else definition.signature_schema
 
     def _resolve_run_targets(
         self, repo: GitRepo | None, bindings: Mapping[str, GitRepo] | None
@@ -977,8 +1143,10 @@ class ShepherdWorkspace:
         if (repo is None) == (bindings is None):
             raise WorkspaceControlError("run requires exactly one of repo= or bindings=")
         if bindings is not None:
+            if not isinstance(bindings, Mapping):
+                raise WorkspaceControlError("bindings= must be a non-empty mapping of name -> GitRepo")
             if not bindings:
-                raise WorkspaceControlError("bindings= must be a non-empty mapping of name → GitRepo")
+                raise WorkspaceControlError("bindings= must be a non-empty mapping of name -> GitRepo")
             roots: dict[str, str] = {}
             for name, handle in bindings.items():
                 bound = self._bound_handles.get(name)
@@ -1081,6 +1249,7 @@ class ShepherdWorkspace:
 
     def select(self, output: RunOutput) -> RetainedOutputSelectionResult:
         """Select a resolved retained run output into its live parent world."""
+        self._ensure_open("select a retained output")
         return self._settle_retained_run_output(output, method_name="select_retained_output")
 
     def apply(self, output: RunOutput) -> RetainedOutputSettlementResult:
@@ -1093,14 +1262,17 @@ class ShepherdWorkspace:
         Whole-output only: per-binding / sub-root apply stays gated on the ``commit_prepared``
         keystone. Consume-once, like every settlement verb.
         """
+        self._ensure_open("apply a retained output")
         return self._settle_retained_run_output(output, method_name="apply_retained_output")
 
     def release(self, output: RunOutput) -> RetainedOutputSettlementResult:
         """Consume a resolved retained run output without selecting it."""
+        self._ensure_open("release a retained output")
         return self._settle_retained_run_output(output, method_name="release_retained_output")
 
     def discard(self, output: RunOutput) -> RetainedOutputSettlementResult:
         """Consume a resolved retained run output as discarded."""
+        self._ensure_open("discard a retained output")
         return self._settle_retained_run_output(output, method_name="discard_retained_output")
 
     def _refuse_readonly_multi_binding_mutation(self, output: RunOutput, *, verb: str) -> None:
@@ -1237,6 +1409,7 @@ class TaskLibraryClient:
         Versions with unresolved declared dependencies are accepted as
         ``draft``; active versions must have a fully resolvable dependency graph.
         """
+        self._workspace._ensure_open("register a task")
         task_source = _resolve_task_source(source)
         resolved_task_id = task_id or _default_task_id(task_source.import_path)
         resolved_may_default, ceiling_provenance = _resolve_task_may_default_with_provenance(may_default, task_source)
@@ -1273,6 +1446,7 @@ class TaskLibraryClient:
         derived_from: tuple[str, ...] = (),
     ) -> TaskDefinitionVersion:
         """Commit a generated source update derived from an existing task version."""
+        self._workspace._ensure_open("update task source")
         task_source = _task_source_from_source_text(
             module_name=module,
             qualname=entrypoint,
@@ -1307,6 +1481,7 @@ class TaskLibraryClient:
         derived_from: tuple[str, ...] = (),
     ) -> TaskDefinitionVersion:
         """Register generated task source directly into the task artifact store."""
+        self._workspace._ensure_open("register task source")
         task_source = _task_source_from_source_text(
             module_name=module,
             qualname=entrypoint,
@@ -1345,6 +1520,7 @@ class TaskLibraryClient:
         metadata: Mapping[str, object] | None = None,
     ) -> TaskDefinitionVersion:
         """Commit an updated task definition version."""
+        self._workspace._ensure_open("update a task")
         if produced_by_run is not None and source_identity is not None:
             _validate_run_produced_source_identity(self.mg, produced_by_run, source_identity)
         task_source = _resolve_task_source(source)
@@ -1365,6 +1541,7 @@ class TaskLibraryClient:
 
     def activate(self, task_ref: TaskRefInput) -> TaskDefinitionVersion:
         """Mark a registered task version active after dependency resolution succeeds."""
+        self._workspace._ensure_open("activate a task")
         task_ref_id = coerce_task_ref(task_ref)
         payload, expected_head = _selected_task_ledger_payload_with_head(self.mg)
         task = _get_task_from_payload(payload, task_ref_id)
@@ -1670,6 +1847,7 @@ class RunControlClient:
         trace_store: Any = None,
     ) -> RunOutput:
         """Resolve exactly one run-owned output for a mutation/settlement boundary."""
+        self._workspace._ensure_open("resolve a run output for settlement")
         if not isinstance(output_name, str) or not output_name:
             raise WorkspaceControlError("run output settlement output_name must be a non-empty string")
         try:
@@ -1696,6 +1874,7 @@ class RunControlClient:
         """Publish or repair the retained workspace output for one terminal run."""
         from shepherd_dialect.workspace_control.output_transition import publish_retained_workspace_output
 
+        self._workspace._ensure_open("publish a retained workspace output")
         try:
             run_ref_id = coerce_exact_run_ref(run_ref)
         except ValueError as exc:
@@ -1770,6 +1949,7 @@ class RunControlClient:
         placement: WorkspaceRunPlacement = "auto",
     ) -> RunRecord:
         """Compatibility start surface routed through the retained nucleus spine."""
+        self._workspace._ensure_open("start a run")
         if os.environ.get(_FENCED_RUN_START_ENV) != "1":
             raise RunStartError(_FENCED_RUN_START_MESSAGE)
         return self.start_retained_workspace_run(
@@ -1829,6 +2009,10 @@ class RunControlClient:
             )
         except MayProfileError as exc:
             raise RunStartError(str(exc)) from exc
+        single_binding_authority = _single_binding_handle_authority(
+            signature_schema=resolved.signature_schema,
+            authority=authority_decision.repo_authority,
+        )
         authority_context = run_authority_context_for_decision(authority_decision)
         may_profile = authority_context.effective_may
 
@@ -1905,6 +2089,7 @@ class RunControlClient:
                 parent_scope=parent_scope,
                 root_resolution=root_resolution,
                 resolved_graph=resolved_graph,
+                single_binding_authority=single_binding_authority,
             )
         except _NucleusAuthorityRunExecutionError as exc:
             recovered = self._recover_authority_runtime_failure(
@@ -2138,6 +2323,7 @@ class RunControlClient:
                 per_binding_roots={a.binding: a.root for a in multi_binding.binding_authorities},
             )
             placement_decision = _multi_binding_placement_decision(placement, multi_binding)
+            single_binding_authority = None
         else:
             try:
                 authority_decision = resolve_workspace_authority_decision(
@@ -2147,6 +2333,10 @@ class RunControlClient:
                 )
             except MayProfileError as exc:
                 raise RunStartError(str(exc)) from exc
+            single_binding_authority = _single_binding_handle_authority(
+                signature_schema=resolved.signature_schema,
+                authority=authority_decision.repo_authority,
+            )
             authority_context = run_authority_context_for_decision(authority_decision)
             placement_decision = _workspace_run_placement_decision(
                 self._workspace,
@@ -2267,6 +2457,7 @@ class RunControlClient:
                 placement_decision=placement_decision,
                 runtime_plan=runtime_plan,
                 multi_binding=multi_binding,
+                single_binding_authority=single_binding_authority,
             )
         except _NucleusRetainedRunExecutionError as exc:
             self._publish_failed_retained_workspace_run(
@@ -2404,6 +2595,7 @@ class RunControlClient:
         placement_decision: _WorkspaceRunPlacementDecision,
         runtime_plan: WorkspaceRunRuntimePlan,
         multi_binding: _MultiBindingRunStaging | None = None,
+        single_binding_authority: ConfinedBindingAuthority | None = None,
     ) -> tuple[Any, tuple[TaskResolutionRecord, ...], tuple[TaskExecutionRecord, ...]]:
         """Execute a workspace-control task through vcs-core's retained runtime command."""
         from vcs_core.runtime_api import CommandExecutionOptions
@@ -2420,6 +2612,7 @@ class RunControlClient:
             task_execution_metadata=task_execution_metadata,
             runtime_plan=runtime_plan,
             multi_binding=multi_binding,
+            single_binding_authority=single_binding_authority,
         )
         executor_descriptor = (
             RuntimeProviderTaskExecutorDescriptor(execution_plan.executor_kind)
@@ -2439,6 +2632,7 @@ class RunControlClient:
             task_execution_metadata=task_execution_metadata,
             error_cls=_NucleusRetainedRunExecutionError,
             multi_binding=multi_binding,
+            single_binding_authority=single_binding_authority,
         )
         if not isinstance(recorded_value, SealedExecutionOutcome):
             raise RunStartError("nucleus retained workspace run did not return a sealed execution outcome")
@@ -2456,6 +2650,7 @@ class RunControlClient:
         task_execution_metadata: dict[str, object],
         runtime_plan: WorkspaceRunRuntimePlan,
         multi_binding: _MultiBindingRunStaging | None = None,
+        single_binding_authority: ConfinedBindingAuthority | None = None,
     ) -> Any | None:
         """Return the execution-bound provider for retained runs that require syscall enforcement."""
         if runtime_plan.provider_kind == "static":
@@ -2507,10 +2702,12 @@ class RunControlClient:
                 binding_authorities=multi_binding.binding_authorities,
                 launch_metadata=task_execution_metadata,
             )
+        if single_binding_authority is None:
+            raise RunStartError("single-binding workspace run requires a GitRepo handle parameter")
         return ConfinedRootTaskProvider(
             artifact_payload=artifact_payload,
             kwargs=dict(args),
-            repo_authority=authority_decision.repo_authority,
+            binding_authorities=(single_binding_authority,),
             launch_metadata=task_execution_metadata,
         )
 
@@ -2523,6 +2720,7 @@ class RunControlClient:
         parent_scope: Any,
         root_resolution: TaskResolutionRecord,
         resolved_graph: ResolvedTaskGraph,
+        single_binding_authority: ConfinedBindingAuthority,
     ) -> tuple[Any, tuple[TaskResolutionRecord, ...], tuple[TaskExecutionRecord, ...]]:
         """Execute a workspace-control task through authority terminalization."""
         from vcs_core.runtime_api import AuthorityExecutionOutcome
@@ -2551,6 +2749,7 @@ class RunControlClient:
             resolved_graph=resolved_graph,
             execution_options=execution_options,
             error_cls=_NucleusAuthorityRunExecutionError,
+            single_binding_authority=single_binding_authority,
         )
         if not isinstance(recorded_value, AuthorityExecutionOutcome):
             raise RunStartError("nucleus authority workspace run did not return an authority execution outcome")
@@ -2572,6 +2771,7 @@ class RunControlClient:
         executor_descriptor: TaskExecutor | None = None,
         task_execution_metadata: Mapping[str, object] | None = None,
         multi_binding: _MultiBindingRunStaging | None = None,
+        single_binding_authority: ConfinedBindingAuthority | None = None,
     ) -> tuple[Any, tuple[TaskResolutionRecord, ...], tuple[TaskExecutionRecord, ...]]:
         """Execute a workspace-control task through vcs-core's runtime command."""
         if execution_provider is not None:
@@ -2587,7 +2787,10 @@ class RunControlClient:
                 task_execution_metadata=task_execution_metadata,
                 error_cls=error_cls,
                 multi_binding=multi_binding,
+                single_binding_authority=single_binding_authority,
             )
+        if multi_binding is None and single_binding_authority is None:
+            raise RunStartError("single-binding workspace run requires a GitRepo handle parameter")
         task_executions: list[TaskExecutionRecord] = []
         runtime_ref: TaskRuntimeContext | None = None
 
@@ -2610,10 +2813,17 @@ class RunControlClient:
                     )
                 repo: Any = None
             else:
-                repo = _WorkspaceControlCarrierGitRepo(
-                    root=Path(working_path),
-                    authority=authority_decision.repo_authority,
+                assert single_binding_authority is not None
+                bindings_handles = _in_process_binding_carriers(
+                    working_path=working_path,
+                    binding_authorities=(single_binding_authority,),
                 )
+                collisions = sorted(set(bindings_handles) & set(args))
+                if collisions:
+                    raise WorkspaceControlError(
+                        f"binding parameter(s) {collisions} collide with task arguments — refusing to inject"
+                    )
+                repo = bindings_handles[single_binding_authority.param]
             runtime = TaskRuntimeContext(
                 workspace=self._workspace,
                 run_ref=run_ref,
@@ -2688,6 +2898,7 @@ class RunControlClient:
         task_execution_metadata: Mapping[str, object] | None,
         error_cls: type[_NucleusRunExecutionError],
         multi_binding: _MultiBindingRunStaging | None = None,
+        single_binding_authority: ConfinedBindingAuthority | None = None,
     ) -> tuple[Any, tuple[TaskResolutionRecord, ...], tuple[TaskExecutionRecord, ...]]:
         """Execute a root workspace task via an execution-bound confined provider."""
         executor = executor_descriptor or ConfinedProcessTaskExecutorDescriptor()
@@ -2714,7 +2925,18 @@ class RunControlClient:
                 for a in multi_binding.binding_authorities
             ]
         else:
-            request_repo = {"binding": "workspace", "authority": authority_decision.repo_authority}
+            if single_binding_authority is None:
+                raise RunStartError("single-binding workspace run requires a GitRepo handle parameter")
+            request_repo = {
+                "bindings": [
+                    {
+                        "param": single_binding_authority.param,
+                        "binding": single_binding_authority.binding,
+                        "authority": single_binding_authority.authority,
+                        "root": single_binding_authority.root,
+                    }
+                ]
+            }
             binding_grants = None
         request = TaskExecutionRequest(
             run_ref=run_ref,
@@ -2910,6 +3132,48 @@ def _task_ref_is_callable(task_ref: object) -> bool:
     return callable(task_ref) and not isinstance(task_ref, str)
 
 
+def _task_value_param_names(signature_schema: Mapping[str, object] | None) -> set[str] | None:
+    """Names of a task's *value* parameters (everything but handle grants), or None if unknown.
+
+    Handle parameters carry a ``gitrepo_grant`` descriptor in the signature schema and are fed
+    by ``repo=`` / ``bindings=``, so they are excluded. Unannotated parameters, including one
+    literally named ``repo``, are value parameters. The shadow-name guard only concerns
+    parameters a caller would pass as keyword values. Returns None when the schema is missing
+    or malformed, which the guard treats as "cannot check, do not fire".
+    """
+    if not signature_schema:
+        return None
+    raw_parameters = signature_schema.get("parameters")
+    if not isinstance(raw_parameters, list | tuple):
+        return None
+    names: set[str] = set()
+    for raw_parameter in raw_parameters:
+        if not isinstance(raw_parameter, Mapping):
+            continue
+        name = raw_parameter.get("name")
+        if not isinstance(name, str):
+            continue
+        if raw_parameter.get("gitrepo_grant") is not None:
+            continue  # handle parameter — fed by repo=/bindings=, never a bare keyword value
+        names.add(name)
+    return names
+
+
+def _shadowed_run_option_message(shadowed: Sequence[str]) -> str:
+    first = shadowed[0]
+    base = (
+        f"task parameter(s) {list(shadowed)} shadow reserved run option(s) of the same name; "
+        f"pass ordinary values through args={{...}} (e.g. args={{{first!r}: ...}}) so the run "
+        f"option and the task argument stay distinct"
+    )
+    if "repo" not in shadowed:
+        return base
+    return (
+        f"{base}. If parameter 'repo' is meant to receive the workspace handle, annotate it as "
+        "GitRepo or May[GitRepo, ...]"
+    )
+
+
 def _resolve_task_source(source: str | Callable[..., Any]) -> _TaskSource:
     if isinstance(source, str):
         task_body = resolve_task_id(source)
@@ -2995,7 +3259,7 @@ def _generated_source_from_main_callable(qualname: str, plain_body: Callable[...
         ) from exc
     definition = _strip_leading_decorators(definition, qualname)
     module_name = f"{GENERATED_MODULE_PREFIX}{qualname.replace('.', '_')}"
-    source_text = f"import shepherd as sp\n\n{definition}"
+    source_text = f"import shepherd as sp\nfrom shepherd import GitRepo, May, ReadOnly, ReadWrite\n\n{definition}"
     _fence_generated_module_resolves(source_text, qualname)
     return _task_source_from_source_text(
         module_name=module_name,
@@ -3007,8 +3271,8 @@ def _generated_source_from_main_callable(qualname: str, plain_body: Callable[...
 def _fence_generated_module_resolves(source_text: str, qualname: str) -> None:
     """Refuse a generated artifact whose annotations name things only ``__main__`` has.
 
-    The generated module carries only ``import shepherd as sp`` plus the def, so its
-    signature annotations must resolve against the shepherd vocabulary and builtins.
+    The generated module carries only the public Shepherd permission vocabulary plus the
+    def, so its signature annotations must resolve against that vocabulary and builtins.
     We reconstruct the artifact and force its annotations to evaluate against that same
     namespace: a name the signature needs but the artifact lacks raises ``NameError``,
     which we turn into a teachable refusal instead of a confusing in-jail failure later.
@@ -3024,16 +3288,16 @@ def _fence_generated_module_resolves(source_text: str, qualname: str) -> None:
         # so the exec above already raised; on 3.14+ (PEP 649/749) annotation
         # evaluation is deferred, so the def succeeds and the check must force it.
         # ``get_type_hints`` resolves against the artifact's own globals (which carry
-        # only ``import shepherd as sp``), so an undefined script-local name raises
-        # ``NameError`` on every supported Python.
+        # only the public Shepherd permission vocabulary), so an undefined script-local
+        # name raises ``NameError`` on every supported Python.
         fn = namespace.get(qualname)
         if fn is not None:
             get_type_hints(fn, globalns=namespace, include_extras=True)
     except NameError as exc:
         raise TaskRegistrationError(
             f"task {qualname!r} has a signature that references a name only its script defines "
-            f"({exc}); the generated task artifact carries only `import shepherd as sp`. Move the "
-            "task to an importable module so its dependencies travel with it."
+            f"({exc}); the generated task artifact carries only Shepherd's public permission "
+            "vocabulary. Move the task to an importable module so its dependencies travel with it."
         ) from exc
 
 
@@ -4103,6 +4367,52 @@ def _workspace_gitrepo_grants_by_param(signature_schema: Mapping[str, object]) -
     return grants
 
 
+def _single_gitrepo_grant_param(signature_schema: Mapping[str, object]) -> str:
+    grants = _workspace_gitrepo_grants_by_param(signature_schema)
+    if not grants:
+        raise RunStartError(
+            "workspace run requires a GitRepo handle parameter; annotate the workspace handle as "
+            "GitRepo or May[GitRepo, ...]"
+        )
+    if len(grants) != 1:
+        raise RunStartError(
+            "run(repo=...) requires exactly one GitRepo handle parameter; use bindings={...} for multi-handle tasks"
+        )
+    return next(iter(grants))
+
+
+def _single_binding_handle_authority(
+    *,
+    signature_schema: Mapping[str, object],
+    authority: str,
+) -> ConfinedBindingAuthority:
+    return ConfinedBindingAuthority(
+        param=_single_gitrepo_grant_param(signature_schema),
+        binding="workspace",
+        authority=authority,
+        root="",
+    )
+
+
+def _linked_call_handle_bindings(
+    signature_schema: Mapping[str, object],
+    *,
+    repo: Any,
+    kwargs: Mapping[str, Any],
+) -> dict[str, Any]:
+    grants = _workspace_gitrepo_grants_by_param(signature_schema)
+    if not grants:
+        return {}
+    if len(grants) != 1:
+        raise RunStartError("linked task calls currently require zero or one GitRepo handle parameter")
+    if repo is None:
+        raise RunStartError("linked task call requires an inherited GitRepo handle")
+    (param,) = grants
+    if param in kwargs:
+        raise WorkspaceControlError(f"binding parameter {param!r} collides with task arguments — refusing to inject")
+    return {param: repo}
+
+
 def _join_bindings_to_grants(
     *,
     binding_roots: Mapping[str, str],
@@ -4652,6 +4962,7 @@ def _resolve_task_graph_from_payload(
                     artifact_ref=_required_task_artifact_ref(child),
                     artifact_digest=child.artifact_digest or "",
                     schema_digest=child.schema_digest,
+                    signature_schema=dict(child.signature_schema),
                 )
                 visit(child, child_alias)
         finally:
@@ -4665,6 +4976,7 @@ def _resolve_task_graph_from_payload(
             artifact_ref=root.artifact_ref,
             artifact_digest=root.artifact_digest,
             schema_digest=root.schema_digest,
+            signature_schema=dict(root.signature_schema),
         ),
         dependencies=dependencies,
     )
@@ -4710,6 +5022,7 @@ def _task_artifact_lock(task: TaskDefinitionVersion) -> TaskArtifactLock:
         artifact_ref=task.artifact_ref,
         artifact_digest=task.artifact_digest,
         schema_digest=task.schema_digest,
+        signature_schema=dict(task.signature_schema),
     )
 
 

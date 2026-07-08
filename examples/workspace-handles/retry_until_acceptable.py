@@ -34,7 +34,9 @@ def main() -> None:
 
         first = task.run(
             repo=copy_git_repo(repo),
-            args={"label": "first", "score": 10, "accepted": False},
+            label="first",
+            score=10,
+            accepted=False,
             placement="advisory",
         )
         first_output = first.output()
@@ -44,7 +46,9 @@ def main() -> None:
 
         second = task.run(
             repo=copy_git_repo(repo),
-            args={"label": "second", "score": 90, "accepted": True},
+            label="second",
+            score=90,
+            accepted=True,
             placement="advisory",
         )
         second_output = second.output()

@@ -15,16 +15,17 @@ TASK_REF_SCHEMA = "shepherd.workspace_control.task_ref.v1"
 
 # A task defined in a run-as-script module (__main__) is registered under a synthetic
 # module derived from its qualname (its artifact is the definition, not the script).
-# This convention is the single source of truth for both registration and lookup, so
-# `ws.run(fn)` resolves to the exact id `ws.tasks.register(fn)` produced.
+# The same default convention is used by callable lookup. Explicit `task_id=`
+# registration is intentionally not an alias for this derived id.
 GENERATED_MODULE_PREFIX = "shepherd_generated_"
 
 
 def task_id_for_callable(fn: Callable[..., object]) -> str:
-    """Derive the registered task id for a callable (plain or ``@sp.task``-decorated).
+    """Derive the default task id for a callable (plain or ``@sp.task``-decorated).
 
-    Mirrors registration's id derivation without capturing source, so the same id is
-    used to register and to look up. Refuses unstable callables (locals, lambdas).
+    Mirrors registration's default id derivation without capturing source. A task
+    registered with an explicit ``task_id=`` must be referenced by that id. Refuses
+    unstable callables (locals, lambdas).
     """
     plain = inspect.unwrap(fn)
     module = getattr(plain, "__module__", "") or ""
@@ -103,8 +104,9 @@ def coerce_task_ref(value: TaskRefInput, *, field_name: str = "task_ref") -> str
     """Return the string identity for a task ref boundary value.
 
     Accepts a task-id string, a ``TaskRef``, or the task callable itself (plain or
-    ``@sp.task``-decorated) — the callable resolves to the id registration assigned it,
-    so ``ws.run(write_note, ...)`` reads as naturally as ``ws.run("write_note", ...)``.
+    ``@sp.task``-decorated) — the callable resolves by the default callable-identity
+    convention. A task registered with an explicit ``task_id=`` must be referenced by
+    that id until source-sync/aliasing lands.
     """
     if isinstance(value, TaskRef):
         return value.id

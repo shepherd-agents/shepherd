@@ -31,7 +31,10 @@ from _support import (
 # the second can be applied onto the first without conflict.
 PATH_TASK_ID = "examples.workspace_handles.write_path"
 PATH_TASK_SOURCE = """
-def write_path(repo, path: str, text: str):
+from shepherd_runtime.nucleus import GitRepo
+
+
+def write_path(repo: GitRepo, path: str, text: str):
     repo.write(path, text.encode())
     return {"path": path}
 """
@@ -56,8 +59,8 @@ def main() -> None:
         task = workspace.tasks.task(PATH_TASK_ID)
 
         # placement="auto": jailed on a jail-capable host, advisory in the dev column (see enforcement).
-        docs_run = task.run(repo=copy_git_repo(repo), args={"path": "docs.md", "text": "docs edit"}, placement="auto")
-        code_run = task.run(repo=copy_git_repo(repo), args={"path": "code.py", "text": "code edit"}, placement="auto")
+        docs_run = task.run(repo=copy_git_repo(repo), path="docs.md", text="docs edit", placement="auto")
+        code_run = task.run(repo=copy_git_repo(repo), path="code.py", text="code edit", placement="auto")
         docs_out, code_out = docs_run.output(), code_run.output()
 
         # Review each candidate by its changeset — disjoint paths (docs.md vs code.py).

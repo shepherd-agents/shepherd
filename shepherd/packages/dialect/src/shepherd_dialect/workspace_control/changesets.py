@@ -90,7 +90,7 @@ class Changeset:
     def inspect(self) -> JsonObject:
         """Return a JSON-shaped, custody-refreshed changeset snapshot."""
         output = self._output.inspect()
-        stat = _stat_from_output_snapshot(output)
+        stat = self._stat_from_output_snapshot(output)
         return {
             **stat.to_json(),
             "output": output,
@@ -102,7 +102,11 @@ class Changeset:
 
     def stat(self) -> ChangesetStat:
         """Return a custody-refreshed changeset summary (narrowed to the bound sub-root if set)."""
-        stat = _stat_from_output_snapshot(self._output.inspect())
+        return self._stat_from_output_snapshot(self._output.inspect())
+
+    def _stat_from_output_snapshot(self, output: JsonObject) -> ChangesetStat:
+        """Return this view's stat projection for a custody-refreshed output snapshot."""
+        stat = _stat_from_output_snapshot(output)
         if self.root_prefix is None:
             return stat
         narrowed = _filter_paths_to_root(stat.changed_paths, self.root_prefix)

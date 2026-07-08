@@ -57,6 +57,27 @@ def test_changeset_wrapper_is_readonly_and_uses_custody_refreshed_output_state()
     assert not hasattr(changeset, "discard")
 
 
+def test_narrowed_changeset_inspect_stat_and_property_apply_same_path_filter() -> None:
+    output_ref = run_output_ref(changed_paths=("backend/candidate.py", "docs/guide.md"))
+    workspace = FakeWorkspace(runs=FakeRuns(output_refs=(output_ref,), shown={}))
+    output = RunOutput(workspace, output_ref)
+
+    whole = output.changeset()
+    backend = whole.narrowed_to_binding(name="backend", root="backend/")
+    docs = whole.narrowed_to_binding(name="docs", root="docs/")
+    frontend = whole.narrowed_to_binding(name="frontend", root="frontend/")
+
+    assert whole.changed_paths == ("backend/candidate.py", "docs/guide.md")
+    assert backend.changed_paths == ("backend/candidate.py",)
+    assert backend.stat().changed_paths == ("backend/candidate.py",)
+    assert backend.inspect()["changed_paths"] == ["backend/candidate.py"]
+    assert backend.inspect()["binding"] == "backend"
+    assert docs.inspect()["changed_paths"] == ["docs/guide.md"]
+    assert frontend.changed_paths == ()
+    assert frontend.stat().changed_paths == ()
+    assert frontend.inspect()["changed_paths"] == []
+
+
 def test_run_output_wrapper_rejects_non_run_or_external_outputs_before_custody_reads() -> None:
     retained_query = RunOutput(
         FakeWorkspace(runs=FakeRuns(output_refs=(), shown={})),

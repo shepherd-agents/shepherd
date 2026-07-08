@@ -38,7 +38,7 @@ def main() -> None:
         # host, advisory in the in-process dev column — the recorded enforcement (below) says
         # which actually happened, never a hard-coded assumption.
         runs = [
-            task.run(repo=copy_git_repo(repo), args={"label": label, "score": score}, placement="auto")
+            task.run(repo=copy_git_repo(repo), label=label, score=score, placement="auto")
             for label, score in (("alpha", 10), ("winner", 99), ("omega", 20))
         ]
         outputs = [run.output() for run in runs]

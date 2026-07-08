@@ -59,7 +59,10 @@ def _write_candidate_task_module(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     module_path = tmp_path / "sample_tasks.py"
     module_path.write_text(
         """
-def propose(repo, label: str, score: int, accepted: bool = False):
+from shepherd_runtime.nucleus import GitRepo
+
+
+def propose(repo: GitRepo, label: str, score: int, accepted: bool = False):
     status = "accepted" if accepted else "rejected"
     repo.write("candidate.txt", f"{score}:{label}:{status}\\n".encode())
     return {"label": label, "score": score, "accepted": accepted}
@@ -81,7 +84,10 @@ def _write_path_candidate_task_module(tmp_path: Path, monkeypatch: pytest.Monkey
     module_path = tmp_path / "path_tasks.py"
     module_path.write_text(
         """
-def propose_path(repo, label: str, score: int):
+from shepherd_runtime.nucleus import GitRepo
+
+
+def propose_path(repo: GitRepo, label: str, score: int):
     repo.write(f"{label}.txt", f"{score}:{label}\\n".encode())
     return {"label": label, "score": score}
 """,
