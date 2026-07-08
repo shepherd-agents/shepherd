@@ -121,7 +121,7 @@
    un-badged). overflow:visible so the ::after isn't clipped by the ellipsis box. */
 .md-header__topic:not([data-md-component]) .md-ellipsis { overflow: visible; }
 .md-header__topic:not([data-md-component]) .md-ellipsis::after {
-  content: "v0.2.0";
+  content: "v0.3.0";
   margin-left: 0.5rem;
   padding: 1px 7px;
   border-radius: 99px;

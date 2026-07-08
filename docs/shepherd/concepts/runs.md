@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -37,7 +37,7 @@ performed, every model request and response, every nested task call, every
 artifact emission.
 
 ```python
-run = workspace.run("review_change", repo=workspace.git_repo(), args={"diff": diff})
+run = workspace.run(review_change, repo=workspace.git_repo(), diff=diff)
 print(run.status)                 # the run's outcome
 cs = run.changeset()              # what it produced, as a read-only view
 print(cs.changed_paths)

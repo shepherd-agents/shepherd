@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -13,7 +13,7 @@ job, prerequisites, steps, expected result, and what to do when it fails.
 They assume you have already met Shepherd (start with the
 [quickstart](../start/index.md) if not).
 
-Available now, running on the shipped 0.2.0 wheel:
+Available now, running on the shipped 0.3.0 wheel:
 
 - [Grant a task repository access](grant-repo-access.md) — per-repository
   read-only / read-write grants declared in the signature, enforced at the OS

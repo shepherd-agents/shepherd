@@ -2,7 +2,7 @@
 
 > Page status: scaffold
 > Source state: scaffold
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: not yet validated
 

@@ -10,7 +10,7 @@ Page-metadata block, kept in an HTML comment so the membership gate
 landing renders without a visible status banner.
 > Page status: release-ready
 > Source state: checked-example
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: docs_src/quickstart/test_world_hero.py
 -->
@@ -56,7 +56,7 @@ permissions in the signature, and retained runs you inspect before you decide.
 
     ---
 
-    The honest map: the Settlement Core that ships in 0.2.0, and the named
+    The honest map: the Settlement Core that ships in 0.3.0, and the named
     Dataflow road (returned handles, task-as-value delegation) ahead.
 
     [:octicons-arrow-right-24: Settlement Core / Dataflow](roadmap.md)
@@ -71,12 +71,13 @@ permissions in the signature, and retained runs you inspect before you decide.
 - **Observable.** Every run leaves a durable trace; `shepherd run trace` reads
   back exactly what happened, so you debug by reading a record, not guessing.
 - **Reviewable.** A run's work lands as a retained output beside your files,
-  inspected per binding and settled explicitly — `select`, `release`, or
-  `discard` — exactly once.
+  inspected per binding and settled explicitly — `select`, `apply`, `release`,
+  or `discard` — exactly once. `apply` three-way-settles a kept output onto a
+  workspace that has moved on, and fails closed on any overlap.
 
 The composable meta-agent surface — tasks passed to tasks, supervised
-retries — is the product's north star and is **not in 0.2.0**; the honest map
-is the [roadmap](roadmap.md).
+retries — is the product's north star and is **not yet shipped**; the honest
+map is the [roadmap](roadmap.md).
 
 <br>
 

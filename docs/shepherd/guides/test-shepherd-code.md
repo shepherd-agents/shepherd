@@ -2,7 +2,7 @@
 
 > Page status: fast-follow
 > Source state: checked-example
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: pytest docs_src/shepherd/quickstart/ docs_src/shepherd/tutorials/
 
@@ -11,7 +11,7 @@
 !!! warning "Not published — docs firewall (2026-07-06)"
     This page teaches (or routes readers into) the ambient model-call idiom —
     `with sp.workspace(model=...): task(...)` — which does not run on the
-    shipped `shepherd-ai` 0.2.0 wheel. It is retained as source material for a
+    shipped `shepherd-ai` 0.3.0 wheel. It is retained as source material for a
     future rewrite and is excluded from the published site until the surface
     it teaches actually ships. Do not re-add it to the public nav until then.
     What ships today, and the named road, are mapped on

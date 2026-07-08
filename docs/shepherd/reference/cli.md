@@ -2,21 +2,21 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/gen_cli_reference.py --check
 
 *Reference. Exact, generated facts. The mental model lives in concepts, recipes in guides.*
 
-The `shepherd` command (also installed as `sp`) ships in 0.2.0. The help blocks
+The `shepherd` command (also installed as `sp`) ships in 0.3.0. The help blocks
 below are captured verbatim from the shipped CLI. Read-only listings accept
 `--json` for a durable machine payload.
 
 **Read vs. settle — the identity rule.** Read commands (`show`, `changeset`,
 `trace`, …) accept selectors: `--latest` and a unique short run-id prefix.
-Settlement commands (`select` / `release` / `discard`) require an *exact* run
-identity and reject selectors. Settlement is consume-once: after one records its
-outcome, the others refuse for that output.
+Settlement commands (`select` / `apply` / `release` / `discard`) require an
+*exact* run identity and reject selectors. Settlement is consume-once: after one
+records its outcome, the others refuse for that output.
 
 `run start` is a fenced compatibility entry point, not the normal launch path —
 it fails closed unless `SHEPHERD_ENABLE_FENCED_RUN_START=1` is set. The sanctioned
@@ -54,6 +54,7 @@ Options:
   --help  Show this message and exit.
 
 Commands:
+  apply                           Apply one retained run output onto...
   changeset                       Inspect the read-only changeset view...
   discard                         Discard one retained run output as...
   list                            List run summaries from the selected...
@@ -62,6 +63,7 @@ Commands:
   publish-retained-workspace-output
                                   Publish or repair the retained...
   release                         Release one retained run output...
+  repair                          Reclaim orphaned operation refs left...
   select                          Select one retained run output into...
   show                            Show one run record from the...
   start                           Run the fenced compatibility start...

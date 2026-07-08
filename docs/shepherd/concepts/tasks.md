@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -10,7 +10,7 @@
 
 A **task** is a typed Python function used as a **contract**. The signature
 declares what the task is given and what it may touch; the docstring states
-the goal. In shipped 0.2.0, the way that contract is executed is a
+the goal. In shipped 0.3.0, the way that contract is executed is a
 **retained run**: a provider-run agent acts as the task's body, and its work
 comes back as a retained output you inspect and settle
 (see [Runs](runs.md)).
@@ -35,9 +35,10 @@ Every part of a task's declaration does semantic work; nothing is decoration.
   work is done over — the repository, the topic — presented under the name
   and type you gave them.
 - **Grants ride the parameters.** `May[GitRepo, ReadWrite]` on `repo` is a
-  [permission](permissions.md) declaration: reading the signature *is*
-  reading the permission surface, and under a jailed
-  [placement](placements.md) the grant is enforced by the operating system.
+  [permission](permissions.md) declaration — a bare `repo: GitRepo` is its
+  writable shorthand: reading the signature *is* reading the permission
+  surface, and under a jailed [placement](placements.md) the grant is
+  enforced by the operating system.
 - **The docstring is the instruction.** It states the goal in plain English,
   and it is what the executing agent is actually asked to do — not
   documentation kept around for human readers only.
@@ -61,12 +62,16 @@ whole body delegated to the executing agent of a retained run
 end-to-end). A task can instead have a **body** — ordinary Python you wrote —
 which runs as ordinary Python.
 
-One boundary to be explicit about, because it is easy to assume otherwise:
-**calling a bodyless task directly** — `my_task(...)` inside
+Two boundaries to be explicit about, because they are easy to assume
+otherwise. **Calling a bodyless task directly** — `my_task(...)` inside
 `with sp.workspace(model=...)` — is a Dataflow surface that has **not**
-shipped: on the 0.2.0 wheel there is no ambient model servicer, and the call
-fails loudly rather than reaching a model. The shipped execution path for a
-bodyless task is the retained run. See
+shipped: there is no ambient model servicer, the call fails loudly rather
+than reaching a model, and a task that declares repository access refuses
+outright (`AmbientWorldAccessRefused`) with the retained-run remedy. And
+handles are **one-directional today**: `repo: GitRepo` in a signature is a
+shipped grant, but a handle-typed *return* (`-> GitRepo`) refuses — returned
+handles are a Dataflow surface, and a task's world output arrives as a
+retained changeset instead. See
 [Settlement Core / Dataflow](../roadmap.md).
 
 ## What a task is not

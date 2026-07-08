@@ -2,7 +2,7 @@
 
 > Page status: fast-follow
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -11,7 +11,7 @@
 !!! warning "Not published — docs firewall (2026-07-06)"
     This page teaches (or routes readers into) the ambient model-call idiom —
     `with sp.workspace(model=...): task(...)` — which does not run on the
-    shipped `shepherd-ai` 0.2.0 wheel. It is retained as source material for a
+    shipped `shepherd-ai` 0.3.0 wheel. It is retained as source material for a
     future rewrite and is excluded from the published site until the surface
     it teaches actually ships. Do not re-add it to the public nav until then.
     What ships today, and the named road, are mapped on
@@ -61,8 +61,9 @@ The workspace also **binds repositories** — the resources a run reads and writ
 under [permission grants](permissions.md). You name a bound root with
 `ws.bind(root="backend/", name="backend")` (it returns a `GitRepo` value), pass
 one or more to a run with `workspace.run(task, bindings={...})`, and settle each
-run's retained output once with `select` / `release` / `discard`. Binding is how
-the workspace hands a task exactly the world it is allowed to touch.
+run's retained output once with `select` / `apply` / `release` / `discard`.
+Binding is how the workspace hands a task exactly the world it is allowed to
+touch.
 
 ## The triangle: task, workspace, run
 

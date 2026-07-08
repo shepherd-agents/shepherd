@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -48,7 +48,7 @@ itself is recorded.
   omission. Effects *are* the behavior: typed, refusable, and recorded
   whether or not anyone is watching.
 
-## A boundary note (0.2.0)
+## A boundary note (0.3.0)
 
 The wheel ships interception machinery (`sp.handle`) for answering boundary
 events in-process. The published docs deliberately do not teach it as a way

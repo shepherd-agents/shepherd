@@ -4,18 +4,20 @@
 import shepherd as sp
 
 
-# The signature is the permission surface: the grant on `repo` is what lets the
-# task write the bound repository (see "Permissions" in the concepts docs).
+# A task is a typed contract: signature + docstring. These two are pure —
+# they take values and return values. (Tasks that touch a repository declare
+# it in their signature and run through a workspace — see the homepage hero.)
 @sp.task
-def implement(repo: sp.May[sp.GitRepo, sp.ReadWrite], feature: str) -> str:
-    """Implement the feature in the repo and report what changed."""
+def implement(spec: str, feature: str) -> str:
+    """Write an implementation plan for the feature against this spec."""
 
 
 @sp.task
-def oversee(worker: object, repo: sp.May[sp.GitRepo, sp.ReadWrite], feature: str) -> str:
-    """Run the worker on the feature. If its tests fail, revert and retry, then report."""
+def review(plan: str, feature: str) -> str:
+    """Review the plan for the feature. Name risks and missing tests, then conclude."""
 
 
 with sp.workspace(model="claude:sonnet-4-5"):
-    print(oversee(implement, repo=".", feature="login"))
+    plan = implement(spec="users sign in with email + password", feature="login")
+    print(review(plan=plan, feature="login"))
 # --8<-- [end:hello]

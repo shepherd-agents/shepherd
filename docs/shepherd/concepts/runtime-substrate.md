@@ -2,7 +2,7 @@
 
 > Page status: scaffold
 > Source state: preview
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -11,12 +11,12 @@
 !!! warning "Partly shipped"
     Part of this substrate model has shipped: `GitRepo` handles, per-binding
     grants, and the **`Changeset`** that reifies what a run changed are on the
-    public `shepherd` surface in 0.2.0 (see [Permissions](permissions.md)). The
+    public `shepherd` surface in 0.3.0 (see [Permissions](permissions.md)). The
     unified, signature-level handle-in/**handle-out** API shown below — output
     handles threaded forward, and substrates beyond the filesystem / Git repo —
     is still the target shape, not yet the importable one.
 
-A **substrate** is a kind of world a task can act on — in 0.2.0, the filesystem
+A **substrate** is a kind of world a task can act on — in 0.3.0, the filesystem
 and a Git repo. The runtime substrate model is about making a task's
 relationship to that world **explicit on both ends**: which world it operates
 on, and what it changed.
