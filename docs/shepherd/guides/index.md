@@ -13,7 +13,7 @@ job, prerequisites, steps, expected result, and what to do when it fails.
 They assume you have already met Shepherd (start with the
 [quickstart](../start/index.md) if not).
 
-Available now, running on the shipped 0.3.0 wheel:
+Available now, running on the shipped 0.3.0 release:
 
 - [Grant a task repository access](grant-repo-access.md) — per-repository
   read-only / read-write grants declared in the signature, enforced at the OS
@@ -23,6 +23,6 @@ Available now, running on the shipped 0.3.0 wheel:
 This list is deliberately short. Several earlier guides taught the ambient
 model-call surface (`with sp.workspace(model=...): task(...)`), which has not
 shipped; they were pulled from the published site until the surface they
-teach runs on the wheel, and they will return with it. What ships today
-versus what is on the named road is mapped on
-[Settlement Core / Dataflow](../roadmap.md).
+teach runs on the release, and they will return with it. What ships today
+versus what is still ahead is mapped on
+[Roadmap](../roadmap.md).

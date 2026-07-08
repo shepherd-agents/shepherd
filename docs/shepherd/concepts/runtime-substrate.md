@@ -23,7 +23,7 @@ on, and what it changed.
 
 Today both ends are erased. A task's effect on the world reaches you implicitly,
 it mutates an ambient workspace, and to learn *what* it changed you
-reconstruct the answer from the after-the-fact trace. The honest type of such a
+reconstruct the answer from the after-the-fact trace. The true type of such a
 task hides two things its signature never says: the world it read, and the world
 it produced.
 
@@ -60,7 +60,7 @@ is always a *view* over the run's recorded trace, never a second store you have
 to keep in sync. "What did that task change?" stops being a reconstruction job
 and becomes a value you read.
 
-So the honest shape of a task becomes explicit at both ends: ordinary arguments
+So the true shape of a task becomes explicit at both ends: ordinary arguments
 and substrate handles go in; ordinary values, output handles, and a changeset
 come out.
 

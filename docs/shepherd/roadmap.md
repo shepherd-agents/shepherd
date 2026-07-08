@@ -1,4 +1,4 @@
-# Settlement Core / Dataflow
+# Roadmap — what ships, and what's ahead
 
 > Page status: release-ready
 > Source state: shipped-source
@@ -6,22 +6,22 @@
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
-This page is the honest map of Shepherd today. It divides the product into two
-named halves so you always know which one you are reading about:
+This page says exactly what ships in the current release and what is still
+ahead, so you always know which you are reading about:
 
-- **Settlement Core** — what ships in `shepherd-ai` 0.3.0. Everything in this
-  half runs on the installed wheel, today, and is what the rest of the
-  published docs teach.
-- **Dataflow** — the named road. The surfaces that make agent results flow
-  like ordinary values — returned handles, typed value projection, task-to-task
-  delegation — are designed and sequenced, but **not shipped**. Nothing in this
-  half runs on 0.3.0.
+- **Shipped (0.3.0)** — everything in this half runs on the installed
+  `shepherd-ai` package, today, and is what the rest of the published docs
+  teach.
+- **Ahead** — the surfaces that make agent results flow like ordinary values —
+  returned handles, typed value projection, task-to-task delegation — are
+  designed and sequenced, but **not shipped**. Nothing in this half runs on
+  0.3.0.
 
-If a page you saw referenced is missing from this site, it taught a Dataflow
-idiom ahead of the wheel and was pulled until the surface it teaches actually
+If a page you saw referenced is missing from this site, it taught a
+not-yet-shipped surface and was pulled until the surface it teaches actually
 ships. This page is its forwarding address.
 
-## Settlement Core — ships in 0.3.0
+## Shipped in 0.3.0 — the settlement loop
 
 The shipped product is a **settlement machine**: agent work is captured to one
 side, reviewed as data, and settled — kept or rejected — explicitly, exactly
@@ -34,7 +34,7 @@ once. Concretely:
 - **Signature grants over named bindings** *(shipped)*. Permissions are part of
   the task's signature: a bare `repo: GitRepo` parameter is the writable
   workspace handle, and `May[GitRepo, ReadOnly]` / `May[GitRepo, ReadWrite]`
-  are the explicit spellings — per bound repository, over disjoint named
+  are the explicit forms — per bound repository, over disjoint named
   bindings. Under jailed placement the grant is enforced at the native syscall
   jail. See [Permissions](concepts/permissions.md) and
   [Placements](concepts/placements.md).
@@ -50,19 +50,20 @@ once. Concretely:
   workspace when the two change sets are path-disjoint — whole-output,
   path-disjoint or refused, never content synthesis. You read retained content
   through the changeset surface (`shepherd run changeset --latest --read
-  <path>`) before deciding. *Known limitation:* an in-session `select` →
-  re-acquire → run loop can misreport the next run's changeset and
-  phantom-refuse `apply`; fork all candidates before your first settlement, or
-  use one settlement chain per workspace session (fix in progress).
+  <path>`) before deciding. *Known limitation:* if you settle, re-acquire the
+  handle, and run again in the same session, the next run's changeset can
+  include files from the earlier settlement and `apply` can refuse when it
+  shouldn't. Fork all candidates before your first settlement, or use one
+  settlement round per workspace session (fix in progress).
 - **The recorded trace** *(shipped)*. Every run leaves a durable record;
   `shepherd run trace <run-ref>` reads it back. Debugging is reading the
   record, not guessing.
 
 The [Getting Started](start/index.md) quickstart exercises this whole loop —
-initialize, run, inspect the changeset, settle — against the shipped wheel,
-offline and deterministically.
+initialize, run, inspect the changeset, settle — against the installed
+package, offline and deterministically.
 
-## Dataflow — the named road (not in 0.3.0)
+## Ahead — not in 0.3.0
 
 These are the surfaces that make Shepherd programs compose like ordinary
 Python. They are named here so that hitting one reads as "not yet", never as
@@ -70,32 +71,32 @@ Python. They are named here so that hitting one reads as "not yet", never as
 
 - **Ambient model service for direct task calls** *(roadmap — not in 0.3.0)*.
   The elegant shape `with sp.workspace(model=...): my_task(...)` — a bodyless
-  task answered directly by a model — has no shipped servicer. On the 0.3.0
-  wheel a pure task's ambient call fails loudly at delivery (`DeliveryFailed`:
+  task answered directly by a model — is not served yet. In 0.3.0 a pure
+  task's ambient call fails loudly at delivery (`DeliveryFailed`:
   no handler installed), and a bodyless task that **declares repository
   access** refuses before launch (`AmbientWorldAccessRefused`), naming the
   working path: run it through retained execution, `workspace.run(...)`.
 - **Returned handles** *(roadmap)*. Handles flow **in** today — `repo: GitRepo`
   in a signature is a shipped grant — but tasks whose *return types* carry
   world resources (for example `-> GitRepo`, or `-> tuple[GitRepo, Report]`)
-  are a Dataflow surface, and 0.3.0 **refuses** such return slots rather than
+  are still ahead, and 0.3.0 **refuses** such return slots rather than
   letting a model fabricate a handle value. A task's world output arrives as a
   retained changeset, not as a returned handle value.
 - **Typed value projection from captured work** *(roadmap)*. Deriving a typed
-  return value — part proof-from-capture, part model-reported testimony,
-  clearly labeled which is which — from a retained run's changeset is designed
-  but not shipped.
+  return value — partly derived from what the run verifiably changed, partly
+  reported by the model, clearly labeled which is which — from a retained
+  run's changeset is designed but not shipped.
 - **Threading and durable children** *(roadmap)*. Passing retained results
   between tasks and supervising long-lived child runs as first-class values.
 - **Task-as-value delegation** *(roadmap — explicitly deferred)*. The
   meta-agent shape where one task takes another task as an argument and
   supervises it — `oversee(implement, ...)`, retry-until-acceptable — is the
   product's north star and is **deferred**: no shipped 0.3.0 surface runs it.
-  Its honest form today is plain Python around retained runs: run, inspect the
+  Today you write it as plain Python around retained runs: run, inspect the
   changeset, keep or discard, retry.
 
-When we are unsure which half a surface belongs to, it goes here — Dataflow —
-until an executed test against the shipped wheel says otherwise.
+When in doubt, a surface is listed here — not shipped — until a test against
+the installed package proves otherwise.
 
 ## Platforms (0.3.0)
 
@@ -104,10 +105,10 @@ Shepherd requires **Python 3.11+**. OS-level grant enforcement is executed on
 container in CI). **Windows is unsupported** — grants would be advisory-only at
 best; use **WSL**.
 
-## Reading claims on this site
+## What these docs promise
 
 Every published page carries an "Applies to" version and teaches only what
-runs on that shipped wheel, or labels the exception explicitly (simulated or
+runs on that release, or labels the exception explicitly (simulated or
 illustrative output is marked as such). If you find a published sentence that
-does not run on the wheel, that is a bug in the docs — please
+does not run on the installed package, that is a bug in the docs — please
 [report it](https://github.com/shepherd-agents/shepherd/issues).

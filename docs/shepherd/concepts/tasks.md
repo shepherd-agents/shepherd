@@ -64,15 +64,15 @@ which runs as ordinary Python.
 
 Two boundaries to be explicit about, because they are easy to assume
 otherwise. **Calling a bodyless task directly** — `my_task(...)` inside
-`with sp.workspace(model=...)` — is a Dataflow surface that has **not**
-shipped: there is no ambient model servicer, the call fails loudly rather
+`with sp.workspace(model=...)` — is a planned surface that has **not**
+shipped: nothing serves the ambient call yet — it fails loudly rather
 than reaching a model, and a task that declares repository access refuses
 outright (`AmbientWorldAccessRefused`) with the retained-run remedy. And
 handles are **one-directional today**: `repo: GitRepo` in a signature is a
 shipped grant, but a handle-typed *return* (`-> GitRepo`) refuses — returned
-handles are a Dataflow surface, and a task's world output arrives as a
+handles are a planned surface, and a task's world output arrives as a
 retained changeset instead. See
-[Settlement Core / Dataflow](../roadmap.md).
+[Roadmap](../roadmap.md).
 
 ## What a task is not
 

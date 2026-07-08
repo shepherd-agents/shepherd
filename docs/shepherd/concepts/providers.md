@@ -11,11 +11,9 @@
 !!! warning "Not published — docs firewall (2026-07-06)"
     This page teaches (or routes readers into) the ambient model-call idiom —
     `with sp.workspace(model=...): task(...)` — which does not run on the
-    shipped `shepherd-ai` 0.3.0 wheel. It is retained as source material for a
-    future rewrite and is excluded from the published site until the surface
-    it teaches actually ships. Do not re-add it to the public nav until then.
-    What ships today, and the named road, are mapped on
-    [Settlement Core / Dataflow](../roadmap.md).
+    shipped `shepherd-ai` 0.3.0 release. It is not linked from the site
+    navigation and will return when the surface it teaches ships. What ships
+    today, and what is ahead, are mapped on the [roadmap](../roadmap.md).
 
 A **provider** is the binding between a task and the model backend that answers
 it. A task declares *what* it wants, a typed contract and a docstring, but

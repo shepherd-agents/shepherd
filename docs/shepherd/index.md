@@ -26,7 +26,7 @@ permissions in the signature, and retained runs you inspect before you decide.
 
 </div>
 
-```python title="hero.py — runs on the shipped wheel, offline (after `shepherd init`)"
+```python title="hero.py — runs on the installed package, offline (after `shepherd init`)"
 --8<-- "quickstart/world_hero.py:hero"
 ```
 
@@ -39,7 +39,7 @@ permissions in the signature, and retained runs you inspect before you decide.
     ---
 
     Initialize a workspace, run a task, inspect its retained changeset, and
-    settle it. Offline and deterministic, on the shipped wheel.
+    settle it. Offline and deterministic, on the installed package.
 
     [:octicons-arrow-right-24: Getting Started](start/index.md)
 
@@ -56,10 +56,10 @@ permissions in the signature, and retained runs you inspect before you decide.
 
     ---
 
-    The honest map: the Settlement Core that ships in 0.3.0, and the named
-    Dataflow road (returned handles, task-as-value delegation) ahead.
+    Exactly what ships in 0.3.0 — and what's ahead: returned handles and
+    task-to-task delegation are on the roadmap, not in this release.
 
-    [:octicons-arrow-right-24: Settlement Core / Dataflow](roadmap.md)
+    [:octicons-arrow-right-24: Roadmap](roadmap.md)
 
 </div>
 
@@ -76,8 +76,8 @@ permissions in the signature, and retained runs you inspect before you decide.
   workspace that has moved on, and fails closed on any overlap.
 
 The composable meta-agent surface — tasks passed to tasks, supervised
-retries — is the product's north star and is **not yet shipped**; the honest
-map is the [roadmap](roadmap.md).
+retries — is where Shepherd is headed and is **not yet shipped**; the
+[roadmap](roadmap.md) says exactly what is.
 
 <br>
 

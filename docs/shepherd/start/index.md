@@ -6,7 +6,7 @@
 > Owner: @docs-system-owner (TBD)
 > Validation: docs_src/quickstart/test_world_hero.py
 
-*Quickstart. This is the path that runs on the shipped wheel, offline. For the mental model, see the concepts. For exact APIs, see the reference.*
+*Quickstart. This is the path that runs on the installed package, offline. For the mental model, see the concepts. For exact APIs, see the reference.*
 
 Run one task, get its work back as a **retained output** — a proposal held
 beside your files — inspect it, and settle it. Deterministic, keyless, no
@@ -62,7 +62,7 @@ What happens, in order:
 
 ## Output
 
-Executed against the shipped 0.3.0 wheel (this exact transcript is what the
+Executed against the shipped 0.3.0 release (this exact transcript is what the
 page's test asserts):
 
 ```text
@@ -95,8 +95,8 @@ variant with `shepherd demo write agent-task` (see the
   carries the first run's selected state, and re-settling an identical result
   fails closed. Start from a fresh directory when repeating the walkthrough.
 - **Looking for `with sp.workspace(model=...): my_task(...)`?** That ambient
-  direct-call shape is a [Dataflow roadmap surface](../roadmap.md) — there is
-  no shipped model servicer, and a task that declares repository access
+  direct-call shape is on the [roadmap](../roadmap.md), not in this release — nothing
+  serves that call yet, and a task that declares repository access
   refuses the ambient call outright (`AmbientWorldAccessRefused`), pointing
   you here. Retained runs, as above, are the shipped path.
 
@@ -122,5 +122,4 @@ variant with `shepherd demo write agent-task` (see the
   read-write grants per bound repository, enforced at the OS under a jailed
   placement.
 - [Concepts: Tasks](../concepts/tasks.md) — the mental model.
-- [Settlement Core / Dataflow](../roadmap.md) — what ships today vs. the named
-  road.
+- [Roadmap](../roadmap.md) — what ships today vs. what is ahead.

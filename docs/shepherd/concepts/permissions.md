@@ -15,14 +15,14 @@ surface; there is no second, hidden policy file that the code merely
 approximates.
 
 A task declares a read-only or read-write grant **per bound repository**, right
-in its signature. There are two spellings of the same grant, one ladder:
+in its signature. There are two ways to write the same grant, one ladder:
 
 ```python
 from shepherd import task, May, GitRepo, ReadOnly, ReadWrite
 
 @task
 def write_note(repo: GitRepo, topic: str) -> None: ...
-    # bare GitRepo — the writable workspace handle, the beginner spelling
+    # bare GitRepo — the writable workspace handle, the beginner form
 
 @task
 def apply_documented_fix(
@@ -38,8 +38,7 @@ name. Reach for `May[...]` the moment a task should hold less than full write:
 `docs` may be read but not written; `backend` is a writable root. Either way
 the grant rides the parameter, so the security surface and the program are the
 same artifact — there is no separate policy document to drift out of sync.
-(Registrations record which spelling was written, so defaulted-writable grants
-stay countable.)
+(Registrations record which form was written.)
 
 ## The grant lowers to the syscall jail
 
