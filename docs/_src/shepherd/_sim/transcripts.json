@@ -1,7 +1,8 @@
 {
   "_comment": "Recorded deterministic transcripts — the prototype's stand-in for the offline provider's fixtures. Keyed by task function name. Re-record, never hand-edit, when task docstrings change (DESIGN ground rule 3).",
   "summarize": "- Shepherd turns typed Python functions into model-backed tasks.\n- The docstring is the instruction; the return type is the contract.\n- Runs are recorded, so behavior is debuggable after the fact.",
-  "oversee": "Login feature landed. The worker's first attempt failed 2 tests, so oversee reverted that step and retried; the retry passed all 41.",
+  "implement": "Plan for login: 1) POST /login accepting email + password; 2) verify against the user store with constant-time comparison; 3) issue a session cookie (HttpOnly, SameSite=Lax); 4) tests for the happy path, wrong password, and unknown email.",
+  "review": "The login plan covers the core flow and names the right tests. Risks: no rate limit on failed attempts, and session fixation is not addressed — rotate the session id at sign-in. Add an expired-credential test. With those noted, the login plan passed review: approve.",
   "triage_change": {
     "category": "bugfix",
     "priority": "high",

@@ -2,9 +2,9 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
-> Validation: shepherd/packages/dialect/tests/test_lane_c_acceptance_gate.py
+> Validation: scripts/check_shepherd_docs.py
 
 *Concept. The mental model behind Shepherd. Steps live in the quickstart, signatures in the reference.*
 
@@ -15,22 +15,30 @@ surface; there is no second, hidden policy file that the code merely
 approximates.
 
 A task declares a read-only or read-write grant **per bound repository**, right
-in its signature:
+in its signature. There are two ways to write the same grant, one ladder:
 
 ```python
 from shepherd import task, May, GitRepo, ReadOnly, ReadWrite
 
 @task
+def write_note(repo: GitRepo, topic: str) -> None: ...
+    # bare GitRepo — the writable workspace handle, the beginner form
+
+@task
 def apply_documented_fix(
     docs:    May[GitRepo, ReadOnly],   # read-only: writes refused at the OS
-    backend: May[GitRepo, ReadWrite],  # writable root
+    backend: May[GitRepo, ReadWrite],  # writable root, spelled explicitly
     issue:   str,
 ) -> None: ...
 ```
 
-`docs` may be read but not written; `backend` is a writable root. The grant
-rides the parameter, so the security surface and the program are the same
-artifact — there is no separate policy document to drift out of sync.
+A bare `GitRepo` parameter **is** a writable grant — equivalent to
+`May[GitRepo, ReadWrite]`, keyed on the annotation, never on the parameter's
+name. Reach for `May[...]` the moment a task should hold less than full write:
+`docs` may be read but not written; `backend` is a writable root. Either way
+the grant rides the parameter, so the security surface and the program are the
+same artifact — there is no separate policy document to drift out of sync.
+(Registrations record which form was written.)
 
 ## The grant lowers to the syscall jail
 
@@ -75,7 +83,7 @@ run = workspace.run(task, repo=workspace.git_repo())
 ```
 
 Each binding's world output is inspected on its own, and settled once —
-**consume-once** — with `select`, `release`, or `discard`:
+**consume-once** — with `select`, `apply`, `release`, or `discard`:
 
 ```python
 run.changeset(name="backend")   # what the task wrote to the backend binding
@@ -95,15 +103,16 @@ run = workspace.run(task, repo=workspace.git_repo(), may="ReadOnly")
 ```
 
 `may="ReadOnly"` makes the entire run read-only; like the per-parameter grants,
-it is compiled into the jail and enforced at the syscall, not merely advised. A
-task registered with `may_default=` sets that same floor at registration time.
+it is compiled into the jail and enforced at the syscall, not merely advised.
+A task's registered ceiling is **derived from its signature's grants** — you
+don't declare it twice; an explicit `may_default=` at registration still
+overrides when you need a different floor.
 
-!!! note "Scope (0.2.0)"
+!!! note "Scope (0.3.0)"
     Per-binding whole-profile `ReadOnly`/`ReadWrite` over disjoint named
     bindings, under jailed placement, filesystem / Git substrate, same-process
-    value-children. Enforcement is exercised on macOS Seatbelt; Linux Landlock
-    is container-gated. Sub-root / `where(path=…)` grants are not part of this
-    cut.
+    value-children. Enforcement is executed on both macOS Seatbelt and Linux
+    Landlock. Sub-root / `where(path=…)` grants are not part of this cut.
 
 ## What permissions are *not*
 
@@ -123,6 +132,6 @@ Permissions are the authority half of a [task's](tasks.md) contract: the
 signature says both *what it computes* (parameters and return type) and *what it
 may touch*. What actually crosses the boundary at runtime are
 [effects](effects.md), and the resources they act on are the
-[runtime substrate](index.md), handles that carry their own
+[runtime substrate](runtime-substrate.md), handles that carry their own
 authority. Permissions are the rules; effects are the traffic; the substrate is
 the world being governed.

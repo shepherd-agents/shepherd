@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: shepherd/packages/dialect/tests/test_lane_c_acceptance_gate.py
 
@@ -10,8 +10,9 @@
 
 **Job.** Give a task read-write access to one bound repository and read-only
 access to another, so a violation is refused by the operating system — not
-caught by convention. This is the per-binding signature-grant surface that
-shipped in 0.2.0 (the mental model is in [Permissions](../concepts/permissions.md)).
+caught by convention. This is the per-binding signature-grant surface
+(the mental model, including the bare `repo: GitRepo` writable shorthand, is
+in [Permissions](../concepts/permissions.md)).
 
 ## 1. Declare the grants in the signature
 
@@ -51,7 +52,7 @@ so the grants are enforced by the OS rather than merely recorded:
 run = ws.run(
     apply_documented_fix,
     bindings={"docs": docs, "backend": backend},
-    args={"issue": "#142"},
+    issue="#142",
     placement="jail",          # writable roots compiled from the grants; Seatbelt/Landlock
 )
 ```
@@ -70,11 +71,11 @@ print(cs.changed_paths)
 ws.select(run.output())              # keep it; or ws.release(...) / ws.discard(...)
 ```
 
-Settlement is **consume-once**: after one of `select` / `release` / `discard`
-records its outcome, the others refuse for that output.
+Settlement is **consume-once**: after one of `select` / `apply` / `release` /
+`discard` records its outcome, the others refuse for that output.
 
-!!! note "Scope (0.2.0)"
+!!! note "Scope (0.3.0)"
     Grants are whole-profile per binding (a bound repository is entirely
-    writable or entirely read-only). Enforcement is exercised on macOS Seatbelt;
-    Linux Landlock is container-gated. Sub-root / `where(path=…)` grants are not
+    writable or entirely read-only). Enforcement is executed on both macOS
+    Seatbelt and Linux Landlock. Sub-root / `where(path=…)` grants are not
     part of this cut.

@@ -2,18 +2,13 @@
 
 > Page status: fast-follow
 > Source state: preview
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
 *How-to guide. New to Shepherd? Start with the tutorial. For exact APIs, see the reference.*
 
-<!-- FIREWALL SOURCE SWEEP (2026-07-06): this page's "real today" claims about
-selecting a provider in code refer to the ambient `workspace(model=...)` idiom,
-which does not run on the shipped 0.2.0 wheel (the direct task call raises
-DeliveryFailed; no ambient servicer ships in 0.2.0). Re-verify every claim
-against the shipped wheel before promoting this page. See
-docs/shepherd/roadmap.md (Settlement Core / Dataflow). -->
+<!-- Not published: depends on surfaces that have not shipped; re-verify before adding to the nav. -->
 
 !!! warning "Not shipped yet"
     This prototype is **offline by design**, every documented example runs

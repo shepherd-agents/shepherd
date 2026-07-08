@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -48,12 +48,12 @@ itself is recorded.
   omission. Effects *are* the behavior: typed, refusable, and recorded
   whether or not anyone is watching.
 
-## A boundary note (0.2.0)
+## A boundary note (0.3.0)
 
-The wheel ships interception machinery (`sp.handle`) for answering boundary
+The 0.3.0 release ships interception machinery (`sp.handle`) for answering boundary
 events in-process. The published docs deliberately do not teach it as a way
 to service model calls for bodyless tasks: the ambient model-delivery lane it
-would answer is a [Dataflow roadmap surface](../roadmap.md), and answering a
+would answer is a [planned surface](../roadmap.md), and answering a
 task that *declares world access* with a handler that has none invites
 confidently fabricated results. Test the shipped surface the way the
 [quickstart](../start/index.md) does — retained runs on the deterministic

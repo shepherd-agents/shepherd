@@ -33,7 +33,7 @@ def render(info: dict, see_also: dict | None) -> str:
         "",
         "> Page status: scaffold",
         "> Source state: generated",
-        "> Applies to: Shepherd v0.2.0",
+        "> Applies to: Shepherd v0.3.0",
         "> Owner: @docs-system-owner (TBD)",
         "> Validation: scripts/gen_shepherd_api_inventory.py --check",
         "",

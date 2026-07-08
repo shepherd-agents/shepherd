@@ -2,9 +2,9 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
-> Validation: shepherd/packages/dialect/tests/test_workspace_control_workstream3.py
+> Validation: scripts/check_shepherd_docs.py
 
 *Concept. The mental model behind Shepherd. Steps live in the quickstart, signatures in the reference.*
 
@@ -23,7 +23,7 @@ run = workspace.run(task, bindings={...}, placement="jail")
   `ReadWrite`-granted root is refused at the syscall. `jail` **fails closed** — if the host
   cannot establish a monitor, the run refuses rather than silently downgrading.
 - **`"advisory"`** — run the body in-process without a jail. Grants are **recorded but not
-  enforced by the OS**; the run's `enforcement` reads `advisory`, honestly, so a reader can never
+  enforced by the OS**; the run's `enforcement` reads `advisory`, accurately, so a reader can never
   mistake it for jailed. Useful as a fast dev lane on hosts without a jail.
 - **`"auto"`** (default) — use the native jail on a jail-capable host, and record advisory
   execution otherwise. `auto` never fails closed: it degrades to advisory *visibly*.
@@ -33,7 +33,7 @@ The enforcement claim in [Permissions](permissions.md) — "refused at the sysca
 boundary. The run record carries which placement resolved, so the distinction is always legible
 after the fact.
 
-!!! note "Scope (0.2.0)"
-    Native jail enforcement is exercised on macOS Seatbelt; Linux Landlock is container-gated.
+!!! note "Scope (0.3.0)"
+    Native jail enforcement is executed on both macOS Seatbelt and Linux Landlock.
     Placement selects the execution boundary for the workspace/Git substrate; remote and cloud
-    devices are out of this cut.
+    placements are out of this cut.

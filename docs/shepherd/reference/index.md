@@ -2,7 +2,7 @@
 
 > Page status: scaffold
 > Source state: generated
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/gen_shepherd_api_inventory.py --check
 
@@ -22,6 +22,6 @@ import shepherd as sp
 
 - **Per-symbol API pages** (`api/`) — one page per public facade symbol,
   taken from the real source docstrings so they match the code today.
-- **[CLI](cli.md)** — the command-line reference (placeholder until the CLI
-  ships).
+- **[CLI](cli.md)** — the command-line reference; help blocks captured
+  verbatim from the shipped `shepherd` / `sp` CLI.
 

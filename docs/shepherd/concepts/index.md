@@ -2,7 +2,7 @@
 
 > Page status: release-ready
 > Source state: shipped-source
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -31,8 +31,8 @@ those effects, and the **placement** decides how that bound is enforced.
 
 Two former pillar pages — *Workspaces* and *Providers* — taught the ambient
 model-call surface, which has not shipped; they return when it does. Where
-that surface sits on the road is mapped on
-[Settlement Core / Dataflow](../roadmap.md).
+that surface sits is mapped on
+[Roadmap](../roadmap.md).
 
 ## If you came here to build
 
@@ -56,4 +56,4 @@ Read [tasks](tasks.md), [runs](runs.md), [permissions](permissions.md), and
 its authority, and its enforcement — then [effects](effects.md) for the
 channel underneath. For what is deliberately *not* claimed yet (ambient model
 service, returned handles, task-as-value delegation), read
-[Settlement Core / Dataflow](../roadmap.md).
+[Roadmap](../roadmap.md).

@@ -2,7 +2,7 @@
 
 > Page status: fast-follow
 > Source state: preview
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: scripts/check_shepherd_docs.py
 
@@ -11,8 +11,8 @@
 ## Requirements
 
 - Python **3.11+**.
-- **macOS**: OS-level grant enforcement is exercised (Seatbelt). **Linux**:
-  Landlock enforcement is container-gated today. **Windows**: unsupported —
+- **macOS**: OS-level grant enforcement is executed (Seatbelt). **Linux**:
+  OS-level grant enforcement is executed (Landlock). **Windows**: unsupported —
   enforcement would be advisory-only at best; use **WSL**.
 - No provider credentials for the offline path. One live provider key (for
   example `ANTHROPIC_API_KEY=<your-key>`) only when you opt into live runs.

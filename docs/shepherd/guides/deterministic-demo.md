@@ -2,7 +2,7 @@
 
 > Page status: fast-follow
 > Source state: checked-example
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: pytest docs_src/shepherd/quickstart/ docs_src/shepherd/tutorials/
 
@@ -11,11 +11,9 @@
 !!! warning "Not published — docs firewall (2026-07-06)"
     This page teaches (or routes readers into) the ambient model-call idiom —
     `with sp.workspace(model=...): task(...)` — which does not run on the
-    shipped `shepherd-ai` 0.2.0 wheel. It is retained as source material for a
-    future rewrite and is excluded from the published site until the surface
-    it teaches actually ships. Do not re-add it to the public nav until then.
-    What ships today, and the named road, are mapped on
-    [Settlement Core / Dataflow](../roadmap.md).
+    shipped `shepherd-ai` 0.3.0 release. It is not linked from the site
+    navigation and will return when the surface it teaches ships. What ships
+    today, and what is ahead, are mapped on the [roadmap](../roadmap.md).
 
 **Job.** Run a Shepherd example with no credentials and no network, and get
 **identical output every time**, using the deterministic offline provider that
@@ -48,14 +46,12 @@ account, nothing billed.
     **Expected output (both runs, identical)**
 
     ```text
-    - Shepherd turns typed Python functions into model-backed tasks.
-    - The docstring is the instruction; the return type is the contract.
-    - Runs are recorded, so behavior is debuggable after the fact.
+    The login plan covers the core flow and names the right tests. Risks: no rate limit on failed attempts, and session fixation is not addressed — rotate the session id at sign-in. Add an expired-credential test. With those noted, the login plan passed review: approve.
     ```
 
 ## Expected result
 
-The two runs print the same three bullets, character for character. Determinism
+The two runs print the same review, character for character. Determinism
 is the point: the offline provider replays a recorded transcript, so what you
 read here is what runs.
 

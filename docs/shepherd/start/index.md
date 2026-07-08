@@ -2,11 +2,11 @@
 
 > Page status: release-ready
 > Source state: checked-example
-> Applies to: Shepherd v0.2.0
+> Applies to: Shepherd v0.3.0
 > Owner: @docs-system-owner (TBD)
 > Validation: docs_src/quickstart/test_world_hero.py
 
-*Quickstart. This is the path that runs on the shipped wheel, offline. For the mental model, see the concepts. For exact APIs, see the reference.*
+*Quickstart. This is the path that runs on the installed package, offline. For the mental model, see the concepts. For exact APIs, see the reference.*
 
 Run one task, get its work back as a **retained output** — a proposal held
 beside your files — inspect it, and settle it. Deterministic, keyless, no
@@ -18,9 +18,9 @@ network.
 pip install shepherd-ai
 ```
 
-Shepherd requires **Python 3.11+**. OS-level grant enforcement is exercised on
-macOS (Seatbelt); on Linux, Landlock enforcement is container-gated today;
-Windows is unsupported — use WSL. ([Platform notes](../roadmap.md#platforms-020))
+Shepherd requires **Python 3.11+**. OS-level grant enforcement is executed on
+both macOS (Seatbelt) and Linux (Landlock); Windows is unsupported — use WSL.
+([Platform notes](../roadmap.md#platforms-030))
 
 ## Initialize a workspace
 
@@ -41,23 +41,28 @@ Save this as `hero.py` in that directory and run `python hero.py`:
 
 What happens, in order:
 
-- `sp.open(".")` opens the initialized workspace. (On an uninitialized
-  directory it raises — run `shepherd init` first.)
-- `register_source` registers a task. The task is a signature plus docstring —
-  the contract a provider-run agent fulfils. The grant on `repo`
-  (`May[GitRepo, ReadWrite]`) is what would let it write the repository; the
-  signature is the permission surface.
-- `workspace.run(...)` executes it as a **retained run**. `provider: "static"`
-  is the deterministic offline provider, so this run is reproducible and free;
-  `"claude"` runs a live sandboxed agent instead (needs the `claude` CLI and
-  auth).
+- `@sp.task` declares the task: a signature plus docstring — the contract a
+  provider-run agent fulfils. The `repo: sp.GitRepo` parameter is a **writable
+  workspace handle**: the signature is the permission surface, and nothing
+  else authorizes the write. (Use `sp.May[sp.GitRepo, sp.ReadOnly]` when a
+  task should only read.)
+- `with sp.open(".") as workspace:` opens the initialized workspace and closes
+  it on exit. (On an uninitialized directory it raises — run `shepherd init`
+  first.)
+- `workspace.tasks.register(write_note)` registers the task object directly —
+  no source strings, no separate id.
+- `workspace.run(write_note, repo=..., topic=..., ...)` executes it as a
+  **retained run**, passing the task's own arguments as keywords.
+  `provider: "static"` is the deterministic offline provider, so this run is
+  reproducible and free; `"claude"` runs a live sandboxed agent instead (needs
+  the `claude` CLI and auth).
 - The work does **not** touch your files. It lands as a retained output; you
   read its changeset and contents first, then settle it — `select()`,
-  `release()`, or `discard()` — exactly once.
+  `apply()`, `release()`, or `discard()` — exactly once.
 
 ## Output
 
-Executed against the shipped 0.2.0 wheel (this exact transcript is what the
+Executed against the shipped 0.3.0 release (this exact transcript is what the
 page's test asserts):
 
 ```text
@@ -85,13 +90,31 @@ variant with `shepherd demo write agent-task` (see the
 
 - **`WorkspaceControlError` from `sp.open(".")`** — the directory is not an
   initialized Shepherd workspace. Run `shepherd init` there first.
-- **Ran the script twice in the same directory?** The second run raises
-  `InvalidRepositoryStateError` (`readiness blocked by run-...`) — the
-  workspace still holds the first run's registration. Start from a fresh
-  directory when repeating the walkthrough.
+- **Ran the script twice in the same directory?** The second run refuses at
+  settlement with `InvalidRepositoryStateError` — the workspace already
+  carries the first run's selected state, and re-settling an identical result
+  fails closed. Start from a fresh directory when repeating the walkthrough.
 - **Looking for `with sp.workspace(model=...): my_task(...)`?** That ambient
-  direct-call shape is a [Dataflow roadmap surface](../roadmap.md) — it does
-  not run on the 0.2.0 wheel. Retained runs, as above, are the shipped path.
+  direct-call shape is on the [roadmap](../roadmap.md), not in this release — nothing
+  serves that call yet, and a task that declares repository access
+  refuses the ambient call outright (`AmbientWorldAccessRefused`), pointing
+  you here. Retained runs, as above, are the shipped path.
+
+## Upgrading from 0.2.x
+
+0.3.0 modernizes the task syntax; three changes matter when upgrading:
+
+- **One behavior removal.** An *unannotated* parameter named `repo` is no
+  longer treated as a workspace handle — handles are keyed on the annotation
+  only. Annotate it (`repo: sp.GitRepo`) to keep it a handle, or pass an
+  ordinary value through `args={"repo": ...}` when `repo` is genuinely data.
+- **`register_source(...)` is no longer the way to define a task by hand.**
+  Write `@sp.task` and register the function object:
+  `workspace.tasks.register(fn)`. The source-text form remains for
+  machine-generated task code.
+- **Task arguments pass as keywords.** `workspace.run(task, repo=h,
+  topic="x")` replaces the `args={...}` dict; `args={...}` still works and is
+  the escape hatch when a task parameter shares a name with a run option.
 
 ## Next
 
@@ -99,5 +122,4 @@ variant with `shepherd demo write agent-task` (see the
   read-write grants per bound repository, enforced at the OS under a jailed
   placement.
 - [Concepts: Tasks](../concepts/tasks.md) — the mental model.
-- [Settlement Core / Dataflow](../roadmap.md) — what ships today vs. the named
-  road.
+- [Roadmap](../roadmap.md) — what ships today vs. what is ahead.
