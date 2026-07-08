@@ -39,7 +39,8 @@ try:
     run = workspace.run(
         "quickstart.write_program",
         repo=workspace.git_repo(),
-        args={"prompt": PROMPT, "output_path": "donut.py"},
+        prompt=PROMPT,
+        output_path="donut.py",
         placement="jail",
         runtime={"provider": "claude"},
     )

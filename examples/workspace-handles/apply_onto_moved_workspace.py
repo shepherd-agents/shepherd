@@ -56,8 +56,8 @@ def main() -> None:
         task = workspace.tasks.task(PATH_TASK_ID)
 
         # placement="auto": jailed on a jail-capable host, advisory in the dev column (see enforcement).
-        docs_run = task.run(repo=copy_git_repo(repo), args={"path": "docs.md", "text": "docs edit"}, placement="auto")
-        code_run = task.run(repo=copy_git_repo(repo), args={"path": "code.py", "text": "code edit"}, placement="auto")
+        docs_run = task.run(repo=copy_git_repo(repo), path="docs.md", text="docs edit", placement="auto")
+        code_run = task.run(repo=copy_git_repo(repo), path="code.py", text="code edit", placement="auto")
         docs_out, code_out = docs_run.output(), code_run.output()
 
         # Review each candidate by its changeset — disjoint paths (docs.md vs code.py).

@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, replace
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, NoReturn, Protocol, get_type_hints
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, NoReturn, Protocol, get_type_hints
 
 from shepherd2.schemas.execution import execution_id_for
 from vcs_core import InvalidRepositoryStateError, terminate_as_interrupt
@@ -165,6 +165,28 @@ if TYPE_CHECKING:
 JsonObject = dict[str, object]
 LaunchSurfaceValue = Literal["python", "cli", "model_tool", "sdk", "operator"]
 WorkspaceRunPlacement = Literal["auto", "advisory", "jail"]
+
+
+class _UnsetType:
+    """Sentinel distinguishing an explicitly-passed run option from its default.
+
+    ``run(...)`` needs this to tell ``placement="jail"`` (an explicit choice that might
+    collide with a task parameter of the same name) apart from an unpassed option that
+    merely defaulted — the shadow-name guard fires only on the former.
+    """
+
+    def __repr__(self) -> str:
+        return "<unset>"
+
+
+_UNSET: Final = _UnsetType()
+
+# Keyword names ``run(...)`` reserves for its own options. A task argument can never be
+# passed as a bare keyword under one of these names (Python binds it to the option), so a
+# task whose *value* parameter shares one of these names must route that argument through
+# ``args={...}``. The shadow-name guard enforces that explicitly rather than letting the
+# argument vanish into the option.
+_SHADOWABLE_RUN_OPTIONS: Final = ("may", "placement", "runtime")
 WorkspaceBackend = Literal["clonefile", "fuse", "kernel", "copy"]
 BindingPolicy = Literal["pinned", "once_per_run", "live"]
 TaskLibraryMutationKind = Literal["create", "derive"]
@@ -913,13 +935,15 @@ class ShepherdWorkspace:
     def run(
         self,
         task_ref: TaskRefInput,
+        /,
         *,
         repo: GitRepo | None = None,
         bindings: Mapping[str, GitRepo] | None = None,
         args: Mapping[str, Any] | None = None,
-        may: str | None = None,
-        placement: WorkspaceRunPlacement = "auto",
-        runtime: Mapping[str, object] | RuntimeOptions | None = None,
+        may: str | None | _UnsetType = _UNSET,
+        placement: WorkspaceRunPlacement | _UnsetType = _UNSET,
+        runtime: Mapping[str, object] | RuntimeOptions | None | _UnsetType = _UNSET,
+        **task_args: Any,
     ) -> WorkspaceRun:
         """Run a task against a selected or named-bound GitRepo basis.
 
@@ -928,12 +952,23 @@ class ShepherdWorkspace:
         ``bindings={"docs": docs, "backend": backend}`` (Lane C) runs against named
         sub-root handles from :meth:`bind`, each with its own signature grant.
 
+        A task's own arguments are passed as keywords — ``run(task, repo=h, topic="x",
+        output_path="y")`` — matching the spec's ``task.run(args)`` call shape. ``args={...}``
+        remains the equivalent explicit form (and the only way to pass an argument whose name
+        collides with a run option — see below); passing the same key both ways is refused.
+
         Execution routes through the nucleus/vcs-core retained-output producer.
         ``placement="auto"`` uses the native jail on jail-capable hosts and records
         advisory execution otherwise; ``placement="jail"`` is fail-closed. Callers
         should reacquire ``workspace.git_repo()`` after selecting an output before
         starting the next run.
         """
+        resolved_args = self._resolve_run_task_args(
+            task_ref, args=args, task_args=task_args, may=may, placement=placement, runtime=runtime
+        )
+        resolved_may = None if isinstance(may, _UnsetType) else may
+        resolved_placement: WorkspaceRunPlacement = "auto" if isinstance(placement, _UnsetType) else placement
+        resolved_runtime = None if isinstance(runtime, _UnsetType) else runtime
         # An interrupted prior run must not wedge this one: reclaim a dead run's orphaned
         # operation refs first ("just run it again"). Safe — the workspace is activated, so a
         # live session was already refused; declined reclaims fall back to `shepherd run repair`.
@@ -946,22 +981,87 @@ class ShepherdWorkspace:
             return self._run_retained_multi_binding_workspace(
                 task_ref,
                 binding_roots=binding_roots,
-                args=args,
-                may=may,
-                placement=placement,
-                runtime=runtime,
+                args=resolved_args,
+                may=resolved_may,
+                placement=resolved_placement,
+                runtime=resolved_runtime,
                 flow_context=None,
             )
         assert selected_repo is not None  # _resolve_run_targets guarantees exactly one target
         return self._run_retained_workspace(
             task_ref,
             repo=selected_repo,
-            args=args,
-            may=may,
-            placement=placement,
-            runtime=runtime,
+            args=resolved_args,
+            may=resolved_may,
+            placement=resolved_placement,
+            runtime=resolved_runtime,
             flow_context=None,
         )
+
+    def _resolve_run_task_args(
+        self,
+        task_ref: TaskRefInput,
+        *,
+        args: Mapping[str, Any] | None,
+        task_args: Mapping[str, Any],
+        may: str | None | _UnsetType,
+        placement: WorkspaceRunPlacement | _UnsetType,
+        runtime: Mapping[str, object] | RuntimeOptions | None | _UnsetType,
+    ) -> dict[str, Any] | None:
+        """Merge keyword task arguments with ``args=``, refusing collisions (call-shape sugar).
+
+        Two fail-closed checks:
+
+        * **shadow-name guard** — a task *value* parameter named like a run option
+          (``may`` / ``placement`` / ``runtime``) can never receive its value as a bare
+          keyword, because Python binds that keyword to the option. If such an option is
+          passed explicitly and the task declares a value parameter of that name that
+          ``args=`` did not supply, the argument would silently vanish into the option, so
+          the call is refused with the ``args={...}`` remedy. Handle parameters
+          (``May[GitRepo, ...]``) are exempt: they are fed by ``repo=`` / ``bindings=``.
+        * **duplicate-key guard** — a key given both in ``args=`` and as a keyword is refused
+          rather than silently resolved by precedence.
+        """
+        explicit_args = dict(args or {})
+        option_values = {"may": may, "placement": placement, "runtime": runtime}
+        passed_shadowable = {
+            name for name in _SHADOWABLE_RUN_OPTIONS if not isinstance(option_values[name], _UnsetType)
+        }
+        if passed_shadowable:
+            value_params = _task_value_param_names(self._signature_schema_for_ref(task_ref))
+            if value_params:
+                shadowed = sorted((passed_shadowable & value_params) - explicit_args.keys())
+                if shadowed:
+                    raise WorkspaceControlError(
+                        f"task parameter(s) {shadowed} shadow reserved run option(s) of the same "
+                        f"name; pass them through args={{...}} (e.g. args={{{shadowed[0]!r}: ...}}) "
+                        f"so the run option and the task argument stay distinct"
+                    )
+        duplicate = sorted(task_args.keys() & explicit_args.keys())
+        if duplicate:
+            raise WorkspaceControlError(
+                f"argument(s) {duplicate} given both in args= and as keyword arguments; pass each once"
+            )
+        merged = {**explicit_args, **task_args}
+        return merged or None
+
+    def _signature_schema_for_ref(self, task_ref: TaskRefInput) -> JsonObject | None:
+        """Best-effort signature schema for a task ref — for the shadow-name guard only.
+
+        Returns ``None`` when the schema cannot be resolved (an unregistered ref, a callable
+        with unresolved authority annotations). The guard then simply does not fire; a
+        genuinely malformed call still fails closed downstream at task resolution/dispatch.
+        """
+        if _task_ref_is_callable(task_ref):
+            try:
+                return _signature_schema(inspect.unwrap(task_ref))
+            except Exception:  # noqa: BLE001 - best-effort guard; failing to introspect must not break a valid run
+                return None
+        try:
+            definition = self.tasks.get(task_ref)
+        except Exception:  # noqa: BLE001 - best-effort guard; failing to introspect must not break a valid run
+            return None
+        return None if definition is None else definition.signature_schema
 
     def _resolve_run_targets(
         self, repo: GitRepo | None, bindings: Mapping[str, GitRepo] | None
@@ -2908,6 +3008,32 @@ def _task_not_found_message(task_ref_id: str, *, from_callable: bool = False) ->
 
 def _task_ref_is_callable(task_ref: object) -> bool:
     return callable(task_ref) and not isinstance(task_ref, str)
+
+
+def _task_value_param_names(signature_schema: Mapping[str, object] | None) -> set[str] | None:
+    """Names of a task's *value* parameters (everything but handle grants), or None if unknown.
+
+    Handle parameters carry a ``gitrepo_grant`` descriptor in the signature schema and are fed
+    by ``repo=`` / ``bindings=``, so they are excluded — the shadow-name guard only concerns
+    parameters a caller would pass as a keyword value. Returns None when the schema is missing
+    or malformed, which the guard treats as "cannot check, do not fire".
+    """
+    if not signature_schema:
+        return None
+    raw_parameters = signature_schema.get("parameters")
+    if not isinstance(raw_parameters, list | tuple):
+        return None
+    names: set[str] = set()
+    for raw_parameter in raw_parameters:
+        if not isinstance(raw_parameter, Mapping):
+            continue
+        name = raw_parameter.get("name")
+        if not isinstance(name, str):
+            continue
+        if raw_parameter.get("gitrepo_grant") is not None:
+            continue  # handle parameter — fed by repo=/bindings=, never a bare keyword value
+        names.add(name)
+    return names
 
 
 def _resolve_task_source(source: str | Callable[..., Any]) -> _TaskSource:

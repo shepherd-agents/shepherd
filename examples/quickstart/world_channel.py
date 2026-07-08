@@ -30,11 +30,9 @@ def main() -> None:
         run = workspace.run(
             write_note,
             repo=workspace.git_repo(),
-            args={
-                "topic": "quickstart",
-                "output_path": "SHEPHERD_QUICKSTART.txt",
-                "output_text": "Hello from a Shepherd retained output.\n",
-            },
+            topic="quickstart",
+            output_path="SHEPHERD_QUICKSTART.txt",
+            output_text="Hello from a Shepherd retained output.\n",
             placement="advisory",
             runtime={"provider": "static"},
         )

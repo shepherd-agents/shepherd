@@ -55,7 +55,7 @@ def main() -> None:
         run = workspace.run(
             update_readme,
             repo=workspace.git_repo(),
-            args={"goal": "tighten the quickstart section"},
+            goal="tighten the quickstart section",
             placement="jail",
             runtime={"provider": "claude"},
         )
