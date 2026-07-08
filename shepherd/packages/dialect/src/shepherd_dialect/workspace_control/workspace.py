@@ -3009,17 +3009,26 @@ def _fence_generated_module_resolves(source_text: str, qualname: str) -> None:
 
     The generated module carries only ``import shepherd as sp`` plus the def, so its
     signature annotations must resolve against the shepherd vocabulary and builtins.
-    Defining the (bodyless) function evaluates its annotations exactly as the confined
-    runner's import will — running only the import and the def statement, no body — so
-    a clean exec here turns a confusing in-jail ``NameError`` into a teachable refusal.
+    We reconstruct the artifact and force its annotations to evaluate against that same
+    namespace: a name the signature needs but the artifact lacks raises ``NameError``,
+    which we turn into a teachable refusal instead of a confusing in-jail failure later.
     """
     try:
         # dont_inherit=True: the generated module has no `from __future__ import
-        # annotations`, so the confined runner's import evaluates annotations eagerly.
-        # This module (workspace.py) does have it; without dont_inherit the fence would
-        # inherit PEP 563 and never see the NameError the real import will raise.
+        # annotations`, so it does not inherit this module's PEP 563 posture.
         code = compile(source_text, f"<shepherd-generated:{qualname}>", "exec", dont_inherit=True)
-        exec(code, {})  # noqa: S102
+        namespace: dict[str, Any] = {}
+        exec(code, namespace)  # noqa: S102
+        # Force annotation evaluation explicitly rather than relying on the ``def``
+        # statement to do it. Through Python 3.13 the def eager-evaluates annotations,
+        # so the exec above already raised; on 3.14+ (PEP 649/749) annotation
+        # evaluation is deferred, so the def succeeds and the check must force it.
+        # ``get_type_hints`` resolves against the artifact's own globals (which carry
+        # only ``import shepherd as sp``), so an undefined script-local name raises
+        # ``NameError`` on every supported Python.
+        fn = namespace.get(qualname)
+        if fn is not None:
+            get_type_hints(fn, globalns=namespace, include_extras=True)
     except NameError as exc:
         raise TaskRegistrationError(
             f"task {qualname!r} has a signature that references a name only its script defines "

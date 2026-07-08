@@ -251,6 +251,30 @@ def test_main_task_with_bare_local_annotation_refuses(workspace: ShepherdWorkspa
         workspace.tasks.register(fn, may_default="ReadWrite")
 
 
+def test_main_task_with_string_forwardref_local_annotation_refuses(
+    workspace: ShepherdWorkspace, define_in_main
+) -> None:
+    # Version-independent guard for the annotation fence. A *string* forward-ref is
+    # never evaluated by the `def` statement on any Python, so an exec-only fence
+    # misses it everywhere (and, since 3.14 defers all annotation evaluation, a bare
+    # annotation slips through there too). The fence must force evaluation itself.
+    fn = define_in_main(
+        '''
+        import shepherd as sp
+
+        class LocalThing:
+            pass
+
+        @sp.task
+        def uses_forwardref(repo: sp.May[sp.GitRepo, sp.ReadWrite], thing: "LocalThing") -> None:
+            """Bodyless, with a string forward-ref only the script defines."""
+        ''',
+        "uses_forwardref",
+    )
+    with pytest.raises(Exception, match="only its script defines"):
+        workspace.tasks.register(fn, may_default="ReadWrite")
+
+
 # =============================================================================
 # Row 6: locals refuse
 # =============================================================================
