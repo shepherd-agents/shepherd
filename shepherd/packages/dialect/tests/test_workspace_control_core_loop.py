@@ -1025,8 +1025,7 @@ def test_update_source_derives_from_active_base_and_rejects_stale_base(tmp_path:
             task_id="source_update.repair",
             module="source_update_v1",
             entrypoint="repair",
-            source_text='from shepherd_runtime.nucleus import GitRepo\n\n'
-            'def repair(repo: GitRepo):\n return "v1"\n',
+            source_text='from shepherd_runtime.nucleus import GitRepo\n\ndef repair(repo: GitRepo):\n return "v1"\n',
             may_default="ReadWrite",
         )
         v2 = workspace.tasks.update_source(
@@ -1034,8 +1033,7 @@ def test_update_source_derives_from_active_base_and_rejects_stale_base(tmp_path:
             base_version=v1.version,
             module="source_update_v2",
             entrypoint="repair",
-            source_text='from shepherd_runtime.nucleus import GitRepo\n\n'
-            'def repair(repo: GitRepo):\n return "v2"\n',
+            source_text='from shepherd_runtime.nucleus import GitRepo\n\ndef repair(repo: GitRepo):\n return "v2"\n',
             may_default="ReadWrite",
         )
 
@@ -1049,7 +1047,7 @@ def test_update_source_derives_from_active_base_and_rejects_stale_base(tmp_path:
                 base_version=v1.version,
                 module="source_update_v3",
                 entrypoint="repair",
-                source_text='from shepherd_runtime.nucleus import GitRepo\n\n'
+                source_text="from shepherd_runtime.nucleus import GitRepo\n\n"
                 'def repair(repo: GitRepo):\n return "v3"\n',
                 may_default="ReadWrite",
             )
@@ -1174,16 +1172,14 @@ def test_dependency_preflight_rejects_task_index_cache_drift(tmp_path: Path) -> 
             task_id="drift_child.repair",
             module="drift_child",
             entrypoint="repair",
-            source_text='from shepherd_runtime.nucleus import GitRepo\n\n'
-            'def repair(repo: GitRepo):\n return "child"\n',
+            source_text='from shepherd_runtime.nucleus import GitRepo\n\ndef repair(repo: GitRepo):\n return "child"\n',
             may_default="ReadWrite",
         )
         parent = workspace.tasks.register_source(
             task_id="drift_parent.run",
             module="drift_parent",
             entrypoint="run",
-            source_text='from shepherd_runtime.nucleus import GitRepo\n\n'
-            'def run(repo: GitRepo):\n return "parent"\n',
+            source_text='from shepherd_runtime.nucleus import GitRepo\n\ndef run(repo: GitRepo):\n return "parent"\n',
             may_default="ReadWrite",
         )
         drifted_parent = replace(
@@ -1222,8 +1218,7 @@ def test_run_start_rejects_cyclic_task_dependency_graph(tmp_path: Path) -> None:
             task_id="cycle.a",
             module="cycle_a",
             entrypoint="run",
-            source_text="from shepherd_runtime.nucleus import GitRepo\n\n"
-            "def run(repo: GitRepo):\n return None\n",
+            source_text="from shepherd_runtime.nucleus import GitRepo\n\ndef run(repo: GitRepo):\n return None\n",
             may_default="ReadWrite",
             declared_dependencies={"b": {"task_id": "cycle.b", "selector": "active"}},
         )
@@ -1231,8 +1226,7 @@ def test_run_start_rejects_cyclic_task_dependency_graph(tmp_path: Path) -> None:
             task_id="cycle.b",
             module="cycle_b",
             entrypoint="run",
-            source_text="from shepherd_runtime.nucleus import GitRepo\n\n"
-            "def run(repo: GitRepo):\n return None\n",
+            source_text="from shepherd_runtime.nucleus import GitRepo\n\ndef run(repo: GitRepo):\n return None\n",
             may_default="ReadWrite",
             declared_dependencies={"a": {"task_id": "cycle.a", "selector": "active"}},
         )

@@ -119,8 +119,11 @@ def raw_annotation_looks_like_authority(annotation: object) -> bool:
     if not isinstance(annotation, str):
         return False
     text = annotation.replace(" ", "")
-    return text in {"GitRepo", "sp.GitRepo"} or text.endswith(".GitRepo") or "May[" in text or (
-        "Annotated[" in text and "GitRepo" in text
+    return (
+        text in {"GitRepo", "sp.GitRepo"}
+        or text.endswith(".GitRepo")
+        or "May[" in text
+        or ("Annotated[" in text and "GitRepo" in text)
     )
 
 

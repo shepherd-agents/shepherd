@@ -337,9 +337,7 @@ def test_unannotated_repo_param_is_a_value_param(define_in_main) -> None:
     assert names == {"repo", "output_path", "output_text"}
 
 
-def test_unannotated_repo_param_refused_with_annotation_remedy(
-    workspace: ShepherdWorkspace, define_in_main
-) -> None:
+def test_unannotated_repo_param_refused_with_annotation_remedy(workspace: ShepherdWorkspace, define_in_main) -> None:
     fn = define_in_main(_UNANNOTATED_REPO, "unannotated_repo")
     with pytest.raises(WorkspaceControlError, match="annotate it as GitRepo"):
         workspace.run(

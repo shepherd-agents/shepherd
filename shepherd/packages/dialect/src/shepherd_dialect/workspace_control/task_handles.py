@@ -83,9 +83,7 @@ class WorkspaceTask:
             options["placement"] = placement
         if not isinstance(runtime, _UnsetType):
             options["runtime"] = runtime
-        return self._workspace.run(
-            self.ref, repo=repo, bindings=bindings, args=args, **options, **task_args
-        )
+        return self._workspace.run(self.ref, repo=repo, bindings=bindings, args=args, **options, **task_args)
 
     def to_json(self) -> dict[str, object]:
         """Return a compact JSON-shaped projection."""

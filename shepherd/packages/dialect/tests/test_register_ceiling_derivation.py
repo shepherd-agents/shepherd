@@ -250,6 +250,46 @@ def test_generated_main_registration_records_originating_script(workspace, defin
     assert origin["source_file"] is not None
 
 
+def test_generated_main_bare_gitrepo_import_derives_readwrite(workspace, define_in_main) -> None:
+    fn = define_in_main(
+        """
+        import shepherd as sp
+        from shepherd import GitRepo
+
+        @sp.task
+        def scripted_writer(repo: GitRepo, note: str) -> None:
+            \"\"\"Bare GitRepo import is the same writable handle syntax in a script.\"\"\"
+        """,
+        "scripted_writer",
+    )
+
+    version = workspace.tasks.register(fn)
+
+    assert version.task_id == "shepherd_generated_scripted_writer.scripted_writer"
+    assert version.may_default == "ReadWrite"
+    assert _provenance(version) == "derived"
+
+
+def test_generated_main_bare_may_import_derives_readonly(workspace, define_in_main) -> None:
+    fn = define_in_main(
+        """
+        import shepherd as sp
+        from shepherd import GitRepo, May, ReadOnly
+
+        @sp.task
+        def scripted_reader(repo: May[GitRepo, ReadOnly], note: str) -> None:
+            \"\"\"Bare May/GitRepo imports are valid generated-main permission syntax.\"\"\"
+        """,
+        "scripted_reader",
+    )
+
+    version = workspace.tasks.register(fn)
+
+    assert version.task_id == "shepherd_generated_scripted_reader.scripted_reader"
+    assert version.may_default == "ReadOnly"
+    assert _provenance(version) == "derived"
+
+
 def test_register_source_records_ceiling_provenance_but_no_callable_origin(workspace) -> None:
     version = workspace.tasks.register_source(
         task_id="src.only",

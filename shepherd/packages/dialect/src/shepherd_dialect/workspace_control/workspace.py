@@ -3259,7 +3259,7 @@ def _generated_source_from_main_callable(qualname: str, plain_body: Callable[...
         ) from exc
     definition = _strip_leading_decorators(definition, qualname)
     module_name = f"{GENERATED_MODULE_PREFIX}{qualname.replace('.', '_')}"
-    source_text = f"import shepherd as sp\n\n{definition}"
+    source_text = f"import shepherd as sp\nfrom shepherd import GitRepo, May, ReadOnly, ReadWrite\n\n{definition}"
     _fence_generated_module_resolves(source_text, qualname)
     return _task_source_from_source_text(
         module_name=module_name,
@@ -3271,8 +3271,8 @@ def _generated_source_from_main_callable(qualname: str, plain_body: Callable[...
 def _fence_generated_module_resolves(source_text: str, qualname: str) -> None:
     """Refuse a generated artifact whose annotations name things only ``__main__`` has.
 
-    The generated module carries only ``import shepherd as sp`` plus the def, so its
-    signature annotations must resolve against the shepherd vocabulary and builtins.
+    The generated module carries only the public Shepherd permission vocabulary plus the
+    def, so its signature annotations must resolve against that vocabulary and builtins.
     We reconstruct the artifact and force its annotations to evaluate against that same
     namespace: a name the signature needs but the artifact lacks raises ``NameError``,
     which we turn into a teachable refusal instead of a confusing in-jail failure later.
@@ -3288,16 +3288,16 @@ def _fence_generated_module_resolves(source_text: str, qualname: str) -> None:
         # so the exec above already raised; on 3.14+ (PEP 649/749) annotation
         # evaluation is deferred, so the def succeeds and the check must force it.
         # ``get_type_hints`` resolves against the artifact's own globals (which carry
-        # only ``import shepherd as sp``), so an undefined script-local name raises
-        # ``NameError`` on every supported Python.
+        # only the public Shepherd permission vocabulary), so an undefined script-local
+        # name raises ``NameError`` on every supported Python.
         fn = namespace.get(qualname)
         if fn is not None:
             get_type_hints(fn, globalns=namespace, include_extras=True)
     except NameError as exc:
         raise TaskRegistrationError(
             f"task {qualname!r} has a signature that references a name only its script defines "
-            f"({exc}); the generated task artifact carries only `import shepherd as sp`. Move the "
-            "task to an importable module so its dependencies travel with it."
+            f"({exc}); the generated task artifact carries only Shepherd's public permission "
+            "vocabulary. Move the task to an importable module so its dependencies travel with it."
         ) from exc
 
 
@@ -4376,8 +4376,7 @@ def _single_gitrepo_grant_param(signature_schema: Mapping[str, object]) -> str:
         )
     if len(grants) != 1:
         raise RunStartError(
-            "run(repo=...) requires exactly one GitRepo handle parameter; use bindings={...} for "
-            "multi-handle tasks"
+            "run(repo=...) requires exactly one GitRepo handle parameter; use bindings={...} for multi-handle tasks"
         )
     return next(iter(grants))
 
