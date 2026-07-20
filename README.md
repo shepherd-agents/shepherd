@@ -207,6 +207,10 @@ Full documentation lives at **[docs.shepherd-agents.ai](https://docs.shepherd-ag
 
 The full experiment code — the meta-agent applications and the framework-performance microbenchmarks — lives in a companion repository: **[shepherd-agents/shepherd-experiments](https://github.com/shepherd-agents/shepherd-experiments)**. It bundles the frozen substrate snapshot used for the paper, so the numbers stay reproducible against the exact version that produced them.
 
+## Acknowledgments
+
+We thank [E2B](https://e2b.dev/), [Tinker](https://thinkingmachines.ai/tinker/), and [Modal](https://modal.com/) for their generous compute support during this project.
+
 ## Citation
 
 ```bibtex
