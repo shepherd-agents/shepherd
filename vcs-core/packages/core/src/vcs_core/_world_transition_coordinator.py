@@ -16,6 +16,7 @@ from vcs_core._substrate_driver import (
     CapabilitySet,
     DriverContext,
     DriverIngressResult,
+    DriverSchema,
     EvidenceCitation,
     IngressRequest,
     ObservationDraft,
@@ -313,6 +314,7 @@ def dispatch_driver(
     request: IngressRequest,
     *,
     capabilities: CapabilitySet | None = None,
+    schema: DriverSchema | None = None,
     execution: Any | None = None,
 ) -> DriverIngressResult:
     """Validated SPI dispatch around ``driver.prepare`` / ``prepare_bound``.
@@ -341,7 +343,7 @@ def dispatch_driver(
         result = driver.prepare_bound(context, request, execution)
     else:
         result = driver.prepare(context, request)
-    validate_driver_ingress(request, result, driver)
+    validate_driver_ingress(request, result, driver, schema=schema)
     _check_active_surface_post_dispatch(driver, context.active_surface, result)
     return result
 

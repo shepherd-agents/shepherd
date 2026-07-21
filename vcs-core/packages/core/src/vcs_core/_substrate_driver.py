@@ -1505,6 +1505,7 @@ def validate_driver_ingress(
     request: IngressRequest,
     result: DriverIngressResult,
     driver: SubstrateDriver | None = None,
+    schema: DriverSchema | None = None,
 ) -> None:
     """Three-layer validator entry point (SPI v0.1).
 
@@ -1518,7 +1519,7 @@ def validate_driver_ingress(
     _validate_generic_invariants(result)
     _validate_per_request_invariants(request, result)
     if driver is not None:
-        _validate_storage_profile_result(driver, result)
+        _validate_storage_profile_result(driver, result, schema=schema)
         driver.validate_result(request, result)
 
 
@@ -1533,9 +1534,14 @@ def validate_driver_ingress_result(result: DriverIngressResult) -> None:
     _validate_generic_invariants(result)
 
 
-def _validate_storage_profile_result(driver: SubstrateDriver, result: DriverIngressResult) -> None:
+def _validate_storage_profile_result(
+    driver: SubstrateDriver,
+    result: DriverIngressResult,
+    *,
+    schema: DriverSchema | None = None,
+) -> None:
     """Enforce the driver's declared storage profile against emitted transitions."""
-    profile = driver.describe().storage_profile
+    profile = (schema or driver.describe()).storage_profile
     for transition in result.transitions:
         path = f"transition[{transition.transition_id}]"
         if profile.shape == "json-snapshot":
