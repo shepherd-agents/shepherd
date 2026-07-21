@@ -210,7 +210,7 @@ The full experiment code — the meta-agent applications and the framework-perfo
 
 ## Acknowledgments
 
-We thank [E2B](https://e2b.dev/) and [Tinker](https://thinkingmachines.ai/tinker/) for their generous compute support during this project.
+We thank [E2B](https://e2b.dev/), [Tinker](https://thinkingmachines.ai/tinker/), and [Modal](https://modal.com/) for their generous compute support during this project.
 
 [![SPONSORED BY E2B FOR RESEARCH](https://img.shields.io/badge/SPONSORED%20BY-E2B%20FOR%20RESEARCH-ff8800?style=for-the-badge)](https://e2b.dev/research)
 ## Citation
