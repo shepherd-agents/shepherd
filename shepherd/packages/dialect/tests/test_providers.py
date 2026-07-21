@@ -391,7 +391,7 @@ def test_headless_auth_failure_surfaces_cli_reason_and_remedy(tmp_path, monkeypa
     assert "ANTHROPIC_API_KEY" in message
     failed = excinfo.value.provider_events[-1]
     assert failed.payload["failure_classification"] == "auth_failure"
-    # the durable trace keeps the full envelope, not just a 300-char tail
+    # the durable trace keeps this full envelope within the shared text limit
     assert failed.payload["stdout_length"] == len(_NOT_LOGGED_IN_STDOUT)
 
 

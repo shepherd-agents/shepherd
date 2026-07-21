@@ -66,6 +66,7 @@ PROVIDER_EVIDENCE_KINDS = frozenset(PROVIDER_EVIDENCE_KIND_BY_EVENT_KIND.values(
 
 PROVIDER_INVOCATION_OUTCOME_SCHEMA = "shepherd/provider_invocation_outcome/v1"
 CALL_SURFACE_EXECUTION_PROVIDER = "execution_provider"
+DEFAULT_TEXT_EXCERPT_LIMIT = 10_000
 
 PROVIDER_INVOCATION_STARTED_SCHEMA = "shepherd.provider.invocation.started.v1"
 PROVIDER_INVOCATION_COMPLETED_SCHEMA = "shepherd.provider.invocation.completed.v1"
@@ -239,7 +240,7 @@ def digest_text(value: str | bytes | None) -> str | None:
     return f"sha256:{hashlib.sha256(raw).hexdigest()}"
 
 
-def bounded_excerpt(value: str | bytes | None, *, limit: int = 300) -> str | None:
+def bounded_excerpt(value: str | bytes | None, *, limit: int = DEFAULT_TEXT_EXCERPT_LIMIT) -> str | None:
     """Return a bounded suffix excerpt for diagnostic output."""
     if value is None:
         return None
@@ -249,7 +250,12 @@ def bounded_excerpt(value: str | bytes | None, *, limit: int = 300) -> str | Non
     return text[-limit:] if limit else ""
 
 
-def redacted_text_payload(value: str | bytes | None, *, field: str, excerpt_limit: int = 300) -> dict[str, object]:
+def redacted_text_payload(
+    value: str | bytes | None,
+    *,
+    field: str,
+    excerpt_limit: int = DEFAULT_TEXT_EXCERPT_LIMIT,
+) -> dict[str, object]:
     """Return digest/length + a **bounded verbatim suffix excerpt** of text.
 
     "redacted" here means *bounded*, not secret-scrubbed: the excerpt is a raw
@@ -288,7 +294,7 @@ def provider_invocation_outcome(
     provider_id: str,
     invocation_id: str,
     terminal: str = "success",
-    output_excerpt_limit: int = 300,
+    output_excerpt_limit: int = DEFAULT_TEXT_EXCERPT_LIMIT,
 ) -> dict[str, object]:
     """Return the canonical provider-backed run outcome mapping."""
     return {
@@ -416,6 +422,7 @@ def _observation_id(event: ProviderEvent) -> str:
 
 __all__ = [
     "CALL_SURFACE_EXECUTION_PROVIDER",
+    "DEFAULT_TEXT_EXCERPT_LIMIT",
     "MODEL_CALL",
     "MODEL_CALL_SCHEMA",
     "MODEL_TURN",

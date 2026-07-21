@@ -40,6 +40,7 @@ from shepherd_dialect.provider_runtime import (
     ProviderInvocationResult,
     digest_jsonable,
     provider_invocation_outcome,
+    redacted_text_payload,
 )
 from shepherd_dialect.provider_stream import (
     ProviderProcessRequest,
@@ -210,6 +211,8 @@ class CodexAgentProvider:
                 payload={
                     "transport": "app_server_broker",
                     "thread_id_present": isinstance(raw.get("thread_id"), str),
+                    "usage": dict(usage) if isinstance(usage, Mapping) else {},
+                    **redacted_text_payload(output_text, field="output_text"),
                 },
             )
             turn_event = ProviderEvent(
@@ -224,6 +227,7 @@ class CodexAgentProvider:
                     "terminal": str(raw.get("terminal") or "completed"),
                     "usage": dict(usage) if isinstance(usage, Mapping) else {},
                     "cost": dict(cost) if isinstance(cost, Mapping) else {},
+                    **redacted_text_payload(output_text, field="text"),
                 },
             )
             completed = ProviderEvent(

@@ -305,7 +305,7 @@ class ClaudeHeadlessProvider:
                     "cli_terminal_reason": diagnosis.cli_terminal_reason,
                     "cli_assistant_error": diagnosis.cli_assistant_error,
                     **redacted_text_payload(message, field="error"),
-                    **redacted_text_payload(proc.stdout or "", field="stdout", excerpt_limit=4000),
+                    **redacted_text_payload(proc.stdout or "", field="stdout"),
                     **redacted_text_payload(proc.stderr or "", field="stderr"),
                     **redacted_text_payload(diagnosis.cli_result or "", field="cli_result"),
                 },

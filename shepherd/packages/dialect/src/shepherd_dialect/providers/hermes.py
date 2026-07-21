@@ -848,7 +848,7 @@ class HermesHeadlessProvider:
                     "envelope_failed": bool(envelope.get("failed")) if envelope else False,
                     "envelope_completed": bool(envelope.get("completed")) if envelope else False,
                     **redacted_text_payload(message, field="error"),
-                    **redacted_text_payload(proc.stdout or "", field="stdout", excerpt_limit=4000),
+                    **redacted_text_payload(proc.stdout or "", field="stdout"),
                     **redacted_text_payload(proc.stderr or "", field="stderr"),
                 },
             )

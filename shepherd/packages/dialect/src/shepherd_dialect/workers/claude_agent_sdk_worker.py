@@ -159,7 +159,7 @@ def _digest_jsonable(value: object) -> str:
     return f"sha256:{hashlib.sha256(raw.encode('utf-8', errors='replace')).hexdigest()}"
 
 
-def _redacted_text_payload(value: str, *, field: str, excerpt_limit: int = 300) -> dict[str, object]:
+def _redacted_text_payload(value: str, *, field: str, excerpt_limit: int = 10_000) -> dict[str, object]:
     return {
         f"{field}_digest": f"sha256:{hashlib.sha256(value.encode('utf-8')).hexdigest()}",
         f"{field}_length": len(value),

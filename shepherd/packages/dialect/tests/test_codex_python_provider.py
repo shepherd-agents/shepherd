@@ -13,6 +13,7 @@ pytest.importorskip("openai_codex", reason="install shepherd-dialect[codex] to r
 from vcs_core.spi import ConfinementSpec
 
 from shepherd_dialect.provider_runtime import (
+    MODEL_CALL,
     MODEL_TURN,
     PROVIDER_INVOCATION_COMPLETED,
     ProviderInvocationError,
@@ -134,7 +135,12 @@ def test_python_provider_streams_every_frame_and_returns_usage_and_subscription_
         "provider_only": 0,
         "carrier_only": 1,
     }
-    assert any(event.kind == MODEL_TURN for event in result.provider_events)
+    model_call = next(event for event in result.provider_events if event.kind == MODEL_CALL)
+    model_turn = next(event for event in result.provider_events if event.kind == MODEL_TURN)
+    assert model_call.payload["output_text_excerpt"] == "completed safely sk-spike-secret"
+    assert model_turn.payload["text_excerpt"] == "completed safely sk-spike-secret"
+    assert model_turn.payload["text_length"] == len("completed safely sk-spike-secret")
+    assert result.outcome["output_text_excerpt"] == "completed safely sk-spike-secret"
     assert result.provider_events[-1].kind == PROVIDER_INVOCATION_COMPLETED
     durable = json.dumps(
         {
