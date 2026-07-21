@@ -15,6 +15,13 @@ dependencies = [
     "click>=8.0",
 ]
 
+[project.optional-dependencies]
+codex = [
+    # App-server, generated protocol types, and bundled codex-cli are audited
+    # as one compatibility pair.  A bump requires the provider re-audit suite.
+    "openai-codex==0.144.4",
+]
+
 # The CLI driver-plugin config (B4b slice 3 W3): vcs-core's plugin discovery
 # finds the run driver so a repo can bind it by name at the process level.
 [project.entry-points."vcscore.substrate_plugins"]

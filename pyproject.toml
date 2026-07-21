@@ -10,7 +10,7 @@ dependencies = [
     "shepherd-transform",
     "shepherd-sandboxes",
     "shepherd-core",
-    "shepherd-providers",
+    "shepherd-providers[openai-mcp]",  # the extra: 24 openai/mcp unit tests import the SDK-backed provider
     "shepherd-contexts",
     "shepherd-authoring",
     "shepherd-banking",
@@ -26,7 +26,11 @@ dependencies = [
     "hypothesis>=6.100.0",  # Property-based testing
     "ruff>=0.15.0,<1.0.0",  # Ensure `uv run ruff` resolves to the locked workspace tool, not PATH.
     "RestrictedPython>=7.0,<8.0",  # Required for secure task reconstruction tests
+    "hatchling>=1.20",  # vcs-core installed-CLI tests build wheels with --no-build-isolation
     "filelock>=3.0",  # Required for persistence tests
+    "shepherd-trace-viewer",  # Root env must collect every member's tests; was notebook-group-only, breaking CI collection
+    "shepherd2",  # trace-viewer tests import it; make the edge explicit instead of relying on shepherd→dialect→shepherd2
+    "jsonschema>=4.0.0,<5.0.0",  # trace-viewer test-time dep, needed at collection in the root env
 ]
 
 [dependency-groups]
@@ -64,6 +68,7 @@ shepherd-tests = { workspace = true }
 shepherd-kernel-v3-reference = { workspace = true }
 shepherd-dialect = { workspace = true }
 shepherd-trace-viewer = { workspace = true }
+shepherd2 = { workspace = true }
 vcs-core = { workspace = true }
 commons-vcs = { workspace = true }
 
@@ -73,6 +78,12 @@ commons-vcs = { workspace = true }
 [tool.mypy]
 python_version = "3.11"
 strict = true
+# Pin the path→module mapping for the src layout: without these, mypy can also
+# resolve shepherd_core files by walking namespace packages up from the repo
+# root ("shepherd.packages.core.src.shepherd_core.…") and dies with
+# "Source file found twice under different module names".
+explicit_package_bases = true
+mypy_path = "shepherd/packages/core/src"
 warn_return_any = true
 warn_unused_ignores = true
 exclude = [

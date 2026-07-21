@@ -947,11 +947,44 @@ def test_launch_context_rejects_deferred_runtime_policy_provider() -> None:
         RunLaunchContext(
             settlement_policy=retained_runtime_settlement_policy(
                 runtime={
-                    "requested": {"provider": {"id": "codex"}},
-                    "resolved": {"provider": "codex"},
+                    "requested": {"provider": {"id": "hermes"}},
+                    "resolved": {"provider": "hermes"},
                 }
             )
         )
+
+
+def test_launch_context_accepts_codex_profile_and_auth_mode() -> None:
+    context = RunLaunchContext(
+        settlement_policy=retained_runtime_settlement_policy(
+            runtime={
+                "requested": {
+                    "provider": {"id": "codex", "profile": "release", "mode": "chatgpt"},
+                    "model": {"name": "gpt-5.4"},
+                },
+                "resolved": {
+                    "provider": "codex",
+                    "profile": "release",
+                    "mode": "chatgpt",
+                    "model": "gpt-5.4",
+                },
+            },
+            execution_enforcement={
+                "mode": "confined_process",
+                "provider": "codex",
+                "executor_kind": "confined_process",
+                "profile": "ReadWrite",
+                "authority_basis": "runtime_provider",
+                "requested_monitor": "provider_tool_sandbox",
+                "monitor_required": True,
+                "established_monitor": "provider_tool_sandbox",
+                "monitor_refusal": None,
+                "prelaunch_refusal": None,
+                "body_refusal": None,
+            },
+        )
+    )
+    assert context.settlement_policy["runtime"]["resolved"]["provider"] == "codex"
 
 
 def test_launch_context_accepts_claude_runtime_policy_provider() -> None:

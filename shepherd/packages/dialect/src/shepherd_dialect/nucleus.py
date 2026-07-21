@@ -116,7 +116,24 @@ class DeliveryFailed(Exception):  # noqa: N818 — the spec's pinned name (CONTR
 
 
 class BudgetExhausted(Exception):  # noqa: N818 — names the outcome, not an error class
-    """A positively identified budget stop (probe a: 'Reached max turns')."""
+    """A positively identified budget stop (probe a: 'Reached max turns').
+
+    ``provider_events`` optionally carries the provider evidence gathered
+    before the stop (the ``ProviderInvocationError`` convention): an exhausted
+    run's partial transcript rides the exception so the consumer can record it
+    instead of discarding it with the exception.
+
+    Consumed by the **workspace-control lane** (``runtime_provider`` records
+    ``exc.provider_events`` on the budget-stop path). The direct in-process
+    ``run()`` lane's terminal catcher below maps this to ``Exhausted`` and does
+    *not* yet thread exception-borne events into its trace payload — the same
+    pre-existing limitation ``ProviderInvocationError`` evidence has on that
+    lane, tracked separately rather than papered over here.
+    """
+
+    def __init__(self, message: str = "", *, provider_events: tuple[object, ...] = ()) -> None:
+        super().__init__(message)
+        self.provider_events = provider_events
 
 
 class WorkspaceAlreadyConfigured(Exception):  # noqa: N818 — the spec's pinned name
@@ -211,7 +228,11 @@ class Workspace:
         self.root = root
         self.trace_store_path = root / ".vcscore" / "shepherd" / "trace.sqlite"
         store = Store(str(root / ".vcscore"))
-        ctx = build_builtin_substrate_context(store, workspace=root, config={"backend": "clonefile"})
+        # No pinned backend: auto-detection applies the platform pairing (native
+        # kernel/FUSE overlay on Linux, APFS clonefile on macOS, copy floor
+        # everywhere else). The previous hard "clonefile" pin made every
+        # Workspace-backed run raise on Linux even with a working overlay.
+        ctx = build_builtin_substrate_context(store, workspace=root)
         self._mg = VcsCore(
             str(root),
             substrates=[

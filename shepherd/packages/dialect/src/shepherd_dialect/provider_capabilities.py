@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-ProviderTransport = Literal["deterministic_fake", "headless_cli", "agent_sdk_worker"]
+ProviderTransport = Literal["deterministic_fake", "headless_cli", "agent_sdk_worker", "app_server_broker"]
 
 READ_FILE = "read_file"
 WRITE_FILE = "write_file"
@@ -43,6 +43,13 @@ _NATIVE_TOOL_TO_CANONICAL = {
     "search_files": SEARCH_FILES,
     "search_content": SEARCH_CONTENT,
     "bash": BASH,
+    # hermes natives: `patch` is its edit tool; `terminal` is its bash. Its
+    # `search_files` spans both search claims (content regex is the default
+    # target, glob is the name mode) — the static map keeps the name-level
+    # SEARCH_FILES reading; refining by the call's `target` argument is a
+    # projection concern, not a mapping one.
+    "patch": EDIT_FILE,
+    "terminal": BASH,
 }
 
 

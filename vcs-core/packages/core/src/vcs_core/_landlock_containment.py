@@ -38,6 +38,13 @@ _LL_RULE_PATH_BENEATH = 1
 _WRITE_ACCESS = (
     (1 << 1) | (1 << 4) | (1 << 5) | (1 << 6) | (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 12)
 )
+# Pairing parity with Seatbelt, which unconditionally allows file-write* under
+# /dev ("/dev/null etc. — not the workspace"): without a /dev grant the Linux
+# pairing is stricter than the contract, and a body that opens /dev/null for
+# writing fails only on Linux (found live: hermes oneshot, S3 evidence run).
+# Deliberately narrower than Seatbelt — existing-file writes only, no
+# create/remove/make bits, so nothing can be *created* under /dev (/dev/shm).
+_DEV_WRITE_ACCESS = 1 << 1
 
 _RUNNER_SENTINEL = "__landlock_confine_exec__"
 _CONFINE_FAILED_RC = 3  # runner exit code when confinement could not be established (touch never uses 3)
@@ -96,6 +103,23 @@ def landlock_confine(writable_dirs: Sequence[str]) -> None:
                 raise OSError(ctypes.get_errno(), "landlock_add_rule")
         finally:
             os.close(dirfd)
+    # The unconditional /dev grant (see _DEV_WRITE_ACCESS). Fail-open is safe
+    # here in the strict direction only: a missing rule makes the jail
+    # STRICTER (deny stands), never looser — so an absent /dev (unusual mount
+    # namespace) skips the rule instead of failing the confinement.
+    with suppress(OSError):
+        devfd = os.open("/dev", os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            dev_rule = _PathBeneathAttr(allowed_access=_DEV_WRITE_ACCESS, parent_fd=devfd)
+            _syscall(
+                _NR_ADD_RULE,
+                ctypes.c_int(fd),
+                ctypes.c_int(_LL_RULE_PATH_BENEATH),
+                ctypes.byref(dev_rule),
+                ctypes.c_uint(0),
+            )
+        finally:
+            os.close(devfd)
     if _LIBC.prctl(_PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) != 0:
         raise OSError(ctypes.get_errno(), "prctl(NO_NEW_PRIVS)")
     if _syscall(_NR_RESTRICT_SELF, ctypes.c_int(fd), ctypes.c_uint(0)) < 0:

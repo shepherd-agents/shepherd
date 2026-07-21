@@ -99,8 +99,8 @@ _RUNTIME_RESERVED_FIELDS = frozenset(
         "world",
     }
 )
-_RUNTIME_RESOLVED_FIELDS = frozenset({"provider", "model"})
-_V011_RUNTIME_PROVIDERS = frozenset({"claude", "static"})
+_RUNTIME_RESOLVED_FIELDS = frozenset({"provider", "model", "profile", "mode"})
+_V011_RUNTIME_PROVIDERS = frozenset({"claude", "codex", "static"})
 _EXECUTION_ENFORCEMENT_FIELDS = frozenset(
     {
         "authority_basis",
@@ -980,13 +980,19 @@ def _validate_runtime_policy(value: Mapping[str, object]) -> None:
     _reject_unknown_fields(value, _RUNTIME_POLICY_FIELDS, "runtime policy")
     requested = _required_mapping(value, "requested")
     resolved = _required_mapping(value, "resolved")
-    requested_provider, requested_model = _validate_runtime_requested_policy(requested)
-    resolved_provider, resolved_model = _validate_runtime_resolved_policy(resolved)
+    requested_provider, requested_model, requested_profile, requested_mode = _validate_runtime_requested_policy(
+        requested
+    )
+    resolved_provider, resolved_model, resolved_profile, resolved_mode = _validate_runtime_resolved_policy(resolved)
     if requested_provider is None:
         if resolved_provider is not None:
             raise ValueError("runtime policy cannot resolve a provider that was not requested")
         if resolved_model is not None:
             raise ValueError("runtime policy cannot resolve a model that was not requested")
+        if resolved_profile is not None:
+            raise ValueError("runtime policy cannot resolve a profile that was not requested")
+        if resolved_mode is not None:
+            raise ValueError("runtime policy cannot resolve an auth mode that was not requested")
         return
     if resolved_provider != requested_provider:
         raise ValueError("runtime policy requested provider must match resolved provider")
@@ -995,9 +1001,21 @@ def _validate_runtime_policy(value: Mapping[str, object]) -> None:
             raise ValueError("runtime policy cannot resolve a model that was not requested")
     elif resolved_model != requested_model:
         raise ValueError("runtime policy requested model must match resolved model")
+    if requested_profile is None:
+        if resolved_profile is not None and requested_provider != "codex":
+            raise ValueError("runtime policy cannot resolve a profile for this provider")
+    elif resolved_profile != requested_profile:
+        raise ValueError("runtime policy requested profile must match resolved profile")
+    if requested_mode is None:
+        if resolved_mode is not None and requested_provider != "codex":
+            raise ValueError("runtime policy cannot resolve an auth mode for this provider")
+    elif resolved_mode != requested_mode:
+        raise ValueError("runtime policy requested auth mode must match resolved auth mode")
 
 
-def _validate_runtime_requested_policy(value: Mapping[str, object]) -> tuple[str | None, str | None]:
+def _validate_runtime_requested_policy(
+    value: Mapping[str, object],
+) -> tuple[str | None, str | None, str | None, str | None]:
     reserved = sorted(set(value) & _RUNTIME_RESERVED_FIELDS)
     if reserved:
         raise ValueError(f"runtime policy requested field(s) reserved for future use: {', '.join(reserved)}")
@@ -1005,16 +1023,22 @@ def _validate_runtime_requested_policy(value: Mapping[str, object]) -> tuple[str
     trace = value.get("trace")
     if trace is not None and not isinstance(trace, Mapping):
         raise TypeError("runtime policy requested.trace must be an object")
-    provider_id = _runtime_provider_payload_id(value.get("provider"), label="runtime policy requested.provider")
+    provider_id, profile, auth_mode = _runtime_provider_payload(
+        value.get("provider"), label="runtime policy requested.provider"
+    )
     model_name = _runtime_model_payload_name(value.get("model"), label="runtime policy requested.model")
     if model_name is not None and provider_id is None:
         raise ValueError("runtime policy requested.model requires requested.provider")
     if provider_id is not None and provider_id not in _V011_RUNTIME_PROVIDERS:
         raise ValueError(f"runtime policy provider is not supported in v0.1.1: {provider_id!r}")
-    return provider_id, model_name
+    if (profile is not None or auth_mode is not None) and provider_id != "codex":
+        raise ValueError("runtime policy requested.provider.profile/mode are supported only for codex")
+    return provider_id, model_name, profile, auth_mode
 
 
-def _validate_runtime_resolved_policy(value: Mapping[str, object]) -> tuple[str | None, str | None]:
+def _validate_runtime_resolved_policy(
+    value: Mapping[str, object],
+) -> tuple[str | None, str | None, str | None, str | None]:
     _reject_unknown_fields(value, _RUNTIME_RESOLVED_FIELDS, "runtime policy resolved")
     provider = value.get("provider")
     if provider is None:
@@ -1030,19 +1054,40 @@ def _validate_runtime_resolved_policy(value: Mapping[str, object]) -> tuple[str 
         raise ValueError("runtime policy resolved.model requires resolved.provider")
     if provider_id is not None and provider_id not in _V011_RUNTIME_PROVIDERS:
         raise ValueError(f"runtime policy resolved provider is not supported in v0.1.1: {provider_id!r}")
-    return provider_id, model if isinstance(model, str) else None
+    profile = value.get("profile")
+    if profile is not None and (not isinstance(profile, str) or not profile):
+        raise ValueError("runtime policy resolved.profile must be null or a non-empty string")
+    if profile is not None and provider_id != "codex":
+        raise ValueError("runtime policy resolved.profile is supported only for codex")
+    auth_mode = value.get("mode")
+    if auth_mode is not None and auth_mode not in {"chatgpt", "api_key"}:
+        raise ValueError("runtime policy resolved.mode must be 'chatgpt' or 'api_key'")
+    if auth_mode is not None and provider_id != "codex":
+        raise ValueError("runtime policy resolved.mode is supported only for codex")
+    return (
+        provider_id,
+        model if isinstance(model, str) else None,
+        profile if isinstance(profile, str) else None,
+        auth_mode if isinstance(auth_mode, str) else None,
+    )
 
 
-def _runtime_provider_payload_id(value: object, *, label: str) -> str | None:
+def _runtime_provider_payload(value: object, *, label: str) -> tuple[str | None, str | None, str | None]:
     if value is None:
-        return None
+        return None, None, None
     if not isinstance(value, Mapping):
         raise TypeError(f"{label} must be an object")
-    _reject_unknown_fields(value, {"id"}, label)
+    _reject_unknown_fields(value, {"id", "profile", "mode"}, label)
     provider_id = _required_str(value, "id").strip().lower()
     if not provider_id:
         raise ValueError(f"{label}.id must be a non-empty string")
-    return provider_id
+    profile = value.get("profile")
+    if profile is not None and (not isinstance(profile, str) or not profile.strip()):
+        raise ValueError(f"{label}.profile must be null or a non-empty string")
+    auth_mode = value.get("mode")
+    if auth_mode is not None and auth_mode not in {"chatgpt", "api_key"}:
+        raise ValueError(f"{label}.mode must be 'chatgpt' or 'api_key'")
+    return provider_id, profile if isinstance(profile, str) else None, auth_mode if isinstance(auth_mode, str) else None
 
 
 def _runtime_model_payload_name(value: object, *, label: str) -> str | None:

@@ -48,6 +48,8 @@ from vcs_core.types import RetainedOutputSettlement
 
 from ...support.overlays import MockOverlayBackend
 
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
+
 
 def _authority_effects(history: Any) -> list[dict[str, object]]:
     return [

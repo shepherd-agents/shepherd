@@ -63,6 +63,13 @@ agent.
 > different key or your org admin is the fix. And an outright `claude` CLI hang
 > (e.g. a stale version) surfaces as a budget timeout, not an auth error.
 
+The preview Codex alternative uses a managed ChatGPT subscription profile and
+does not require an API key. Install `shepherd-ai[codex]`, run
+`shepherd codex login --mode chatgpt` (or explicitly adopt an existing login),
+then verify it without a model call using `shepherd doctor codex --probe`. See
+the [headless Codex provider guide](shepherd/docs/guides/codex-provider.md) for
+runtime selection, sandboxing, event completeness, tokens, and cost evidence.
+
 A task is a plain Python function with **no body**; the signature and docstring
 are the contract the agent fulfils at runtime — including its permissions:
 `repo: sp.GitRepo` is the explicit writable workspace-handle grant that lets the

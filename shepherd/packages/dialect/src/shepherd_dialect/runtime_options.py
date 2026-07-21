@@ -23,7 +23,7 @@ _RESERVED_RUNTIME_FIELDS = frozenset(
     }
 )
 _SUPPORTED_TRACE_FIELDS = frozenset({"label", "tags"})
-_SUPPORTED_PROVIDER_FIELDS = frozenset({"id"})
+_SUPPORTED_PROVIDER_FIELDS = frozenset({"id", "profile", "mode"})
 _SUPPORTED_MODEL_FIELDS = frozenset({"name"})
 
 
@@ -52,13 +52,24 @@ class ProviderRuntimeOptions:
     """Provider requested by the caller for this run."""
 
     id: str
+    profile: str | None = None
+    mode: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.id, str) or not self.id.strip():
             raise RuntimeOptionsError("runtime.provider.id must be a non-empty string")
+        if self.profile is not None and (not isinstance(self.profile, str) or not self.profile.strip()):
+            raise RuntimeOptionsError("runtime.provider.profile must be null or a non-empty string")
+        if self.mode is not None and self.mode not in {"chatgpt", "api_key"}:
+            raise RuntimeOptionsError("runtime.provider.mode must be 'chatgpt' or 'api_key'")
 
     def to_payload(self) -> JsonObject:
-        return {"id": self.id}
+        payload: JsonObject = {"id": self.id}
+        if self.profile is not None:
+            payload["profile"] = self.profile
+        if self.mode is not None:
+            payload["mode"] = self.mode
+        return payload
 
 
 @dataclass(frozen=True)
@@ -241,7 +252,13 @@ def _parse_provider_runtime_options(value: object) -> ProviderRuntimeOptions:
     provider_id = value.get("id")
     if not isinstance(provider_id, str) or not provider_id.strip():
         raise RuntimeOptionsError("runtime.provider.id must be a non-empty string")
-    return ProviderRuntimeOptions(id=provider_id)
+    profile = value.get("profile")
+    if profile is not None and (not isinstance(profile, str) or not profile.strip()):
+        raise RuntimeOptionsError("runtime.provider.profile must be null or a non-empty string")
+    mode = value.get("mode")
+    if mode is not None and mode not in {"chatgpt", "api_key"}:
+        raise RuntimeOptionsError("runtime.provider.mode must be 'chatgpt' or 'api_key'")
+    return ProviderRuntimeOptions(id=provider_id, profile=profile, mode=mode)
 
 
 def _parse_model_runtime_options(value: object) -> ModelRuntimeOptions:

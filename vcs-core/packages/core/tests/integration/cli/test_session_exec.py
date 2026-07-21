@@ -39,6 +39,8 @@ from ...support.builders import make_marker_filesystem_vcscore
 from ...support.cli import init_repo as _init
 from ...support.overlays import MockOverlayBackend
 
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
+
 
 def _session_info(workspace: Path) -> SessionInfo:
     return SessionInfo(

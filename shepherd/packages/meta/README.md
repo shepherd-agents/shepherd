@@ -71,6 +71,18 @@ That lane uses `runtime={"provider": "claude"}`, the local `claude` CLI,
 `ANTHROPIC_API_KEY`, and native jail placement. It does not reuse a desktop
 login.
 
+The preview Codex lane is installed with `shepherd[codex]`, uses an explicit
+managed profile, and supports ChatGPT subscription auth without an API key:
+
+```bash
+shepherd codex login --mode chatgpt
+shepherd doctor codex --probe
+```
+
+Select it with
+`runtime={"provider": {"id": "codex", "profile": "default", "mode": "chatgpt"}, "model": "gpt-5.4"}`.
+See [the Codex provider runbook](../../docs/guides/codex-provider.md).
+
 See [the guide quickstart](../../docs/guides/quickstart.md) for the full
 first-run walkthrough and [`examples/quickstart`](../../../examples/quickstart)
 for checked-in executable examples.

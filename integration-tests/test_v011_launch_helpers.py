@@ -8,6 +8,8 @@ from pathlib import Path
 import pytest
 from shepherd_dialect.workspace_control import ShepherdWorkspace
 
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
+
 REPO = Path(__file__).resolve().parents[1]
 VISUAL_ARTIFACT_EXAMPLE = REPO / "examples" / "notebooks" / "visual_artifact"
 

@@ -7,6 +7,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
+
 REPO = Path(__file__).resolve().parents[1]
 EXAMPLES = REPO / "examples" / "workspace-handles"
 

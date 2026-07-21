@@ -2097,6 +2097,34 @@ wheels = [
 ]
 
 [[package]]
+name = "openai-codex"
+version = "0.144.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "openai-codex-cli-bin" },
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b9/7d/4b999b0ddd05c22d83cc2e879c95e1e92e3b7808b58ac561c4ea91fca1c4/openai_codex-0.144.4.tar.gz", hash = "sha256:91c63a7cb213441569f130e593386b34657ab9e726ae88af255f0ecb8de08ea5", size = 68324, upload-time = "2026-07-17T23:42:17.013Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/17/35/5d2a13e38d91278019f18757ac10426d2649b7ec6f031818c792f64559e9/openai_codex-0.144.4-py3-none-any.whl", hash = "sha256:de1513a6e94b9a8d7728a3b74298bc1469428ade10ba0ef2d5db47dd1cb606f5", size = 76244, upload-time = "2026-07-17T23:42:15.658Z" },
+]
+
+[[package]]
+name = "openai-codex-cli-bin"
+version = "0.144.4"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/79/30/7e457c007a32aa7333a78438a9f532504c3b77a1ea57e7808855712c2c0f/openai_codex_cli_bin-0.144.4-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:4d587d152d5f0aa25f21ded4d08aac5150da48639b29fc3e57b2a8b413d06903", size = 126851183, upload-time = "2026-07-15T00:14:00.171Z" },
+    { url = "https://files.pythonhosted.org/packages/65/eb/64c180514a2cc3e2500e486813f5a8d7f7e349342e9bebd78d99ddd9791a/openai_codex_cli_bin-0.144.4-py3-none-macosx_11_0_arm64.whl", hash = "sha256:05db505a9c7f020f58b70837a94e00d32a50086986c267bcc44ea97b573d4a05", size = 116474758, upload-time = "2026-07-15T00:14:08.177Z" },
+    { url = "https://files.pythonhosted.org/packages/85/34/921ab692c7ed140941a91e39b84c6deafddb45072793f3a5f6dcbf86f59a/openai_codex_cli_bin-0.144.4-py3-none-manylinux_2_17_aarch64.whl", hash = "sha256:cd4bb31b8a477a3adba22139c8c493693fa5292ba21e86eef08ace3e96c41294", size = 119437596, upload-time = "2026-07-15T00:14:17.418Z" },
+    { url = "https://files.pythonhosted.org/packages/25/62/39e630cf8b7b2e2444a5a6669235a6cd88004869a25bb7f3f629ed35638c/openai_codex_cli_bin-0.144.4-py3-none-manylinux_2_17_x86_64.whl", hash = "sha256:4106229c38f37245c3eea8d904426afd45b8bf19831765715647f5402f757c06", size = 128817757, upload-time = "2026-07-15T00:14:30.539Z" },
+    { url = "https://files.pythonhosted.org/packages/23/24/318f91a95baaff845307e529d138d42a7202e6bd0e626556058eab3dead5/openai_codex_cli_bin-0.144.4-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:d2d3fada11731938e3d3e3660819d5324b7f92e825a0ed5aede63100b36ffc9a", size = 119437594, upload-time = "2026-07-15T00:14:39.327Z" },
+    { url = "https://files.pythonhosted.org/packages/2e/a0/65e6fd3a6fba52639937801d9ce517b0c48026458723bb9f08eb07a1dd35/openai_codex_cli_bin-0.144.4-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:70fb62ed7755e332dd8b00ed48e22ee16df10f4a977335039e237cd330490df3", size = 128817755, upload-time = "2026-07-15T00:14:47.849Z" },
+    { url = "https://files.pythonhosted.org/packages/e3/8a/3ab5fc97352e8f780d472c8dd6d7504d6a670cd7dede106d461ac1171999/openai_codex_cli_bin-0.144.4-py3-none-win_amd64.whl", hash = "sha256:56e142974467332f1f669b89f2636e06b3ada09413512abb2f24c33b4a4f59fc", size = 140595092, upload-time = "2026-07-15T00:14:58.484Z" },
+    { url = "https://files.pythonhosted.org/packages/70/1a/3aa52ab8f89e0f596b6eea835e3f3494697da51917d3231f5f48f92e2bcb/openai_codex_cli_bin-0.144.4-py3-none-win_arm64.whl", hash = "sha256:2ad01058db7181323ae7c6217e560702e38c4f107595b99ab1d0abc9f184890a", size = 130665105, upload-time = "2026-07-15T00:15:08.861Z" },
+]
+
+[[package]]
 name = "overrides"
 version = "7.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2134,11 +2162,11 @@ wheels = [
 
 [[package]]
 name = "pathspec"
-version = "0.12.1"
+version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ca/bc/f35b8446f4531a7cb215605d100cd88b7ac6f44ab3fc94870c120ab3adbf/pathspec-0.12.1.tar.gz", hash = "sha256:a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712", size = 51043, upload-time = "2023-12-10T22:30:45Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5a/82/42f767fc1c1143d6fd36efb827202a2d997a375e160a71eb2888a925aac1/pathspec-1.1.1.tar.gz", hash = "sha256:17db5ecd524104a120e173814c90367a96a98d07c45b2e10c2f3919fff91bf5a", size = 135180, upload-time = "2026-04-27T01:46:08.907Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cc/20/ff623b09d963f88bfde16306a54e12ee5ea43e9b597108672ff3a408aad6/pathspec-0.12.1-py3-none-any.whl", hash = "sha256:a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08", size = 31191, upload-time = "2023-12-10T22:30:43.14Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/d9/7fb5aa316bc299258e68c73ba3bddbc499654a07f151cba08f6153988714/pathspec-1.1.1-py3-none-any.whl", hash = "sha256:a00ce642f577bf7f473932318056212bc4f8bfdf53128c78bbd5af0b9b20b189", size = 57328, upload-time = "2026-04-27T01:46:07.06Z" },
 ]
 
 [[package]]
@@ -3254,6 +3282,9 @@ banking = [
 claude = [
     { name = "shepherd-providers", extra = ["claude"] },
 ]
+codex = [
+    { name = "shepherd-dialect", extra = ["codex"] },
+]
 contexts = [
     { name = "shepherd-contexts" },
 ]
@@ -3294,6 +3325,7 @@ requires-dist = [
     { name = "shepherd-contexts", marker = "extra == 'contexts'", editable = "shepherd/packages/contexts" },
     { name = "shepherd-core", editable = "shepherd/packages/core" },
     { name = "shepherd-dialect", editable = "shepherd/packages/dialect" },
+    { name = "shepherd-dialect", extras = ["codex"], marker = "extra == 'codex'", editable = "shepherd/packages/dialect" },
     { name = "shepherd-export", editable = "shepherd/packages/export" },
     { name = "shepherd-providers", marker = "extra == 'providers'", editable = "shepherd/packages/providers" },
     { name = "shepherd-providers", extras = ["claude"], marker = "extra == 'claude'", editable = "shepherd/packages/providers" },
@@ -3302,7 +3334,7 @@ requires-dist = [
     { name = "shepherd-sandboxes", marker = "extra == 'sandboxes'", editable = "shepherd/packages/sandboxes" },
     { name = "shepherd-transform", marker = "extra == 'transform'", editable = "shepherd/packages/transform" },
 ]
-provides-extras = ["providers", "contexts", "banking", "sandboxes", "transform", "claude", "openai", "dev", "all"]
+provides-extras = ["providers", "contexts", "banking", "sandboxes", "transform", "claude", "openai", "codex", "dev", "all"]
 
 [[package]]
 name = "shepherd-authoring"
@@ -3582,6 +3614,11 @@ dependencies = [
     { name = "vcs-core" },
 ]
 
+[package.optional-dependencies]
+codex = [
+    { name = "openai-codex" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "pytest" },
@@ -3594,11 +3631,13 @@ lint = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.0" },
+    { name = "openai-codex", marker = "extra == 'codex'", specifier = "==0.144.4" },
     { name = "shepherd-kernel-v3-reference", editable = "shepherd/packages/kernel-v3-reference" },
     { name = "shepherd-runtime", editable = "shepherd/packages/runtime" },
     { name = "shepherd2", editable = "shepherd2" },
     { name = "vcs-core", editable = "vcs-core/packages/core" },
 ]
+provides-extras = ["codex"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -3907,7 +3946,9 @@ source = { virtual = "." }
 dependencies = [
     { name = "commons-vcs" },
     { name = "filelock" },
+    { name = "hatchling" },
     { name = "hypothesis" },
+    { name = "jsonschema" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-xdist" },
@@ -3922,11 +3963,13 @@ dependencies = [
     { name = "shepherd-core" },
     { name = "shepherd-export" },
     { name = "shepherd-kernel-v3-reference" },
-    { name = "shepherd-providers" },
+    { name = "shepherd-providers", extra = ["openai-mcp"] },
     { name = "shepherd-runtime" },
     { name = "shepherd-sandboxes" },
     { name = "shepherd-tests" },
+    { name = "shepherd-trace-viewer" },
     { name = "shepherd-transform" },
+    { name = "shepherd2" },
     { name = "vcs-core" },
 ]
 
@@ -3941,7 +3984,9 @@ notebook = [
 requires-dist = [
     { name = "commons-vcs", editable = "commons-vcs" },
     { name = "filelock", specifier = ">=3.0" },
+    { name = "hatchling", specifier = ">=1.20" },
     { name = "hypothesis", specifier = ">=6.100.0" },
+    { name = "jsonschema", specifier = ">=4.0.0,<5.0.0" },
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", specifier = ">=0.23.0" },
     { name = "pytest-xdist", specifier = ">=3.6.0" },
@@ -3956,11 +4001,13 @@ requires-dist = [
     { name = "shepherd-core", editable = "shepherd/packages/core" },
     { name = "shepherd-export", editable = "shepherd/packages/export" },
     { name = "shepherd-kernel-v3-reference", editable = "shepherd/packages/kernel-v3-reference" },
-    { name = "shepherd-providers", editable = "shepherd/packages/providers" },
+    { name = "shepherd-providers", extras = ["openai-mcp"], editable = "shepherd/packages/providers" },
     { name = "shepherd-runtime", editable = "shepherd/packages/runtime" },
     { name = "shepherd-sandboxes", editable = "shepherd/packages/sandboxes" },
     { name = "shepherd-tests", editable = "shepherd/packages/tests" },
+    { name = "shepherd-trace-viewer", editable = "shepherd/extras/trace-viewer" },
     { name = "shepherd-transform", editable = "shepherd/packages/transform" },
+    { name = "shepherd2", editable = "shepherd2" },
     { name = "vcs-core", editable = "vcs-core/packages/core" },
 ]
 

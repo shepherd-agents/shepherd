@@ -110,6 +110,7 @@ from shepherd_dialect.workspace_control.run_outputs import RunOutput
 from shepherd_dialect.workspace_control.runtime_provider import (
     CLAUDE_WORKSPACE_INPUT_DIR,
     ClaudeWorkspaceRuntimeProvider,
+    CodexWorkspaceRuntimeProvider,
     RuntimeProviderTaskExecutorDescriptor,
     StaticWorkspaceRuntimeProvider,
     WorkspaceRunRuntimePlan,
@@ -2689,6 +2690,32 @@ class RunControlClient:
                 input_artifacts=_workspace_runtime_input_artifacts(self._workspace, args),
                 launch_metadata=task_execution_metadata,
             )
+        if runtime_plan.provider_kind == "codex":
+            if resolved_graph.dependencies:
+                raise RunStartError("Codex runtime workspace runs do not yet support linked task dependencies")
+            if placement_decision.resolved != "jail":
+                raise RunStartError("Codex runtime workspace runs require native jail placement")
+            artifact_payload = _read_task_artifact(self.mg, root_resolution.task_lock.artifact_ref)
+            task_execution_metadata["launch_confined_attempted"] = False
+            task_execution_metadata["runtime_provider"] = "codex"
+            task_execution_metadata["runtime_provider_transport"] = "codex-app-server-broker"
+            task_execution_metadata["runtime_provider_monitor"] = "provider_tool_sandbox"
+            task_execution_metadata["runtime_provider_auth_mode"] = runtime_plan.auth_mode or "chatgpt"
+            task_execution_metadata["runtime_provider_profile_digest"] = canonical_digest(
+                {"profile_id": runtime_plan.profile_id or "default"}
+            )
+            if runtime_plan.model_name is not None:
+                task_execution_metadata["runtime_model"] = runtime_plan.model_name
+            return CodexWorkspaceRuntimeProvider(
+                task_lock=root_resolution.task_lock,
+                artifact_payload=artifact_payload,
+                kwargs=dict(args),
+                model_name=runtime_plan.model_name,
+                profile_id=runtime_plan.profile_id or "default",
+                auth_mode=runtime_plan.auth_mode or "chatgpt",
+                input_artifacts=_workspace_runtime_input_artifacts(self._workspace, args),
+                launch_metadata=task_execution_metadata,
+            )
         if execution_plan.mode != "confined_process" or placement_decision.resolved != "jail":
             return None
         if resolved_graph.dependencies:
@@ -3788,6 +3815,7 @@ def _retained_execution_plan_for_decision(
     # A per-binding run passes ``profile_name`` (the effective profile *name*) so this never reads
     # the run-wide authority scalar — that would collapse a heterogeneous decision (S2 tripwire).
     if placement_decision.resolved == "jail":
+        codex_tool_sandbox = runtime_plan is not None and runtime_plan.provider_kind == "codex"
         return RetainedExecutionPlan(
             mode="confined_process",
             provider=provider or "workspace-control-confined-task",
@@ -3796,11 +3824,13 @@ def _retained_execution_plan_for_decision(
             authority_basis=(
                 "per_binding_grants"
                 if profile_name is not None
+                else "runtime_provider"
+                if codex_tool_sandbox
                 else (
                     "effective_gitrepo_readonly" if decision.repo_authority == "readonly" else "workspace_run_placement"
                 )
             ),
-            requested_monitor="syscall_jail",
+            requested_monitor="provider_tool_sandbox" if codex_tool_sandbox else "syscall_jail",
             monitor_required=True,
         )
     return RetainedExecutionPlan(
@@ -3829,14 +3859,15 @@ def _validate_workspace_runtime_plan_for_placement(
     runtime_plan: WorkspaceRunRuntimePlan,
     placement_decision: _WorkspaceRunPlacementDecision,
 ) -> None:
-    if runtime_plan.provider_kind != "claude":
+    if runtime_plan.provider_kind not in {"claude", "codex"}:
         return
+    provider_name = runtime_plan.provider_kind
     if placement_decision.requested == "advisory":
-        raise RunStartError("runtime provider 'claude' requires placement='auto' or placement='jail'")
+        raise RunStartError(f"runtime provider {provider_name!r} requires placement='auto' or placement='jail'")
     if not native_jail_available():
-        raise RunStartError("runtime provider 'claude' requires native jail support")
+        raise RunStartError(f"runtime provider {provider_name!r} requires native jail support")
     if placement_decision.resolved != "jail":
-        raise RunStartError("runtime provider 'claude' requires native jail placement")
+        raise RunStartError(f"runtime provider {provider_name!r} requires native jail placement")
 
 
 def _workspace_runtime_input_artifacts(

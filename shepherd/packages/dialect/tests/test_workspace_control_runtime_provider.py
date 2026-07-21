@@ -13,6 +13,7 @@ from vcs_core.runtime_api import native_jail_available
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
 
 import shepherd_dialect.workspace_control.runtime_provider as runtime_provider_module
+from shepherd_dialect.provider_activity import ProviderActivityLedger
 from shepherd_dialect.provider_runtime import ExecutionProviderResult, ProviderEvent, ProviderInvocationError
 from shepherd_dialect.run_driver import ShepherdRunDriver
 from shepherd_dialect.workspace_control import (
@@ -26,9 +27,12 @@ from shepherd_dialect.workspace_control import (
 )
 from shepherd_dialect.workspace_control.runtime_provider import (
     ClaudeWorkspaceRuntimeProvider,
+    CodexWorkspaceRuntimeProvider,
     WorkspaceRuntimeInputArtifact,
 )
 from shepherd_dialect.workspace_control.schemas import TaskArtifactLock, TaskArtifactRef
+
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -39,7 +43,7 @@ if TYPE_CHECKING:
 def _make_workspace(root: Path) -> ShepherdWorkspace:
     root.mkdir(parents=True, exist_ok=True)
     store = Store(str(root / ".vcscore"))
-    context = build_builtin_substrate_context(store=store, workspace=root, config={"backend": "clonefile"})
+    context = build_builtin_substrate_context(store=store, workspace=root)
     mg = VcsCore(
         str(root),
         substrates=[
@@ -260,7 +264,12 @@ def test_claude_workspace_runtime_provider_records_events_and_scrubs_inputs(
     assert metadata["launch_confined_attempted"] is True
     assert metadata["provider_events"] == [result.provider_events[0].stable_payload()]
     assert isinstance(metadata["provider_prompt_digest"], str)
-    assert metadata["provider_private_dirs"] == [".shepherd-inputs", ".claude-scratch", ".claude-sdk-scratch"]
+    assert metadata["provider_private_dirs"] == [
+        ".shepherd-inputs",
+        ".claude-scratch",
+        ".claude-sdk-scratch",
+        ".hermes-scratch",
+    ]
     assert metadata["provider_input_manifest"] == [
         {
             "source_run_ref": "run-source",
@@ -282,6 +291,150 @@ def test_claude_workspace_runtime_provider_records_events_and_scrubs_inputs(
     assert isinstance(prompt, str)
     assert "Task id: runtime_provider_tasks.generate" in prompt
     assert ".shepherd-inputs/01-candidate/candidate/index.html" in prompt
+
+
+def test_codex_workspace_runtime_provider_uses_existing_seam_and_records_native_evidence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+    ledger = ProviderActivityLedger(
+        provider_id="codex",
+        invocation_id="codex:fake-scope",
+        source="codex.app_server",
+        projector=lambda _message, _state: {
+            "category": "notification",
+            "kind": "notification.turn.completed",
+            "method": "turn/completed",
+        },
+    )
+    activity = ledger.append_ingress('{"method":"turn/completed","params":{}}\n')
+    manifest = ledger.manifest(terminal_kind="completed", terminal_seen=True)
+
+    class _FakeCodexProvider:
+        def __init__(self, invocation: object) -> None:
+            captured["provider_id"] = invocation.provider_id
+            captured["profile_id"] = invocation.profile_id
+            captured["auth_mode"] = invocation.auth_mode
+            captured["prompt"] = invocation.prompt
+
+        def execute(self, *_args: object, execution: object, **_kwargs: object) -> ExecutionProviderResult:
+            (execution.working_path / "index.html").write_text("<title>Codex fake</title>", encoding="utf-8")
+            event = ProviderEvent(
+                kind="provider.invocation.completed",
+                provider_id="codex",
+                invocation_id="codex:fake-scope",
+                sequence=0,
+                event_id="codex:fake-scope:completed",
+                model="gpt-5.4",
+                payload={"transport": "fake"},
+            )
+            return ExecutionProviderResult(
+                outcome={"status": "ok"},
+                provider_events=(event,),
+                provider_activities=(activity,),
+                activity_manifest=manifest,
+            )
+
+    monkeypatch.setattr(
+        runtime_provider_module,
+        "_WORKSPACE_RUNTIME_PROVIDER_TRANSPORTS",
+        SimpleNamespace(claude=None, codex=_FakeCodexProvider),
+    )
+    metadata: dict[str, object] = {"launch_confined_attempted": False}
+    provider = CodexWorkspaceRuntimeProvider(
+        task_lock=_test_task_lock(),
+        artifact_payload={"entrypoint": {"module": "runtime_provider_tasks", "qualname": "generate"}},
+        kwargs={"output_path": "index.html"},
+        model_name="gpt-5.4",
+        profile_id="team-subscription",
+        auth_mode="chatgpt",
+        input_artifacts=(),
+        launch_metadata=metadata,
+    )
+    execution = SimpleNamespace(
+        working_path=tmp_path,
+        identity=SimpleNamespace(scope_instance_id="fake-scope", scope_name="fake"),
+    )
+
+    result = provider.execute(None, None, None, {}, execution=execution, confinement=object())
+
+    assert result.outcome == {"status": "ok"}
+    assert captured["profile_id"] == "team-subscription"
+    assert captured["auth_mode"] == "chatgpt"
+    assert "local Codex agent" in str(captured["prompt"])
+    assert metadata["provider_activities"] == [activity.as_wire_record()]
+    assert metadata["provider_activity_manifest"] == manifest.as_wire_record()
+    assert not (tmp_path / ".shepherd-inputs").exists()
+
+
+def test_claude_workspace_runtime_provider_preserves_budget_stop_and_its_evidence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A budget stop in the workspace lane stays a budget stop, with its real
+    evidence. BudgetExhausted is not a ProviderInvocationError, so without the
+    dedicated handler it fell to the generic catch — converted to a provider
+    *failure* (Failed, not Exhausted) with the started bookend replaced by
+    synthetic failure events. This pins the fix: the type is re-raised unchanged
+    and exc.provider_events (the started bookend) is what gets recorded."""
+    from shepherd_dialect.nucleus import BudgetExhausted
+
+    started = ProviderEvent(
+        kind="provider.invocation.started",
+        provider_id="claude",
+        invocation_id="claude:fake-scope",
+        sequence=0,
+        event_id="claude:fake-scope:started",
+        model="sonnet",
+        payload={"transport": "fake"},
+    )
+
+    class _BudgetProvider:
+        def __init__(self, invocation: object) -> None:
+            self.provider_id = invocation.provider_id
+
+        def execute(self, *_a: object, **_k: object) -> ExecutionProviderResult:
+            raise BudgetExhausted("reached budget", provider_events=(started,))
+
+    class _FakeExecution:
+        working_path = tmp_path
+        identity = SimpleNamespace(scope_instance_id="fake-scope", scope_name="fake")
+
+        def launch_confined(self, command: list[str], confinement: object) -> object:
+            del command, confinement
+            return SimpleNamespace(returncode=-14, stdout="", stderr="")
+
+    monkeypatch.setattr(
+        runtime_provider_module,
+        "_WORKSPACE_RUNTIME_PROVIDER_TRANSPORTS",
+        SimpleNamespace(claude=_BudgetProvider),
+    )
+    metadata: dict[str, object] = {"launch_confined_attempted": False}
+    provider = ClaudeWorkspaceRuntimeProvider(
+        task_lock=_test_task_lock(),
+        artifact_payload={
+            "entrypoint": {"module": "runtime_provider_tasks", "qualname": "generate"},
+            "files": [
+                {
+                    "path": "runtime_provider_tasks.py",
+                    "content_encoding": "utf-8",
+                    "content": "def generate(repo, *, output_path):\n    '''Write.'''\n",
+                }
+            ],
+        },
+        kwargs={"output_path": "index.html"},
+        model_name="sonnet",
+        input_artifacts=(),
+        launch_metadata=metadata,
+    )
+
+    with pytest.raises(BudgetExhausted):  # not converted to ProviderInvocationError
+        provider.execute(None, None, None, {}, execution=_FakeExecution(), confinement=object())
+
+    assert metadata["provider_events"] == [started.stable_payload()], (
+        "the real started bookend must be recorded, not synthetic failure events"
+    )
 
 
 def test_claude_workspace_runtime_provider_fails_closed_when_private_cleanup_leaves_path(
@@ -364,7 +517,7 @@ def test_claude_workspace_runtime_provider_fails_closed_when_private_cleanup_lea
     assert isinstance(events, list)
     assert [event["kind"] for event in events] == ["provider.invocation.started", "provider.invocation.failed"]
     failed = events[1]
-    assert failed["payload"]["error_type"] == "_ClaudePrivateRuntimeCleanupError"
+    assert failed["payload"]["error_type"] == "_ProviderPrivateRuntimeCleanupError"
 
 
 def test_workspace_task_run_static_runtime_provider_publishes_retained_output(
@@ -610,7 +763,7 @@ def test_workspace_flow_fork_prelaunch_rejection_does_not_attach_run(
         repo = _seed_selected_workspace(workspace)
         flow = workspace.flows.open(name="deferred-provider", metadata={"usecase": "guard"})
 
-        with pytest.raises(RunStartError, match="deferred"):
+        with pytest.raises(RunStartError, match="requires placement"):
             flow.fork(
                 "runtime_provider_tasks.generate",
                 repo=repo,
@@ -792,7 +945,9 @@ def test_workspace_run_static_runtime_provider_uses_launch_confined_when_jail_re
 @pytest.mark.parametrize(
     ("runtime", "message"),
     [
-        ({"provider": "codex"}, "deferred"),
+        ({"provider": "codex-sdk"}, "aliases are not public"),
+        ({"provider": "hermes"}, "deferred"),
+        ({"provider": "hermes-headless"}, "deferred"),
         ({"provider": "claude-headless"}, "aliases for Claude are not public"),
         ({"provider": "openai"}, "unsupported runtime provider"),
         ({"model": "sonnet"}, "runtime.model requires runtime.provider"),
@@ -1013,6 +1168,7 @@ def _assert_claude_retained_run_record(workspace: ShepherdWorkspace, run_ref: st
         ".shepherd-inputs",
         ".claude-scratch",
         ".claude-sdk-scratch",
+        ".hermes-scratch",
     ]
     assert [event["kind"] for event in execution.metadata["provider_events"]] == [
         "provider.invocation.started",

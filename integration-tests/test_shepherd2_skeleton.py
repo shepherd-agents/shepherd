@@ -33,6 +33,8 @@ from vcs_core.git_store import create_or_update_reference
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
 from vcs_core.substrates import FilesystemSubstrate, MarkerSubstrate
 
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
+
 if TYPE_CHECKING:
     from pathlib import Path
 

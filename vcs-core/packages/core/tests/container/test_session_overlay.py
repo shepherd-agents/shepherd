@@ -144,7 +144,10 @@ class TestOverlaySession:
 
             assert experiment_path != ground_path
             assert "experiment" in experiment_path
-            assert "ground" in ground_path
+            # Ground is the real working copy, never a carrier layer
+            # (overlay_mount_path_for_scope): switching to ground surfaces the
+            # actual workspace, not a ground overlay mount.
+            assert ground_path == str(session_workspace.resolve())
 
             resp = send_request(info.socket_path, "switch", {"name": "experiment"})
             assert resp["ok"], resp.get("error")

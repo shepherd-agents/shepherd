@@ -22,13 +22,13 @@ from shepherd_dialect.workspace_control import (
     ShepherdWorkspace,
 )
 
-pytestmark = pytest.mark.workspace_scenario
+pytestmark = [pytest.mark.workspace_scenario, pytest.mark.slow]  # slow: lifecycle-tests CI job
 
 
 def _make_workspace(root: Path) -> ShepherdWorkspace:
     root.mkdir(parents=True, exist_ok=True)
     store = Store(str(root / ".vcscore"))
-    context = build_builtin_substrate_context(store=store, workspace=root, config={"backend": "clonefile"})
+    context = build_builtin_substrate_context(store=store, workspace=root)
     mg = VcsCore(
         str(root),
         substrates=[

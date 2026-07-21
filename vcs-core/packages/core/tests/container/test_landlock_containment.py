@@ -104,3 +104,20 @@ def test_landlock_probe_catches_readonly_mislowered_to_writable(tmp_path) -> Non
     mislowered = backend.profile_for((str(tmp_path),), allow_network=True)
     with pytest.raises(JailNotEstablished):
         backend.probe(mislowered, tmp_path, writable_roots=())
+
+
+def test_landlock_dev_null_writable_even_readonly_but_dev_create_denied(tmp_path) -> None:
+    """Seatbelt-pairing parity: /dev/null etc. accept writes under every profile
+    (the macOS lowering allows file-write* under /dev unconditionally — a body
+    that opens /dev/null for writing must not fail only on Linux; found live
+    with the hermes oneshot, S3 evidence). Narrower than Seatbelt: creating
+    files under /dev stays denied."""
+    backend = LandlockContainmentBackend()
+    profile = backend.profile_for((), allow_network=False)  # ReadOnly — the strictest profile
+
+    write_null = ["/bin/sh", "-c", "echo probe > /dev/null"]
+    assert backend.launch(profile, tmp_path, write_null).returncode == 0
+
+    create_under_dev = ["/usr/bin/touch", "--", "/dev/shm/.landlock-dev-create-probe"]
+    result = backend.launch(profile, tmp_path, create_under_dev)
+    assert result.returncode != 0, "creating files under /dev must stay denied (write_file-only grant)"

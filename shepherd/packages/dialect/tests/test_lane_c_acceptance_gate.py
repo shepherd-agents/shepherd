@@ -39,7 +39,7 @@ from shepherd_dialect.workspace_control import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-pytestmark = pytest.mark.workspace_scenario
+pytestmark = [pytest.mark.workspace_scenario, pytest.mark.slow]  # slow: lifecycle-tests CI job
 
 _JAIL_ONLY = pytest.mark.skipif(not native_jail_available(), reason="native jail backend is not available on this host")
 # Stacked with _JAIL_ONLY on every jailed leg: the marker routes collection (native-jail lane);

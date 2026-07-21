@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import ast
 
-import shepherd as sp
+import pytest
 
 from shepherd_dialect.workspace_control.authority_declarations import (
     gitrepo_grant_spelling,
@@ -29,6 +29,10 @@ from shepherd_dialect.workspace_control.workspace import (
     _signature_schema,
     _signature_schema_from_ast,
 )
+
+# Module-level so collection survives the dialect-only env (the container CI
+# lane syncs just this package; the sibling files import shepherd in-function).
+sp = pytest.importorskip("shepherd", reason="requires the shepherd meta package")
 
 
 def _param(schema: dict, name: str) -> dict:

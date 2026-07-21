@@ -12,9 +12,12 @@ import json
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from vcs_core.spi import ObservationDraft
+
+if TYPE_CHECKING:
+    from shepherd_dialect.provider_activity import ProviderActivity, ProviderActivityManifest
 
 PROVIDER_INVOCATION_STARTED = "provider.invocation.started"
 PROVIDER_INVOCATION_COMPLETED = "provider.invocation.completed"
@@ -199,6 +202,8 @@ class ExecutionProviderResult:
 
     outcome: Mapping[str, object]
     provider_events: tuple[ProviderEvent, ...] = ()
+    provider_activities: tuple[ProviderActivity, ...] = ()
+    activity_manifest: ProviderActivityManifest | None = None
 
 
 class ProviderInvocationError(RuntimeError):
@@ -209,10 +214,14 @@ class ProviderInvocationError(RuntimeError):
         message: str,
         *,
         provider_events: tuple[ProviderEvent, ...] = (),
+        provider_activities: tuple[ProviderActivity, ...] = (),
+        activity_manifest: ProviderActivityManifest | None = None,
         outcome: Mapping[str, object] | None = None,
     ) -> None:
         super().__init__(message)
         self.provider_events = provider_events
+        self.provider_activities = provider_activities
+        self.activity_manifest = activity_manifest
         self.outcome = dict(outcome or {})
         self.runtime_operation_id: str | None = None
 
@@ -241,7 +250,15 @@ def bounded_excerpt(value: str | bytes | None, *, limit: int = 300) -> str | Non
 
 
 def redacted_text_payload(value: str | bytes | None, *, field: str, excerpt_limit: int = 300) -> dict[str, object]:
-    """Return digest/length/excerpt metadata for text without storing it raw."""
+    """Return digest/length + a **bounded verbatim suffix excerpt** of text.
+
+    "redacted" here means *bounded*, not secret-scrubbed: the excerpt is a raw
+    tail slice (up to ``excerpt_limit`` chars) with no token pattern matching, so
+    a secret a provider echoes to stdout/stderr within that window rides forward
+    into the durable trace — a channel the scratch scrub does not touch. Callers
+    seeding host credentials must not rely on this to keep a leaked token out of
+    the trace; bound the excerpt and treat provider output as untrusted.
+    """
     if value is None:
         return {
             f"{field}_digest": None,

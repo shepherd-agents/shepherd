@@ -23,6 +23,8 @@ from shepherd_core.effects import (
 )
 from shepherd_core.scope.stream import Stream
 
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
+
 # =============================================================================
 # Hypothesis Strategies
 # =============================================================================

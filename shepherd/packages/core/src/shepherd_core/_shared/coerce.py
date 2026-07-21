@@ -263,12 +263,14 @@ def _coerce_step_value(
                 logger.debug("Dataclass JSON validation failed for %s: %s", target_type.__name__, e)
         if isinstance(value, dict):
             hints = get_type_hints(target_type)
-            coerced = {}
+            coerced_fields: dict[str, Any] = {}
             for field in fields(target_type):
                 if field.name in value:
                     field_type = hints.get(field.name, field.type)
-                    coerced[field.name] = _coerce_step_value(value[field.name], field_type, step_name, field.name)
-            return target_type(**coerced)
+                    coerced_fields[field.name] = _coerce_step_value(
+                        value[field.name], field_type, step_name, field.name
+                    )
+            return target_type(**coerced_fields)
         raise StepOutputError(
             step_name=step_name,
             expected_type=target_type,

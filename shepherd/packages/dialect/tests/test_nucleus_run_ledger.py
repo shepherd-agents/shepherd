@@ -36,6 +36,8 @@ from shepherd_dialect.workspace_control.schemas import (
     TaskResolutionRecord,
 )
 
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 

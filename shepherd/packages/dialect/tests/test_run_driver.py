@@ -516,12 +516,7 @@ def test_literal_canonical_cli_runtime_run_and_operation_show(
     init = runner.invoke(main, ["init", "."])
     assert init.exit_code == 0, init.output
     (root / "vcscore.toml").write_text(
-        "[bindings.filesystem]\n"
-        'type = "filesystem"\n'
-        'backend = "clonefile"\n'
-        "\n"
-        "[bindings.runtime]\n"
-        'type = "shepherd.run_driver"\n',
+        '[bindings.filesystem]\ntype = "filesystem"\n\n[bindings.runtime]\ntype = "shepherd.run_driver"\n',
         encoding="utf-8",
     )
 

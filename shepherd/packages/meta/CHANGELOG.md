@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`shepherd doctor hermes` — readiness checks for the hermes multi-model
+  runtime lane.** Native jail, `hermes` CLI on PATH, a warn-only version pin
+  against the tested hermes-agent release (drift names the re-audit list
+  without gating), and offline env-key auth resolution for an explicit
+  `--provider` (`anthropic`, `openai`, or `openrouter` — the lane has no
+  account default). `--probe --model <id> --provider <p>` performs the
+  authoritative network-reaching auth check under the provider's
+  scrubbed-home + seeded-config conditions.
+- **`shepherd doctor` rejects `--json`/`--backend` placed before a
+  subcommand** instead of parsing and silently dropping them.
+
 ## [0.3.0] - 2026-07-08
 
 ### Added

@@ -27,11 +27,17 @@ RUN_PATH = REPO_ROOT / "shepherd" / "packages" / "dialect" / "src" / "shepherd_d
 
 #: The containment backends — the jail IS the sanctioned spawn; raw subprocess
 #: is its mechanism. Everything else scanned is run-path.
+#: ``_reaper.py`` is the §4.6 hard-stop supervisor: it is launched *through*
+#: ``launch_confined`` (via ``hard_stop_prefix``), so its ``os.execvp`` of the
+#: command runs INSIDE the confinement after Landlock ``restrict_self`` —
+#: containment mechanism, exactly like ``_landlock_containment``'s runner, not a
+#: parent-side spawn (the static scanner cannot see the confinement boundary).
 IMPL_FILES = frozenset(
     {
         "_containment.py",
         "_seatbelt_containment.py",
         "_landlock_containment.py",
+        "_reaper.py",
     }
 )
 
@@ -83,12 +89,14 @@ class Violation:
 
 
 # Each entry is a deliberate, reviewed grant of parent-side executor use on the
-# run path. A key pins (filename, api, symbol); if the pinned symbol or api
-# changes, the entry goes stale and the guard FAILS — re-review, don't rename.
-# Target size is ZERO: every entry is a debt the credential/egress broker seam
-# (W3.2 / g07) is meant to retire.
+# run path. A key pins (run-path-relative path, api, symbol); if the pinned
+# symbol, api, or location changes, the entry goes stale and the guard FAILS —
+# re-review, don't rename.
+# Keep this set small. D1-D3 are credential/probe debt intended to move behind
+# a broker boundary; D4 is that restricted broker boundary itself and remains a
+# reviewed implementation exception rather than an arbitrary run-path spawn.
 RATIFIED_PARENT_EFFECTS: dict[tuple[str, str, str], str] = {
-    ("providers.py", "subprocess.run", "_read_host_claude_login"): (
+    ("providers/claude_auth.py", "subprocess.run", "_read_host_claude_login"): (
         "D1 2026-07-04: subscription-auth credential seeding (public PR#7). Reads the macOS "
         "keychain (`security find-generic-password`) in the PARENT and copies raw credential "
         "bytes into the jailed run's scratch CLAUDE_CONFIG_DIR so a signed-in `claude` CLI works "
@@ -97,7 +105,7 @@ RATIFIED_PARENT_EFFECTS: dict[tuple[str, str, str], str] = {
         "SHEPHERD_ALLOW_KEYLESS_CLAUDE is set). Migrates to the credential-broker seam (W3.2/g07); "
         "retire this entry when it does."
     ),
-    ("providers.py", "subprocess.run", "probe_claude_auth"): (
+    ("providers/claude_headless.py", "subprocess.run", "probe_claude_auth"): (
         "D2 2026-07-06: `shepherd doctor claude --probe` auth preflight. Runs a minimal `claude -p` "
         "in the PARENT to verify the signed-in CLI can actually authenticate, classifying the "
         "outcome with the run path's own envelope parser. This is a diagnostic health check, not a "
@@ -105,6 +113,23 @@ RATIFIED_PARENT_EFFECTS: dict[tuple[str, str, str], str] = {
         "deliberately outside `launch_confined`. Never raises (a probe that cannot launch is a "
         "failed probe). Migrates to the credential-broker seam (W3.2/g07); retire this entry when "
         "it does."
+    ),
+    ("providers/hermes.py", "subprocess.run", "probe_hermes_auth"): (
+        "D3 2026-07-09: `shepherd doctor hermes --probe` auth preflight (execplan 260709 r4 §S2). "
+        "Runs a minimal `hermes -z` in the PARENT from a throwaway temp cwd, under the provider's "
+        "scrubbed-home + seeded-config conditions, and classifies the outcome with the run path's "
+        "own usage-envelope reading. Same diagnostic-not-task posture as the claude probe (D2): no "
+        "user task body, no workspace authority, deliberately outside `launch_confined`, never "
+        "raises. Migrates to the credential-broker seam (W3.2/g07); retire this entry when it does."
+    ),
+    ("provider_stream.py", "subprocess.Popen", "supervise_provider_process"): (
+        "D4 2026-07-21: restricted trusted-provider broker capability for the Codex app-server. "
+        "The authenticated control-plane parent must remain outside the outer Landlock jail so it "
+        "can refresh its managed profile and establish the nested Codex Bubblewrap/Seatbelt tool "
+        "sandbox in the correct order. This is not an arbitrary task executor: callers select only "
+        "a registered adapter, the broker proves the lowered tool sandbox before prompt submission, "
+        "streams a loss-detecting activity manifest, runs in a private scrubbed process group, and is "
+        "hard-stopped/reaped by this supervisor. The carrier remains authoritative for file effects."
     ),
 }
 
@@ -210,12 +235,19 @@ def partition_ratified(
 
 
 def scan_paths(paths: list[Path], *, impl_files: frozenset[str]) -> list[Violation]:
-    """Scan trees: every .py is run_path unless its basename is in impl_files."""
+    """Scan trees: every .py is run_path unless its basename is in impl_files.
+
+    Violations are labeled with the path RELATIVE to the scanned root (posix
+    form), not the bare basename: since the providers/ package split, basenames
+    like ``claude_auth.py`` are generic enough that a future same-named file
+    elsewhere under the run path would silently inherit a ratified pin.
+    """
     out: list[Violation] = []
     for p in paths:
         for f in sorted(p.rglob("*.py")) if p.is_dir() else [p]:
             role = "containment_impl" if f.name in impl_files else "run_path"
-            out.extend(find_violations(f.read_text(encoding="utf-8"), f.name, role=role))
+            label = f.relative_to(p).as_posix() if p.is_dir() else f.name
+            out.extend(find_violations(f.read_text(encoding="utf-8"), label, role=role))
     return out
 
 
@@ -287,15 +319,17 @@ def test_violation_captures_enclosing_symbol() -> None:
 
 
 def test_ratified_entry_is_accepted_and_matches_the_live_pin() -> None:
-    """The two reviewed parent-side executor calls: the PR#7 keychain read and the doctor probe."""
+    """Every reviewed parent-side executor call remains pinned exactly."""
     violations = scan_paths([RUN_PATH], impl_files=IMPL_FILES)
     unratified, stale = partition_ratified(violations)
     assert unratified == []
     assert stale == []
-    # exactly these reviewed entries: the PR#7 keychain read and the `doctor claude` auth probe
+    # Exactly these reviewed entries: credential/probe effects and the restricted provider broker.
     assert set(RATIFIED_PARENT_EFFECTS) == {
-        ("providers.py", "subprocess.run", "_read_host_claude_login"),
-        ("providers.py", "subprocess.run", "probe_claude_auth"),
+        ("providers/claude_auth.py", "subprocess.run", "_read_host_claude_login"),
+        ("providers/claude_headless.py", "subprocess.run", "probe_claude_auth"),
+        ("providers/hermes.py", "subprocess.run", "probe_hermes_auth"),
+        ("provider_stream.py", "subprocess.Popen", "supervise_provider_process"),
     }
 
 
@@ -308,7 +342,7 @@ def test_unratified_call_still_fails() -> None:
         "def _sneaky():\n"
         "    return subprocess.run(['curl'])\n"  # ...but this one is not
     )
-    violations = find_violations(src, "providers.py", role="run_path")
+    violations = find_violations(src, "providers/claude_auth.py", role="run_path")
     unratified, _ = partition_ratified(violations)
     assert [v.symbol for v in unratified] == ["_sneaky"]
 
@@ -316,13 +350,15 @@ def test_unratified_call_still_fails() -> None:
 def test_ratification_is_symbol_specific_not_file_wide() -> None:
     """Same file + same api but a DIFFERENT symbol is not covered by the pin."""
     src = "import subprocess\ndef some_other_fn():\n    return subprocess.run(['security'])\n"
-    violations = find_violations(src, "providers.py", role="run_path")
+    violations = find_violations(src, "providers/claude_auth.py", role="run_path")
     unratified, _ = partition_ratified(violations)
-    assert [(v.filename, v.api, v.symbol) for v in unratified] == [("providers.py", "subprocess.run", "some_other_fn")]
+    assert [(v.filename, v.api, v.symbol) for v in unratified] == [
+        ("providers/claude_auth.py", "subprocess.run", "some_other_fn")
+    ]
 
 
 def test_stale_ratified_entry_is_a_failure() -> None:
     """A table key matching nothing in a scan is surfaced as stale."""
-    violations = find_violations("def unrelated():\n    return 1\n", "providers.py", role="run_path")
+    violations = find_violations("def unrelated():\n    return 1\n", "providers/claude_auth.py", role="run_path")
     _, stale = partition_ratified(violations)
-    assert ("providers.py", "subprocess.run", "_read_host_claude_login") in stale
+    assert ("providers/claude_auth.py", "subprocess.run", "_read_host_claude_login") in stale

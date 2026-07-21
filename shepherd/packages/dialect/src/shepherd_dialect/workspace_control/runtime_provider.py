@@ -22,29 +22,36 @@ from shepherd_dialect.provider_runtime import (
     digest_jsonable,
     redacted_text_payload,
 )
-from shepherd_dialect.providers import ClaudeHeadlessProvider
+from shepherd_dialect.providers import ClaudeHeadlessProvider, CodexAgentProvider
 from shepherd_dialect.runtime_options import RuntimeOptions, RuntimeOptionsError, parse_runtime_options
 
 if TYPE_CHECKING:
     from shepherd_dialect.workspace_control.schemas import TaskArtifactLock
 
 JsonObject = dict[str, object]
-WorkspaceRuntimeProviderKind = Literal["static", "claude"]
+WorkspaceRuntimeProviderKind = Literal["static", "claude", "codex"]
 CLAUDE_WORKSPACE_INPUT_DIR = ".shepherd-inputs"
-_CLAUDE_PRIVATE_RUNTIME_DIRS = (CLAUDE_WORKSPACE_INPUT_DIR, ".claude-scratch", ".claude-sdk-scratch")
+# Every provider scratch the pre-publication scrub must cover: a new provider
+# lane adds its scratch here or its housekeeping survives into retained outputs.
+_PROVIDER_PRIVATE_RUNTIME_DIRS = (
+    CLAUDE_WORKSPACE_INPUT_DIR,
+    ".claude-scratch",
+    ".claude-sdk-scratch",
+    ".hermes-scratch",
+)
 
 
 class WorkspaceRuntimePlanError(ValueError):
     """Raised when a workspace-control runtime envelope cannot be planned."""
 
 
-class _ClaudePrivateRuntimeCleanupError(RuntimeError):
-    """Raised when private Claude runtime paths remain after cleanup."""
+class _ProviderPrivateRuntimeCleanupError(RuntimeError):
+    """Raised when private provider runtime paths remain after cleanup."""
 
     def __init__(self, details: tuple[str, ...]) -> None:
         self.details = details
         suffix = "; ".join(details)
-        super().__init__(f"Claude private runtime cleanup failed; refusing retained publication: {suffix}")
+        super().__init__(f"provider private runtime cleanup failed; refusing retained publication: {suffix}")
 
 
 @dataclass(frozen=True)
@@ -65,6 +72,8 @@ class WorkspaceRunRuntimePlan:
     provider_kind: WorkspaceRuntimeProviderKind | None = None
     provider_id: str | None = None
     model_name: str | None = None
+    profile_id: str | None = None
+    auth_mode: str | None = None
 
     @property
     def uses_execution_provider(self) -> bool:
@@ -78,6 +87,10 @@ class WorkspaceRunRuntimePlan:
             resolved["provider"] = self.provider_id
         if self.model_name is not None:
             resolved["model"] = self.model_name
+        if self.profile_id is not None:
+            resolved["profile"] = self.profile_id
+        if self.auth_mode is not None:
+            resolved["mode"] = self.auth_mode
         return {
             "requested": self.requested.to_payload(),
             "resolved": resolved,
@@ -128,6 +141,20 @@ class _WorkspaceClaudeInvocation:
 
 
 @dataclass(frozen=True)
+class _WorkspaceCodexInvocation:
+    """Structured private invocation envelope for the built-in Codex lane."""
+
+    provider_id: str
+    profile_id: str
+    auth_mode: str
+    prompt: str
+    model_name: str | None
+    task_lock: TaskArtifactLock
+    kwargs: Mapping[str, Any]
+    input_artifacts: tuple[WorkspaceRuntimeInputArtifact, ...]
+
+
+@dataclass(frozen=True)
 class _WorkspaceRuntimeProviderTransports:
     """Private built-in transport seam.
 
@@ -137,6 +164,7 @@ class _WorkspaceRuntimeProviderTransports:
     """
 
     claude: Callable[[_WorkspaceClaudeInvocation], Any]
+    codex: Callable[[_WorkspaceCodexInvocation], Any] | None = None
 
 
 def _default_claude_transport(invocation: _WorkspaceClaudeInvocation) -> Any:
@@ -147,8 +175,19 @@ def _default_claude_transport(invocation: _WorkspaceClaudeInvocation) -> Any:
     )
 
 
+def _default_codex_transport(invocation: _WorkspaceCodexInvocation) -> Any:
+    return CodexAgentProvider(
+        provider_id=invocation.provider_id,
+        profile_id=invocation.profile_id,
+        auth_mode=invocation.auth_mode,
+        prompt=invocation.prompt,
+        model=invocation.model_name or "gpt-5.4",
+    )
+
+
 _WORKSPACE_RUNTIME_PROVIDER_TRANSPORTS = _WorkspaceRuntimeProviderTransports(
     claude=_default_claude_transport,
+    codex=_default_codex_transport,
 )
 
 
@@ -331,15 +370,28 @@ class ClaudeWorkspaceRuntimeProvider:
         )
         _record_claude_invocation_metadata(self.launch_metadata, invocation)
         proxied_execution = _LaunchMetadataExecutionProxy(execution, self.launch_metadata)
+        from shepherd_dialect.nucleus import BudgetExhausted
+
         try:
             provider = _WORKSPACE_RUNTIME_PROVIDER_TRANSPORTS.claude(invocation)
             result = provider.execute(None, stack, context, {}, execution=proxied_execution, confinement=confinement)
         except ProviderInvocationError as exc:
-            _scrub_claude_private_runtime_dirs_best_effort(root)
+            _scrub_provider_private_runtime_dirs_best_effort(root)
+            _record_provider_events(self.launch_metadata, exc.provider_events)
+            raise
+        except BudgetExhausted as exc:
+            # A budget stop is not a provider failure. BudgetExhausted is not a
+            # ProviderInvocationError, so without this it fell through to the
+            # generic handler below — which discarded exc.provider_events (the
+            # started bookend) for synthetic failure events and re-raised as a
+            # ProviderInvocationError, mis-recording the exhausted run as Failed.
+            # Record the real evidence and re-raise unchanged so it stays a budget
+            # stop (→ Exhausted) upstream.
+            _scrub_provider_private_runtime_dirs_best_effort(root)
             _record_provider_events(self.launch_metadata, exc.provider_events)
             raise
         except Exception as exc:
-            _scrub_claude_private_runtime_dirs_best_effort(root)
+            _scrub_provider_private_runtime_dirs_best_effort(root)
             events = _claude_runtime_failure_events(
                 provider_id=self.provider_id,
                 model_name=self.model_name,
@@ -351,8 +403,8 @@ class ClaudeWorkspaceRuntimeProvider:
             raise ProviderInvocationError(str(exc), provider_events=events) from exc
 
         try:
-            _scrub_claude_private_runtime_dirs(root)
-        except _ClaudePrivateRuntimeCleanupError as exc:
+            _scrub_provider_private_runtime_dirs(root)
+        except _ProviderPrivateRuntimeCleanupError as exc:
             events = _claude_runtime_failure_events(
                 provider_id=self.provider_id,
                 model_name=self.model_name,
@@ -368,8 +420,100 @@ class ClaudeWorkspaceRuntimeProvider:
         return result
 
 
+@dataclass(frozen=True)
+class CodexWorkspaceRuntimeProvider:
+    """Workspace-control adapter for the subscription-authenticated Codex lane."""
+
+    task_lock: TaskArtifactLock
+    artifact_payload: Mapping[str, Any]
+    kwargs: Mapping[str, Any]
+    model_name: str | None
+    profile_id: str
+    auth_mode: str
+    input_artifacts: tuple[WorkspaceRuntimeInputArtifact, ...] = ()
+    launch_metadata: dict[str, object] | None = None
+    provider_id: str = "codex"
+
+    def execute(
+        self,
+        task_body: Callable[..., Any] | None,
+        stack: Any,
+        context: Any,
+        args: Mapping[str, Any],
+        *,
+        execution: Any = None,
+        confinement: Any = None,
+    ) -> ExecutionProviderResult:
+        del task_body, args
+        if execution is None or confinement is None:
+            from vcs_core.spi import ExecutionAuthorityRequired
+
+            raise ExecutionAuthorityRequired("Codex workspace runtime provider requires execution authority")
+        root = Path(execution.working_path)
+        prompt = _workspace_agent_runtime_prompt(
+            agent_label="Codex",
+            task_lock=self.task_lock,
+            artifact_payload=self.artifact_payload,
+            kwargs=self.kwargs,
+            input_artifacts=self.input_artifacts,
+        )
+        _stage_workspace_input_artifacts(root, self.input_artifacts)
+        invocation = _WorkspaceCodexInvocation(
+            provider_id=self.provider_id,
+            profile_id=self.profile_id,
+            auth_mode=self.auth_mode,
+            prompt=prompt,
+            model_name=self.model_name,
+            task_lock=self.task_lock,
+            kwargs=self.kwargs,
+            input_artifacts=self.input_artifacts,
+        )
+        _record_runtime_invocation_metadata(
+            self.launch_metadata,
+            prompt=prompt,
+            input_artifacts=self.input_artifacts,
+        )
+        try:
+            transport = _WORKSPACE_RUNTIME_PROVIDER_TRANSPORTS.codex
+            if transport is None:
+                raise RuntimeError("Codex workspace transport is not configured")
+            provider = transport(invocation)
+            result = provider.execute(None, stack, context, {}, execution=execution, confinement=confinement)
+        except ProviderInvocationError as exc:
+            _scrub_provider_private_runtime_dirs_best_effort(root)
+            _record_provider_error_evidence(self.launch_metadata, exc)
+            raise
+        except Exception as exc:
+            _scrub_provider_private_runtime_dirs_best_effort(root)
+            events = _runtime_failure_events(
+                provider_id=self.provider_id,
+                model_name=self.model_name or "gpt-5.4",
+                execution=execution,
+                prompt=prompt,
+                transport="app_server_broker",
+                exc=exc,
+            )
+            _record_provider_events(self.launch_metadata, events)
+            raise ProviderInvocationError(str(exc), provider_events=events) from exc
+        try:
+            _scrub_provider_private_runtime_dirs(root)
+        except _ProviderPrivateRuntimeCleanupError as exc:
+            events = _runtime_failure_events(
+                provider_id=self.provider_id,
+                model_name=self.model_name or "gpt-5.4",
+                execution=execution,
+                prompt=prompt,
+                transport="app_server_broker",
+                exc=exc,
+            )
+            _record_provider_events(self.launch_metadata, events)
+            raise ProviderInvocationError(str(exc), provider_events=events) from exc
+        _record_provider_result_evidence(self.launch_metadata, result)
+        return result
+
+
 def resolve_workspace_run_runtime_plan(value: Mapping[str, object] | RuntimeOptions | None) -> WorkspaceRunRuntimePlan:
-    """Return the v0.1.1 runtime-provider plan for a workspace-control run."""
+    """Return the validated runtime-provider plan for a workspace-control run."""
     supplied = value is not None
     try:
         requested = parse_runtime_options(value)
@@ -377,12 +521,16 @@ def resolve_workspace_run_runtime_plan(value: Mapping[str, object] | RuntimeOpti
         raise WorkspaceRuntimePlanError(f"invalid runtime: {exc}") from exc
     provider_id = requested.provider.id.strip() if requested.provider is not None else None
     model_name = requested.model.name.strip() if requested.model is not None else None
+    profile_id = requested.provider.profile.strip() if requested.provider and requested.provider.profile else None
+    auth_mode = requested.provider.mode if requested.provider else None
     if provider_id is None:
         if model_name is not None:
             raise WorkspaceRuntimePlanError("runtime.model requires runtime.provider")
         return WorkspaceRunRuntimePlan(requested=requested, supplied=supplied)
     normalized = provider_id.lower()
     if normalized == "static":
+        if profile_id is not None or auth_mode is not None:
+            raise WorkspaceRuntimePlanError("runtime.provider.profile/mode are supported only by provider 'codex'")
         return WorkspaceRunRuntimePlan(
             requested=requested,
             supplied=supplied,
@@ -391,6 +539,8 @@ def resolve_workspace_run_runtime_plan(value: Mapping[str, object] | RuntimeOpti
             model_name=model_name,
         )
     if normalized == "claude":
+        if profile_id is not None or auth_mode is not None:
+            raise WorkspaceRuntimePlanError("runtime.provider.profile/mode are supported only by provider 'codex'")
         return WorkspaceRunRuntimePlan(
             requested=requested,
             supplied=supplied,
@@ -398,8 +548,23 @@ def resolve_workspace_run_runtime_plan(value: Mapping[str, object] | RuntimeOpti
             provider_id="claude",
             model_name=model_name,
         )
-    if normalized in {"codex", "codex-sdk"}:
-        raise WorkspaceRuntimePlanError("runtime provider 'codex' is deferred for v0.1.1")
+    if normalized == "codex":
+        return WorkspaceRunRuntimePlan(
+            requested=requested,
+            supplied=supplied,
+            provider_kind="codex",
+            provider_id="codex",
+            model_name=model_name,
+            profile_id=profile_id or "default",
+            auth_mode=auth_mode or "chatgpt",
+        )
+    if normalized == "codex-sdk":
+        raise WorkspaceRuntimePlanError("runtime provider aliases are not public; use 'codex'")
+    if normalized in {"hermes", "hermes-headless"}:
+        # The dialect provider exists (shepherd_dialect.providers.hermes); public
+        # exposure on this surface is an export decision, not a code default
+        # (execplan 260709 r4 §S1).
+        raise WorkspaceRuntimePlanError("runtime provider 'hermes' is deferred for v0.1.1")
     if normalized in {"claude", "claude-headless", "claude-api"}:
         raise WorkspaceRuntimePlanError("runtime provider aliases for Claude are not public in v0.1.1; use 'claude'")
     raise WorkspaceRuntimePlanError(f"unsupported runtime provider: {provider_id!r}")
@@ -489,6 +654,28 @@ def _record_provider_events(
     metadata["provider_events"] = [event.stable_payload() for event in events]
 
 
+def _record_provider_result_evidence(metadata: dict[str, object] | None, result: ExecutionProviderResult) -> None:
+    if metadata is None:
+        return
+    _record_provider_events(metadata, result.provider_events)
+    if result.provider_activities:
+        metadata["provider_activities"] = [activity.as_wire_record() for activity in result.provider_activities]
+    if result.activity_manifest is not None:
+        metadata["provider_activity_manifest"] = result.activity_manifest.as_wire_record()
+
+
+def _record_provider_error_evidence(metadata: dict[str, object] | None, exc: ProviderInvocationError) -> None:
+    if metadata is None:
+        return
+    _record_provider_events(metadata, exc.provider_events)
+    if exc.provider_activities:
+        metadata["provider_activities"] = [activity.as_wire_record() for activity in exc.provider_activities]
+    if exc.activity_manifest is not None:
+        metadata["provider_activity_manifest"] = exc.activity_manifest.as_wire_record()
+    if exc.outcome:
+        metadata["provider_failure_outcome"] = dict(exc.outcome)
+
+
 def _record_claude_invocation_metadata(
     metadata: dict[str, object] | None,
     invocation: _WorkspaceClaudeInvocation,
@@ -497,7 +684,20 @@ def _record_claude_invocation_metadata(
         return
     metadata["provider_prompt_digest"] = digest_jsonable({"prompt": invocation.prompt})
     metadata["provider_input_manifest"] = [artifact.manifest_entry() for artifact in invocation.input_artifacts]
-    metadata["provider_private_dirs"] = list(_CLAUDE_PRIVATE_RUNTIME_DIRS)
+    metadata["provider_private_dirs"] = list(_PROVIDER_PRIVATE_RUNTIME_DIRS)
+
+
+def _record_runtime_invocation_metadata(
+    metadata: dict[str, object] | None,
+    *,
+    prompt: str,
+    input_artifacts: tuple[WorkspaceRuntimeInputArtifact, ...],
+) -> None:
+    if metadata is None:
+        return
+    metadata["provider_prompt_digest"] = digest_jsonable({"prompt": prompt})
+    metadata["provider_input_manifest"] = [artifact.manifest_entry() for artifact in input_artifacts]
+    metadata["provider_private_dirs"] = list(_PROVIDER_PRIVATE_RUNTIME_DIRS)
 
 
 class _LaunchMetadataExecutionProxy:
@@ -523,6 +723,23 @@ def _claude_runtime_prompt(
     kwargs: Mapping[str, Any],
     input_artifacts: tuple[WorkspaceRuntimeInputArtifact, ...],
 ) -> str:
+    return _workspace_agent_runtime_prompt(
+        agent_label="Claude",
+        task_lock=task_lock,
+        artifact_payload=artifact_payload,
+        kwargs=kwargs,
+        input_artifacts=input_artifacts,
+    )
+
+
+def _workspace_agent_runtime_prompt(
+    *,
+    agent_label: str,
+    task_lock: TaskArtifactLock,
+    artifact_payload: Mapping[str, Any],
+    kwargs: Mapping[str, Any],
+    input_artifacts: tuple[WorkspaceRuntimeInputArtifact, ...],
+) -> str:
     entrypoint = artifact_payload.get("entrypoint")
     source_files = _claude_prompt_source_files(artifact_payload)
     args_json = json.dumps(_prompt_jsonable(dict(kwargs)), indent=2, sort_keys=True, default=str)
@@ -532,7 +749,7 @@ def _claude_runtime_prompt(
     if not source_block:
         source_block = "(no source text available)"
     return (
-        "You are executing one Shepherd workspace-control task as a local Claude agent.\n"
+        f"You are executing one Shepherd workspace-control task as a local {agent_label} agent.\n"
         "Work only in the current working directory. Create or update only the artifacts requested by the task.\n"
         "Do not persist credentials, provider config, prompts, transcripts, or scratch files.\n"
         "The framework will retain files you write in the working directory after you exit.\n\n"
@@ -595,18 +812,22 @@ def _prompt_jsonable(value: object) -> object:
 
 
 def _stage_claude_input_artifacts(root: Path, artifacts: tuple[WorkspaceRuntimeInputArtifact, ...]) -> None:
+    _stage_workspace_input_artifacts(root, artifacts)
+
+
+def _stage_workspace_input_artifacts(root: Path, artifacts: tuple[WorkspaceRuntimeInputArtifact, ...]) -> None:
     for artifact in artifacts:
         _validate_static_runtime_artifact_path(artifact.materialized_path)
         if not artifact.materialized_path.startswith(f"{CLAUDE_WORKSPACE_INPUT_DIR}/"):
-            raise ValueError("Claude input artifact materialized path must live under the private input directory")
+            raise ValueError("provider input artifact materialized path must live under the private input directory")
         target = root / PurePosixPath(artifact.materialized_path)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(artifact.content)
 
 
-def _scrub_claude_private_runtime_dirs(root: Path) -> None:
+def _scrub_provider_private_runtime_dirs(root: Path) -> None:
     cleanup_errors: list[str] = []
-    for dirname in _CLAUDE_PRIVATE_RUNTIME_DIRS:
+    for dirname in _PROVIDER_PRIVATE_RUNTIME_DIRS:
         target = root / dirname
         try:
             if target.is_dir() and not target.is_symlink():
@@ -617,17 +838,17 @@ def _scrub_claude_private_runtime_dirs(root: Path) -> None:
             cleanup_errors.append(f"{dirname}: {type(exc).__name__}: {exc}")
     remaining = [
         dirname
-        for dirname in _CLAUDE_PRIVATE_RUNTIME_DIRS
+        for dirname in _PROVIDER_PRIVATE_RUNTIME_DIRS
         if (root / dirname).exists() or (root / dirname).is_symlink()
     ]
     if cleanup_errors or remaining:
         remaining_errors = tuple(f"{dirname}: still exists after cleanup" for dirname in remaining)
-        raise _ClaudePrivateRuntimeCleanupError((*cleanup_errors, *remaining_errors))
+        raise _ProviderPrivateRuntimeCleanupError((*cleanup_errors, *remaining_errors))
 
 
-def _scrub_claude_private_runtime_dirs_best_effort(root: Path) -> None:
-    with suppress(_ClaudePrivateRuntimeCleanupError):
-        _scrub_claude_private_runtime_dirs(root)
+def _scrub_provider_private_runtime_dirs_best_effort(root: Path) -> None:
+    with suppress(_ProviderPrivateRuntimeCleanupError):
+        _scrub_provider_private_runtime_dirs(root)
 
 
 def _claude_runtime_failure_events(
@@ -638,18 +859,36 @@ def _claude_runtime_failure_events(
     prompt: str,
     exc: BaseException,
 ) -> tuple[ProviderEvent, ProviderEvent]:
+    return _runtime_failure_events(
+        provider_id=provider_id,
+        model_name=model_name or "claude-code-cli",
+        execution=execution,
+        prompt=prompt,
+        transport="headless_cli",
+        exc=exc,
+    )
+
+
+def _runtime_failure_events(
+    *,
+    provider_id: str,
+    model_name: str,
+    execution: Any,
+    prompt: str,
+    transport: str,
+    exc: BaseException,
+) -> tuple[ProviderEvent, ProviderEvent]:
     invocation_id = _static_runtime_invocation_id(provider_id, execution)
-    model = model_name or "claude-code-cli"
     started = ProviderEvent(
         kind=PROVIDER_INVOCATION_STARTED,
         provider_id=provider_id,
         invocation_id=invocation_id,
         sequence=0,
         event_id=f"{invocation_id}:started",
-        model=model,
+        model=model_name,
         payload={
             "prompt_digest": digest_jsonable({"prompt": prompt}),
-            "transport": "headless_cli",
+            "transport": transport,
             "network_credential_posture": "advisory",
         },
     )
@@ -659,7 +898,7 @@ def _claude_runtime_failure_events(
         invocation_id=invocation_id,
         sequence=1,
         event_id=f"{invocation_id}:failed",
-        model=model,
+        model=model_name,
         payload={
             "error_type": type(exc).__name__,
             **redacted_text_payload(str(exc), field="error"),
@@ -671,6 +910,7 @@ def _claude_runtime_failure_events(
 __all__ = [
     "CLAUDE_WORKSPACE_INPUT_DIR",
     "ClaudeWorkspaceRuntimeProvider",
+    "CodexWorkspaceRuntimeProvider",
     "RuntimeProviderTaskExecutorDescriptor",
     "StaticWorkspaceRuntimeProvider",
     "WorkspaceRunRuntimePlan",

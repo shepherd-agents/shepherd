@@ -20,6 +20,8 @@ from test_register_ergonomics import _make_workspace
 
 from shepherd_dialect.workspace_control.workspace import RunStartError, TaskRegistrationError
 
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from pathlib import Path

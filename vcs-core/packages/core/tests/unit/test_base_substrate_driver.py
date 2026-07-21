@@ -17,6 +17,7 @@ delegation chain were removed alongside the method.
 
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from typing import Annotated
 
@@ -206,6 +207,16 @@ def test_identity_fields_have_empty_string_defaults_on_base() -> None:
     assert base.materialization_class == "external"
 
 
+@pytest.mark.xfail(
+    sys.version_info < (3, 12),
+    reason=(
+        "owner: vcs-core — on 3.11 runtime_checkable isinstance uses hasattr, which executes the "
+        "raising `capabilities` property stub; 3.12+ uses static lookup (python/cpython#102433). "
+        "The bare-base isinstance contract cannot hold on 3.11 with a raising property stub."
+    ),
+    raises=NotImplementedError,
+    strict=True,
+)
 def test_bare_base_driver_required_hooks_raise() -> None:
     """BaseSubstrateDriver provides stubs that raise NotImplementedError.
 

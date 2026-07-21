@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import struct
 import time
 from contextlib import contextmanager
 from pathlib import Path
@@ -404,6 +405,12 @@ def test_daemon_connection_renders_app_errors_for_ipc(workspace: Path) -> None:
 
         def sendall(self, data: bytes) -> None:
             self.sent += data
+
+        def getsockopt(self, level: int, optname: int, buflen: int = 0) -> bytes:
+            # Present the same-uid SO_PEERCRED a real same-user local
+            # connection carries, so _authorize_peer sees an authorized peer.
+            del level, optname, buflen
+            return struct.pack("3i", os.getpid(), os.getuid(), os.getgid())
 
     daemon = SessionDaemon(str(workspace))
 

@@ -17,7 +17,6 @@ import textwrap
 from typing import TYPE_CHECKING
 
 import pytest
-import vcs_core._vcscore_lifecycle  # noqa: F401 — ensure runtime substrate registration
 from vcs_core import FilesystemSubstrate, MarkerSubstrate, Store, VcsCore, build_builtin_substrate_context
 from vcs_core.runtime_substrate import TaskTraceSubstrateDriver
 
@@ -31,18 +30,23 @@ from shepherd_dialect.workspace_control import (
 )
 from shepherd_dialect.workspace_control.identities import coerce_task_ref, task_id_for_callable
 
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from pathlib import Path
 
-import shepherd as sp
+# Module-level so collection survives the dialect-only env (the container CI
+# lane syncs just this package); test_register_ceiling_derivation imports this
+# module, so the guard covers it too.
+sp = pytest.importorskip("shepherd", reason="requires the shepherd meta package")
 
 
 def _make_workspace(root: Path) -> ShepherdWorkspace:
     root.mkdir(parents=True, exist_ok=True)
     (root / "base.txt").write_text("base\n", encoding="utf-8")
     store = Store(str(root / ".vcscore"))
-    context = build_builtin_substrate_context(store=store, workspace=root, config={"backend": "clonefile"})
+    context = build_builtin_substrate_context(store=store, workspace=root)
     mg = VcsCore(
         str(root),
         substrates=[

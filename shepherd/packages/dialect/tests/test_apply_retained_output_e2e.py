@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.slow  # full-lifecycle suite: runs in the lifecycle-tests CI job
+
 _EXAMPLES = Path(__file__).resolve().parents[4] / "examples" / "workspace-handles"
 if str(_EXAMPLES) not in sys.path:
     sys.path.insert(0, str(_EXAMPLES))

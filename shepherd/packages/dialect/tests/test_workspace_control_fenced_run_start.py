@@ -36,7 +36,7 @@ def _make_workspace(
 ) -> ShepherdWorkspace:
     root.mkdir(parents=True, exist_ok=True)
     store = Store(str(root / ".vcscore"))
-    context = build_builtin_substrate_context(store=store, workspace=root, config={"backend": "clonefile"})
+    context = build_builtin_substrate_context(store=store, workspace=root)
     mg = VcsCore(
         str(root),
         substrates=[
