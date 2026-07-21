@@ -4,7 +4,6 @@
 
 ![Status: Alpha](https://img.shields.io/badge/status-alpha-orange?style=for-the-badge) [![PyPI](https://img.shields.io/pypi/v/shepherd-ai?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/shepherd-ai/) [![Python](https://img.shields.io/pypi/pyversions/shepherd-ai?style=for-the-badge&logo=python&logoColor=white&label=)](https://pypi.org/project/shepherd-ai/) [![Homepage](https://img.shields.io/badge/Homepage-4d8cd8?style=for-the-badge&logo=google-chrome&logoColor=white)](https://shepherd-agents.ai/) [![Docs](https://img.shields.io/badge/Docs-4d8cd8?style=for-the-badge&logo=materialformkdocs&logoColor=white)](https://docs.shepherd-agents.ai/) [![Paper](https://img.shields.io/badge/Paper-2605.10913-red?style=for-the-badge)](https://arxiv.org/abs/2605.10913) [![Blog](https://img.shields.io/badge/Blog-4d8cd8?style=for-the-badge)](https://shepherd-agents.ai/blog)
 
-[![SPONSORED BY E2B FOR RESEARCH](https://img.shields.io/badge/SPONSORED%20BY-E2B%20FOR%20RESEARCH-ff8800?style=for-the-badge)](https://e2b.dev/research)
 </div>
 
 ---
@@ -213,6 +212,7 @@ The full experiment code — the meta-agent applications and the framework-perfo
 
 We thank [E2B](https://e2b.dev/), [Tinker](https://thinkingmachines.ai/tinker/), and [Modal](https://modal.com/) for their generous compute support during this project.
 
+[![SPONSORED BY E2B FOR RESEARCH](https://img.shields.io/badge/SPONSORED%20BY-E2B%20FOR%20RESEARCH-ff8800?style=for-the-badge)](https://e2b.dev/research)
 ## Citation
 
 ```bibtex
