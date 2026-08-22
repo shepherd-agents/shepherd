@@ -201,7 +201,7 @@ make baseline
 ## Documentation
 
 Full documentation lives at **[docs.shepherd-agents.ai](https://docs.shepherd-agents.ai/)**. In this repository the docs are authored under [`docs/shepherd/`](https://github.com/shepherd-agents/shepherd/tree/main/docs/shepherd), starting with the
-[Quickstart guide](https://github.com/shepherd-agents/shepherd/blob/main/docs/shepherd/start/quickstart.md) and
+[Quickstart guide](https://github.com/shepherd-agents/shepherd/blob/main/docs/shepherd/start/index.md) and
 [Concepts](https://github.com/shepherd-agents/shepherd/blob/main/docs/shepherd/concepts/index.md) — tasks, effects, scopes, permissions, and the trace.
 
 ## Reproducing Paper Results
