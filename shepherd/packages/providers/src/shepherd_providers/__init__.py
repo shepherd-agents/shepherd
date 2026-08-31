@@ -3,6 +3,7 @@
 This package provides concrete provider implementations for various LLM SDKs:
 - ClaudeProvider: Claude Agent SDK adapter
 - OpenAIProvider: OpenAI Agents SDK adapter
+- OrcaRouterProvider: OrcaRouter OpenAI-compatible gateway adapter
 
 Providers translate abstract ProviderBinding from shepherd-core into
 SDK-specific configurations and handle execution.
@@ -11,9 +12,10 @@ Usage:
     # Import specific providers
     from shepherd_providers.claude import ClaudeProvider
     from shepherd_providers.openai import OpenAIProvider
+    from shepherd_providers.orcarouter import OrcaRouterProvider
 
     # Or import from top-level (lazy-loaded)
-    from shepherd_providers import ClaudeProvider, OpenAIProvider
+    from shepherd_providers import ClaudeProvider, OpenAIProvider, OrcaRouterProvider
 
     # Create and use providers
     provider = ClaudeProvider(
@@ -41,6 +43,7 @@ _PROVIDER_MAP = {
     "ClaudeProvider": "shepherd_providers.claude",
     "OpenAIProvider": "shepherd_providers.openai",
     "OpenCodeProvider": "shepherd_providers.opencode",
+    "OrcaRouterProvider": "shepherd_providers.orcarouter",
 }
 
 # Eager exports (always available)
@@ -50,8 +53,8 @@ from shepherd_providers.verbose import VerboseConfig, VerboseFormatter
 def __getattr__(name: str) -> Any:
     """Lazy import for provider classes.
 
-    This allows importing ClaudeProvider and OpenAIProvider from the
-    top-level package without loading their dependencies until actually used.
+    This allows importing ClaudeProvider, OpenAIProvider, and OrcaRouterProvider
+    from the top-level package without loading their dependencies until used.
     """
     if name in _PROVIDER_MAP:
         import importlib
@@ -71,6 +74,7 @@ __all__ = [
     "ClaudeProvider",
     "OpenAIProvider",
     "OpenCodeProvider",
+    "OrcaRouterProvider",
     # Verbose output
     "VerboseConfig",
     "VerboseFormatter",

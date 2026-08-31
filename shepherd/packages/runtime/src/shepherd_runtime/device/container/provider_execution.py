@@ -59,7 +59,7 @@ def _create_provider(config: dict[str, Any]) -> Provider:
     """Create provider from config using the runtime-owned provider registry."""
     provider_type = config.get("provider_type")
 
-    if provider_type in {"claude", "openai"}:
+    if provider_type in {"claude", "openai", "orcarouter"}:
         module_name = f"shepherd_providers.{provider_type}"
         if module_name in sys.modules and sys.modules[module_name] is None:
             err = ImportError(f"{module_name} is unavailable")
@@ -98,6 +98,18 @@ def _create_provider(config: dict[str, Any]) -> Provider:
         except ImportError as e:
             raise ProviderNotAvailableError(
                 f"Provider 'openai' requested but shepherd-providers is not installed. "
+                f"Install with: pip install shepherd-providers\n"
+                f"Original error: {e}"
+            ) from e
+
+    if provider_type == "orcarouter":
+        try:
+            from shepherd_providers.orcarouter import OrcaRouterProvider  # type: ignore[import-not-found,unused-ignore]
+
+            return OrcaRouterProvider.from_config(config)  # type: ignore[no-any-return,unused-ignore]
+        except ImportError as e:
+            raise ProviderNotAvailableError(
+                f"Provider 'orcarouter' requested but shepherd-providers is not installed. "
                 f"Install with: pip install shepherd-providers\n"
                 f"Original error: {e}"
             ) from e

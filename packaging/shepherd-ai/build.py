@@ -57,6 +57,7 @@ ENTRY_POINTS = """\
 [project.entry-points."shepherd.providers"]
 claude = "shepherd_providers.claude:ClaudeProvider"
 openai = "shepherd_providers.openai:OpenAIProvider"
+orcarouter = "shepherd_providers.orcarouter:OrcaRouterProvider"
 
 [project.entry-points."shepherd.contexts"]
 workspace = "shepherd_contexts.workspace:WorkspaceRef"
