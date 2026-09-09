@@ -26,3 +26,5 @@ shipped; they were pulled from the published site until the surface they
 teach runs on the release, and they will return with it. What ships today
 versus what is still ahead is mapped on
 [Roadmap](../roadmap.md).
+
+- [Check a paper’s citations](check-citations.md): evidence-linked bibliography checking.

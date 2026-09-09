@@ -49,6 +49,7 @@ def test_requirements_dev_pins_local_quickstart_closure() -> None:
     expected = {
         "shepherd",
         "shepherd-core",
+        "shepherd-citation-checker",
         "shepherd-dialect",
         "shepherd-export",
         "shepherd-kernel-v3-reference",

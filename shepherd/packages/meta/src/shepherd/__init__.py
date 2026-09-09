@@ -74,7 +74,7 @@ if TYPE_CHECKING:
         WorkspaceTask,
     )
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 # The handle surface, resolved lazily (PEP 562). Every name here lives in
 # ``shepherd_dialect.workspace_control``; importing that module pulls ``vcs_core``

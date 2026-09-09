@@ -12,3 +12,4 @@
 -e ./shepherd/packages/dialect
 -e ./shepherd/packages/providers
 -e ./shepherd/packages/meta
+-e ./shepherd/extras/citation-checker

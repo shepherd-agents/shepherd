@@ -43,6 +43,10 @@ jobs:
           uv run pytest -q
           shepherd/integration-tests/test_import_boundaries.py
           shepherd/packages/kernel-v3-reference/tests/test_import_boundaries.py
+      - name: Citation-checker package regressions (offline)
+        run: |
+          make test-citation-checker
+          uv run pytest integration-tests/test_bundled_distribution.py -q
       - name: Boundary + run-path guards
         # Previously documented-deferred: these failed against live public source
         # until the 0.2.0 export landed the WS-A boundary-seam and run-path

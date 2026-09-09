@@ -5,7 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.1] - Unreleased
+
+### Added
+
+- Packaged citation checking with `shepherd-ai[citation-checker]` and the
+  `shepherd-check-citations` command: PDF extraction, evidence collection,
+  deterministic matching, bounded Opus review batches, and evidence-linked reports.
+  Exact matches bypass the model; incomplete reviews retain completed citations.
+- Frozen development evaluation and an original-task demo: 116/140 scored
+  citations (82.9%) across three datasets. Ten ambiguous labels are unscored;
+  this screened development selection is not a held-out benchmark.
+
+### Changed
+
+- Public Claude SDK requirements now match the workspace-tested range.
+- Bundled distribution checks cover package discovery, optional dependencies,
+  report creation and frozen-run resume outside the development checkout.
 
 ### Fixed
 

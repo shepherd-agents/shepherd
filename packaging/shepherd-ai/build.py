@@ -27,15 +27,18 @@ import subprocess
 import sys
 from pathlib import Path
 
+import tomllib
+
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 STAGE = HERE / "build" / "stage"
-DEFAULT_VERSION = "0.2.0"
+DEFAULT_VERSION = tomllib.loads((REPO / "shepherd/packages/meta/pyproject.toml").read_text())["project"]["version"]
 
 # Bundled import package  ->  its src/ directory in the workspace.
 # This is the runtime install closure of `shepherd[providers,contexts]`:
 # the deterministic quickstart plus the Claude/OpenAI provider lanes.
 PACKAGES = {
+    "shepherd_citation_checker": "shepherd/extras/citation-checker/src/shepherd_citation_checker",
     "shepherd": "shepherd/packages/meta/src/shepherd",
     "shepherd_core": "shepherd/packages/core/src/shepherd_core",
     "shepherd_runtime": "shepherd/packages/runtime/src/shepherd_runtime",
@@ -54,6 +57,9 @@ PACKAGES = {
 # here, or discovery silently finds nothing. Keep in sync with the source
 # packages' pyproject.toml [project.entry-points.*] tables.
 ENTRY_POINTS = """\
+[project.entry-points."shepherd.packages"]
+citation_checker = "shepherd_citation_checker.registration"
+
 [project.entry-points."shepherd.providers"]
 claude = "shepherd_providers.claude:ClaudeProvider"
 openai = "shepherd_providers.openai:OpenAIProvider"
@@ -121,13 +127,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-claude = ["claude-agent-sdk>=0.1.0"]
+claude = ["claude-agent-sdk>=0.1.18,<0.2"]
 openai = ["openai>=1.66"]
-all = ["shepherd-ai[claude,openai]"]
+citation-checker = ["pdfplumber>=0.11,<0.12", "beautifulsoup4>=4.12,<5"]
+all = ["shepherd-ai[claude,openai,citation-checker]"]
 
 [project.scripts]
 shepherd = "shepherd.cli:main"
 sp = "shepherd.cli:main"
+shepherd-check-citations = "shepherd_citation_checker.cli:main"
 
 [project.urls]
 Homepage = "https://shepherd-agents.ai/"
@@ -179,7 +187,12 @@ def stage(version: str) -> None:
         raise SystemExit("could not locate __version__ in shepherd/__init__.py")
     init.write_text(new_text)
 
-    shutil.copy(REPO / "README.md", STAGE / "README.md")
+    readme = (REPO / "README.md").read_text()
+    readme = readme.replace(
+        "](shepherd/extras/citation-checker/README.md)",
+        f"](https://github.com/shepherd-agents/shepherd/blob/v{version}/shepherd/extras/citation-checker/README.md)",
+    )
+    (STAGE / "README.md").write_text(readme)
     shutil.copy(REPO / "LICENSE", STAGE / "LICENSE")
 
     wheel_packages = "\n".join(f'    "src/{imp}",' for imp in PACKAGES)

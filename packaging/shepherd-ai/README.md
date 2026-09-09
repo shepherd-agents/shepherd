@@ -29,7 +29,7 @@ collisions are irrelevant. The import package names (`shepherd`,
 
 ## What is bundled
 
-The 11 import packages in the `shepherd[providers,contexts]` runtime closure —
+The framework import packages and citation workflow in the `shepherd[providers,contexts]` runtime closure —
 the deterministic quickstart plus the Claude/OpenAI provider lanes. The exact
 list lives in `PACKAGES` in `build.py`.
 
@@ -70,4 +70,31 @@ match the release version so `import shepherd; shepherd.__version__` agrees with
 the wheel version.
 
 To cut a new version: `python packaging/shepherd-ai/build.py --version X.Y.Z`
-(or edit `DEFAULT_VERSION` in `build.py`).
+(the default is the version in `shepherd/packages/meta/pyproject.toml`).
+
+## Citation checker (0.3.1)
+
+The bundle includes the `shepherd_citation_checker` workflow package and its
+`shepherd.packages` registration. Install its optional PDF/HTML dependencies with:
+
+```bash
+python -m pip install --upgrade "shepherd-ai[citation-checker]==0.3.1"
+claude auth login
+shepherd-check-citations paper paper.pdf --output citation-report
+```
+
+The checker uses the Claude Code headless CLI and subscription login. Git and a
+supported native jail are required for live reviews. The Python Claude SDK extra
+is separate; its tested bounds match the workspace provider package.
+
+Before a release, build from the public release checkout and validate both
+artifacts with `twine check`. Install the wheel into fresh environments outside
+this repository, then run `python -I /path/to/packaging/shepherd-ai/smoke.py` with
+those environments' Python interpreters. Use `--base-only` for an environment
+containing plain `shepherd-ai`; the normal smoke requires the citation extra.
+Also test upgrading from 0.3.0 and rebuilding/installing the sdist. These offline
+checks do not replace a real review on a supported native jail.
+
+The default build version comes from the framework metadata. GitHub releases
+pass the immutable tag version explicitly. Runtime wheels and sdists omit the
+repository's evaluation data and original-candidate archive.
