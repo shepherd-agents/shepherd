@@ -1,0 +1,40 @@
+{
+  "run_ref": "run-d295776ebbb2",
+  "started_at": "2026-09-05T09:19:08Z",
+  "finished_at": "2026-09-05T09:20:10Z",
+  "task_artifact_digest": "sha256:a9fdd4db0eb2cac59937724946f552433ed651684918afd3348f8cc6ef49d820",
+  "note": "Public archive of the original task, inputs and result. Operational launch records are omitted; machine-specific paths are normalized. Task source is unchanged; report content differs only in normalized machine paths.",
+  "archive_files_sha256": {
+    "evidence/052abb5568cc7769d4fa.json": "3b81a354c5276c0753fc62e0db1fd43beba274eeda57336f52a38ceb9905cb7f",
+    "evidence/17412a6bd988442e1e12.json": "1d9ec3dce0eda1a9b99c7cf6f29dca79d2736fc985e8a9a9328da1db893a50d2",
+    "evidence/5c6470ea2973605f160f.json": "c675705dbb610237368f830d78f401be09de10dd6eb5cdd547af47df3de88119",
+    "evidence/70fe97f3b0397da07510.json": "bed3b8d9f1823e1be123d8c6150877a0543240a36532f7381b9cc3d9f5a147db",
+    "evidence/a738133f0b741c980fe6.json": "38a69e5ddf77dff43607fffb2ba44ff2289dd73ad63e5f0d43f22a698ba6e933",
+    "evidence/e397a39c5042cfb3deda.json": "020892d5e38db6052e25839a663ee6cebfd73041fb6a204612dfe2e0a9a88d40",
+    "first-report.json": "01933e7f394eb31e5e32aae9b929cf6297adc60fbea7764dcca5fd08c78f0c3e",
+    "input.json": "5e1a74ac7722c892a20be02d890d1354689ee749640bdc96bf2b73354be4a170",
+    "policy.md": "fbbe85f2e3a83480f867894190468a76d925ca0c7ed17badf3f38b02f363a464",
+    "references.json": "3fe8b8e52b1df2fa6c90e1d43b106248201289121fc84ddef6cef3e663385db2",
+    "task-artifact.json": "f99fecc54a19239e2a2ecb66f74fe63fc07f6dfe6495244bfbcfd294c7a03122",
+    "tasks.py": "f183b94581dd278147f1c7bf21ccde791ac44a41db9418440e15f16b790d6ed6"
+  },
+  "source_sha256": {
+    "README.md": "3eb0986ce9b24c2a09b8529019a116dd4004546b3bd0ddd47f531681eed8582c",
+    "evidence/052abb5568cc7769d4fa.json": "3b81a354c5276c0753fc62e0db1fd43beba274eeda57336f52a38ceb9905cb7f",
+    "evidence/17412a6bd988442e1e12.json": "1d9ec3dce0eda1a9b99c7cf6f29dca79d2736fc985e8a9a9328da1db893a50d2",
+    "evidence/5c6470ea2973605f160f.json": "c675705dbb610237368f830d78f401be09de10dd6eb5cdd547af47df3de88119",
+    "evidence/70fe97f3b0397da07510.json": "bed3b8d9f1823e1be123d8c6150877a0543240a36532f7381b9cc3d9f5a147db",
+    "evidence/a738133f0b741c980fe6.json": "38a69e5ddf77dff43607fffb2ba44ff2289dd73ad63e5f0d43f22a698ba6e933",
+    "evidence/e397a39c5042cfb3deda.json": "020892d5e38db6052e25839a663ee6cebfd73041fb6a204612dfe2e0a9a88d40",
+    "first-report.json": "67bf085bb9a1dfe56aa00f19c83b77114c5107f22cb0d9dc5cd744ed36170d18",
+    "input.json": "5e1a74ac7722c892a20be02d890d1354689ee749640bdc96bf2b73354be4a170",
+    "pilot-run-inventory.json": "a22414e9d39ed1e9d1a7c64cd19f6e8f06192868e38c0c8904cbfad70eed56f6",
+    "policy.md": "fbbe85f2e3a83480f867894190468a76d925ca0c7ed17badf3f38b02f363a464",
+    "provenance.json": "342ce5564cb8c32e3e72b5dac67072813f24705d257556602998b11c4dcb511b",
+    "references.json": "3fe8b8e52b1df2fa6c90e1d43b106248201289121fc84ddef6cef3e663385db2",
+    "run-args.json": "e5a82d668458052c9015755297fc8f08fd00d6442e0187b8c0d3e4b8cf2355a9",
+    "run.json": "f14c195c5bc2469833c57a7b02efff56d37a217c29c0472663985bd79ea4d465",
+    "task-artifact.json": "c39fd0d35759aedd14986a67a667dd53c76c6eb36cb432c29f306f2d8f6d0ecd",
+    "tasks.py": "f183b94581dd278147f1c7bf21ccde791ac44a41db9418440e15f16b790d6ed6"
+  }
+}

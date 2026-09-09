@@ -17,6 +17,15 @@ The quickstart examples use the public `import shepherd as sp` facade and the
 initialized workspace created with `sp init`. `claude_readme.py` is optional and
 skips unless `sp doctor claude` is green.
 
+## Paper Citation Checker
+
+- [`citation-checker/`](citation-checker/README.md)
+
+Run `python check_paper.py /path/to/paper.pdf` from the repository root after
+installing the example dependencies. One Shepherd task extracts common ACL,
+ICLR, ICML, and NeurIPS bibliographies and checks them with jailed headless
+Opus, bounded follow-up searches, and retained evidence-linked reports.
+
 ## Workspace Handles
 
 - [`workspace-handles/best_of_n.py`](workspace-handles/best_of_n.py)

@@ -1,0 +1,85 @@
+{
+  "references": 150,
+  "execution_counts": {
+    "completed": 150
+  },
+  "timing": {
+    "wall_seconds": 741.13,
+    "complete": true,
+    "run_ref": "run-db7273b0101046419688fe47a2a19344"
+  },
+  "model_jobs": 25,
+  "usage_reports": 25,
+  "reported_usd_equivalent": 25.8113425,
+  "note": "Fresh packaged workflow; cached extraction and initial evidence. Native scoring unchanged. Selected development sample, not held-out accuracy. CLI costs are list-price equivalents, not subscription charges.",
+  "native_datasets": {
+    "delta_human_audit": {
+      "n": 40,
+      "correct": 24,
+      "decided": 24,
+      "abstentions": 16,
+      "accuracy": 0.6,
+      "coverage": 0.6,
+      "precision": 1.0,
+      "recall": 0.3,
+      "f1": 0.46153846153846156,
+      "false_positive_rate": 0.0,
+      "true_positives": 6,
+      "false_positives": 0,
+      "true_negatives": 18,
+      "false_negatives_decided": 0,
+      "positive_abstentions": 14,
+      "negative_abstentions": 2,
+      "accuracy_wilson_95": [
+        0.44595893660346186,
+        0.7365167431570808
+      ]
+    },
+    "hallmark_test_public": {
+      "n": 50,
+      "correct": 34,
+      "decided": 34,
+      "abstentions": 16,
+      "accuracy": 0.68,
+      "coverage": 0.68,
+      "precision": 1.0,
+      "recall": 0.56,
+      "f1": 0.717948717948718,
+      "false_positive_rate": 0.0,
+      "true_positives": 14,
+      "false_positives": 0,
+      "true_negatives": 20,
+      "false_negatives_decided": 0,
+      "positive_abstentions": 11,
+      "negative_abstentions": 5,
+      "accuracy_wilson_95": [
+        0.5418970269185592,
+        0.7924178373934316
+      ]
+    },
+    "manual_reference_verification": {
+      "n": 50,
+      "correct": 34,
+      "decided": 36,
+      "abstentions": 14,
+      "accuracy": 0.68,
+      "coverage": 0.72,
+      "precision": 0.7142857142857143,
+      "recall": 0.5,
+      "f1": 0.5882352941176471,
+      "false_positive_rate": 0.05,
+      "true_positives": 5,
+      "false_positives": 2,
+      "true_negatives": 29,
+      "false_negatives_decided": 0,
+      "positive_abstentions": 5,
+      "negative_abstentions": 9,
+      "accuracy_wilson_95": [
+        0.5418970269185592,
+        0.7924178373934316
+      ]
+    }
+  },
+  "correct": 92,
+  "scored_references": 140
+}

@@ -1,0 +1,216 @@
+{
+  "url": "https://api.crossref.org/works?query.bibliographic=Jacob+Austin+and+et+al.+Diffuseq%3A+Sequence+to+sequence+text+generation+with+diffusion+models.+In+ICLR%2C+2022.&rows=3",
+  "retrieved_at": "2026-09-05T09:18:10.331517+00:00",
+  "evidence_file": "evidence/052abb5568cc7769d4fa.json",
+  "http_status": 200,
+  "resolved_url": "https://api.crossref.org/works?query.bibliographic=Jacob+Austin+and+et+al.+Diffuseq%3A+Sequence+to+sequence+text+generation+with+diffusion+models.+In+ICLR%2C+2022.&rows=3",
+  "body": "{\"status\":\"ok\",\"message-type\":\"work-list\",\"message-version\":\"1.0.0\",\"message\":{\"facets\":{},\"total-results\":868690,\"items\":[{\"institution\":[{\"name\":\"San Jose State University\",\"acronym\":[\"SJSU\",\"SJSU\"],\"place\":[\"San Jose, CA, USA\"],\"department\":[\"Computer Science\"]}],\"indexed\":{\"date-parts\":[[2025,6,24]],\"date-time\":\"2025-06-24T04:07:34Z\",\"timestamp\":1750738054726,\"version\":\"3.41.0\"},\"reference-count\":0,\"publisher\":\"San Jose State University Library\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"DOI\":\"10.31979\\/etd.ya8w-kmhj\",\"type\":\"dissertation\",\"created\":{\"date-parts\":[[2025,6,23]],\"date-time\":\"2025-06-23T18:35:09Z\",\"timestamp\":1750703709000},\"approved\":{\"date-parts\":[[2025,1,1]]},\"source\":\"Crossref\",\"is-referenced-by-count\":0,\"title\":[\"Transforming Chatbot Text\"],\"prefix\":\"10.31979\",\"author\":[{\"given\":\"Natesh\",\"family\":\"Reddy\",\"sequence\":\"first\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]}],\"member\":\"16862\",\"link\":[{\"URL\":\"https:\\/\\/scholarworks.sjsu.edu\\/cgi\\/viewcontent.cgi?article=2560&amp;context=etd_projects&amp;unstamped=1\",\"content-type\":\"unspecified\",\"content-version\":\"vor\",\"intended-application\":\"similarity-checking\"}],\"deposited\":{\"date-parts\":[[2025,6,23]],\"date-time\":\"2025-06-23T18:35:44Z\",\"timestamp\":1750703744000},\"score\":38.62203,\"degree\":[\"Master of Science in Computer Science (MSCS)\"],\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/scholarworks.sjsu.edu\\/etd_projects\\/1560\"}},\"subtitle\":[\"A Sequence-to-Sequence Approach to Human-Like Text Generation\"],\"issued\":{\"date-parts\":[[null]]},\"references-count\":0,\"URL\":\"https:\\/\\/doi.org\\/10.31979\\/etd.ya8w-kmhj\"},{\"indexed\":{\"date-parts\":[[2022,8,17]],\"date-time\":\"2022-08-17T04:39:37Z\",\"timestamp\":1660711177837},\"reference-count\":0,\"publisher\":\"Siberian Academic Book LLC\",\"issue\":\"19\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"short-container-title\":[\"Internauka\"],\"DOI\":\"10.32743\\/26870142.2022.19.242.339376\",\"type\":\"journal-article\",\"created\":{\"date-parts\":[[2022,8,16]],\"date-time\":\"2022-08-16T16:17:55Z\",\"timestamp\":1660666675000},\"source\":\"Crossref\",\"is-referenced-by-count\":0,\"title\":[\"AUTOMATIC TEXT SUMMARIZATION USING SEQUENCE-TO-SEQUENCE MODELS\"],\"prefix\":\"10.32743\",\"volume\":\"242\",\"author\":[{\"given\":\"\\u0415\\u0440\\u0436\\u0430\\u043d \\u041c\\u0435\\u0440\\u0435\\u043a\\u0435\\u0443\\u043b\\u044b\",\"family\":\"\\u0423\\u0442\\u0435\\u0448\\u043e\\u0432\",\"sequence\":\"first\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]}],\"member\":\"17979\",\"published-online\":{\"date-parts\":[[2022,5,30]]},\"container-title\":[\"Internauka\"],\"deposited\":{\"date-parts\":[[2022,8,16]],\"date-time\":\"2022-08-16T16:18:02Z\",\"timestamp\":1660666682000},\"score\":38.24918,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/www.internauka.org\\/journal\\/science\\/internauka\\/242\\/339376\"}},\"issued\":{\"date-parts\":[[2022,5,30]]},\"references-count\":0,\"journal-issue\":{\"issue\":\"19\",\"published-online\":{\"date-parts\":[[2022,5,30]]}},\"URL\":\"https:\\/\\/doi.org\\/10.32743\\/26870142.2022.19.242.339376\",\"ISSN\":[\"2687-0142\"],\"issn-type\":[{\"value\":\"2687-0142\",\"type\":\"electronic\"}],\"published\":{\"date-parts\":[[2022,5,30]]}},{\"indexed\":{\"date-parts\":[[2025,8,23]],\"date-time\":\"2025-08-23T00:07:44Z\",\"timestamp\":1755907664391,\"version\":\"3.44.0\"},\"publisher-location\":\"New York, NY, USA\",\"reference-count\":28,\"publisher\":\"ACM\",\"license\":[{\"start\":{\"date-parts\":[[2023,12,8]],\"date-time\":\"2023-12-08T00:00:00Z\",\"timestamp\":1701993600000},\"content-version\":\"vor\",\"delay-in-days\":0,\"URL\":\"https:\\/\\/www.acm.org\\/publications\\/policies\\/copyright_policy#Background\"}],\"content-domain\":{\"domain\":[\"dl.acm.org\"],\"crossmark-restriction\":true},\"published-print\":{\"date-parts\":[[2023,12,8]]},\"DOI\":\"10.1145\\/3638584.3638617\",\"type\":\"proceedings-article\",\"created\":{\"date-parts\":[[2024,3,14]],\"date-time\":\"2024-03-14T11:15:19Z\",\"timestamp\":1710414919000},\"page\":\"546-552\",\"update-policy\":\"https:\\/\\/doi.org\\/10.1145\\/crossmark-policy\",\"source\":\"Crossref\",\"is-referenced-by-count\":0,\"title\":[\"LDSeq: Latent Diffusion Models for Sequence to Sequence Text Generation\"],\"prefix\":\"10.1145\",\"author\":[{\"ORCID\":\"https:\\/\\/orcid.org\\/0009-0001-5166-5753\",\"authenticated-orcid\":false,\"given\":\"Yizhou\",\"family\":\"Ding\",\"sequence\":\"first\",\"affiliation\":[{\"name\":\"State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"ORCID\":\"https:\\/\\/orcid.org\\/0000-0003-1936-4595\",\"authenticated-orcid\":false,\"given\":\"Jidong\",\"family\":\"Tian\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"ORCID\":\"https:\\/\\/orcid.org\\/0009-0007-3739-7231\",\"authenticated-orcid\":false,\"given\":\"Shanxing\",\"family\":\"Mei\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"ORCID\":\"https:\\/\\/orcid.org\\/0009-0001-2244-1945\",\"authenticated-orcid\":false,\"given\":\"Yifan\",\"family\":\"Zhou\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"ORCID\":\"https:\\/\\/orcid.org\\/0009-0004-3392-4004\",\"authenticated-orcid\":false,\"given\":\"Yuwu\",\"family\":\"Dong\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"ORCID\":\"https:\\/\\/orcid.org\\/0000-0002-4851-7012\",\"authenticated-orcid\":false,\"given\":\"Hao\",\"family\":\"He\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"ORCID\":\"https:\\/\\/orcid.org\\/0000-0002-6168-2688\",\"authenticated-orcid\":false,\"given\":\"Weisheng\",\"family\":\"Hu\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]}],\"member\":\"320\",\"published-online\":{\"date-parts\":[[2024,3,14]]},\"reference\":[{\"key\":\"e_1_3_2_1_1_1\",\"first-page\":\"17981\",\"article-title\":\"Structured denoising diffusion models in discrete state-spaces\",\"volume\":\"34\",\"author\":\"Austin Jacob\",\"year\":\"2021\",\"unstructured\":\"Jacob Austin, Daniel\\u00a0D Johnson, Jonathan Ho, Daniel Tarlow, and Rianne van\\u00a0den Berg. 2021. Structured denoising diffusion models in discrete state-spaces. Advances in Neural Information Processing Systems 34 (2021), 17981\\u201317993.\",\"journal-title\":\"Advances in Neural Information Processing Systems\"},{\"key\":\"e_1_3_2_1_2_1\",\"volume-title\":\"Analog bits: Generating discrete data using diffusion models with self-conditioning. arXiv preprint arXiv:2208.04202\",\"author\":\"Chen Ting\",\"year\":\"2022\",\"unstructured\":\"Ting Chen, Ruixiang Zhang, and Geoffrey Hinton. 2022. Analog bits: Generating discrete data using diffusion models with self-conditioning. arXiv preprint arXiv:2208.04202 (2022).\"},{\"key\":\"e_1_3_2_1_3_1\",\"volume-title\":\"Difformer: Empowering Diffusion Model on Embedding Space for Text Generation. arXiv preprint arXiv:2212.09412\",\"author\":\"Gao Zhujin\",\"year\":\"2022\",\"unstructured\":\"Zhujin Gao, Junliang Guo, Xu Tan, Yongxin Zhu, Fang Zhang, Jiang Bian, and Linli Xu. 2022. Difformer: Empowering Diffusion Model on Embedding Space for Text Generation. arXiv preprint arXiv:2212.09412 (2022).\"},{\"key\":\"e_1_3_2_1_4_1\",\"volume-title\":\"Mask-predict: Parallel decoding of conditional masked language models. arXiv preprint arXiv:1904.09324\",\"author\":\"Ghazvininejad Marjan\",\"year\":\"2019\",\"unstructured\":\"Marjan Ghazvininejad, Omer Levy, Yinhan Liu, and Luke Zettlemoyer. 2019. Mask-predict: Parallel decoding of conditional masked language models. arXiv preprint arXiv:1904.09324 (2019).\"},{\"key\":\"e_1_3_2_1_5_1\",\"volume-title\":\"Diffuseq: Sequence to sequence text generation with diffusion models. arXiv preprint arXiv:2210.08933\",\"author\":\"Gong Shansan\",\"year\":\"2022\",\"unstructured\":\"Shansan Gong, Mukai Li, Jiangtao Feng, Zhiyong Wu, and LingPeng Kong. 2022. Diffuseq: Sequence to sequence text generation with diffusion models. arXiv preprint arXiv:2210.08933 (2022).\"},{\"key\":\"e_1_3_2_1_6_1\",\"volume-title\":\"Levenshtein transformer. Advances in Neural Information Processing Systems 32\",\"author\":\"Gu Jiatao\",\"year\":\"2019\",\"unstructured\":\"Jiatao Gu, Changhan Wang, and Junbo Zhao. 2019. Levenshtein transformer. Advances in Neural Information Processing Systems 32 (2019).\"},{\"key\":\"e_1_3_2_1_7_1\",\"volume-title\":\"DiffusionBERT: Improving Generative Masked Language Models with Diffusion Models. arXiv preprint arXiv:2211.15029\",\"author\":\"He Zhengfu\",\"year\":\"2022\",\"unstructured\":\"Zhengfu He, Tianxiang Sun, Kuanning Wang, Xuanjing Huang, and Xipeng Qiu. 2022. DiffusionBERT: Improving Generative Masked Language Models with Diffusion Models. arXiv preprint arXiv:2211.15029 (2022).\"},{\"key\":\"e_1_3_2_1_8_1\",\"first-page\":\"6840\",\"article-title\":\"Denoising diffusion probabilistic models\",\"volume\":\"33\",\"author\":\"Ho Jonathan\",\"year\":\"2020\",\"unstructured\":\"Jonathan Ho, Ajay Jain, and Pieter Abbeel. 2020. Denoising diffusion probabilistic models. Advances in Neural Information Processing Systems 33 (2020), 6840\\u20136851.\",\"journal-title\":\"Advances in Neural Information Processing Systems\"},{\"key\":\"e_1_3_2_1_9_1\",\"volume-title\":\"Classifier-free diffusion guidance. arXiv preprint arXiv:2207.12598\",\"author\":\"Ho Jonathan\",\"year\":\"2022\",\"unstructured\":\"Jonathan Ho and Tim Salimans. 2022. Classifier-free diffusion guidance. arXiv preprint arXiv:2207.12598 (2022).\"},{\"key\":\"e_1_3_2_1_10_1\",\"volume-title\":\"Proceedings of the Human Language Technology Conference of the North American Chapter of the Association for Computational Linguistics: HLT-NAACL\",\"author\":\"Kumar Shankar\",\"year\":\"2004\",\"unstructured\":\"Shankar Kumar and Bill Byrne. 2004. Minimum bayes-risk decoding for statistical machine translation. In Proceedings of the Human Language Technology Conference of the North American Chapter of the Association for Computational Linguistics: HLT-NAACL 2004. 169\\u2013176.\"},{\"key\":\"e_1_3_2_1_11_1\",\"volume-title\":\"Bart: Denoising sequence-to-sequence pre-training for natural language generation, translation, and comprehension. arXiv preprint arXiv:1910.13461\",\"author\":\"Lewis Mike\",\"year\":\"2019\",\"unstructured\":\"Mike Lewis, Yinhan Liu, Naman Goyal, Marjan Ghazvininejad, Abdelrahman Mohamed, Omer Levy, Ves Stoyanov, and Luke Zettlemoyer. 2019. Bart: Denoising sequence-to-sequence pre-training for natural language generation, translation, and comprehension. arXiv preprint arXiv:1910.13461 (2019).\"},{\"key\":\"e_1_3_2_1_12_1\",\"volume-title\":\"Optimus: Organizing sentences via pre-trained modeling of a latent space. arXiv preprint arXiv:2004.04092\",\"author\":\"Li Chunyuan\",\"year\":\"2020\",\"unstructured\":\"Chunyuan Li, Xiang Gao, Yuan Li, Baolin Peng, Xiujun Li, Yizhe Zhang, and Jianfeng Gao. 2020. Optimus: Organizing sentences via pre-trained modeling of a latent space. arXiv preprint arXiv:2004.04092 (2020).\"},{\"key\":\"e_1_3_2_1_13_1\",\"first-page\":\"4328\",\"article-title\":\"Diffusion-lm improves controllable text generation\",\"volume\":\"35\",\"author\":\"Li Xiang\",\"year\":\"2022\",\"unstructured\":\"Xiang Li, John Thickstun, Ishaan Gulrajani, Percy\\u00a0S Liang, and Tatsunori\\u00a0B Hashimoto. 2022. Diffusion-lm improves controllable text generation. Advances in Neural Information Processing Systems 35 (2022), 4328\\u20134343.\",\"journal-title\":\"Advances in Neural Information Processing Systems\"},{\"key\":\"e_1_3_2_1_14_1\",\"volume-title\":\"GENIE: Large Scale Pre-training for Text Generation with Diffusion Model. arXiv preprint arXiv:2212.11685\",\"author\":\"Lin Zhenghao\",\"year\":\"2022\",\"unstructured\":\"Zhenghao Lin, Yeyun Gong, Yelong Shen, Tong Wu, Zhihao Fan, Chen Lin, Weizhu Chen, and Nan Duan. 2022. GENIE: Large Scale Pre-training for Text Generation with Diffusion Model. arXiv preprint arXiv:2212.11685 (2022).\"},{\"key\":\"e_1_3_2_1_15_1\",\"volume-title\":\"Composable Text Control Operations in Latent Space with Ordinary Differential Equations. arXiv preprint arXiv:2208.00638\",\"author\":\"Liu Guangyi\",\"year\":\"2022\",\"unstructured\":\"Guangyi Liu, Zeyu Feng, Yuan Gao, Zichao Yang, Xiaodan Liang, Junwei Bao, Xiaodong He, Shuguang Cui, Zhen Li, and Zhiting Hu. 2022. Composable Text Control Operations in Latent Space with Ordinary Differential Equations. arXiv preprint arXiv:2208.00638 (2022).\"},{\"key\":\"e_1_3_2_1_16_1\",\"volume-title\":\"Latent Diffusion for Language Generation. arXiv preprint arXiv:2212.09462\",\"author\":\"Lovelace Justin\",\"year\":\"2022\",\"unstructured\":\"Justin Lovelace, Varsha Kishore, Chao Wan, Eliot Shekhtman, and Kilian Weinberger. 2022. Latent Diffusion for Language Generation. arXiv preprint arXiv:2212.09462 (2022).\"},{\"key\":\"e_1_3_2_1_17_1\",\"volume-title\":\"International Conference on Machine Learning. PMLR, 8162\\u20138171\",\"author\":\"Nichol Alexander\\u00a0Quinn\",\"year\":\"2021\",\"unstructured\":\"Alexander\\u00a0Quinn Nichol and Prafulla Dhariwal. 2021. Improved denoising diffusion probabilistic models. In International Conference on Machine Learning. PMLR, 8162\\u20138171.\"},{\"key\":\"e_1_3_2_1_18_1\",\"volume-title\":\"Language models are unsupervised multitask learners. OpenAI blog 1, 8\",\"author\":\"Radford Alec\",\"year\":\"2019\",\"unstructured\":\"Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever, 2019. Language models are unsupervised multitask learners. OpenAI blog 1, 8 (2019), 9.\"},{\"key\":\"e_1_3_2_1_19_1\",\"volume-title\":\"Hierarchical text-conditional image generation with clip latents. arXiv preprint arXiv:2204.06125\",\"author\":\"Ramesh Aditya\",\"year\":\"2022\",\"unstructured\":\"Aditya Ramesh, Prafulla Dhariwal, Alex Nichol, Casey Chu, and Mark Chen. 2022. Hierarchical text-conditional image generation with clip latents. arXiv preprint arXiv:2204.06125 (2022).\"},{\"key\":\"e_1_3_2_1_20_1\",\"doi-asserted-by\":\"publisher\",\"DOI\":\"10.1109\\/CVPR52688.2022.01042\"},{\"key\":\"e_1_3_2_1_21_1\",\"volume-title\":\"ACLWeb. Proceedings of the 2015 conference on empirical methods in natural language processing.\",\"author\":\"Rush M\",\"year\":\"2017\",\"unstructured\":\"Alexander\\u00a0M Rush, SEAS Harvard, Sumit Chopra, and Jason Weston. 2017. A neural attention model for sentence summarization. In ACLWeb. Proceedings of the 2015 conference on empirical methods in natural language processing.\"},{\"key\":\"e_1_3_2_1_22_1\",\"first-page\":\"36479\",\"article-title\":\"Photorealistic text-to-image diffusion models with deep language understanding\",\"volume\":\"35\",\"author\":\"Saharia Chitwan\",\"year\":\"2022\",\"unstructured\":\"Chitwan Saharia, William Chan, Saurabh Saxena, Lala Li, Jay Whang, Emily\\u00a0L Denton, Kamyar Ghasemipour, Raphael Gontijo\\u00a0Lopes, Burcu Karagol\\u00a0Ayan, Tim Salimans, 2022. Photorealistic text-to-image diffusion models with deep language understanding. Advances in Neural Information Processing Systems 35 (2022), 36479\\u201336494.\",\"journal-title\":\"Advances in Neural Information Processing Systems\"},{\"key\":\"e_1_3_2_1_23_1\",\"volume-title\":\"Denoising diffusion implicit models. arXiv preprint arXiv:2010.02502\",\"author\":\"Song Jiaming\",\"year\":\"2020\",\"unstructured\":\"Jiaming Song, Chenlin Meng, and Stefano Ermon. 2020. Denoising diffusion implicit models. arXiv preprint arXiv:2010.02502 (2020).\"},{\"key\":\"e_1_3_2_1_24_1\",\"volume-title\":\"Self-conditioned embedding diffusion for text generation. arXiv preprint arXiv:2211.04236\",\"author\":\"Strudel Robin\",\"year\":\"2022\",\"unstructured\":\"Robin Strudel, Corentin Tallec, Florent Altch\\u00e9, Yilun Du, Yaroslav Ganin, Arthur Mensch, Will Grathwohl, Nikolay Savinov, Sander Dieleman, Laurent Sifre, 2022. Self-conditioned embedding diffusion for text generation. arXiv preprint arXiv:2211.04236 (2022).\"},{\"key\":\"e_1_3_2_1_25_1\",\"volume-title\":\"Attention is all you need. Advances in neural information processing systems 30\",\"author\":\"Vaswani Ashish\",\"year\":\"2017\",\"unstructured\":\"Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan\\u00a0N Gomez, \\u0141ukasz Kaiser, and Illia Polosukhin. 2017. Attention is all you need. Advances in neural information processing systems 30 (2017).\"},{\"key\":\"e_1_3_2_1_26_1\",\"volume-title\":\"DINOISER: Diffused Conditional Sequence Learning by Manipulating Noises. arXiv preprint arXiv:2302.10025\",\"author\":\"Ye Jiasheng\",\"year\":\"2023\",\"unstructured\":\"Jiasheng Ye, Zaixiang Zheng, Yu Bao, Lihua Qian, and Mingxuan Wang. 2023. DINOISER: Diffused Conditional Sequence Learning by Manipulating Noises. arXiv preprint arXiv:2302.10025 (2023).\"},{\"key\":\"e_1_3_2_1_27_1\",\"volume-title\":\"SeqDiffuSeq: Text Diffusion with Encoder-Decoder Transformers. arXiv preprint arXiv:2212.10325\",\"author\":\"Yuan Hongyi\",\"year\":\"2022\",\"unstructured\":\"Hongyi Yuan, Zheng Yuan, Chuanqi Tan, Fei Huang, and Songfang Huang. 2022. SeqDiffuSeq: Text Diffusion with Encoder-Decoder Transformers. arXiv preprint arXiv:2212.10325 (2022).\"},{\"key\":\"e_1_3_2_1_28_1\",\"volume-title\":\"Diffusum: Generation enhanced extractive summarization with diffusion. arXiv preprint arXiv:2305.01735\",\"author\":\"Zhang Haopeng\",\"year\":\"2023\",\"unstructured\":\"Haopeng Zhang, Xiao Liu, and Jiawei Zhang. 2023. Diffusum: Generation enhanced extractive summarization with diffusion. arXiv preprint arXiv:2305.01735 (2023).\"}],\"event\":{\"name\":\"CSAI 2023: 2023 7th International Conference on Computer Science and Artificial Intelligence\",\"acronym\":\"CSAI 2023\",\"location\":\"Beijing China\"},\"container-title\":[\"Proceedings of the 2023 7th International Conference on Computer Science and Artificial Intelligence\"],\"link\":[{\"URL\":\"https:\\/\\/dl.acm.org\\/doi\\/10.1145\\/3638584.3638617\",\"content-type\":\"unspecified\",\"content-version\":\"vor\",\"intended-application\":\"text-mining\"},{\"URL\":\"https:\\/\\/dl.acm.org\\/doi\\/pdf\\/10.1145\\/3638584.3638617\",\"content-type\":\"unspecified\",\"content-version\":\"vor\",\"intended-application\":\"similarity-checking\"}],\"deposited\":{\"date-parts\":[[2025,8,22]],\"date-time\":\"2025-08-22T14:56:22Z\",\"timestamp\":1755874582000},\"score\":38.21704,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/dl.acm.org\\/doi\\/10.1145\\/3638584.3638617\"}},\"issued\":{\"date-parts\":[[2023,12,8]]},\"references-count\":28,\"alternative-id\":[\"10.1145\\/3638584.3638617\",\"10.1145\\/3638584\"],\"URL\":\"https:\\/\\/doi.org\\/10.1145\\/3638584.3638617\",\"published\":{\"date-parts\":[[2023,12,8]]},\"assertion\":[{\"value\":\"2024-03-14\",\"order\":3,\"name\":\"published\",\"label\":\"Published\",\"group\":{\"name\":\"publication_history\",\"label\":\"Publication History\"}}]}],\"items-per-page\":3,\"query\":{\"start-index\":0,\"search-terms\":null}}}",
+  "candidates": [
+    {
+      "title": [
+        "Transforming Chatbot Text"
+      ],
+      "author": [
+        {
+          "given": "Natesh",
+          "family": "Reddy",
+          "sequence": "first",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        }
+      ],
+      "container-title": null,
+      "published": null,
+      "DOI": "10.31979/etd.ya8w-kmhj",
+      "URL": "https://doi.org/10.31979/etd.ya8w-kmhj",
+      "type": "dissertation"
+    },
+    {
+      "title": [
+        "AUTOMATIC TEXT SUMMARIZATION USING SEQUENCE-TO-SEQUENCE MODELS"
+      ],
+      "author": [
+        {
+          "given": "Ержан Мерекеулы",
+          "family": "Утешов",
+          "sequence": "first",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Internauka"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2022,
+            5,
+            30
+          ]
+        ]
+      },
+      "DOI": "10.32743/26870142.2022.19.242.339376",
+      "URL": "https://doi.org/10.32743/26870142.2022.19.242.339376",
+      "type": "journal-article"
+    },
+    {
+      "title": [
+        "LDSeq: Latent Diffusion Models for Sequence to Sequence Text Generation"
+      ],
+      "author": [
+        {
+          "ORCID": "https://orcid.org/0009-0001-5166-5753",
+          "authenticated-orcid": false,
+          "given": "Yizhou",
+          "family": "Ding",
+          "sequence": "first",
+          "affiliation": [
+            {
+              "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "ORCID": "https://orcid.org/0000-0003-1936-4595",
+          "authenticated-orcid": false,
+          "given": "Jidong",
+          "family": "Tian",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "ORCID": "https://orcid.org/0009-0007-3739-7231",
+          "authenticated-orcid": false,
+          "given": "Shanxing",
+          "family": "Mei",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "ORCID": "https://orcid.org/0009-0001-2244-1945",
+          "authenticated-orcid": false,
+          "given": "Yifan",
+          "family": "Zhou",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "ORCID": "https://orcid.org/0009-0004-3392-4004",
+          "authenticated-orcid": false,
+          "given": "Yuwu",
+          "family": "Dong",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "ORCID": "https://orcid.org/0000-0002-4851-7012",
+          "authenticated-orcid": false,
+          "given": "Hao",
+          "family": "He",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "ORCID": "https://orcid.org/0000-0002-6168-2688",
+          "authenticated-orcid": false,
+          "given": "Weisheng",
+          "family": "Hu",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Proceedings of the 2023 7th International Conference on Computer Science and Artificial Intelligence"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2023,
+            12,
+            8
+          ]
+        ]
+      },
+      "DOI": "10.1145/3638584.3638617",
+      "URL": "https://doi.org/10.1145/3638584.3638617",
+      "type": "proceedings-article"
+    }
+  ]
+}

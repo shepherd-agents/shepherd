@@ -1,0 +1,116 @@
+{
+  "selected_ids": [
+    "3",
+    "6",
+    "17",
+    "29",
+    "51",
+    "82",
+    "97",
+    "120",
+    "121",
+    "147",
+    "182",
+    "194",
+    "215",
+    "227",
+    "256"
+  ],
+  "replacement_counts": {
+    "manual_reference_verification": 8,
+    "hallmark_test_public": 5,
+    "delta_human_audit": 2
+  },
+  "final_dataset_counts": {
+    "delta_human_audit": 50,
+    "manual_reference_verification": 50,
+    "hallmark_test_public": 50
+  },
+  "native_label_deviations": [],
+  "excluded_screen_candidates": {
+    "36": {
+      "eligible": false,
+      "exclusion": "provider_timeout",
+      "finding": "Provider budget exceeded at 240 seconds; worker receipt elapsed 250.33 seconds. No completed report, so no label-error judgment is made.",
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-36/receipt.json",
+          "sha256": "8f47e129f2b6aad511ea2d6b1b007f7f6e7acd3bbd7b42975d25c1f4e4f2023c"
+        }
+      ],
+      "receipt_sha256": "8f47e129f2b6aad511ea2d6b1b007f7f6e7acd3bbd7b42975d25c1f4e4f2023c"
+    },
+    "253": {
+      "eligible": false,
+      "exclusion": "apparent_label_or_scope_conflict",
+      "finding": "Citation names Smith, Katz and Niemeyer as a complete author list, without et al., but the retained Crossref record explicitly registers FORCE11 Software Citation Working Group as an additional author (name field; role=author). The DOI response repeats that author. This is an apparent omission conflicting with verified gold under complete-metadata checking, so it is conservatively excluded per the user requested label screen.",
+      "limitations": [
+        "The native model prediction agrees with verified gold; this exclusion comes from independent source audit, not model-label disagreement.",
+        "Publisher landing page is blocked by Cloudflare. Crossref and doi.org are the same metadata source, not independent confirmation. Whether a citation style permits omission of the group author is a scope question; this is not a definitive adjudication that the benchmark label is wrong.",
+        "The model mentions the group in prose but does not check authors structurally or assess the omission."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-253/review/evidence/eb5cb58646727308d109.json",
+          "sha256": "477bf510375e8c7616778e79ad44ff31c5fced6df3a665bd3051aeaead189529"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-253/review/evidence/4afd2ab217bad30c739e.json",
+          "sha256": "48b6585c12ed1a0f0f779a35f6bd574c42197e7565b796d8df7fdedca7184503"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-253/review/evidence/ca683f6634c6ba080439.json",
+          "sha256": "3b39419019a8ead008c4c494f00f866cf9581d2a591d99f9d8e84442fa089b71"
+        }
+      ],
+      "receipt_sha256": "844e5ef488ad714f9bc328df3f9059ba30ac96d3c19a4afd99cc841ef0ed941a"
+    }
+  },
+  "eligible_unused_candidates": [
+    "1",
+    "67",
+    "108",
+    "153",
+    "168",
+    "188",
+    "220",
+    "235",
+    "249"
+  ],
+  "screen_run": ".runs/citation-iteration-50-v3-screen-v1",
+  "merged_results": false,
+  "note": "Runtime- and label-screened development subset. Original evaluation remains unchanged. Screening outcomes are not held-out accuracy. User requested replacement-only execution; merge deferred.",
+  "source_hashes": {
+    "examples/citation-checker/benchmarks/iteration-50-v3/replacement-protocol.json": "9dea7f587631cf22795dd5e6707cfe83bee698c5d924d071d89e67bacfeacd9c",
+    "examples/citation-checker/benchmarks/iteration-50-v3/label-screen-audit.json": "ea5722f6eaa80ea58b85f6d4318a85e36689841eb3a5abc604e47bce244e34b8",
+    ".runs/citation-iteration-50-v3-screen-v1/manifest.json": "89d00ea35e987364ba7cf061ca2a8ee818c6161496bf75bdd3cdba2414892fc7"
+  },
+  "receipt_hashes": {
+    "1": "5224c2eb7361336f2024addea8acecc82a4b5eac992ff5dce404eb60aeea34b8",
+    "3": "b04d7bca1bbb9d581cf6673a6eb961ad9348482e26d3858cab0e11d0f8044c5c",
+    "6": "591b882d258db8636513ca44c5b411107d41f3db3978c568e6cb628e943aa156",
+    "17": "201d15d9629387c4ba4caba3bd02e79209b30fb50d72e57381990c434a8fd964",
+    "29": "5344ff8f2267aa59743ece4d30a29e6fc468eb8a541549105708425c824eb3c2",
+    "36": "8f47e129f2b6aad511ea2d6b1b007f7f6e7acd3bbd7b42975d25c1f4e4f2023c",
+    "51": "6890a7f639463c72201b5808e7e06a61252e42bcdd0411557905fb7e8f21fc2c",
+    "67": "f8285d1c1ffbc5aa784d10b5222d212898a300c061261b25d0893455e6d26a37",
+    "82": "2e4068ce356c656d3df150108876875ff8fea52e4d3f46fabd7d750c26b1dc15",
+    "97": "b7895d6c9382d64bbf50c733a5f93ee573021edac4f06ee4feab23f76897926b",
+    "108": "80ac704372deb536ea63ec18e50e625dfd8e4aee126073894b2b6262e9693ebd",
+    "120": "694f42289dd22655758e3e943f410c37130a2ff11e5442f0ed283dcd847ded38",
+    "121": "5fcf157bcc88dd69aea9c49eb98fc7aa7365cd762f1ab02b6b5a4f3f25c5b4f4",
+    "147": "a0013167850d06e0cd900d2d86e04debd3c5d1b7a3baf73ee7996bca87be10d2",
+    "153": "0a7093a9bb7e7d26db3b71b0a59cc41859ffde8c2568cdac99e8980121c05533",
+    "168": "a7d099df69776b32dd4371fe74bb1c7e8bebeaa9acea6dcc97dd23f28826a707",
+    "182": "2b7b5beb1860579866f964b3b84e820ca2628682e3590314eb84c40b78cd042b",
+    "188": "069f725fa3fd71b128c0c8da601e121027e76769f0f53bd596be995fe5a45445",
+    "194": "5f407bd9c57c7e808454c6211f5b078c254912a40c431267dc59b4ac1c212e2b",
+    "215": "72a779716ec5b65514ce56c8fe146d21cb2662459bd8572b2b2429186c049be1",
+    "220": "bba31cc398643e5e82ef66bcad367d000acca6228c958f27b06dde858c1bf467",
+    "227": "0151335c513cfb29d6b1694f79d6075e5fca6938d8966a91369fd6fc48fc9c81",
+    "235": "a1b1774fd8e1158f22da06ab6f6adb8661be75e7d962825367ef2623ee827fb5",
+    "249": "6857a943de291119db55364df4a243dbf6c7470d78e9e19860af940e1f6e3449",
+    "253": "844e5ef488ad714f9bc328df3f9059ba30ac96d3c19a4afd99cc841ef0ed941a",
+    "256": "fb249098f465048c01e61736b68ef2adfd8c05634ddc6c6a70f2a437a97d83df"
+  }
+}

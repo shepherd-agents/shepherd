@@ -1,0 +1,1358 @@
+{
+  "suite": "citation-suite-v1",
+  "seed": "citation-suite-v1-20260906",
+  "reference_count": 262,
+  "sources": {
+    "zenodo.csv": {
+      "url": "https://zenodo.org/records/21457492/files/manual_reference_verification_dataset.csv?download=1",
+      "sha256": "46bacd05613159795fc62afe51f9b66aaaee35b587fce9b820cb4740a97cd627"
+    },
+    "hallmark.jsonl": {
+      "url": "https://raw.githubusercontent.com/rpatrik96/hallmark/bff938e14a0db9651fdbf0c4c1f95011bdca8a0c/data/v1.2/test_public.jsonl",
+      "sha256": "0637ffc80747c36f3e010cd613f16481dcb916f944874122b2e2d3f872429973"
+    },
+    "manual_validation_100.csv": {
+      "url": "https://raw.githubusercontent.com/Zerichen/Citation-Hallucination/0c9a70128cbef858412773af940cc1b7b6e3a3ab/manual_validation_100.csv",
+      "sha256": "95e9b6d510297732dbfe6ddc26b5924506f8598a9a86574a90e072cfa16274e9"
+    },
+    "manual_validation_200_batch2.csv": {
+      "url": "https://raw.githubusercontent.com/Zerichen/Citation-Hallucination/0c9a70128cbef858412773af940cc1b7b6e3a3ab/manual_validation_200_batch2.csv",
+      "sha256": "ba9234093a98e221b53d1cb74b1420a160982e8d32d9ceda8b842e0d40388d32"
+    }
+  },
+  "selection_method": "SHA-256 ranked selection within fixed label/tier/type quotas; see freeze_suite.py",
+  "deduplication": "Normalized candidate titles of >=20 ASCII alphanumeric characters, screened against earlier selections; not canonical-work deduplication",
+  "counts": {
+    "delta_human_audit": {
+      "AMBIGUOUS": 20,
+      "EXISTS": 40,
+      "FABRICATED": 40
+    },
+    "hallmark_test_public": {
+      "VALID": 50,
+      "HALLUCINATED": 50
+    },
+    "manual_reference_verification": {
+      "verified": 50,
+      "problematic": 12
+    }
+  },
+  "inputs_sha256": "95bf55342078d14ee2ba22c1365983a638ddd5af9e0d26ea4c42f546dae7d82f",
+  "labels_sha256": "cb46ecb41b713a017244d219fb628c14d12252213e11e9019de81fb36e176ece",
+  "policy_sha256_at_selection": "fbbe85f2e3a83480f867894190468a76d925ca0c7ed17badf3f38b02f363a464",
+  "selector_sha256": "84511f04c65daa0a98f3c15e414bf4316be8829eafd1cfd026c7e6e7a4494b99",
+  "selection": [
+    {
+      "id": "1",
+      "dataset": "delta_human_audit",
+      "source_id": "0862b445-e885-412a-af2d-994164603048_c04"
+    },
+    {
+      "id": "2",
+      "dataset": "delta_human_audit",
+      "source_id": "63277e88-c35e-41e2-8342-6f5ac8057853_c01"
+    },
+    {
+      "id": "3",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R44"
+    },
+    {
+      "id": "4",
+      "dataset": "delta_human_audit",
+      "source_id": "9adf39a2-2be6-4c38-b16c-5bc15c715958_c05"
+    },
+    {
+      "id": "5",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R20"
+    },
+    {
+      "id": "6",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R23"
+    },
+    {
+      "id": "7",
+      "dataset": "hallmark_test_public",
+      "source_id": "e1694f2a0b29"
+    },
+    {
+      "id": "8",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R63"
+    },
+    {
+      "id": "9",
+      "dataset": "delta_human_audit",
+      "source_id": "3e2f73b4-ce0d-4814-98f1-8d9d20f3912f_c03"
+    },
+    {
+      "id": "10",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R46"
+    },
+    {
+      "id": "11",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R20"
+    },
+    {
+      "id": "12",
+      "dataset": "hallmark_test_public",
+      "source_id": "d18ee16e0ae6"
+    },
+    {
+      "id": "13",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R7"
+    },
+    {
+      "id": "14",
+      "dataset": "hallmark_test_public",
+      "source_id": "d30bec325635"
+    },
+    {
+      "id": "15",
+      "dataset": "delta_human_audit",
+      "source_id": "2df5780b-4390-4083-a980-685220462479_c02"
+    },
+    {
+      "id": "16",
+      "dataset": "delta_human_audit",
+      "source_id": "13633304-34d8-44f8-90f4-d7d1d8262fd3_c04"
+    },
+    {
+      "id": "17",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R56"
+    },
+    {
+      "id": "18",
+      "dataset": "delta_human_audit",
+      "source_id": "ccde5f31-0982-4e8d-b1dd-aa91bc2f0570_c05"
+    },
+    {
+      "id": "19",
+      "dataset": "hallmark_test_public",
+      "source_id": "d0e8f6c5bb51"
+    },
+    {
+      "id": "20",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R18"
+    },
+    {
+      "id": "21",
+      "dataset": "delta_human_audit",
+      "source_id": "f39a722c-e462-4caa-aac8-fb093198cd83_c04"
+    },
+    {
+      "id": "22",
+      "dataset": "delta_human_audit",
+      "source_id": "23c8f04f-2a02-4060-8495-3b7fe28c7ba5_c08"
+    },
+    {
+      "id": "23",
+      "dataset": "hallmark_test_public",
+      "source_id": "d5f5db809235"
+    },
+    {
+      "id": "24",
+      "dataset": "hallmark_test_public",
+      "source_id": "b74335e5c7fe"
+    },
+    {
+      "id": "25",
+      "dataset": "delta_human_audit",
+      "source_id": "78ebf120-f50f-4dbf-aeb9-0874217b0dd1_c02"
+    },
+    {
+      "id": "26",
+      "dataset": "delta_human_audit",
+      "source_id": "69c869fe-0f39-4090-b8f8-154e836e469d_c05"
+    },
+    {
+      "id": "27",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R11"
+    },
+    {
+      "id": "28",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R53"
+    },
+    {
+      "id": "29",
+      "dataset": "hallmark_test_public",
+      "source_id": "cde609b82419"
+    },
+    {
+      "id": "30",
+      "dataset": "hallmark_test_public",
+      "source_id": "db0f3122fafb"
+    },
+    {
+      "id": "31",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R39"
+    },
+    {
+      "id": "32",
+      "dataset": "delta_human_audit",
+      "source_id": "69ea82fe-566f-4c7d-8bf7-f940f1e1c1a8_c01"
+    },
+    {
+      "id": "33",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R23"
+    },
+    {
+      "id": "34",
+      "dataset": "delta_human_audit",
+      "source_id": "f5edb917-cbcb-49be-9462-722d21cfe22d_c06"
+    },
+    {
+      "id": "35",
+      "dataset": "delta_human_audit",
+      "source_id": "ec7d957a-2acf-4064-9f84-a719c71b7659_c05"
+    },
+    {
+      "id": "36",
+      "dataset": "delta_human_audit",
+      "source_id": "8ff246cf-2d7a-4e96-b86a-8640bfc20abe_c04"
+    },
+    {
+      "id": "37",
+      "dataset": "delta_human_audit",
+      "source_id": "fb6abf2a-abd1-49b2-867f-e504d6afe421_c01"
+    },
+    {
+      "id": "38",
+      "dataset": "delta_human_audit",
+      "source_id": "99155d37-ab1f-48a9-a133-93dd3c619e7b_c04"
+    },
+    {
+      "id": "39",
+      "dataset": "delta_human_audit",
+      "source_id": "2234b4a9-a944-4a35-a9e0-525d0764f493_c01"
+    },
+    {
+      "id": "40",
+      "dataset": "hallmark_test_public",
+      "source_id": "e51140f8b514"
+    },
+    {
+      "id": "41",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R21"
+    },
+    {
+      "id": "42",
+      "dataset": "delta_human_audit",
+      "source_id": "faeb3317-880c-4ab1-a11b-4fdd5bfd926e_c02"
+    },
+    {
+      "id": "43",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R24"
+    },
+    {
+      "id": "44",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R47"
+    },
+    {
+      "id": "45",
+      "dataset": "delta_human_audit",
+      "source_id": "a9f0175c-f6ef-43c9-8f2d-36b56e34295a_c02"
+    },
+    {
+      "id": "46",
+      "dataset": "hallmark_test_public",
+      "source_id": "c5737004e577"
+    },
+    {
+      "id": "47",
+      "dataset": "delta_human_audit",
+      "source_id": "eb586059-529d-44c4-83e6-45452903a2e8_c04"
+    },
+    {
+      "id": "48",
+      "dataset": "hallmark_test_public",
+      "source_id": "c958e6b170dc"
+    },
+    {
+      "id": "49",
+      "dataset": "hallmark_test_public",
+      "source_id": "f530e82c6353"
+    },
+    {
+      "id": "50",
+      "dataset": "delta_human_audit",
+      "source_id": "09af07fc-ef59-41c0-b781-dd145a82776b_c05"
+    },
+    {
+      "id": "51",
+      "dataset": "delta_human_audit",
+      "source_id": "9bd76642-ee16-4613-b8a3-d8a563544bcb_c02"
+    },
+    {
+      "id": "52",
+      "dataset": "delta_human_audit",
+      "source_id": "1d4c9637-4626-4386-8a68-7cab01f35d31_c05"
+    },
+    {
+      "id": "53",
+      "dataset": "hallmark_test_public",
+      "source_id": "b3699cb42c69"
+    },
+    {
+      "id": "54",
+      "dataset": "hallmark_test_public",
+      "source_id": "fcf41787a617"
+    },
+    {
+      "id": "55",
+      "dataset": "delta_human_audit",
+      "source_id": "80f9414e-31d8-4fde-b792-90333997d078_c03"
+    },
+    {
+      "id": "56",
+      "dataset": "hallmark_test_public",
+      "source_id": "d177f921ebff"
+    },
+    {
+      "id": "57",
+      "dataset": "hallmark_test_public",
+      "source_id": "b655453949db"
+    },
+    {
+      "id": "58",
+      "dataset": "delta_human_audit",
+      "source_id": "a052f203-dbc9-40e0-827f-51b35271e87a_c03"
+    },
+    {
+      "id": "59",
+      "dataset": "delta_human_audit",
+      "source_id": "62f0273e-8c33-4c77-8c9d-75c9820bfa3b_c02"
+    },
+    {
+      "id": "60",
+      "dataset": "delta_human_audit",
+      "source_id": "ca4d0f48-d317-42e6-b49a-08068c034a45_c04"
+    },
+    {
+      "id": "61",
+      "dataset": "hallmark_test_public",
+      "source_id": "ba0e690d508b"
+    },
+    {
+      "id": "62",
+      "dataset": "delta_human_audit",
+      "source_id": "00528e27-4299-4534-a78a-5dcb6b1afc4b_c01"
+    },
+    {
+      "id": "63",
+      "dataset": "delta_human_audit",
+      "source_id": "c4a9f66a-c0d6-4004-a404-426d7b665f2f_c03"
+    },
+    {
+      "id": "64",
+      "dataset": "hallmark_test_public",
+      "source_id": "9f685db5c103"
+    },
+    {
+      "id": "65",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R36"
+    },
+    {
+      "id": "66",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R61"
+    },
+    {
+      "id": "67",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R34"
+    },
+    {
+      "id": "68",
+      "dataset": "hallmark_test_public",
+      "source_id": "d16d7cb21832"
+    },
+    {
+      "id": "69",
+      "dataset": "hallmark_test_public",
+      "source_id": "fbdd4f366347"
+    },
+    {
+      "id": "70",
+      "dataset": "hallmark_test_public",
+      "source_id": "e11e16df9644"
+    },
+    {
+      "id": "71",
+      "dataset": "hallmark_test_public",
+      "source_id": "ebd150e9f6db"
+    },
+    {
+      "id": "72",
+      "dataset": "delta_human_audit",
+      "source_id": "0987978e-9b90-4d92-8a2e-60d8f6a379b0_c02"
+    },
+    {
+      "id": "73",
+      "dataset": "hallmark_test_public",
+      "source_id": "f6d93b7505e0"
+    },
+    {
+      "id": "74",
+      "dataset": "hallmark_test_public",
+      "source_id": "eb48886dfab0"
+    },
+    {
+      "id": "75",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R17"
+    },
+    {
+      "id": "76",
+      "dataset": "hallmark_test_public",
+      "source_id": "ab3fd7b714d3"
+    },
+    {
+      "id": "77",
+      "dataset": "delta_human_audit",
+      "source_id": "74e75ce6-59ba-40dc-88ca-570ed875ae93_c01"
+    },
+    {
+      "id": "78",
+      "dataset": "hallmark_test_public",
+      "source_id": "e13917573537"
+    },
+    {
+      "id": "79",
+      "dataset": "hallmark_test_public",
+      "source_id": "b30d3ae98ca4"
+    },
+    {
+      "id": "80",
+      "dataset": "delta_human_audit",
+      "source_id": "2b8b2b89-e938-46e9-ad1d-82c6c7ed5b1b_c04"
+    },
+    {
+      "id": "81",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R13"
+    },
+    {
+      "id": "82",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R2"
+    },
+    {
+      "id": "83",
+      "dataset": "delta_human_audit",
+      "source_id": "710b9b22-4a92-4ec0-99d4-d233bd98e899_c06"
+    },
+    {
+      "id": "84",
+      "dataset": "delta_human_audit",
+      "source_id": "88271efc-a7b9-4f73-a85c-9862a0254af3_c04"
+    },
+    {
+      "id": "85",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R9"
+    },
+    {
+      "id": "86",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R57"
+    },
+    {
+      "id": "87",
+      "dataset": "hallmark_test_public",
+      "source_id": "cea36cda1d80"
+    },
+    {
+      "id": "88",
+      "dataset": "delta_human_audit",
+      "source_id": "454b055a-ed2a-4fdf-98a4-daf377a4e548_c01"
+    },
+    {
+      "id": "89",
+      "dataset": "manual_reference_verification",
+      "source_id": "P2/R14"
+    },
+    {
+      "id": "90",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R51"
+    },
+    {
+      "id": "91",
+      "dataset": "hallmark_test_public",
+      "source_id": "ba6f8800e25a"
+    },
+    {
+      "id": "92",
+      "dataset": "hallmark_test_public",
+      "source_id": "b0ba9237553b"
+    },
+    {
+      "id": "93",
+      "dataset": "delta_human_audit",
+      "source_id": "8342016d-a0a4-4e28-bfe5-cd6ef70cd3e8_c08"
+    },
+    {
+      "id": "94",
+      "dataset": "hallmark_test_public",
+      "source_id": "e4ab84d0a880"
+    },
+    {
+      "id": "95",
+      "dataset": "hallmark_test_public",
+      "source_id": "d3d4d046e8ca"
+    },
+    {
+      "id": "96",
+      "dataset": "delta_human_audit",
+      "source_id": "cf81eaa9-c67e-4f81-a353-3fe72f87d4d7_c06"
+    },
+    {
+      "id": "97",
+      "dataset": "hallmark_test_public",
+      "source_id": "eb25a8a34125"
+    },
+    {
+      "id": "98",
+      "dataset": "hallmark_test_public",
+      "source_id": "c8b5d9a2513c"
+    },
+    {
+      "id": "99",
+      "dataset": "delta_human_audit",
+      "source_id": "98ada660-db28-4e80-9364-2344d6f545b8_c05"
+    },
+    {
+      "id": "100",
+      "dataset": "hallmark_test_public",
+      "source_id": "f324a547f55c"
+    },
+    {
+      "id": "101",
+      "dataset": "hallmark_test_public",
+      "source_id": "c729374ecfbc"
+    },
+    {
+      "id": "102",
+      "dataset": "delta_human_audit",
+      "source_id": "0343266d-b4a0-4d22-8667-3fae2fc4ad1b_c04"
+    },
+    {
+      "id": "103",
+      "dataset": "hallmark_test_public",
+      "source_id": "faccd51096ac"
+    },
+    {
+      "id": "104",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R32"
+    },
+    {
+      "id": "105",
+      "dataset": "hallmark_test_public",
+      "source_id": "d68dff503d04"
+    },
+    {
+      "id": "106",
+      "dataset": "hallmark_test_public",
+      "source_id": "d448cd0748bb"
+    },
+    {
+      "id": "107",
+      "dataset": "hallmark_test_public",
+      "source_id": "bfb18b239245"
+    },
+    {
+      "id": "108",
+      "dataset": "hallmark_test_public",
+      "source_id": "36e9c687d931"
+    },
+    {
+      "id": "109",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R62"
+    },
+    {
+      "id": "110",
+      "dataset": "delta_human_audit",
+      "source_id": "6f02baa4-8f52-4bbd-9756-39fa166a33fd_c02"
+    },
+    {
+      "id": "111",
+      "dataset": "hallmark_test_public",
+      "source_id": "f921019497f2"
+    },
+    {
+      "id": "112",
+      "dataset": "delta_human_audit",
+      "source_id": "1c49488f-2df8-49ca-a89e-3df94bf9ab72_c06"
+    },
+    {
+      "id": "113",
+      "dataset": "hallmark_test_public",
+      "source_id": "dac4f63ce2b7"
+    },
+    {
+      "id": "114",
+      "dataset": "hallmark_test_public",
+      "source_id": "a36e4d6f6b45"
+    },
+    {
+      "id": "115",
+      "dataset": "hallmark_test_public",
+      "source_id": "b6a26b30b14a"
+    },
+    {
+      "id": "116",
+      "dataset": "hallmark_test_public",
+      "source_id": "e1ebe7e33440"
+    },
+    {
+      "id": "117",
+      "dataset": "hallmark_test_public",
+      "source_id": "dcd757d3958f"
+    },
+    {
+      "id": "118",
+      "dataset": "delta_human_audit",
+      "source_id": "f978202e-59f9-4194-9f1e-bc5c8ea0a3bc_c01"
+    },
+    {
+      "id": "119",
+      "dataset": "hallmark_test_public",
+      "source_id": "a516eefcdcd5"
+    },
+    {
+      "id": "120",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R19"
+    },
+    {
+      "id": "121",
+      "dataset": "hallmark_test_public",
+      "source_id": "bed2051ec470"
+    },
+    {
+      "id": "122",
+      "dataset": "delta_human_audit",
+      "source_id": "f09244b9-68c2-468f-9c2e-c6fba840195c_c02"
+    },
+    {
+      "id": "123",
+      "dataset": "hallmark_test_public",
+      "source_id": "fd9ce387a764"
+    },
+    {
+      "id": "124",
+      "dataset": "hallmark_test_public",
+      "source_id": "a7f3e683c9da"
+    },
+    {
+      "id": "125",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R59"
+    },
+    {
+      "id": "126",
+      "dataset": "hallmark_test_public",
+      "source_id": "ec6617de62a6"
+    },
+    {
+      "id": "127",
+      "dataset": "delta_human_audit",
+      "source_id": "b0126112-a84c-42be-b204-fff54f74d5a3_c04"
+    },
+    {
+      "id": "128",
+      "dataset": "hallmark_test_public",
+      "source_id": "ce020c7b6d9b"
+    },
+    {
+      "id": "129",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R42"
+    },
+    {
+      "id": "130",
+      "dataset": "hallmark_test_public",
+      "source_id": "feae66fc8c02"
+    },
+    {
+      "id": "131",
+      "dataset": "delta_human_audit",
+      "source_id": "db4f5046-3e83-4b0b-b76f-b655257f10f0_c08"
+    },
+    {
+      "id": "132",
+      "dataset": "delta_human_audit",
+      "source_id": "e200e923-32d3-489d-9eef-36dcdbbabcad_c03"
+    },
+    {
+      "id": "133",
+      "dataset": "delta_human_audit",
+      "source_id": "1afe2032-8579-4e5a-af2c-834525b16558_c01"
+    },
+    {
+      "id": "134",
+      "dataset": "hallmark_test_public",
+      "source_id": "d681fa8682cc"
+    },
+    {
+      "id": "135",
+      "dataset": "delta_human_audit",
+      "source_id": "9d057fbc-6685-47e9-8bae-2624858aab04_c01"
+    },
+    {
+      "id": "136",
+      "dataset": "delta_human_audit",
+      "source_id": "d9576fd3-5514-45c9-aafa-5c667b382ad5_c04"
+    },
+    {
+      "id": "137",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R8"
+    },
+    {
+      "id": "138",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R45"
+    },
+    {
+      "id": "139",
+      "dataset": "hallmark_test_public",
+      "source_id": "dee6980ec594"
+    },
+    {
+      "id": "140",
+      "dataset": "hallmark_test_public",
+      "source_id": "e42174d04fa9"
+    },
+    {
+      "id": "141",
+      "dataset": "delta_human_audit",
+      "source_id": "4fa29f56-0687-4abb-98db-f9bdf9f345d1_c05"
+    },
+    {
+      "id": "142",
+      "dataset": "delta_human_audit",
+      "source_id": "ff183bdd-8ec7-4e5c-be22-529aec7ab6f4_c04"
+    },
+    {
+      "id": "143",
+      "dataset": "hallmark_test_public",
+      "source_id": "d85227857767"
+    },
+    {
+      "id": "144",
+      "dataset": "delta_human_audit",
+      "source_id": "320c5a21-1a5f-4c6a-8d1b-e1023b993efc_c05"
+    },
+    {
+      "id": "145",
+      "dataset": "hallmark_test_public",
+      "source_id": "f04b2cbb7894"
+    },
+    {
+      "id": "146",
+      "dataset": "delta_human_audit",
+      "source_id": "7e2e0dd6-b62b-48b7-8b89-b213dce5621d_c06"
+    },
+    {
+      "id": "147",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R7"
+    },
+    {
+      "id": "148",
+      "dataset": "delta_human_audit",
+      "source_id": "83946328-3d87-45ee-ae90-9ab9c1c8bba5_c05"
+    },
+    {
+      "id": "149",
+      "dataset": "hallmark_test_public",
+      "source_id": "f6c271148583"
+    },
+    {
+      "id": "150",
+      "dataset": "delta_human_audit",
+      "source_id": "4067752f-a165-4e2a-b940-4996ecce48c5_c07"
+    },
+    {
+      "id": "151",
+      "dataset": "hallmark_test_public",
+      "source_id": "bceb607d95f6"
+    },
+    {
+      "id": "152",
+      "dataset": "hallmark_test_public",
+      "source_id": "d1f15c4f13d0"
+    },
+    {
+      "id": "153",
+      "dataset": "manual_reference_verification",
+      "source_id": "P2/R8"
+    },
+    {
+      "id": "154",
+      "dataset": "delta_human_audit",
+      "source_id": "490e292c-2f4d-4a2b-b8f7-7e9028fbf819_c07"
+    },
+    {
+      "id": "155",
+      "dataset": "delta_human_audit",
+      "source_id": "0b0ac2a3-3ca9-4276-932b-e6050e30372c_c07"
+    },
+    {
+      "id": "156",
+      "dataset": "manual_reference_verification",
+      "source_id": "P2/R7"
+    },
+    {
+      "id": "157",
+      "dataset": "hallmark_test_public",
+      "source_id": "d8b8c8693782"
+    },
+    {
+      "id": "158",
+      "dataset": "hallmark_test_public",
+      "source_id": "c94919343e03"
+    },
+    {
+      "id": "159",
+      "dataset": "hallmark_test_public",
+      "source_id": "e6fe32836b20"
+    },
+    {
+      "id": "160",
+      "dataset": "hallmark_test_public",
+      "source_id": "e94dbb9fafa8"
+    },
+    {
+      "id": "161",
+      "dataset": "hallmark_test_public",
+      "source_id": "a5a0f35fa18a"
+    },
+    {
+      "id": "162",
+      "dataset": "delta_human_audit",
+      "source_id": "3af4481b-e807-4ba0-988a-dc56bcf50b23_c01"
+    },
+    {
+      "id": "163",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R9"
+    },
+    {
+      "id": "164",
+      "dataset": "delta_human_audit",
+      "source_id": "9af236bd-3dfb-422f-8bcb-bb6cce1c1340_c03"
+    },
+    {
+      "id": "165",
+      "dataset": "delta_human_audit",
+      "source_id": "e73786a3-94aa-4f2f-a4f0-5036bf8f44f3_c01"
+    },
+    {
+      "id": "166",
+      "dataset": "delta_human_audit",
+      "source_id": "ae5e43c2-6064-4455-a562-5763541d0664_c03"
+    },
+    {
+      "id": "167",
+      "dataset": "hallmark_test_public",
+      "source_id": "dae94ac1c507"
+    },
+    {
+      "id": "168",
+      "dataset": "hallmark_test_public",
+      "source_id": "fea1bb8127f5"
+    },
+    {
+      "id": "169",
+      "dataset": "hallmark_test_public",
+      "source_id": "a0bdd256f349"
+    },
+    {
+      "id": "170",
+      "dataset": "hallmark_test_public",
+      "source_id": "fe3a5cbb503f"
+    },
+    {
+      "id": "171",
+      "dataset": "hallmark_test_public",
+      "source_id": "e41b68410201"
+    },
+    {
+      "id": "172",
+      "dataset": "delta_human_audit",
+      "source_id": "a0bc7189-185a-4293-8458-be37dd4bc0da_c06"
+    },
+    {
+      "id": "173",
+      "dataset": "delta_human_audit",
+      "source_id": "2918589a-8579-4849-9019-7bd3a256d5fe_c03"
+    },
+    {
+      "id": "174",
+      "dataset": "hallmark_test_public",
+      "source_id": "b33e1453661c"
+    },
+    {
+      "id": "175",
+      "dataset": "delta_human_audit",
+      "source_id": "bed55f69-f945-4bbb-a7c0-be79cd0fd73a_c06"
+    },
+    {
+      "id": "176",
+      "dataset": "hallmark_test_public",
+      "source_id": "dfceb6a9669f"
+    },
+    {
+      "id": "177",
+      "dataset": "delta_human_audit",
+      "source_id": "fc0df7e6-5b36-4b47-9d3a-9c4d5cf85d3e_c04"
+    },
+    {
+      "id": "178",
+      "dataset": "delta_human_audit",
+      "source_id": "c2b1ec7f-9669-417d-8bef-b5fe62a587f2_c03"
+    },
+    {
+      "id": "179",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R28"
+    },
+    {
+      "id": "180",
+      "dataset": "hallmark_test_public",
+      "source_id": "c62f826741b3"
+    },
+    {
+      "id": "181",
+      "dataset": "hallmark_test_public",
+      "source_id": "bf9d132106d0"
+    },
+    {
+      "id": "182",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R1"
+    },
+    {
+      "id": "183",
+      "dataset": "delta_human_audit",
+      "source_id": "2335a517-fa7a-47fb-90cb-9539d12f157b_c06"
+    },
+    {
+      "id": "184",
+      "dataset": "delta_human_audit",
+      "source_id": "f666c4b7-5edd-49fb-ae71-77c02506f6dd_c05"
+    },
+    {
+      "id": "185",
+      "dataset": "delta_human_audit",
+      "source_id": "2c363978-ab3e-4b8d-97fd-1825eb970a68_c03"
+    },
+    {
+      "id": "186",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R60"
+    },
+    {
+      "id": "187",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R15"
+    },
+    {
+      "id": "188",
+      "dataset": "hallmark_test_public",
+      "source_id": "f6a762094d04"
+    },
+    {
+      "id": "189",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R2"
+    },
+    {
+      "id": "190",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R38"
+    },
+    {
+      "id": "191",
+      "dataset": "hallmark_test_public",
+      "source_id": "aec6dcbdcb4f"
+    },
+    {
+      "id": "192",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R64"
+    },
+    {
+      "id": "193",
+      "dataset": "hallmark_test_public",
+      "source_id": "f57f7465507c"
+    },
+    {
+      "id": "194",
+      "dataset": "delta_human_audit",
+      "source_id": "179bd5bb-cca2-4dad-9d40-a8ce09468adb_c06"
+    },
+    {
+      "id": "195",
+      "dataset": "hallmark_test_public",
+      "source_id": "a73d7564f5be"
+    },
+    {
+      "id": "196",
+      "dataset": "delta_human_audit",
+      "source_id": "8c998337-2d73-48ef-8c4a-5f8bcd87b32a_c03"
+    },
+    {
+      "id": "197",
+      "dataset": "delta_human_audit",
+      "source_id": "e8918eec-c788-48d6-a56a-7e56192616bd_c02"
+    },
+    {
+      "id": "198",
+      "dataset": "delta_human_audit",
+      "source_id": "f826164a-0165-4c43-a7d8-392e829554a6_c01"
+    },
+    {
+      "id": "199",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R14"
+    },
+    {
+      "id": "200",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R41"
+    },
+    {
+      "id": "201",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R24"
+    },
+    {
+      "id": "202",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R35"
+    },
+    {
+      "id": "203",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R29"
+    },
+    {
+      "id": "204",
+      "dataset": "hallmark_test_public",
+      "source_id": "b6d85d903dcf"
+    },
+    {
+      "id": "205",
+      "dataset": "delta_human_audit",
+      "source_id": "ee04ec69-ca70-4b02-9d4a-a6b5c773e4a6_c01"
+    },
+    {
+      "id": "206",
+      "dataset": "delta_human_audit",
+      "source_id": "69d821a8-aaf9-4981-a1a5-89de1791a630_c05"
+    },
+    {
+      "id": "207",
+      "dataset": "delta_human_audit",
+      "source_id": "a19c6b09-2e63-48b6-8d15-4b2596f23095_c01"
+    },
+    {
+      "id": "208",
+      "dataset": "delta_human_audit",
+      "source_id": "1033f080-447c-40e1-a1db-97aa95268c41_c04"
+    },
+    {
+      "id": "209",
+      "dataset": "delta_human_audit",
+      "source_id": "0861bfe7-c8bd-4962-809e-b2c382ca09e9_c01"
+    },
+    {
+      "id": "210",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R14"
+    },
+    {
+      "id": "211",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R18"
+    },
+    {
+      "id": "212",
+      "dataset": "hallmark_test_public",
+      "source_id": "ecea509e5720"
+    },
+    {
+      "id": "213",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R15"
+    },
+    {
+      "id": "214",
+      "dataset": "manual_reference_verification",
+      "source_id": "P2/R13"
+    },
+    {
+      "id": "215",
+      "dataset": "hallmark_test_public",
+      "source_id": "c65d6703973e"
+    },
+    {
+      "id": "216",
+      "dataset": "delta_human_audit",
+      "source_id": "1d684508-651f-47a0-8fb0-a8599ff8bf99_c03"
+    },
+    {
+      "id": "217",
+      "dataset": "hallmark_test_public",
+      "source_id": "fdfc719747d1"
+    },
+    {
+      "id": "218",
+      "dataset": "delta_human_audit",
+      "source_id": "3615f21f-fb8e-4cc9-8da2-6e20ae03e82a_c01"
+    },
+    {
+      "id": "219",
+      "dataset": "delta_human_audit",
+      "source_id": "8fa06ace-88ec-4dbb-900d-60a260658db4_c05"
+    },
+    {
+      "id": "220",
+      "dataset": "hallmark_test_public",
+      "source_id": "ef9e665113db"
+    },
+    {
+      "id": "221",
+      "dataset": "hallmark_test_public",
+      "source_id": "c0401c2d5892"
+    },
+    {
+      "id": "222",
+      "dataset": "delta_human_audit",
+      "source_id": "81ef35da-1c44-4607-b835-6e1c9b2e13b3_c05"
+    },
+    {
+      "id": "223",
+      "dataset": "delta_human_audit",
+      "source_id": "41cfe8cc-7f34-4595-8824-56ebc750f093_c03"
+    },
+    {
+      "id": "224",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R33"
+    },
+    {
+      "id": "225",
+      "dataset": "delta_human_audit",
+      "source_id": "41867dee-1d53-4042-a655-0ad981315f71_c05"
+    },
+    {
+      "id": "226",
+      "dataset": "delta_human_audit",
+      "source_id": "355ca5c6-581e-4dc5-bac3-b32f5ff753cc_c02"
+    },
+    {
+      "id": "227",
+      "dataset": "hallmark_test_public",
+      "source_id": "413fa88ea98c"
+    },
+    {
+      "id": "228",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R16"
+    },
+    {
+      "id": "229",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R10"
+    },
+    {
+      "id": "230",
+      "dataset": "delta_human_audit",
+      "source_id": "cde9c9b3-d432-4987-a16d-072af0f4c0af_c05"
+    },
+    {
+      "id": "231",
+      "dataset": "hallmark_test_public",
+      "source_id": "e5aaea0199f1"
+    },
+    {
+      "id": "232",
+      "dataset": "delta_human_audit",
+      "source_id": "fdac2cd2-2c20-4674-89d3-cfe08f5fdda6_c07"
+    },
+    {
+      "id": "233",
+      "dataset": "delta_human_audit",
+      "source_id": "9a23e7f6-5f59-47f2-8c13-27f1458e507e_c05"
+    },
+    {
+      "id": "234",
+      "dataset": "delta_human_audit",
+      "source_id": "e06b435a-dee8-4c7e-9eab-bf5537dfe259_c05"
+    },
+    {
+      "id": "235",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R6"
+    },
+    {
+      "id": "236",
+      "dataset": "delta_human_audit",
+      "source_id": "ddf7c34b-68dd-4440-87b0-670fa8bbd41b_c05"
+    },
+    {
+      "id": "237",
+      "dataset": "hallmark_test_public",
+      "source_id": "f8cdaa8f15f3"
+    },
+    {
+      "id": "238",
+      "dataset": "hallmark_test_public",
+      "source_id": "ad2bb10698d1"
+    },
+    {
+      "id": "239",
+      "dataset": "delta_human_audit",
+      "source_id": "495d7e7c-2879-435a-ba9a-71a3b59c0491_c03"
+    },
+    {
+      "id": "240",
+      "dataset": "delta_human_audit",
+      "source_id": "e0732cb9-d5ad-4736-80e0-092742604607_c01"
+    },
+    {
+      "id": "241",
+      "dataset": "hallmark_test_public",
+      "source_id": "d4fe212888ba"
+    },
+    {
+      "id": "242",
+      "dataset": "hallmark_test_public",
+      "source_id": "b79aa3db399c"
+    },
+    {
+      "id": "243",
+      "dataset": "delta_human_audit",
+      "source_id": "5bca2786-0adf-48da-bfa6-616c9c381a48_c04"
+    },
+    {
+      "id": "244",
+      "dataset": "hallmark_test_public",
+      "source_id": "c89033e923da"
+    },
+    {
+      "id": "245",
+      "dataset": "manual_reference_verification",
+      "source_id": "P2/R11"
+    },
+    {
+      "id": "246",
+      "dataset": "hallmark_test_public",
+      "source_id": "cea852a48efe"
+    },
+    {
+      "id": "247",
+      "dataset": "delta_human_audit",
+      "source_id": "eb586059-529d-44c4-83e6-45452903a2e8_c03"
+    },
+    {
+      "id": "248",
+      "dataset": "hallmark_test_public",
+      "source_id": "a0283035e7e9"
+    },
+    {
+      "id": "249",
+      "dataset": "hallmark_test_public",
+      "source_id": "b92406286e5c"
+    },
+    {
+      "id": "250",
+      "dataset": "hallmark_test_public",
+      "source_id": "e4d9322cf784"
+    },
+    {
+      "id": "251",
+      "dataset": "delta_human_audit",
+      "source_id": "5b751207-04ab-43d2-83c0-c99dd168bfd4_c05"
+    },
+    {
+      "id": "252",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R43"
+    },
+    {
+      "id": "253",
+      "dataset": "manual_reference_verification",
+      "source_id": "P2/R15"
+    },
+    {
+      "id": "254",
+      "dataset": "hallmark_test_public",
+      "source_id": "f5728e2b5e15"
+    },
+    {
+      "id": "255",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R13"
+    },
+    {
+      "id": "256",
+      "dataset": "manual_reference_verification",
+      "source_id": "P1/R5"
+    },
+    {
+      "id": "257",
+      "dataset": "hallmark_test_public",
+      "source_id": "a5ce9b3b8868"
+    },
+    {
+      "id": "258",
+      "dataset": "delta_human_audit",
+      "source_id": "1176bbd3-6e79-4764-b227-a22e5b465341_c02"
+    },
+    {
+      "id": "259",
+      "dataset": "delta_human_audit",
+      "source_id": "d9061d31-a40b-4352-9163-c7213c5562b9_c02"
+    },
+    {
+      "id": "260",
+      "dataset": "delta_human_audit",
+      "source_id": "68e961b1-b93f-4875-9c79-38344fdef49a_c01"
+    },
+    {
+      "id": "261",
+      "dataset": "hallmark_test_public",
+      "source_id": "eb148d071e66"
+    },
+    {
+      "id": "262",
+      "dataset": "delta_human_audit",
+      "source_id": "f09244b9-68c2-468f-9c2e-c6fba840195c_c01"
+    }
+  ],
+  "evidence_frozen": false,
+  "model_evaluations_run": false
+}

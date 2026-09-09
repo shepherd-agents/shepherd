@@ -13,6 +13,8 @@ extend-exclude = [
     "shepherd/design/**",
     "shepherd/eval/**",
     "shepherd/examples/**",
+    # Verbatim recovered task source: provenance archive, not maintained runtime code.
+    "shepherd/extras/citation-checker/docs/original-candidate/**",
     # Union of both repos' docs-tree excludes so this file is one lint truth
     # (D6): _system/_src exist only publicly; design/tools only internally.
     "docs/_system/**",

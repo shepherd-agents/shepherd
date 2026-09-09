@@ -1,0 +1,1398 @@
+{
+  "references": [
+    {
+      "id": "s01",
+      "raw": "Diederik P. Kingma and Jimmy Ba. Deepfm: a factorization-machine based neural network for ctr prediction. In International Conference on Learning Representations, 2015.",
+      "source_pdf": "https://arxiv.org/pdf/2509.22807v1",
+      "pages": [
+        11
+      ],
+      "prefetched": [
+        {
+          "url": "https://api.crossref.org/works?query.bibliographic=Diederik+P.+Kingma+and+Jimmy+Ba.+Deepfm%3A+a+factorization-machine+based+neural+network+for+ctr+prediction.+In+International+Conference+on+Learning+Representations%2C+2015.&rows=3",
+          "retrieved_at": "2026-09-05T09:18:03.756940+00:00",
+          "evidence_file": "evidence/e397a39c5042cfb3deda.json",
+          "http_status": 200,
+          "resolved_url": "https://api.crossref.org/works?query.bibliographic=Diederik+P.+Kingma+and+Jimmy+Ba.+Deepfm%3A+a+factorization-machine+based+neural+network+for+ctr+prediction.+In+International+Conference+on+Learning+Representations%2C+2015.&rows=3",
+          "candidates": [
+            {
+              "title": [
+                "DeepFM: A Factorization-Machine based Neural Network for CTR Prediction"
+              ],
+              "author": [
+                {
+                  "given": "Huifeng",
+                  "family": "Guo",
+                  "sequence": "first",
+                  "affiliation": [
+                    {
+                      "name": "Shenzhen Graduate School, Harbin Institute of Technology"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Ruiming",
+                  "family": "TANG",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Huawei Noah's Ark Lab"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Yunming",
+                  "family": "Ye",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Shenzhen Graduate School, Harbin Institute of Technology"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Zhenguo",
+                  "family": "Li",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Huawei Noah's Ark Lab"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Xiuqiang",
+                  "family": "He",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Huawei Noah's Ark Lab"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Proceedings of the Twenty-Sixth International Joint Conference on Artificial Intelligence"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2017,
+                    8
+                  ]
+                ]
+              },
+              "DOI": "10.24963/ijcai.2017/239",
+              "URL": "https://doi.org/10.24963/ijcai.2017/239",
+              "type": "proceedings-article"
+            },
+            {
+              "title": [
+                "DeepFaFM :A Field-array Factorization Machine based Neural Network for CTR Prediction"
+              ],
+              "author": [
+                {
+                  "given": "Xiaowan",
+                  "family": "Zhou",
+                  "sequence": "first",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "given": "Yuliang",
+                  "family": "Shi",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "2020 IEEE 4th Information Technology, Networking, Electronic and Automation Control Conference (ITNEC)"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2020,
+                    6
+                  ]
+                ]
+              },
+              "DOI": "10.1109/itnec48623.2020.9084654",
+              "URL": "https://doi.org/10.1109/itnec48623.2020.9084654",
+              "type": "proceedings-article"
+            },
+            {
+              "title": [
+                "Self-Attention Based Optimal Factorization Machine for Ctr Prediction"
+              ],
+              "author": [
+                {
+                  "given": "Zhenguo",
+                  "family": "Gao",
+                  "sequence": "first",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "given": "Shuang",
+                  "family": "Wu",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                }
+              ],
+              "container-title": null,
+              "published": {
+                "date-parts": [
+                  [
+                    2023
+                  ]
+                ]
+              },
+              "DOI": "10.2139/ssrn.4442847",
+              "URL": "https://doi.org/10.2139/ssrn.4442847",
+              "type": "posted-content"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "raw": "Huifeng Guo, Ruiming Tang, Yunming Ye, Zhenguo Li, and Xiuqiang He. Deepfm: a factorization-machine based neural network for ctr prediction. In Proceedings of the 26th International Joint Conference on Artificial Intelligence, 2017.",
+      "source_pdf": "https://arxiv.org/pdf/2509.22807v1",
+      "pages": [
+        11
+      ],
+      "prefetched": [
+        {
+          "url": "https://api.crossref.org/works?query.bibliographic=Huifeng+Guo%2C+Ruiming+Tang%2C+Yunming+Ye%2C+Zhenguo+Li%2C+and+Xiuqiang+He.+Deepfm%3A+a+factorization-machine+based+neural+network+for+ctr+prediction.+In+Proceedings+of+the+26th+International+Joint+Conference+on+Artificial+Intelligence%2C+2017.&rows=3",
+          "retrieved_at": "2026-09-05T09:18:05.286792+00:00",
+          "evidence_file": "evidence/a738133f0b741c980fe6.json",
+          "http_status": 200,
+          "resolved_url": "https://api.crossref.org/works?query.bibliographic=Huifeng+Guo%2C+Ruiming+Tang%2C+Yunming+Ye%2C+Zhenguo+Li%2C+and+Xiuqiang+He.+Deepfm%3A+a+factorization-machine+based+neural+network+for+ctr+prediction.+In+Proceedings+of+the+26th+International+Joint+Conference+on+Artificial+Intelligence%2C+2017.&rows=3",
+          "candidates": [
+            {
+              "title": [
+                "DeepFM: A Factorization-Machine based Neural Network for CTR Prediction"
+              ],
+              "author": [
+                {
+                  "given": "Huifeng",
+                  "family": "Guo",
+                  "sequence": "first",
+                  "affiliation": [
+                    {
+                      "name": "Shenzhen Graduate School, Harbin Institute of Technology"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Ruiming",
+                  "family": "TANG",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Huawei Noah's Ark Lab"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Yunming",
+                  "family": "Ye",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Shenzhen Graduate School, Harbin Institute of Technology"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Zhenguo",
+                  "family": "Li",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Huawei Noah's Ark Lab"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Xiuqiang",
+                  "family": "He",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Huawei Noah's Ark Lab"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Proceedings of the Twenty-Sixth International Joint Conference on Artificial Intelligence"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2017,
+                    8
+                  ]
+                ]
+              },
+              "DOI": "10.24963/ijcai.2017/239",
+              "URL": "https://doi.org/10.24963/ijcai.2017/239",
+              "type": "proceedings-article"
+            },
+            {
+              "title": [
+                "Holistic Neural Network for CTR Prediction"
+              ],
+              "author": [
+                {
+                  "given": "Huifeng",
+                  "family": "Guo",
+                  "sequence": "first",
+                  "affiliation": [
+                    {
+                      "name": "Harbin Institute of Technology, Shenzhen, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "given": "Ruiming",
+                  "family": "Tang",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Noah's Ark Lab, Shenzhen, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "given": "Yunming",
+                  "family": "Ye",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Harbin Institute of Technology, Shenzhen, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "given": "Xiuqiang",
+                  "family": "He",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Noah's Ark Lab, Shenzhen, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Proceedings of the 26th International Conference on World Wide Web Companion - WWW '17 Companion"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2017
+                  ]
+                ]
+              },
+              "DOI": "10.1145/3041021.3054208",
+              "URL": "https://doi.org/10.1145/3041021.3054208",
+              "type": "proceedings-article"
+            },
+            {
+              "title": [
+                "A Dual Input-aware Factorization Machine for CTR Prediction"
+              ],
+              "author": [
+                {
+                  "given": "Wantong",
+                  "family": "Lu",
+                  "sequence": "first",
+                  "affiliation": [
+                    {
+                      "name": "Shenzhen International Graduate School, Tsinghua University"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Yantao",
+                  "family": "Yu",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Shenzhen International Graduate School, Tsinghua University"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Yongzhe",
+                  "family": "Chang",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Shenzhen International Graduate School, Tsinghua University"
+                    },
+                    {
+                      "name": "Data 61 CSIRO, Sydney, Australia"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Zhen",
+                  "family": "Wang",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "UBTECH Sydney AI Centre, The University of Sydney, Australia"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Chenhui",
+                  "family": "Li",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Shenzhen International Graduate School, Tsinghua University"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Bo",
+                  "family": "Yuan",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Shenzhen International Graduate School, Tsinghua University"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Proceedings of the Twenty-Ninth International Joint Conference on Artificial Intelligence"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2020,
+                    7
+                  ]
+                ]
+              },
+              "DOI": "10.24963/ijcai.2020/434",
+              "URL": "https://doi.org/10.24963/ijcai.2020/434",
+              "type": "proceedings-article"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "raw": "Zayne Sprague, Xi Ye, Kyle Richardson, and Greg Durrett. MuSR: Testing the limits of chain-of-thought with multistep soft reasoning. In Findings of the Association for Computational Linguistics: EMNLP 2023, pages 10749–10763, 2023.",
+      "source_pdf": "https://arxiv.org/pdf/2506.12241v1",
+      "pages": [
+        12
+      ],
+      "reference_number": 10,
+      "prefetched": [
+        {
+          "url": "https://api.crossref.org/works?query.bibliographic=Zayne+Sprague%2C+Xi+Ye%2C+Kyle+Richardson%2C+and+Greg+Durrett.+MuSR%3A+Testing+the+limits+of+chain-of-thought+with+multistep+soft+reasoning.+In+Findings+of+the+Association+for+Computational+Linguistics%3A+EMNLP+2023%2C+pages+10749%E2%80%9310763%2C+2023.&rows=3",
+          "retrieved_at": "2026-09-05T09:18:07.101910+00:00",
+          "evidence_file": "evidence/17412a6bd988442e1e12.json",
+          "http_status": 200,
+          "resolved_url": "https://api.crossref.org/works?query.bibliographic=Zayne+Sprague%2C+Xi+Ye%2C+Kyle+Richardson%2C+and+Greg+Durrett.+MuSR%3A+Testing+the+limits+of+chain-of-thought+with+multistep+soft+reasoning.+In+Findings+of+the+Association+for+Computational+Linguistics%3A+EMNLP+2023%2C+pages+10749%E2%80%9310763%2C+2023.&rows=3",
+          "candidates": [
+            {
+              "title": [
+                "GRACE: Discriminator-Guided Chain-of-Thought Reasoning"
+              ],
+              "author": [
+                {
+                  "given": "Muhammad",
+                  "family": "Khalifa",
+                  "sequence": "first",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Lajanugen",
+                  "family": "Logeswaran",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Moontae",
+                  "family": "Lee",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Honglak",
+                  "family": "Lee",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Lu",
+                  "family": "Wang",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Findings of the Association for Computational Linguistics: EMNLP 2023"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2023
+                  ]
+                ]
+              },
+              "DOI": "10.18653/v1/2023.findings-emnlp.1022",
+              "URL": "https://doi.org/10.18653/v1/2023.findings-emnlp.1022",
+              "type": "proceedings-article"
+            },
+            {
+              "title": [
+                "Chain of Thought with Explicit Evidence Reasoning for Few-shot Relation Extraction"
+              ],
+              "author": [
+                {
+                  "given": "Xilai",
+                  "family": "Ma",
+                  "sequence": "first",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Jing",
+                  "family": "Li",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Min",
+                  "family": "Zhang",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Findings of the Association for Computational Linguistics: EMNLP 2023"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2023
+                  ]
+                ]
+              },
+              "DOI": "10.18653/v1/2023.findings-emnlp.153",
+              "URL": "https://doi.org/10.18653/v1/2023.findings-emnlp.153",
+              "type": "proceedings-article"
+            },
+            {
+              "title": [
+                "Self-prompted Chain-of-Thought on Large Language Models for Open-domain Multi-hop Reasoning"
+              ],
+              "author": [
+                {
+                  "given": "Jinyuan",
+                  "family": "Wang",
+                  "sequence": "first",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Junlong",
+                  "family": "Li",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Hai",
+                  "family": "Zhao",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Findings of the Association for Computational Linguistics: EMNLP 2023"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2023
+                  ]
+                ]
+              },
+              "DOI": "10.18653/v1/2023.findings-emnlp.179",
+              "URL": "https://doi.org/10.18653/v1/2023.findings-emnlp.179",
+              "type": "proceedings-article"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "raw": "Mor Geva, Daniel Khashabi, Elad Segal, Tushar Khot, Dan Roth, and Jonathan Berant. Did aristotle use a laptop? a question answering benchmark with implicit reasoning strategies. Transactions of the Association for Computational Linguistics, 9:346–361, 2021.",
+      "source_pdf": "https://arxiv.org/pdf/2506.12241v1",
+      "pages": [
+        12
+      ],
+      "reference_number": 9,
+      "prefetched": [
+        {
+          "url": "https://api.crossref.org/works?query.bibliographic=Mor+Geva%2C+Daniel+Khashabi%2C+Elad+Segal%2C+Tushar+Khot%2C+Dan+Roth%2C+and+Jonathan+Berant.+Did+aristotle+use+a+laptop%3F+a+question+answering+benchmark+with+implicit+reasoning+strategies.+Transactions+of+the+Association+for+Computational+Linguistics%2C+9%3A346%E2%80%93361%2C+2021.&rows=3",
+          "retrieved_at": "2026-09-05T09:18:08.641234+00:00",
+          "evidence_file": "evidence/5c6470ea2973605f160f.json",
+          "http_status": 200,
+          "resolved_url": "https://api.crossref.org/works?query.bibliographic=Mor+Geva%2C+Daniel+Khashabi%2C+Elad+Segal%2C+Tushar+Khot%2C+Dan+Roth%2C+and+Jonathan+Berant.+Did+aristotle+use+a+laptop%3F+a+question+answering+benchmark+with+implicit+reasoning+strategies.+Transactions+of+the+Association+for+Computational+Linguistics%2C+9%3A346%E2%80%93361%2C+2021.&rows=3",
+          "candidates": [
+            {
+              "title": [
+                "<i>Did Aristotle Use a Laptop?</i>\n                    A Question Answering Benchmark with Implicit Reasoning Strategies"
+              ],
+              "author": [
+                {
+                  "given": "Mor",
+                  "family": "Geva",
+                  "sequence": "first",
+                  "affiliation": [
+                    {
+                      "name": "Tel Aviv University, Israel"
+                    },
+                    {
+                      "name": "Allen Institute for AI, United States. morgeva@mail.tau.ac.il"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Daniel",
+                  "family": "Khashabi",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Allen Institute for AI, United States. danielk@allenai.org"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Elad",
+                  "family": "Segal",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Tel Aviv University, Israel. elad.segal@gmail.com"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Tushar",
+                  "family": "Khot",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Allen Institute for AI, United States. tushark@allenai.org"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Dan",
+                  "family": "Roth",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "University of Pennsylvania, United States. danroth@seas.upenn.edu"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Jonathan",
+                  "family": "Berant",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Tel Aviv University, Israel"
+                    },
+                    {
+                      "name": "Allen Institute for AI, United States. joberant@cs.tau.ac.il"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Transactions of the Association for Computational Linguistics"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2021
+                  ]
+                ]
+              },
+              "DOI": "10.1162/tacl_a_00370",
+              "URL": "https://doi.org/10.1162/tacl_a_00370",
+              "type": "journal-article"
+            },
+            {
+              "title": [
+                "GooAQ: Open Question Answering with Diverse Answer Types"
+              ],
+              "author": [
+                {
+                  "given": "Daniel",
+                  "family": "Khashabi",
+                  "sequence": "first",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "given": "Amos",
+                  "family": "Ng",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "given": "Tushar",
+                  "family": "Khot",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "given": "Ashish",
+                  "family": "Sabharwal",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "given": "Hannaneh",
+                  "family": "Hajishirzi",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "given": "Chris",
+                  "family": "Callison-Burch",
+                  "sequence": "additional",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Findings of the Association for Computational Linguistics: EMNLP 2021"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2021
+                  ]
+                ]
+              },
+              "DOI": "10.18653/v1/2021.findings-emnlp.38",
+              "URL": "https://doi.org/10.18653/v1/2021.findings-emnlp.38",
+              "type": "proceedings-article"
+            },
+            {
+              "title": [
+                "B\n                    <scp>reak</scp>\n                    It Down: A Question Understanding Benchmark"
+              ],
+              "author": [
+                {
+                  "given": "Tomer",
+                  "family": "Wolfson",
+                  "sequence": "first",
+                  "affiliation": [
+                    {
+                      "name": "Tel Aviv University"
+                    },
+                    {
+                      "name": "Allen Institute for AI."
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Mor",
+                  "family": "Geva",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Tel Aviv University"
+                    },
+                    {
+                      "name": "Allen Institute for AI."
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Ankit",
+                  "family": "Gupta",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Tel Aviv University."
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Matt",
+                  "family": "Gardner",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Allen Institute for AI."
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Yoav",
+                  "family": "Goldberg",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Bar-Ilan University"
+                    },
+                    {
+                      "name": "Allen Institute for AI."
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Daniel",
+                  "family": "Deutch",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Tel Aviv University."
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                },
+                {
+                  "given": "Jonathan",
+                  "family": "Berant",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "Tel Aviv University"
+                    },
+                    {
+                      "name": "Allen Institute for AI."
+                    }
+                  ],
+                  "role": [
+                    {
+                      "vocabulary": "crossref",
+                      "role": "author"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Transactions of the Association for Computational Linguistics"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2020,
+                    12
+                  ]
+                ]
+              },
+              "DOI": "10.1162/tacl_a_00309",
+              "URL": "https://doi.org/10.1162/tacl_a_00309",
+              "type": "journal-article"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "raw": "Jacob Austin and et al. Diffuseq: Sequence to sequence text generation with diffusion models. In ICLR, 2022.",
+      "source_pdf": "https://arxiv.org/pdf/2510.21310v1",
+      "pages": [
+        11
+      ],
+      "reference_number": 5,
+      "prefetched": [
+        {
+          "url": "https://api.crossref.org/works?query.bibliographic=Jacob+Austin+and+et+al.+Diffuseq%3A+Sequence+to+sequence+text+generation+with+diffusion+models.+In+ICLR%2C+2022.&rows=3",
+          "retrieved_at": "2026-09-05T09:18:10.331517+00:00",
+          "evidence_file": "evidence/052abb5568cc7769d4fa.json",
+          "http_status": 200,
+          "resolved_url": "https://api.crossref.org/works?query.bibliographic=Jacob+Austin+and+et+al.+Diffuseq%3A+Sequence+to+sequence+text+generation+with+diffusion+models.+In+ICLR%2C+2022.&rows=3",
+          "candidates": [
+            {
+              "title": [
+                "Transforming Chatbot Text"
+              ],
+              "author": [
+                {
+                  "given": "Natesh",
+                  "family": "Reddy",
+                  "sequence": "first",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                }
+              ],
+              "container-title": null,
+              "published": null,
+              "DOI": "10.31979/etd.ya8w-kmhj",
+              "URL": "https://doi.org/10.31979/etd.ya8w-kmhj",
+              "type": "dissertation"
+            },
+            {
+              "title": [
+                "AUTOMATIC TEXT SUMMARIZATION USING SEQUENCE-TO-SEQUENCE MODELS"
+              ],
+              "author": [
+                {
+                  "given": "Ержан Мерекеулы",
+                  "family": "Утешов",
+                  "sequence": "first",
+                  "affiliation": [],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Internauka"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2022,
+                    5,
+                    30
+                  ]
+                ]
+              },
+              "DOI": "10.32743/26870142.2022.19.242.339376",
+              "URL": "https://doi.org/10.32743/26870142.2022.19.242.339376",
+              "type": "journal-article"
+            },
+            {
+              "title": [
+                "LDSeq: Latent Diffusion Models for Sequence to Sequence Text Generation"
+              ],
+              "author": [
+                {
+                  "ORCID": "https://orcid.org/0009-0001-5166-5753",
+                  "authenticated-orcid": false,
+                  "given": "Yizhou",
+                  "family": "Ding",
+                  "sequence": "first",
+                  "affiliation": [
+                    {
+                      "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "ORCID": "https://orcid.org/0000-0003-1936-4595",
+                  "authenticated-orcid": false,
+                  "given": "Jidong",
+                  "family": "Tian",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "ORCID": "https://orcid.org/0009-0007-3739-7231",
+                  "authenticated-orcid": false,
+                  "given": "Shanxing",
+                  "family": "Mei",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "ORCID": "https://orcid.org/0009-0001-2244-1945",
+                  "authenticated-orcid": false,
+                  "given": "Yifan",
+                  "family": "Zhou",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "ORCID": "https://orcid.org/0009-0004-3392-4004",
+                  "authenticated-orcid": false,
+                  "given": "Yuwu",
+                  "family": "Dong",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "ORCID": "https://orcid.org/0000-0002-4851-7012",
+                  "authenticated-orcid": false,
+                  "given": "Hao",
+                  "family": "He",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                },
+                {
+                  "ORCID": "https://orcid.org/0000-0002-6168-2688",
+                  "authenticated-orcid": false,
+                  "given": "Weisheng",
+                  "family": "Hu",
+                  "sequence": "additional",
+                  "affiliation": [
+                    {
+                      "name": "State Key Lab of Advanced Optical Communication System and Network, Shanghai Jiao Tong University, China"
+                    }
+                  ],
+                  "role": [
+                    {
+                      "role": "author",
+                      "vocabulary": "crossref"
+                    }
+                  ]
+                }
+              ],
+              "container-title": [
+                "Proceedings of the 2023 7th International Conference on Computer Science and Artificial Intelligence"
+              ],
+              "published": {
+                "date-parts": [
+                  [
+                    2023,
+                    12,
+                    8
+                  ]
+                ]
+              },
+              "DOI": "10.1145/3638584.3638617",
+              "URL": "https://doi.org/10.1145/3638584.3638617",
+              "type": "proceedings-article"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "raw": "Ari Holtzman, Jan Buys, Li Du, Maxwell Forbes, and Yejin Choi. The curious case of neural text degeneration. arXiv preprint arXiv:1904.09751, 2019.",
+      "source_pdf": "https://arxiv.org/pdf/2510.21310v1",
+      "pages": [
+        11
+      ],
+      "reference_number": 3,
+      "prefetched": [
+        {
+          "url": "https://arxiv.org/abs/1904.09751",
+          "retrieved_at": "2026-09-05T09:18:12.017012+00:00",
+          "evidence_file": "evidence/70fe97f3b0397da07510.json",
+          "http_status": 200,
+          "resolved_url": "https://arxiv.org/abs/1904.09751",
+          "metadata": {
+            "citation_title": [
+              "The Curious Case of Neural Text Degeneration"
+            ],
+            "citation_author": [
+              "Holtzman, Ari",
+              "Buys, Jan",
+              "Du, Li",
+              "Forbes, Maxwell",
+              "Choi, Yejin"
+            ],
+            "citation_date": [
+              "2019/04/22"
+            ],
+            "citation_online_date": [
+              "2020/02/14"
+            ],
+            "citation_pdf_url": [
+              "https://arxiv.org/pdf/1904.09751"
+            ],
+            "citation_arxiv_id": [
+              "1904.09751"
+            ],
+            "citation_abstract": [
+              "Despite considerable advancements with deep neural language models, the enigma of neural text degeneration persists when these models are tested as text generators. The counter-intuitive empirical observation is that even though the use of likelihood as training objective leads to high quality models for a broad range of language understanding tasks, using likelihood as a decoding objective leads to text that is bland and strangely repetitive. In this paper, we reveal surprising distributional differences between human text and machine text. In addition, we find that decoding strategies alone can dramatically effect the quality of machine text, even when generated from exactly the same neural language model. Our findings motivate Nucleus Sampling, a simple but effective method to draw the best out of neural generation. By sampling text from the dynamic nucleus of the probability distribution, which allows for diversity while effectively truncating the less reliable tail of the distribution, the resulting text better demonstrates the quality of human text, yielding enhanced diversity without sacrificing fluency and coherence."
+            ]
+          },
+          "text": "[1904.09751] The Curious Case of Neural Text Degeneration Skip to main content Search Submit Donate Log in Search arXiv Press Enter to search · Advanced search Computer Science > Computation and Language arXiv:1904.09751 (cs) [Submitted on 22 Apr 2019 ( v1 ), last revised 14 Feb 2020 (this version, v2)] Title: The Curious Case of Neural Text Degeneration Authors: Ari Holtzman , Jan Buys , Li Du , Maxwell Forbes , Yejin Choi View a PDF of the paper titled The Curious Case of Neural Text Degeneration, by Ari Holtzman and 4 other authors View PDF HTML (experimental) Abstract: Despite considerable advancements with deep neural language models, the enigma of neural text degeneration persists when these models are tested as text generators. The counter-intuitive empirical observation is that even though the use of likelihood as training objective leads to high quality models for a broad range of language understanding tasks, using likelihood as a decoding objective leads to text that is bland and strangely repetitive. In this paper, we reveal surprising distributional differences between human text and machine text. In addition, we find that decoding strategies alone can dramatically effect the quality of machine text, even when generated from exactly the same neural language model. Our findings motivate Nucleus Sampling, a simple but effective method to draw the best out of neural generation. By sampling text from the dynamic nucleus of the probability distribution, which allows for diversity while effectively truncating the less reliable tail of the distribution, the resulting text better demonstrates the quality of human text, yielding enhanced diversity without sacrificing fluency and coherence. Comments: Published in ICLR 2020 Subjects: Computation and Language (cs.CL) Cite as: arXiv:1904.09751 [cs.CL] (or arXiv:1904.09751v2 [cs.CL] for this version) https://doi.org/10.48550/arXiv.1904.09751 Focus to learn more arXiv-issued DOI via DataCite Submission history From: Ari Holtzman [ view email ] [v1] Mon, 22 Apr 2019 07:17:18 UTC (749 KB) [v2] Fri, 14 Feb 2020 21:56:30 UTC (4,271 KB) Full-text links: Access Paper: View a PDF of the paper titled The Curious Case of Neural Text Degeneration, by Ari Holtzman and 4 other authors View PDF HTML (experimental) TeX Source view license Current browse context: cs.CL < prev | next > new | recent | 2019-04 Change to browse by: cs References & Citations NASA ADS Google Scholar Semantic Scholar 6 blog links ( what is this? ) DBLP - CS Bibliography listing | bibtex Ari Holtzman Jan Buys Maxwell Forbes Yejin Choi export BibTeX citation Loading... BibTeX formatted citation × loading... Data provided by: Bookmark Bibliographic Tools Bibliographic and Citation Tools Bibliographic Explorer Toggle Bibliographic Explorer ( What is the Explorer? ) Connected Papers Toggle Connected Papers ( What is Connected Papers? ) Litmaps Toggle Litmaps ( What is Litmaps? ) scite.ai Toggle scite Smart Citations ( What are Smart Citations? ) Code, Data, Media Code, Data and Media Associated with this Article alphaXiv Toggle alphaXiv ( What is alphaXiv? ) Links to Code Toggle CatalyzeX Code Finder for Papers ( What is CatalyzeX? ) DagsHub Toggle DagsHub ( What is DagsHub? ) GotitPub Toggle Gotit.pub ( What is GotitPub? ) Huggingface Toggle Hugging Face ( What is Huggingface? ) ScienceCast Toggle ScienceCast ( What is ScienceCast? ) Demos Demos Replicate Toggle Replicate ( What is Replicate? ) Spaces Toggle Hugging Face Spaces ( What is Spaces? ) Spaces Toggle TXYZ.AI ( What is TXYZ.AI? ) Related Papers Recommenders and Search Tools Link to Influence Flower Influence Flower ( What are Influence Flowers? ) Core recommender toggle CORE Recommender ( What is CORE? ) Author Venue Institution Topic About arXivLabs arXivLabs: experimental projects with community collaborators arXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website. Both individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them. Have an idea for a project that will add value for arXiv's community? Learn more about arXivLabs . Which authors of this paper are endorsers? | Disable MathJax ( What is MathJax? ) We gratefully acknowledge support from\n        our major funders , member institutions , ,\n        and all contributors. About · Help · Contact · Subscribe · Copyright · Privacy · Accessibility · Operational Status (opens in new tab) Major funding support from"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "note": "Raw references from first retained pilot input; source evidence remains in the original workspace.",
+  "references": [
+    {
+      "id": "s01",
+      "raw": "Diederik P. Kingma and Jimmy Ba. Deepfm: a factorization-machine based neural network for ctr prediction. In International Conference on Learning Representations, 2015.",
+      "source_pdf": "https://arxiv.org/pdf/2509.22807v1",
+      "pages": [
+        11
+      ]
+    },
+    {
+      "id": "s02",
+      "raw": "Huifeng Guo, Ruiming Tang, Yunming Ye, Zhenguo Li, and Xiuqiang He. Deepfm: a factorization-machine based neural network for ctr prediction. In Proceedings of the 26th International Joint Conference on Artificial Intelligence, 2017.",
+      "source_pdf": "https://arxiv.org/pdf/2509.22807v1",
+      "pages": [
+        11
+      ]
+    },
+    {
+      "id": "s03",
+      "raw": "Zayne Sprague, Xi Ye, Kyle Richardson, and Greg Durrett. MuSR: Testing the limits of chain-of-thought with multistep soft reasoning. In Findings of the Association for Computational Linguistics: EMNLP 2023, pages 10749\u201310763, 2023.",
+      "source_pdf": "https://arxiv.org/pdf/2506.12241v1",
+      "pages": [
+        12
+      ]
+    },
+    {
+      "id": "s04",
+      "raw": "Mor Geva, Daniel Khashabi, Elad Segal, Tushar Khot, Dan Roth, and Jonathan Berant. Did aristotle use a laptop? a question answering benchmark with implicit reasoning strategies. Transactions of the Association for Computational Linguistics, 9:346\u2013361, 2021.",
+      "source_pdf": "https://arxiv.org/pdf/2506.12241v1",
+      "pages": [
+        12
+      ]
+    },
+    {
+      "id": "s05",
+      "raw": "Jacob Austin and et al. Diffuseq: Sequence to sequence text generation with diffusion models. In ICLR, 2022.",
+      "source_pdf": "https://arxiv.org/pdf/2510.21310v1",
+      "pages": [
+        11
+      ]
+    },
+    {
+      "id": "s06",
+      "raw": "Ari Holtzman, Jan Buys, Li Du, Maxwell Forbes, and Yejin Choi. The curious case of neural text degeneration. arXiv preprint arXiv:1904.09751, 2019.",
+      "source_pdf": "https://arxiv.org/pdf/2510.21310v1",
+      "pages": [
+        11
+      ]
+    }
+  ]
+}

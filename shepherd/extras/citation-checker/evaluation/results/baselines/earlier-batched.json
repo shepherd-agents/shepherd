@@ -1,0 +1,113 @@
+{
+  "timing": {
+    "started_at": "2026-09-09T01:57:04.987107+00:00",
+    "finished_at": "2026-09-09T02:05:31.052233+00:00",
+    "wall_seconds": 506.063,
+    "preparation_seconds": 4.048,
+    "cached_inputs": true
+  },
+  "references": 150,
+  "categories": {
+    "metadata_errors": 14,
+    "verified": 59,
+    "metadata_uncertain": 13,
+    "unresolved": 48,
+    "execution_validation_failed": 15,
+    "execution_not_completed": 1
+  },
+  "execution": {
+    "completed": 134,
+    "validation_failed": 15,
+    "not_completed": 1
+  },
+  "routes": {
+    "opus": 146,
+    "deterministic": 4
+  },
+  "model_jobs": 25,
+  "model_job_statuses": {
+    "completed": 14,
+    "partial": 11
+  },
+  "provider_usage_reports": 24,
+  "provider_runtime_statuses": {
+    "completed": 24,
+    "failed": 1
+  },
+  "provider_budget_exhaustions": 1,
+  "tool_errors": 10,
+  "model_contract_adjustments": 0,
+  "reported_usd_equivalent": 19.157370000000004,
+  "note": "Native benchmark scoring rechecked; ambiguous gold excluded from decisive accuracy. Cached extraction and initial evidence; not cold PDF-to-report latency. Per-citation completed checkpoints are counted independently of session failure. CLI USD figures are list-price equivalents, not subscription charges; interrupted-session usage may be missing.",
+  "native_datasets": {
+    "delta_human_audit": {
+      "n": 40,
+      "correct": 17,
+      "decided": 17,
+      "abstentions": 23,
+      "accuracy": 0.425,
+      "coverage": 0.425,
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "false_positive_rate": 0.0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "true_negatives": 17,
+      "false_negatives_decided": 0,
+      "positive_abstentions": 20,
+      "negative_abstentions": 3,
+      "accuracy_wilson_95": [
+        0.28509392559950375,
+        0.5780493145800892
+      ]
+    },
+    "hallmark_test_public": {
+      "n": 50,
+      "correct": 25,
+      "decided": 25,
+      "abstentions": 25,
+      "accuracy": 0.5,
+      "coverage": 0.5,
+      "precision": 1.0,
+      "recall": 0.28,
+      "f1": 0.4375,
+      "false_positive_rate": 0.0,
+      "true_positives": 7,
+      "false_positives": 0,
+      "true_negatives": 18,
+      "false_negatives_decided": 0,
+      "positive_abstentions": 18,
+      "negative_abstentions": 7,
+      "accuracy_wilson_95": [
+        0.3664451431682858,
+        0.6335548568317142
+      ]
+    },
+    "manual_reference_verification": {
+      "n": 50,
+      "correct": 32,
+      "decided": 34,
+      "abstentions": 16,
+      "accuracy": 0.64,
+      "coverage": 0.68,
+      "precision": 0.6,
+      "recall": 0.3,
+      "f1": 0.4,
+      "false_positive_rate": 0.05,
+      "true_positives": 3,
+      "false_positives": 2,
+      "true_negatives": 29,
+      "false_negatives_decided": 0,
+      "positive_abstentions": 7,
+      "negative_abstentions": 9,
+      "accuracy_wilson_95": [
+        0.501410168761127,
+        0.7586125034815325
+      ]
+    }
+  },
+  "scored_references": 140,
+  "correct": 74,
+  "ambiguous_gold_references": 10
+}

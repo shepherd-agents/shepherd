@@ -1,0 +1,27 @@
+{
+  "controls": {
+    "sutton_barto_issue": true,
+    "openhands_issue": true,
+    "swe_bench_verified": true,
+    "reference_3_author_uncertainty": true,
+    "reference_5_author_uncertainty": true
+  },
+  "metadata_status": {
+    "verified": 51,
+    "partially_verified": 5,
+    "errors_found": 2
+  },
+  "unverified_core_ids": [
+    "3",
+    "5",
+    "50"
+  ],
+  "optional_only_ids": [
+    "30",
+    "46"
+  ],
+  "issue_ids": [
+    "35",
+    "41"
+  ]
+}

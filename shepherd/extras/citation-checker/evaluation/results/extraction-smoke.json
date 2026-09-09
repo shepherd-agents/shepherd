@@ -1,0 +1,15 @@
+{
+  "references": 58,
+  "raw_citations_identical_to_cached_inputs": true,
+  "seconds": 3.971,
+  "source": ".runs/shepherd-manuscript-adjudication-v1-prepared/source.pdf",
+  "details": {
+    "method": "pdfplumber-columns-and-indentation",
+    "style": "numbered",
+    "boundary": "section_heading",
+    "columns": {
+      "1": 50
+    },
+    "warnings": []
+  }
+}

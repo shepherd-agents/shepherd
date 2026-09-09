@@ -1,0 +1,171 @@
+{
+  "selection": "Two full-v1 abstentions per dataset; unchanged initial sources and labels",
+  "cases": [
+    {
+      "id": "5",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R20",
+      "gold": "problematic",
+      "prediction": true,
+      "correct": true
+    },
+    {
+      "id": "24",
+      "dataset": "hallmark_test_public",
+      "source_id": "b74335e5c7fe",
+      "gold": "HALLUCINATED",
+      "tier": 3,
+      "error_type": "near_miss_title",
+      "prediction": true,
+      "correct": true
+    },
+    {
+      "id": "37",
+      "dataset": "delta_human_audit",
+      "source_id": "fb6abf2a-abd1-49b2-867f-e504d6afe421_c01",
+      "source_file": "manual_validation_200_batch2.csv",
+      "gold": "EXISTS",
+      "prediction": false,
+      "correct": true
+    },
+    {
+      "id": "50",
+      "dataset": "delta_human_audit",
+      "source_id": "09af07fc-ef59-41c0-b781-dd145a82776b_c05",
+      "source_file": "manual_validation_200_batch2.csv",
+      "gold": "FABRICATED",
+      "prediction": true,
+      "correct": true
+    },
+    {
+      "id": "61",
+      "dataset": "hallmark_test_public",
+      "source_id": "ba0e690d508b",
+      "gold": "VALID",
+      "tier": null,
+      "error_type": null,
+      "prediction": false,
+      "correct": true
+    },
+    {
+      "id": "66",
+      "dataset": "manual_reference_verification",
+      "source_id": "P3/R61",
+      "gold": "verified",
+      "prediction": null,
+      "correct": false
+    }
+  ],
+  "execution": {
+    "completed": 6
+  },
+  "jobs": [
+    {
+      "terminal": {
+        "duration_ms": 154904,
+        "duration_api_ms": 143064,
+        "num_turns": 13,
+        "total_cost_usd": 1.291398,
+        "usage": {
+          "input_tokens": 20,
+          "cache_creation_input_tokens": 44370,
+          "cache_read_input_tokens": 704026,
+          "output_tokens": 8272,
+          "output_tokens_details": {
+            "thinking_tokens": 2683
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 44370,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {
+          "claude-opus-5": {
+            "inputTokens": 40217,
+            "outputTokens": 10584,
+            "cacheReadInputTokens": 704026,
+            "cacheCreationInputTokens": 44370,
+            "webSearchRequests": 3,
+            "costUSD": 1.291398,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 64000,
+            "thinkingTokens": 2683,
+            "canonicalModel": "claude-opus-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      },
+      "tool_calls": {
+        "WebSearch": 3,
+        "Bash": 4,
+        "Write": 4,
+        "Grep": 1
+      },
+      "tool_errors": []
+    },
+    {
+      "terminal": {
+        "duration_ms": 118706,
+        "duration_api_ms": 101580,
+        "num_turns": 17,
+        "total_cost_usd": 1.316645,
+        "usage": {
+          "input_tokens": 34,
+          "cache_creation_input_tokens": 40179,
+          "cache_read_input_tokens": 1233380,
+          "output_tokens": 6463,
+          "output_tokens_details": {
+            "thinking_tokens": 1785
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 40179,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {
+          "claude-opus-5": {
+            "inputTokens": 21513,
+            "outputTokens": 7224,
+            "cacheReadInputTokens": 1233380,
+            "cacheCreationInputTokens": 40179,
+            "webSearchRequests": 1,
+            "costUSD": 1.316645,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 64000,
+            "thinkingTokens": 1785,
+            "canonicalModel": "claude-opus-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      },
+      "tool_calls": {
+        "Bash": 8,
+        "Read": 3,
+        "Write": 3,
+        "WebSearch": 1,
+        "Grep": 1
+      },
+      "tool_errors": [
+        "PreToolUse:Bash hook error: [python3 -B -m shepherd_citation_checker._engine.hooks]: Use Read/Grep/Glob for inspection; Bash is limited to the retained fetcher and validator\n"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,467 @@
+[
+  {
+    "id": "3",
+    "dataset": "manual_reference_verification",
+    "source_id": "P3/R44",
+    "gold": "verified",
+    "predicted_positive": null,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "Crossref record 10.18653/v1/p19-1365 matches title, the five authors in order, ACL 2019 proceedings, pages 3752-3762 and Florence, Italy.",
+    "field_findings": {
+      "editors": {
+        "outcome": "uncertain",
+        "explanation": "Korhonen, Traum and Marquez appear only as authors of the Front Matter record; no retained source explicitly labels them proceedings editors."
+      },
+      "publication_month": {
+        "outcome": "uncertain",
+        "explanation": "Retained Crossref data gives July 2019 only as the conference event date, not a publication month."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-024"
+  },
+  {
+    "id": "50",
+    "dataset": "delta_human_audit",
+    "source_id": "09af07fc-ef59-41c0-b781-dd145a82776b_c05",
+    "source_file": "manual_validation_200_batch2.csv",
+    "gold": "FABRICATED",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "unresolved",
+    "reason": "The retained Crossref bibliographic query returned only unrelated works (none by Mark Davis or Karen Wilson, none titled 'Enhancing Citation Integrity'), and follow-up lookups at OpenAlex and Semantic Scholar were rate-limited (HTTP 429), so no second independent record could be retained to confirm or rule out the work.",
+    "field_findings": {},
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-020"
+  },
+  {
+    "id": "54",
+    "dataset": "hallmark_test_public",
+    "source_id": "fcf41787a617",
+    "gold": "HALLUCINATED",
+    "tier": 3,
+    "error_type": "plausible_fabrication",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "unresolved",
+    "reason": "No retained source identifies an OSDI 2021 paper with this title; the Crossref bibliographic query returned only unrelated distributed-computing works, and follow-up lookups at dblp, OpenAlex and Semantic Scholar were blocked by bot challenges or HTTP 429, so fabrication cannot be established either.",
+    "field_findings": {},
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-022"
+  },
+  {
+    "id": "66",
+    "dataset": "manual_reference_verification",
+    "source_id": "P3/R61",
+    "gold": "verified",
+    "predicted_positive": null,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "The University of Chicago Department of Statistics technical report index lists '348 Kong, A. August 1992 A note on importance sampling using standardized weights', matching title, author, report number, institution and year.",
+    "field_findings": {
+      "pages": {
+        "outcome": "uncertain",
+        "explanation": "The department index gives no page or length data, so the ':14' component of '348:14' is unconfirmed; the report PDF fetched from the department server contained no extractable text."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-024"
+  },
+  {
+    "id": "70",
+    "dataset": "hallmark_test_public",
+    "source_id": "e11e16df9644",
+    "gold": "HALLUCINATED",
+    "tier": 2,
+    "error_type": "chimeric_title",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "unresolved",
+    "reason": "Two Crossref searches (title+author and author-only) returned no work matching the supplied title or the Guo/Wu/Huang/Xing author list, and DBLP, OpenAlex and Semantic Scholar were unavailable (bot challenge / HTTP 429), so identity could not be established either way.",
+    "field_findings": {},
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-021"
+  },
+  {
+    "id": "75",
+    "dataset": "manual_reference_verification",
+    "source_id": "P1/R17",
+    "gold": "verified",
+    "predicted_positive": null,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "The supplied GitHub URL resolves to the microsoft/markitdown repository, whose retained page describes MarkItDown as a Python utility for converting files and office documents to Markdown, matching the cited software.",
+    "field_findings": {
+      "year": {
+        "outcome": "uncertain",
+        "explanation": "The retained repository page shows no creation, release or copyright date, so the 2025 date could not be confirmed or refuted."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-017"
+  },
+  {
+    "id": "83",
+    "dataset": "delta_human_audit",
+    "source_id": "710b9b22-4a92-4ec0-99d4-d233bd98e899_c06",
+    "source_file": "manual_validation_100.csv",
+    "gold": "EXISTS",
+    "predicted_positive": null,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "unresolved",
+    "reason": "No retained source identifies this title in IEEE Transactions on Big Data; the Crossref bibliographic query returned only unrelated membership-inference works (RAID 2023, NDSS 2019 ML-Leaks, IEEE Big Data 2022), and dblp, OpenAlex and Semantic Scholar lookups returned bot challenges or HTTP 429.",
+    "field_findings": {},
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-022"
+  },
+  {
+    "id": "85",
+    "dataset": "manual_reference_verification",
+    "source_id": "P1/R9",
+    "gold": "verified",
+    "predicted_positive": null,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "The supplied PKP URL returns the news post 'The XML Markup Evaluation Corpus' dated April 18, 2016, matching the supplied title, year and Public Knowledge Project venue; the supplied author is not corroborated.",
+    "field_findings": {
+      "authors": {
+        "outcome": "uncertain",
+        "explanation": "The retained PKP page bylines the post 'By PKP Communications' and the Front Matter Crossref records name a different person, so no retained source confirms or refutes A. Garnett as the original author."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-023"
+  },
+  {
+    "id": "90",
+    "dataset": "manual_reference_verification",
+    "source_id": "P3/R51",
+    "gold": "verified",
+    "predicted_positive": null,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "Matches the NeurIPS proceedings record for Advances in Neural Information Processing Systems 24 (2011); the author list, including the proceedings' own spelling 'Pennin, Jeffrey', title, volume and year all agree, but the page range could not be confirmed from any retained record.",
+    "field_findings": {
+      "pages": {
+        "outcome": "uncertain",
+        "explanation": "The official NeurIPS proceedings page for this paper carries no citation_firstpage/citation_lastpage metadata, and Crossref returned no matching record; Semantic Scholar and OpenAlex both returned HTTP 429, so pages 801-809 remain unconfirmed."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-010"
+  },
+  {
+    "id": "99",
+    "dataset": "delta_human_audit",
+    "source_id": "98ada660-db28-4e80-9364-2344d6f545b8_c05",
+    "source_file": "manual_validation_200_batch2.csv",
+    "gold": "FABRICATED",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "unresolved",
+    "reason": "The retained Crossref query returned only unrelated CVPR 2024 proceedings articles, none matching this title or the authors Sarah Red and Tom Yellow, and OpenAlex/Semantic Scholar follow-ups were rate-limited (HTTP 429), so no independent confirmation or refutation could be retained.",
+    "field_findings": {},
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-020"
+  },
+  {
+    "id": "109",
+    "dataset": "manual_reference_verification",
+    "source_id": "P3/R62",
+    "gold": "verified",
+    "predicted_positive": true,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "DOI 10.18653/v1/W19-8609 resolves to the cited paper with matching authors, pages 76-87 and year 2019, but the supplied month 01 (January) conflicts with the ACL Anthology publication month October-November 2019.",
+    "field_findings": {
+      "publication_month": {
+        "outcome": "error",
+        "explanation": "ACL Anthology lists the publication month as October-November 2019, not January (01)."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-016"
+  },
+  {
+    "id": "117",
+    "dataset": "hallmark_test_public",
+    "source_id": "dcd757d3958f",
+    "gold": "VALID",
+    "tier": null,
+    "error_type": null,
+    "predicted_positive": null,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "The title and four of five authors (Ma, H. Yang, Chen, Cheng) match arXiv:2101.11525, but the OpenReview/TMLR record is behind a browser challenge, leaving venue, year and the second author's given name unverified.",
+    "field_findings": {
+      "authors": {
+        "outcome": "uncertain",
+        "explanation": "arXiv lists the second author as 'Yang, Haochen' while the citation gives 'Garry Yang'; the official OpenReview/TMLR record, which could show an author-preferred given name, returned a bot challenge (403), so the discrepancy cannot be settled."
+      },
+      "venue": {
+        "outcome": "uncertain",
+        "explanation": "OpenReview (se63c85ba2afd001a) returned a browser-verification page and api2.openreview.net returned 403, so TMLR publication is unconfirmed; the arXiv record shows no journal reference."
+      },
+      "year": {
+        "outcome": "uncertain",
+        "explanation": "The arXiv record's 2023-08-22 revision date is consistent with 2023, but no retained venue record confirms a 2023 TMLR publication year."
+      },
+      "url": {
+        "outcome": "uncertain",
+        "explanation": "https://openreview.net/forum?id=LdSP6cvTS4 returned only a browser-verification page, so its content could not be matched to the cited work."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-011"
+  },
+  {
+    "id": "128",
+    "dataset": "hallmark_test_public",
+    "source_id": "ce020c7b6d9b",
+    "gold": "HALLUCINATED",
+    "tier": 2,
+    "error_type": "chimeric_title",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "unresolved",
+    "reason": "Crossref returns no work matching this title or authors, and the second-service checks (OpenAlex, Semantic Scholar, DBLP) were blocked by rate limiting and a bot challenge, so no independent corroboration was obtainable within budget.",
+    "field_findings": {},
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-019"
+  },
+  {
+    "id": "152",
+    "dataset": "hallmark_test_public",
+    "source_id": "d1f15c4f13d0",
+    "gold": "HALLUCINATED",
+    "tier": 2,
+    "error_type": "wrong_venue",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "The arXiv abstract page for 2602.12204v1 carries the exact supplied title, the same three ordered authors and a 2026-02-12 date, but no AAAI publication record and no resolvable DOI were retrieved.",
+    "field_findings": {
+      "venue": {
+        "outcome": "uncertain",
+        "explanation": "The arXiv record lists no conference venue and a Crossref bibliographic search returned no AAAI record for this work, so the AAAI booktitle is unconfirmed rather than refuted."
+      },
+      "identifier": {
+        "outcome": "uncertain",
+        "explanation": "Attempts to resolve the version-suffixed DOI 10.48550/arXiv.2602.12204v1 at doi.org, Crossref and DataCite all failed to return a record, so no retained evidence confirms or refutes this identifier."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-021"
+  },
+  {
+    "id": "179",
+    "dataset": "manual_reference_verification",
+    "source_id": "P3/R28",
+    "gold": "verified",
+    "predicted_positive": null,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "Crossref record 10.18653/v1/2023.findings-eacl.139 matches the four authors, Findings of the ACL: EACL 2023 venue, pages 1856-1869 and 2023.",
+    "field_findings": {
+      "editors": {
+        "outcome": "uncertain",
+        "explanation": "The retained Crossref record lists no editors, so Vlachos and Augenstein as volume editors could not be confirmed or refuted."
+      },
+      "publication_month": {
+        "outcome": "uncertain",
+        "explanation": "Crossref gives only a May 2023 event date for the conference, which does not establish May as the publication month."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-012"
+  },
+  {
+    "id": "192",
+    "dataset": "manual_reference_verification",
+    "source_id": "P3/R64",
+    "gold": "verified",
+    "predicted_positive": null,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "arXiv:2501.12948 carries exactly this title and a 2025/01/22 date, matching the supplied identifier, title and year.",
+    "field_findings": {
+      "authors": {
+        "outcome": "uncertain",
+        "explanation": "The truncated list matches arXiv's author names but not its order (arXiv gives DeepSeek-AI first, then Guo, Yang, Zhang, Song, Wang Peiyi, Zhu Qihao, Xu Runxin, Zhang Ruoyu, Ma Shirong, Bi Xiao), and 'et al.' leaves the remainder unverifiable."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-023"
+  },
+  {
+    "id": "206",
+    "dataset": "delta_human_audit",
+    "source_id": "69d821a8-aaf9-4981-a1a5-89de1791a630_c05",
+    "source_file": "manual_validation_200_batch2.csv",
+    "gold": "FABRICATED",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "unresolved",
+    "reason": "The retained Crossref query returned only other Snaith-group perovskite papers (Nature Communications 2013 x2, Advanced Energy Materials 2015), none titled 'Advanced Encapsulation Techniques for Perovskite Solar Cells' or published in Nature Energy in 2017, and OpenAlex/Semantic Scholar follow-ups were rate-limited (HTTP 429).",
+    "field_findings": {},
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-020"
+  },
+  {
+    "id": "207",
+    "dataset": "delta_human_audit",
+    "source_id": "a19c6b09-2e63-48b6-8d15-4b2596f23095_c01",
+    "source_file": "manual_validation_100.csv",
+    "gold": "FABRICATED",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "unresolved",
+    "reason": "Crossref returned no work matching the supplied title, authors or venue, and the second-service lookups (OpenAlex, Semantic Scholar) were blocked by HTTP 429, so identity could not be established or a no-match conclusion adequately supported.",
+    "field_findings": {},
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-016"
+  },
+  {
+    "id": "210",
+    "dataset": "manual_reference_verification",
+    "source_id": "P3/R14",
+    "gold": "verified",
+    "predicted_positive": true,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "Crossref record 10.18653/v1/p17-1147 matches the cited authors, ACL 2017 venue, pages 1601-1611 and year, but the cited title drops the word 'Dataset'.",
+    "field_findings": {
+      "title": {
+        "outcome": "error",
+        "explanation": "The published title reads 'Challenge Dataset for Reading Comprehension'; the cited title omits 'Dataset'."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-020"
+  },
+  {
+    "id": "227",
+    "dataset": "hallmark_test_public",
+    "source_id": "413fa88ea98c",
+    "gold": "HALLUCINATED",
+    "tier": 3,
+    "error_type": "plausible_fabrication",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "unresolved",
+    "reason": "No retained source identifies this title; the Crossref bibliographic query returned only unrelated diffusion-model papers (IEEE Access 2026, CVPR 2024 EmoGen, a 2025 SCITEPRESS comparison), and dblp/OpenAlex lookups were blocked by a bot challenge and HTTP 429.",
+    "field_findings": {},
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-022"
+  },
+  {
+    "id": "241",
+    "dataset": "hallmark_test_public",
+    "source_id": "d4fe212888ba",
+    "gold": "VALID",
+    "tier": null,
+    "error_type": null,
+    "predicted_positive": null,
+    "expected_positive": false,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "The arXiv record for 2109.05439 matches the supplied title and the ordered author list, and its bibliographic comment states publication in Transactions on Machine Learning Research in 2022.",
+    "field_findings": {
+      "url": {
+        "outcome": "uncertain",
+        "explanation": "The supplied OpenReview forum page returned only a browser-verification challenge, so the retained content does not confirm that id=WXVkgkPXRk is this work's OpenReview record."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-002"
+  },
+  {
+    "id": "246",
+    "dataset": "hallmark_test_public",
+    "source_id": "cea852a48efe",
+    "gold": "HALLUCINATED",
+    "tier": 1,
+    "error_type": "fabricated_doi",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "identified",
+    "reason": "The ICLR 2022 virtual poster page matches the supplied title, all seven ordered authors and the ICLR 2022 venue/year; the supplied DOI could not be resolved.",
+    "field_findings": {
+      "identifier": {
+        "outcome": "uncertain",
+        "explanation": "Lookups for 10.55910/mbwo.6329160 at doi.org, Crossref and DataCite returned no record, and no retained source associates any DOI with this work, so the identifier remains unconfirmed."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-008"
+  },
+  {
+    "id": "258",
+    "dataset": "delta_human_audit",
+    "source_id": "1176bbd3-6e79-4764-b227-a22e5b465341_c02",
+    "source_file": "manual_validation_200_batch2.csv",
+    "gold": "FABRICATED",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "completed",
+    "identity": "unresolved",
+    "reason": "Two Crossref bibliographic queries returned no work with this title by Regan and Norton (closest is Regan & Norton, 'Greed, Grievance, and Mobilization in Civil Wars', JCR 2005), and the second and third services needed to confirm absence (OpenAlex and Semantic Scholar) returned HTTP 429, so identity could not be established or ruled out.",
+    "field_findings": {
+      "title": {
+        "outcome": "uncertain",
+        "explanation": "No retained record of a work with this exact title; Crossref-only coverage is insufficient to confirm existence or absence."
+      },
+      "authors": {
+        "outcome": "uncertain",
+        "explanation": "Regan and Norton co-authored a 2005 JCR article, but no record ties them to this title."
+      },
+      "venue": {
+        "outcome": "uncertain",
+        "explanation": "No retained record places this title in the Journal of Conflict Resolution."
+      },
+      "year": {
+        "outcome": "uncertain",
+        "explanation": "No retained record supports a 2023 publication date for this title."
+      }
+    },
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-006"
+  },
+  {
+    "id": "262",
+    "dataset": "delta_human_audit",
+    "source_id": "f09244b9-68c2-468f-9c2e-c6fba840195c_c01",
+    "source_file": "manual_validation_200_batch2.csv",
+    "gold": "FABRICATED",
+    "predicted_positive": null,
+    "expected_positive": true,
+    "correct": false,
+    "execution_status": "not_completed",
+    "identity": "unresolved",
+    "reason": "KeyError: '262'",
+    "field_findings": {},
+    "batch_path": "<evaluation-workspace>/.runs/citation-package-full-v2-benchmark/jobs/batch-015"
+  }
+]

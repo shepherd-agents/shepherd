@@ -1,0 +1,304 @@
+{
+  "jobs": [
+    {
+      "job": "batch-001",
+      "status": "completed",
+      "seconds": 116.394,
+      "validation_errors": {},
+      "runtime_status": "completed",
+      "provider": {
+        "terminal": {
+          "duration_ms": 94680,
+          "duration_api_ms": 93212,
+          "num_turns": 16,
+          "total_cost_usd": 0.984501,
+          "usage": {
+            "input_tokens": 16,
+            "cache_creation_input_tokens": 45071,
+            "cache_read_input_tokens": 539202,
+            "output_tokens": 6453,
+            "output_tokens_details": {
+              "thinking_tokens": 1474
+            },
+            "server_tool_use": {
+              "web_search_requests": 0,
+              "web_fetch_requests": 0
+            },
+            "service_tier": "standard",
+            "cache_creation": {
+              "ephemeral_1h_input_tokens": 45071,
+              "ephemeral_5m_input_tokens": 0
+            },
+            "inference_geo": "not_available",
+            "iterations": [],
+            "speed": "standard"
+          },
+          "modelUsage": {
+            "claude-opus-5": {
+              "inputTokens": 13983,
+              "outputTokens": 7371,
+              "cacheReadInputTokens": 539202,
+              "cacheCreationInputTokens": 45071,
+              "webSearchRequests": 1,
+              "costUSD": 0.984501,
+              "contextWindow": 1000000,
+              "maxOutputTokens": 64000,
+              "thinkingTokens": 1474,
+              "canonicalModel": "claude-opus-5",
+              "provider": "firstParty",
+              "costBasis": "list"
+            }
+          }
+        },
+        "tool_calls": {
+          "Bash": 2,
+          "WebSearch": 1,
+          "Glob": 1,
+          "Read": 1,
+          "Grep": 4,
+          "Write": 6
+        },
+        "tool_errors": [
+          "PreToolUse:Bash hook error: [python3 -B -m shepherd_citation_checker._engine.hooks]: Use Read/Grep/Glob for inspection; Bash is limited to the retained fetcher and validator\n"
+        ]
+      }
+    },
+    {
+      "job": "batch-002",
+      "status": "completed",
+      "seconds": 116.819,
+      "validation_errors": {},
+      "runtime_status": "completed",
+      "provider": {
+        "terminal": {
+          "duration_ms": 96086,
+          "duration_api_ms": 86235,
+          "num_turns": 13,
+          "total_cost_usd": 0.9091894999999999,
+          "usage": {
+            "input_tokens": 14,
+            "cache_creation_input_tokens": 43607,
+            "cache_read_input_tokens": 468889,
+            "output_tokens": 5877,
+            "output_tokens_details": {
+              "thinking_tokens": 1588
+            },
+            "server_tool_use": {
+              "web_search_requests": 0,
+              "web_fetch_requests": 0
+            },
+            "service_tier": "standard",
+            "cache_creation": {
+              "ephemeral_1h_input_tokens": 43607,
+              "ephemeral_5m_input_tokens": 0
+            },
+            "inference_geo": "not_available",
+            "iterations": [],
+            "speed": "standard"
+          },
+          "modelUsage": {
+            "claude-opus-5": {
+              "inputTokens": 12885,
+              "outputTokens": 6570,
+              "cacheReadInputTokens": 468889,
+              "cacheCreationInputTokens": 43607,
+              "webSearchRequests": 1,
+              "costUSD": 0.9091894999999999,
+              "contextWindow": 1000000,
+              "maxOutputTokens": 64000,
+              "thinkingTokens": 1588,
+              "canonicalModel": "claude-opus-5",
+              "provider": "firstParty",
+              "costBasis": "list"
+            }
+          }
+        },
+        "tool_calls": {
+          "Bash": 4,
+          "WebSearch": 1,
+          "Write": 6,
+          "Read": 1
+        },
+        "tool_errors": []
+      }
+    },
+    {
+      "job": "batch-003",
+      "status": "completed",
+      "seconds": 96.733,
+      "validation_errors": {},
+      "runtime_status": "completed",
+      "provider": {
+        "terminal": {
+          "duration_ms": 76336,
+          "duration_api_ms": 74205,
+          "num_turns": 9,
+          "total_cost_usd": 0.842802,
+          "usage": {
+            "input_tokens": 18,
+            "cache_creation_input_tokens": 39043,
+            "cache_read_input_tokens": 603564,
+            "output_tokens": 6020,
+            "output_tokens_details": {
+              "thinking_tokens": 1631
+            },
+            "server_tool_use": {
+              "web_search_requests": 0,
+              "web_fetch_requests": 0
+            },
+            "service_tier": "standard",
+            "cache_creation": {
+              "ephemeral_1h_input_tokens": 39043,
+              "ephemeral_5m_input_tokens": 0
+            },
+            "inference_geo": "not_available",
+            "iterations": [],
+            "speed": "standard"
+          },
+          "modelUsage": {
+            "claude-opus-5": {
+              "inputTokens": 18,
+              "outputTokens": 6020,
+              "cacheReadInputTokens": 603564,
+              "cacheCreationInputTokens": 39043,
+              "webSearchRequests": 0,
+              "costUSD": 0.842802,
+              "contextWindow": 1000000,
+              "maxOutputTokens": 64000,
+              "thinkingTokens": 1631,
+              "canonicalModel": "claude-opus-5",
+              "provider": "firstParty",
+              "costBasis": "list"
+            }
+          }
+        },
+        "tool_calls": {
+          "Bash": 2,
+          "Grep": 1,
+          "Write": 5
+        },
+        "tool_errors": []
+      }
+    },
+    {
+      "job": "batch-004",
+      "status": "completed",
+      "seconds": 107.868,
+      "validation_errors": {},
+      "runtime_status": "completed",
+      "provider": {
+        "terminal": {
+          "duration_ms": 86157,
+          "duration_api_ms": 82109,
+          "num_turns": 12,
+          "total_cost_usd": 0.9581474999999999,
+          "usage": {
+            "input_tokens": 18,
+            "cache_creation_input_tokens": 41076,
+            "cache_read_input_tokens": 616705,
+            "output_tokens": 5392,
+            "output_tokens_details": {
+              "thinking_tokens": 1047
+            },
+            "server_tool_use": {
+              "web_search_requests": 0,
+              "web_fetch_requests": 0
+            },
+            "service_tier": "standard",
+            "cache_creation": {
+              "ephemeral_1h_input_tokens": 41076,
+              "ephemeral_5m_input_tokens": 0
+            },
+            "inference_geo": "not_available",
+            "iterations": [],
+            "speed": "standard"
+          },
+          "modelUsage": {
+            "claude-opus-5": {
+              "inputTokens": 13942,
+              "outputTokens": 6373,
+              "cacheReadInputTokens": 616705,
+              "cacheCreationInputTokens": 41076,
+              "webSearchRequests": 1,
+              "costUSD": 0.9581474999999999,
+              "contextWindow": 1000000,
+              "maxOutputTokens": 64000,
+              "thinkingTokens": 1047,
+              "canonicalModel": "claude-opus-5",
+              "provider": "firstParty",
+              "costBasis": "list"
+            }
+          }
+        },
+        "tool_calls": {
+          "Write": 6,
+          "WebSearch": 1,
+          "Bash": 1,
+          "Grep": 3
+        },
+        "tool_errors": []
+      }
+    },
+    {
+      "job": "batch-005",
+      "status": "completed",
+      "seconds": 133.132,
+      "validation_errors": {},
+      "runtime_status": "completed",
+      "provider": {
+        "terminal": {
+          "duration_ms": 111832,
+          "duration_api_ms": 107627,
+          "num_turns": 14,
+          "total_cost_usd": 1.1529184999999997,
+          "usage": {
+            "input_tokens": 26,
+            "cache_creation_input_tokens": 41790,
+            "cache_read_input_tokens": 927607,
+            "output_tokens": 6783,
+            "output_tokens_details": {
+              "thinking_tokens": 2469
+            },
+            "server_tool_use": {
+              "web_search_requests": 0,
+              "web_fetch_requests": 0
+            },
+            "service_tier": "standard",
+            "cache_creation": {
+              "ephemeral_1h_input_tokens": 41790,
+              "ephemeral_5m_input_tokens": 0
+            },
+            "inference_geo": "not_available",
+            "iterations": [],
+            "speed": "standard"
+          },
+          "modelUsage": {
+            "claude-opus-5": {
+              "inputTokens": 13778,
+              "outputTokens": 7693,
+              "cacheReadInputTokens": 927607,
+              "cacheCreationInputTokens": 41790,
+              "webSearchRequests": 1,
+              "costUSD": 1.1529184999999997,
+              "contextWindow": 1000000,
+              "maxOutputTokens": 64000,
+              "thinkingTokens": 2469,
+              "canonicalModel": "claude-opus-5",
+              "provider": "firstParty",
+              "costBasis": "list"
+            }
+          }
+        },
+        "tool_calls": {
+          "Bash": 4,
+          "Read": 3,
+          "WebSearch": 1,
+          "Write": 5
+        },
+        "tool_errors": [
+          "PreToolUse:Bash hook error: [python3 -B -m shepherd_citation_checker._engine.hooks]: Use Read/Grep/Glob for inspection; Bash is limited to the retained fetcher and validator\n"
+        ]
+      }
+    }
+  ]
+}

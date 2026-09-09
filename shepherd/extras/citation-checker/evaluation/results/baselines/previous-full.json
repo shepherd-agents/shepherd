@@ -1,0 +1,98 @@
+{
+  "note": "Deterministic revalidation of unchanged saved model outputs. Only validator change: raw JSON and equivalent JSON formatting may support a quote as well as decoded strings; quoted values remain unchanged. Native scoring, labels, model decisions and original run artifacts preserved. No additional retrieval or model calls.",
+  "references": 150,
+  "scored_references": 140,
+  "original_correct": 113,
+  "correct": 116,
+  "recovered_validation_ids": [
+    "53",
+    "191",
+    "260"
+  ],
+  "remaining_validation_errors": {},
+  "execution": {
+    "completed": 150
+  },
+  "native_datasets": {
+    "delta_human_audit": {
+      "n": 40,
+      "correct": 39,
+      "decided": 40,
+      "abstentions": 0,
+      "accuracy": 0.975,
+      "coverage": 1.0,
+      "precision": 0.9523809523809523,
+      "recall": 1.0,
+      "f1": 0.975609756097561,
+      "false_positive_rate": 0.05,
+      "true_positives": 20,
+      "false_positives": 1,
+      "true_negatives": 19,
+      "false_negatives_decided": 0,
+      "positive_abstentions": 0,
+      "negative_abstentions": 0,
+      "accuracy_wilson_95": [
+        0.8711863103652591,
+        0.9955731684973186
+      ]
+    },
+    "hallmark_test_public": {
+      "n": 50,
+      "correct": 45,
+      "decided": 46,
+      "abstentions": 4,
+      "accuracy": 0.9,
+      "coverage": 0.92,
+      "precision": 0.9583333333333334,
+      "recall": 0.92,
+      "f1": 0.9387755102040817,
+      "false_positive_rate": 0.04,
+      "true_positives": 23,
+      "false_positives": 1,
+      "true_negatives": 22,
+      "false_negatives_decided": 0,
+      "positive_abstentions": 2,
+      "negative_abstentions": 2,
+      "accuracy_wilson_95": [
+        0.7863976856252035,
+        0.9565242350681096
+      ]
+    },
+    "manual_reference_verification": {
+      "n": 50,
+      "correct": 32,
+      "decided": 34,
+      "abstentions": 16,
+      "accuracy": 0.64,
+      "coverage": 0.68,
+      "precision": 0.8181818181818182,
+      "recall": 0.9,
+      "f1": 0.8571428571428571,
+      "false_positive_rate": 0.05,
+      "true_positives": 9,
+      "false_positives": 2,
+      "true_negatives": 23,
+      "false_negatives_decided": 0,
+      "positive_abstentions": 1,
+      "negative_abstentions": 15,
+      "accuracy_wilson_95": [
+        0.501410168761127,
+        0.7586125034815325
+      ]
+    }
+  },
+  "original_timing": {
+    "started_at": "2026-09-09T07:03:53.435600+00:00",
+    "finished_at": "2026-09-09T07:20:57.189675+00:00",
+    "wall_seconds": 1023.753,
+    "preparation_seconds": 3.862,
+    "cached_inputs": true
+  },
+  "revalidation_seconds": 8.36,
+  "reported_usd_equivalent": 34.274982,
+  "additional_model_calls": 0,
+  "additional_retrieval_calls": 0,
+  "validator_before_sha256": "eb04ddb7b61ca228385f84eedba0b2c9966ea7211be3b71977f47982e75802ce",
+  "validator_after_sha256": "27b898f41c7ca3b0eb237048c1acc2008a3675050eae4f7bf9d1636933b32eff",
+  "other_frozen_validator_dependencies_unchanged": true
+}

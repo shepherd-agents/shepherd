@@ -182,6 +182,11 @@ path-disjoint).
 
 ## Examples
 
+Audit a paper's bibliography with the [Shepherd citation-checker package](shepherd/extras/citation-checker/README.md):
+`shepherd-check-citations paper /path/to/paper.pdf --output citation-report`.
+It uses pdfplumber and Claude Code subscription login with headless Opus.
+See the package for installation, reports, evaluation results and extraction limitations.
+
 The demo scripts above are the Python surface in miniature — checked-in copies
 live in [`examples/quickstart/`](https://github.com/shepherd-agents/shepherd/tree/main/examples/quickstart).
 The visual-artifact notebooks live in

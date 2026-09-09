@@ -1,0 +1,369 @@
+{
+  "url": "https://api.crossref.org/works?query.bibliographic=Mor+Geva%2C+Daniel+Khashabi%2C+Elad+Segal%2C+Tushar+Khot%2C+Dan+Roth%2C+and+Jonathan+Berant.+Did+aristotle+use+a+laptop%3F+a+question+answering+benchmark+with+implicit+reasoning+strategies.+Transactions+of+the+Association+for+Computational+Linguistics%2C+9%3A346%E2%80%93361%2C+2021.&rows=3",
+  "retrieved_at": "2026-09-05T09:18:08.641234+00:00",
+  "evidence_file": "evidence/5c6470ea2973605f160f.json",
+  "http_status": 200,
+  "resolved_url": "https://api.crossref.org/works?query.bibliographic=Mor+Geva%2C+Daniel+Khashabi%2C+Elad+Segal%2C+Tushar+Khot%2C+Dan+Roth%2C+and+Jonathan+Berant.+Did+aristotle+use+a+laptop%3F+a+question+answering+benchmark+with+implicit+reasoning+strategies.+Transactions+of+the+Association+for+Computational+Linguistics%2C+9%3A346%E2%80%93361%2C+2021.&rows=3",
+  "body": "{\"status\":\"ok\",\"message-type\":\"work-list\",\"message-version\":\"1.0.0\",\"message\":{\"facets\":{},\"total-results\":1484,\"items\":[{\"indexed\":{\"date-parts\":[[2026,9,5]],\"date-time\":\"2026-09-05T06:30:42Z\",\"timestamp\":1788589842034,\"version\":\"build-2803163510\"},\"reference-count\":27,\"publisher\":\"MIT Press\",\"license\":[{\"start\":{\"date-parts\":[[2021,4,28]],\"date-time\":\"2021-04-28T00:00:00Z\",\"timestamp\":1619568000000},\"content-version\":\"vor\",\"delay-in-days\":117,\"URL\":\"https:\\/\\/creativecommons.org\\/licenses\\/by\\/4.0\\/\"}],\"content-domain\":{\"domain\":[\"direct.mit.edu\"],\"crossmark-restriction\":true},\"published-print\":{\"date-parts\":[[2021,4,26]]},\"abstract\":\"<jats:title>Abstract<\\/jats:title>\\n                  <jats:p>A key limitation in current datasets for multi-hop reasoning is that the required steps for answering the question are mentioned in it explicitly. In this work, we introduce StrategyQA, a question answering (QA) benchmark where the required reasoning steps are implicit in the question, and should be inferred using a strategy. A fundamental challenge in this setup is how to elicit such creative questions from crowdsourcing workers, while covering a broad range of potential strategies. We propose a data collection procedure that combines term-based priming to inspire annotators, careful control over the annotator population, and adversarial filtering for eliminating reasoning shortcuts. Moreover, we annotate each question with (1) a decomposition into reasoning steps for answering it, and (2) Wikipedia paragraphs that contain the answers to each step. Overall, StrategyQA includes 2,780 examples, each consisting of a strategy question, its decomposition, and evidence paragraphs. Analysis shows that questions in StrategyQA are short, topic-diverse, and cover a wide range of strategies. Empirically, we show that humans perform well (87%) on this task, while our best baseline reaches an accuracy of \\u223c 66%.<\\/jats:p>\",\"DOI\":\"10.1162\\/tacl_a_00370\",\"type\":\"journal-article\",\"created\":{\"date-parts\":[[2021,4,28]],\"date-time\":\"2021-04-28T19:50:50Z\",\"timestamp\":1619639450000},\"page\":\"346-361\",\"update-policy\":\"https:\\/\\/doi.org\\/10.1162\\/mitpressjournals.corrections.policy\",\"source\":\"Crossref\",\"is-referenced-by-count\":194,\"title\":[\"<i>Did Aristotle Use a Laptop?<\\/i>\\n                    A Question Answering Benchmark with Implicit Reasoning Strategies\"],\"prefix\":\"10.1162\",\"volume\":\"9\",\"author\":[{\"given\":\"Mor\",\"family\":\"Geva\",\"sequence\":\"first\",\"affiliation\":[{\"name\":\"Tel Aviv University, Israel\"},{\"name\":\"Allen Institute for AI, United States. morgeva@mail.tau.ac.il\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Daniel\",\"family\":\"Khashabi\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Allen Institute for AI, United States. danielk@allenai.org\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Elad\",\"family\":\"Segal\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Tel Aviv University, Israel. elad.segal@gmail.com\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Tushar\",\"family\":\"Khot\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Allen Institute for AI, United States. tushark@allenai.org\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Dan\",\"family\":\"Roth\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"University of Pennsylvania, United States. danroth@seas.upenn.edu\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Jonathan\",\"family\":\"Berant\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Tel Aviv University, Israel\"},{\"name\":\"Allen Institute for AI, United States. joberant@cs.tau.ac.il\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]}],\"member\":\"281\",\"published-online\":{\"date-parts\":[[2021,4,26]]},\"reference\":[{\"key\":\"2021060823401751300_bib1\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"662\",\"DOI\":\"10.1162\\/tacl_a_00338\",\"article-title\":\"Beat the AI: Investigating adversarial human annotation for reading comprehension\",\"volume\":\"8\",\"author\":\"Bartolo\",\"year\":\"2020\",\"journal-title\":\"Transactions of the Association for Computational Linguistics\"},{\"key\":\"2021060823401751300_bib2\",\"first-page\":\"2924\",\"article-title\":\"BoolQ: Exploring the surprising difficulty of natural yes\\/no questions\",\"volume-title\":\"Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)\",\"author\":\"Clark\",\"year\":\"2019\"},{\"key\":\"2021060823401751300_bib3\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"454\",\"DOI\":\"10.1162\\/tacl_a_00317\",\"article-title\":\"TyDi QA: A benchmark for information-seeking question answering in typologically diverse languages\",\"volume\":\"8\",\"author\":\"Clark\",\"year\":\"2020\",\"journal-title\":\"Transactions of the Association for Computational Linguistics (TACL)\"},{\"key\":\"2021060823401751300_bib4\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"4443\",\"DOI\":\"10.18653\\/v1\\/2020.acl-main.408\",\"article-title\":\"ERASER: A benchmark to evaluate rationalized NLP models\",\"volume-title\":\"Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics\",\"author\":\"DeYoung\",\"year\":\"2020\"},{\"key\":\"2021060823401751300_bib5\",\"article-title\":\"DROP: A reading comprehension benchmark requiring discrete reasoning over paragraphs\",\"volume-title\":\"North American Chapter of the Association for Computational Linguistics (NAACL)\",\"author\":\"Dua\",\"year\":\"2019\"},{\"key\":\"2021060823401751300_bib6\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"1161\",\"DOI\":\"10.18653\\/v1\\/D19-1107\",\"article-title\":\"Are we modeling the task or the annotator? An investigation of annotator bias in natural language understanding datasets\",\"volume-title\":\"Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)\",\"author\":\"Geva\",\"year\":\"2019\"},{\"key\":\"2021060823401751300_bib7\",\"first-page\":\"107\",\"article-title\":\"Annotation artifacts in natural language inference data\",\"volume-title\":\"Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 2 (Short Papers)\",\"author\":\"Gururangan\",\"year\":\"2018\"},{\"key\":\"2021060823401751300_bib8\",\"doi-asserted-by\":\"crossref\",\"DOI\":\"10.18653\\/v1\\/P19-1262\",\"article-title\":\"Avoiding reasoning shortcuts: Adversarial evaluation, training, and model development for multi-hop QA\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Jiang\",\"year\":\"2019\"},{\"key\":\"2021060823401751300_bib9\",\"first-page\":\"252\",\"article-title\":\"Looking beyond the surface: A challenge set for reading comprehension over multiple sentences\",\"volume-title\":\"Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers)\",\"author\":\"Khashabi\",\"year\":\"2018\"},{\"key\":\"2021060823401751300_bib10\",\"doi-asserted-by\":\"crossref\",\"DOI\":\"10.1609\\/aaai.v34i05.6319\",\"article-title\":\"QASC: A dataset for question answering via sentence composition\",\"volume-title\":\"AAAI\",\"author\":\"Khot\",\"year\":\"2020\"},{\"key\":\"2021060823401751300_bib11\",\"article-title\":\"Text modular networks: Learning to decompose tasks in the language of existing models\",\"author\":\"Khot\",\"year\":\"2020\",\"journal-title\":\"arXiv preprint arXiv:2009.00751\"},{\"key\":\"2021060823401751300_bib12\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"453\",\"DOI\":\"10.1162\\/tacl_a_00276\",\"article-title\":\"Natural questions: A benchmark for question answering research\",\"volume\":\"7\",\"author\":\"Kwiatkowski\",\"year\":\"2019\",\"journal-title\":\"Transactions of the Association for Computational Linguistics (TACL)\"},{\"key\":\"2021060823401751300_bib13\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"7871\",\"DOI\":\"10.18653\\/v1\\/2020.acl-main.703\",\"article-title\":\"BART: Denoising sequence-to-sequence pre-training for natural language generation, translation, and comprehension\",\"volume-title\":\"Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics\",\"author\":\"Lewis\",\"year\":\"2020\"},{\"key\":\"2021060823401751300_bib14\",\"article-title\":\"RoBERTa: A robustly optimized BERT pretraining approach\",\"author\":\"Liu\",\"year\":\"2019\",\"journal-title\":\"arXiv preprint arXiv:1907.11692\"},{\"key\":\"2021060823401751300_bib15\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"2381\",\"DOI\":\"10.18653\\/v1\\/D18-1260\",\"article-title\":\"Can a suit of armor conduct electricity? A new dataset for open book question answering\",\"volume-title\":\"Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing\",\"author\":\"Mihaylov\",\"year\":\"2018\"},{\"key\":\"2021060823401751300_bib16\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"6097\",\"DOI\":\"10.18653\\/v1\\/P19-1613\",\"article-title\":\"Multi-hop reading comprehension through question decomposition and rescoring\",\"volume-title\":\"Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics\",\"author\":\"Min\",\"year\":\"2019\"},{\"key\":\"2021060823401751300_bib17\",\"article-title\":\"MS MARCO: A human generated machine reading comprehension dataset\",\"volume-title\":\"Workshop on Cognitive Computing at NIPS\",\"author\":\"Nguyen\",\"year\":\"2016\"},{\"key\":\"2021060823401751300_bib18\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"8864\",\"DOI\":\"10.18653\\/v1\\/2020.emnlp-main.713\",\"article-title\":\"Unsupervised question decomposition for question answering\",\"volume-title\":\"Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"Perez\",\"year\":\"2020\"},{\"key\":\"2021060823401751300_bib19\",\"doi-asserted-by\":\"crossref\",\"DOI\":\"10.18653\\/v1\\/D16-1264\",\"article-title\":\"SQuAD: 100,000+ questions for machine comprehension of text\",\"volume-title\":\"Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"Rajpurkar\",\"year\":\"2016\"},{\"key\":\"2021060823401751300_bib20\",\"first-page\":\"109\",\"article-title\":\"Okapi at TREC-3\",\"volume-title\":\"Overview of the Third Text REtrieval Conference (TREC-3)\",\"author\":\"Robertson\",\"year\":\"1995\"},{\"key\":\"2021060823401751300_bib21\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"3074\",\"DOI\":\"10.18653\\/v1\\/2020.emnlp-main.248\",\"article-title\":\"A simple and effective model for answering multi-span questions\",\"volume-title\":\"Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"Segal\",\"year\":\"2020\"},{\"key\":\"2021060823401751300_bib22\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"pages 6418\\u2013pages 6428\",\"DOI\":\"10.18653\\/v1\\/P19-1644\",\"article-title\":\"A corpus for reasoning about natural language grounded in photographs\",\"volume-title\":\"Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics\",\"author\":\"Suhr\",\"year\":\"2019\"},{\"key\":\"2021060823401751300_bib23\",\"doi-asserted-by\":\"crossref\",\"DOI\":\"10.18653\\/v1\\/N18-1059\",\"article-title\":\"The web as a knowledge-base for answering complex questions\",\"volume-title\":\"North American Chapter of the Association for Computational Linguistics (NAACL)\",\"author\":\"Talmor\",\"year\":\"2018\"},{\"key\":\"2021060823401751300_bib24\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"287\",\"DOI\":\"10.1162\\/tacl_a_00021\",\"article-title\":\"Constructing datasets for multi-hop reading comprehension across documents\",\"volume\":\"6\",\"author\":\"Welbl\",\"year\":\"2018\",\"journal-title\":\"Transactions of the Association for Computational Linguistics (TACL)\"},{\"key\":\"2021060823401751300_bib25\",\"first-page\":\"1112\",\"article-title\":\"A broad-coverage challenge corpus for sentence understanding through inference\",\"volume-title\":\"Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers)\",\"author\":\"Williams\",\"year\":\"2018\"},{\"key\":\"2021060823401751300_bib26\",\"doi-asserted-by\":\"crossref\",\"DOI\":\"10.1162\\/tacl_a_00309\",\"article-title\":\"Break it down: A question understanding benchmark\",\"author\":\"Wolfson\",\"year\":\"2020\",\"journal-title\":\"Transactions of the Association for Computational Linguistics (TACL)\"},{\"key\":\"2021060823401751300_bib27\",\"doi-asserted-by\":\"crossref\",\"DOI\":\"10.18653\\/v1\\/D18-1259\",\"article-title\":\"HotpotQA: A dataset for diverse, explainable multi-hop question answering\",\"volume-title\":\"Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"Yang\",\"year\":\"2018\"}],\"container-title\":[\"Transactions of the Association for Computational Linguistics\"],\"language\":\"en\",\"link\":[{\"URL\":\"http:\\/\\/direct.mit.edu\\/tacl\\/article-pdf\\/doi\\/10.1162\\/tacl_a_00370\\/1924104\\/tacl_a_00370.pdf\",\"content-type\":\"application\\/pdf\",\"content-version\":\"vor\",\"intended-application\":\"syndication\"},{\"URL\":\"http:\\/\\/direct.mit.edu\\/tacl\\/article-pdf\\/doi\\/10.1162\\/tacl_a_00370\\/1924104\\/tacl_a_00370.pdf\",\"content-type\":\"unspecified\",\"content-version\":\"vor\",\"intended-application\":\"similarity-checking\"}],\"deposited\":{\"date-parts\":[[2022,12,25]],\"date-time\":\"2022-12-25T14:35:03Z\",\"timestamp\":1671978903000},\"score\":166.38902,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/direct.mit.edu\\/tacl\\/article\\/doi\\/10.1162\\/tacl_a_00370\\/100680\\/Did-Aristotle-Use-a-Laptop-A-Question-Answering\"}},\"issued\":{\"date-parts\":[[2021]]},\"references-count\":27,\"URL\":\"https:\\/\\/doi.org\\/10.1162\\/tacl_a_00370\",\"ISSN\":[\"2307-387X\"],\"issn-type\":[{\"value\":\"2307-387X\",\"type\":\"electronic\"}],\"published-other\":{\"date-parts\":[[2021]]},\"published\":{\"date-parts\":[[2021]]}},{\"indexed\":{\"date-parts\":[[2026,5,5]],\"date-time\":\"2026-05-05T19:46:57Z\",\"timestamp\":1778010417454,\"version\":\"3.51.4\"},\"publisher-location\":\"Stroudsburg, PA, USA\",\"reference-count\":0,\"publisher\":\"Association for Computational Linguistics\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"published-print\":{\"date-parts\":[[2021]]},\"DOI\":\"10.18653\\/v1\\/2021.findings-emnlp.38\",\"type\":\"proceedings-article\",\"created\":{\"date-parts\":[[2021,12,28]],\"date-time\":\"2021-12-28T17:24:05Z\",\"timestamp\":1640712245000},\"page\":\"421-433\",\"source\":\"Crossref\",\"is-referenced-by-count\":8,\"title\":[\"GooAQ: Open Question Answering with Diverse Answer Types\"],\"prefix\":\"10.18653\",\"author\":[{\"given\":\"Daniel\",\"family\":\"Khashabi\",\"sequence\":\"first\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"given\":\"Amos\",\"family\":\"Ng\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"given\":\"Tushar\",\"family\":\"Khot\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"given\":\"Ashish\",\"family\":\"Sabharwal\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"given\":\"Hannaneh\",\"family\":\"Hajishirzi\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"given\":\"Chris\",\"family\":\"Callison-Burch\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]}],\"member\":\"1643\",\"event\":{\"name\":\"Findings of the Association for Computational Linguistics: EMNLP 2021\",\"location\":\"Punta Cana, Dominican Republic\",\"start\":{\"date-parts\":[[2021,11]]},\"end\":{\"date-parts\":[[2021,11]]}},\"container-title\":[\"Findings of the Association for Computational Linguistics: EMNLP 2021\"],\"deposited\":{\"date-parts\":[[2021,12,28]],\"date-time\":\"2021-12-28T17:26:39Z\",\"timestamp\":1640712399000},\"score\":61.519176,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/aclanthology.org\\/2021.findings-emnlp.38\"}},\"issued\":{\"date-parts\":[[2021]]},\"references-count\":0,\"URL\":\"https:\\/\\/doi.org\\/10.18653\\/v1\\/2021.findings-emnlp.38\",\"published\":{\"date-parts\":[[2021]]}},{\"indexed\":{\"date-parts\":[[2026,8,18]],\"date-time\":\"2026-08-18T01:56:02Z\",\"timestamp\":1787018162496,\"version\":\"build-2736575974\"},\"reference-count\":53,\"publisher\":\"MIT Press\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"short-container-title\":[\"Transactions of the Association for Computational Linguistics\"],\"published-print\":{\"date-parts\":[[2020,12]]},\"abstract\":\"<jats:p>Understanding natural language questions entails the ability to break down a question into the requisite steps for computing its answer. In this work, we introduce a Question Decomposition Meaning Representation (QDMR) for questions. QDMR constitutes the ordered list of steps, expressed through natural language, that are necessary for answering a question. We develop a crowdsourcing pipeline, showing that quality QDMRs can be annotated at scale, and release the Break dataset, containing over 83K pairs of questions and their QDMRs. We demonstrate the utility of QDMR by showing that (a) it can be used to improve open-domain question answering on the HotpotQA dataset, (b) it can be deterministically converted to a pseudo-SQL formal language, which can alleviate annotation in semantic parsing applications. Last, we use Break to train a sequence-to-sequence model with copying that parses questions into QDMR structures, and show that it substantially outperforms several natural baselines.<\\/jats:p>\",\"DOI\":\"10.1162\\/tacl_a_00309\",\"type\":\"journal-article\",\"created\":{\"date-parts\":[[2020,4,17]],\"date-time\":\"2020-04-17T12:51:34Z\",\"timestamp\":1587127894000},\"page\":\"183-198\",\"source\":\"Crossref\",\"is-referenced-by-count\":49,\"title\":[\"B\\n                    <scp>reak<\\/scp>\\n                    It Down: A Question Understanding Benchmark\"],\"prefix\":\"10.1162\",\"volume\":\"8\",\"author\":[{\"given\":\"Tomer\",\"family\":\"Wolfson\",\"sequence\":\"first\",\"affiliation\":[{\"name\":\"Tel Aviv University\"},{\"name\":\"Allen Institute for AI.\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Mor\",\"family\":\"Geva\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Tel Aviv University\"},{\"name\":\"Allen Institute for AI.\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Ankit\",\"family\":\"Gupta\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Tel Aviv University.\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Matt\",\"family\":\"Gardner\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Allen Institute for AI.\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Yoav\",\"family\":\"Goldberg\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Bar-Ilan University\"},{\"name\":\"Allen Institute for AI.\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Daniel\",\"family\":\"Deutch\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Tel Aviv University.\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Jonathan\",\"family\":\"Berant\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Tel Aviv University\"},{\"name\":\"Allen Institute for AI.\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]}],\"member\":\"281\",\"reference\":[{\"key\":\"bib1\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Abend Omri\",\"year\":\"2013\"},{\"key\":\"bib2\",\"volume-title\":\"North American Association for Computational Linguistics (NAACL)\",\"author\":\"Abujabal Abdalghani\",\"year\":\"2019\"},{\"key\":\"bib3\",\"volume-title\":\"Human Language Technology and North American Association for Computational Linguistics (HLT\\/NAACL)\",\"author\":\"Andreas Jacob\",\"year\":\"2016\"},{\"key\":\"bib4\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"29\",\"DOI\":\"10.1017\\/S135132490000005X\",\"volume\":\"1\",\"author\":\"Androutsopoulos Ion\",\"year\":\"1995\",\"journal-title\":\"Journal of Natural Language Engineering\"},{\"key\":\"bib5\",\"first-page\":\"2425\",\"volume-title\":\"International Conference on Computer Vision (ICCV)\",\"author\":\"Antol Stanislaw\",\"year\":\"2015\"},{\"key\":\"bib6\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"374\",\"DOI\":\"10.1109\\/ICDE.2019.00041\",\"volume-title\":\"2019 IEEE 35th International Conference on Data Engineering (ICDE)\",\"author\":\"Baik Christopher\",\"year\":\"2019\"},{\"key\":\"bib7\",\"volume-title\":\"7th Linguistic Annotation Workshop and Interoperability with Discourse\",\"author\":\"Banarescu Laura\",\"year\":\"2013\"},{\"key\":\"bib8\",\"first-page\":\"249\",\"volume-title\":\"Proceedings of the 1974 ACM SIGFIDET (now SIGMOD) Workshop on Data Description, Access and Control\",\"author\":\"Chamberlin Donald D.\",\"year\":\"1974\"},{\"key\":\"bib9\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Chen Danqi\",\"year\":\"2017\"},{\"key\":\"bib10\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Chen Jifan\",\"year\":\"2019\"},{\"key\":\"bib11\",\"author\":\"Cheng Jianpeng\",\"year\":\"2018\",\"journal-title\":\"ArXiv\"},{\"key\":\"bib12\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Choi Eunsol\",\"year\":\"2015\"},{\"key\":\"bib13\",\"first-page\":\"18\",\"volume-title\":\"Computational Natural Language Learning (CoNLL)\",\"author\":\"Clarke James\",\"year\":\"2010\"},{\"issue\":\"6\",\"key\":\"bib14\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"377\",\"DOI\":\"10.1145\\/362384.362685\",\"volume\":\"13\",\"author\":\"Codd Edgar F.\",\"year\":\"1970\",\"journal-title\":\"Communications of the ACM\"},{\"key\":\"bib15\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"43\",\"DOI\":\"10.3115\\/1075812.1075823\",\"volume-title\":\"Workshop on Human Language Technology\",\"author\":\"Dahl Deborah A.\",\"year\":\"1994\"},{\"key\":\"bib16\",\"volume-title\":\"North American Association for Computational Linguistics (NAACL)\",\"author\":\"Devlin Jacob\",\"year\":\"2019\"},{\"key\":\"bib17\",\"volume-title\":\"Human Language Technology and North American Association for Computational Linguistics (HLT\\/NAACL)\",\"author\":\"Dua Dheeru\",\"year\":\"2019\"},{\"key\":\"bib18\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"FitzGerald Nicholas\",\"year\":\"2018\"},{\"key\":\"bib19\",\"unstructured\":\"Matt Gardner, Joel Grus, Mark Neumann, Oyvind Tafjord, Pradeep Dasigi, Nelson F. Liu, Matthew Peters, Michael Schmitz, and Luke S. Zettlemoyer. 2017. In AllenNLP: A deep semantic natural language processing platform, arXiv, abs\\/1803.07640v2.\"},{\"key\":\"bib20\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Jiatao Gu\",\"year\":\"2016\"},{\"key\":\"bib21\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Guo Jiaqi\",\"year\":\"2019\"},{\"key\":\"bib22\",\"volume-title\":\"Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"Gupta Nitish\",\"year\":\"2018\"},{\"issue\":\"2\",\"key\":\"bib23\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"100\",\"DOI\":\"10.1109\\/TSSC.1968.300136\",\"volume\":\"4\",\"author\":\"Hart Peter E.\",\"year\":\"1968\",\"journal-title\":\"IEEE Transactions on Systems Science and Cybernetics\"},{\"key\":\"bib24\",\"volume-title\":\"Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"He Luheng\",\"year\":\"2016\"},{\"key\":\"bib25\",\"volume-title\":\"International Conference on Computer Vision (ICCV)\",\"author\":\"Ronghang Hu\",\"year\":\"2017\"},{\"key\":\"bib26\",\"volume-title\":\"The IEEE Conference on Computer Vision and Pattern Recognition (CVPR)\",\"author\":\"Hudson Drew A.\",\"year\":\"2019\"},{\"key\":\"bib27\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Iyer Srini\",\"year\":\"2017\"},{\"key\":\"bib28\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"1821\",\"DOI\":\"10.18653\\/v1\\/P17-1167\",\"volume-title\":\"Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)\",\"author\":\"Iyyer Mohit\",\"year\":\"2017\"},{\"key\":\"bib29\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Jiang Yichen\",\"year\":\"2019\"},{\"key\":\"bib30\",\"volume-title\":\"Computer Vision and Pattern Recognition (CVPR)\",\"author\":\"Johnson Justin\",\"year\":\"2017\"},{\"key\":\"bib31\",\"volume-title\":\"Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"Kwiatkowski Tom\",\"year\":\"2013\"},{\"key\":\"bib32\",\"doi-asserted-by\":\"publisher\",\"DOI\":\"10.1162\\/tacl_a_00276\"},{\"key\":\"bib33\",\"volume-title\":\"International Conference on Management of Data, SIGMOD\",\"author\":\"Li Fei\",\"year\":\"2014\"},{\"key\":\"bib34\",\"first-page\":\"pages 1051\\u2013page\",\"volume-title\":\"International Conference on Management of Data, SIGMOD\",\"author\":\"Li Fei\",\"year\":\"2014\"},{\"key\":\"bib35\",\"doi-asserted-by\":\"publisher\",\"DOI\":\"10.1162\\/COLI_a_00127\"},{\"key\":\"bib36\",\"volume-title\":\"North American Association for Computational Linguistics (NAACL)\",\"author\":\"Michael Julian\",\"year\":\"2018\"},{\"key\":\"bib37\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Min Sewon\",\"year\":\"2019\"},{\"key\":\"bib38\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Min Sewon\",\"year\":\"2019\"},{\"key\":\"bib39\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Pasupat Panupong\",\"year\":\"2015\"},{\"issue\":\"1\",\"key\":\"bib40\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"11\",\"DOI\":\"10.1007\\/BF00763644\",\"volume\":\"13\",\"author\":\"Pelletier Francis Jeffry\",\"year\":\"1994\",\"journal-title\":\"Topoi\"},{\"key\":\"bib41\",\"first-page\":\"91\",\"volume-title\":\"Proceedings of the Third DARPA Speech and Natural Language Workshop\",\"author\":\"Price P. J.\",\"year\":\"1990\"},{\"key\":\"bib42\",\"first-page\":\"2590\",\"volume-title\":\"Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"Qi Peng\",\"year\":\"2019\"},{\"key\":\"bib43\",\"volume-title\":\"Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"Rajpurkar Pranav\",\"year\":\"2016\"},{\"key\":\"bib44\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Reddy Siva\",\"year\":\"2016\"},{\"key\":\"bib45\",\"author\":\"Suhr Alane\",\"year\":\"2019\",\"journal-title\":\"Association for Computational Linguistics (ACL)\"},{\"key\":\"bib46\",\"volume-title\":\"North American Association for Computational Linguistics (NAACL)\",\"author\":\"Talmor Alon\",\"year\":\"2018\"},{\"key\":\"bib47\",\"doi-asserted-by\":\"publisher\",\"DOI\":\"10.1162\\/tacl_a_00021\"},{\"key\":\"bib48\",\"doi-asserted-by\":\"crossref\",\"first-page\":\"401\",\"DOI\":\"10.1162\\/tacl_a_00107\",\"volume\":\"4\",\"author\":\"Wei Xu\",\"year\":\"2016\",\"journal-title\":\"Transactions of the Association for Computational Linguistics\"},{\"key\":\"bib49\",\"volume-title\":\"Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"Yang Zhilin\",\"year\":\"2018\"},{\"key\":\"bib50\",\"volume-title\":\"Association for Computational Linguistics (ACL)\",\"author\":\"Yih Wen-tau\",\"year\":\"2016\"},{\"key\":\"bib51\",\"volume-title\":\"Empirical Methods in Natural Language Processing (EMNLP)\",\"author\":\"Tao Yu\",\"year\":\"2018\"},{\"key\":\"bib52\",\"first-page\":\"1050\",\"volume-title\":\"Association for the Advancement of Artificial Intelligence (AAAI)\",\"author\":\"Zelle John M.\",\"year\":\"1996\"},{\"key\":\"bib53\",\"first-page\":\"658\",\"volume-title\":\"Uncertainty in Artificial Intelligence (UAI)\",\"author\":\"Zettlemoyer Luke\",\"year\":\"2005\"}],\"container-title\":[\"Transactions of the Association for Computational Linguistics\"],\"language\":\"en\",\"link\":[{\"URL\":\"https:\\/\\/www.mitpressjournals.org\\/doi\\/pdf\\/10.1162\\/tacl_a_00309\",\"content-type\":\"unspecified\",\"content-version\":\"vor\",\"intended-application\":\"similarity-checking\"}],\"deposited\":{\"date-parts\":[[2021,3,12]],\"date-time\":\"2021-03-12T16:39:35Z\",\"timestamp\":1615567175000},\"score\":60.877216,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/direct.mit.edu\\/tacl\\/article\\/43549\"}},\"issued\":{\"date-parts\":[[2020,12]]},\"references-count\":53,\"alternative-id\":[\"10.1162\\/tacl_a_00309\"],\"URL\":\"https:\\/\\/doi.org\\/10.1162\\/tacl_a_00309\",\"ISSN\":[\"2307-387X\"],\"issn-type\":[{\"value\":\"2307-387X\",\"type\":\"electronic\"}],\"published\":{\"date-parts\":[[2020,12]]}}],\"items-per-page\":3,\"query\":{\"start-index\":0,\"search-terms\":null}}}",
+  "candidates": [
+    {
+      "title": [
+        "<i>Did Aristotle Use a Laptop?</i>\n                    A Question Answering Benchmark with Implicit Reasoning Strategies"
+      ],
+      "author": [
+        {
+          "given": "Mor",
+          "family": "Geva",
+          "sequence": "first",
+          "affiliation": [
+            {
+              "name": "Tel Aviv University, Israel"
+            },
+            {
+              "name": "Allen Institute for AI, United States. morgeva@mail.tau.ac.il"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Daniel",
+          "family": "Khashabi",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Allen Institute for AI, United States. danielk@allenai.org"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Elad",
+          "family": "Segal",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Tel Aviv University, Israel. elad.segal@gmail.com"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Tushar",
+          "family": "Khot",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Allen Institute for AI, United States. tushark@allenai.org"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Dan",
+          "family": "Roth",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "University of Pennsylvania, United States. danroth@seas.upenn.edu"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Jonathan",
+          "family": "Berant",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Tel Aviv University, Israel"
+            },
+            {
+              "name": "Allen Institute for AI, United States. joberant@cs.tau.ac.il"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Transactions of the Association for Computational Linguistics"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2021
+          ]
+        ]
+      },
+      "DOI": "10.1162/tacl_a_00370",
+      "URL": "https://doi.org/10.1162/tacl_a_00370",
+      "type": "journal-article"
+    },
+    {
+      "title": [
+        "GooAQ: Open Question Answering with Diverse Answer Types"
+      ],
+      "author": [
+        {
+          "given": "Daniel",
+          "family": "Khashabi",
+          "sequence": "first",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "given": "Amos",
+          "family": "Ng",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "given": "Tushar",
+          "family": "Khot",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "given": "Ashish",
+          "family": "Sabharwal",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "given": "Hannaneh",
+          "family": "Hajishirzi",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "given": "Chris",
+          "family": "Callison-Burch",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Findings of the Association for Computational Linguistics: EMNLP 2021"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2021
+          ]
+        ]
+      },
+      "DOI": "10.18653/v1/2021.findings-emnlp.38",
+      "URL": "https://doi.org/10.18653/v1/2021.findings-emnlp.38",
+      "type": "proceedings-article"
+    },
+    {
+      "title": [
+        "B\n                    <scp>reak</scp>\n                    It Down: A Question Understanding Benchmark"
+      ],
+      "author": [
+        {
+          "given": "Tomer",
+          "family": "Wolfson",
+          "sequence": "first",
+          "affiliation": [
+            {
+              "name": "Tel Aviv University"
+            },
+            {
+              "name": "Allen Institute for AI."
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Mor",
+          "family": "Geva",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Tel Aviv University"
+            },
+            {
+              "name": "Allen Institute for AI."
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Ankit",
+          "family": "Gupta",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Tel Aviv University."
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Matt",
+          "family": "Gardner",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Allen Institute for AI."
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Yoav",
+          "family": "Goldberg",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Bar-Ilan University"
+            },
+            {
+              "name": "Allen Institute for AI."
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Daniel",
+          "family": "Deutch",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Tel Aviv University."
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Jonathan",
+          "family": "Berant",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Tel Aviv University"
+            },
+            {
+              "name": "Allen Institute for AI."
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Transactions of the Association for Computational Linguistics"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2020,
+            12
+          ]
+        ]
+      },
+      "DOI": "10.1162/tacl_a_00309",
+      "URL": "https://doi.org/10.1162/tacl_a_00309",
+      "type": "journal-article"
+    }
+  ]
+}

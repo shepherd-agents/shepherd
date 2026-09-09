@@ -1,0 +1,22 @@
+{
+  "citation-iteration-50-v3-discovery-full-v2": {
+    "references": 146,
+    "semantic_changes": [],
+    "old_validation_errors": {
+      "208": "ValueError: No explicit supplied edition annotation; omit its check and use enrichment only",
+      "82": "ValueError: No explicit supplied version annotation; omit its check and use enrichment only",
+      "33": "ValueError: No explicit supplied work_type annotation; omit its check and use enrichment only"
+    },
+    "packaged_validation_errors": {
+      "208": "ValueError: No explicit supplied edition annotation; omit its check and use enrichment only",
+      "82": "ValueError: No explicit supplied version annotation; omit its check and use enrichment only",
+      "33": "ValueError: No explicit supplied work_type annotation; omit its check and use enrichment only"
+    }
+  },
+  "shepherd-manuscript-adjudication-v14-refinement": {
+    "references": 28,
+    "semantic_changes": [],
+    "old_validation_errors": {},
+    "packaged_validation_errors": {}
+  }
+}

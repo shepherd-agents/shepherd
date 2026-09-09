@@ -99,3 +99,8 @@ examples/agent_tutorials/
 .shepherd/
 .vcscore/
 vcs-core/packages/core/.podman/
+
+# Citation-checker exploration stays on disk, outside the supported package.
+# Curated history, frozen evaluations and regression tests live in the package tree.
+/examples/citation-checker/*
+!/examples/citation-checker/README.md

@@ -1,0 +1,37 @@
+{
+  "results": [],
+  "status": "incomplete",
+  "error": "missing_inputs",
+  "reason": "No references were audited because the task inputs were not present in the workspace. The declared input file 'input.json' does not exist, 'policy.md' does not exist, and there is no 'evidence/' directory of prefetched public-source evidence. The workspace working directory (/tmp/vcs-core-overlay/workspace-dea857c41561/clones/run-68919bfdf0ac) contained only the agent scratch directory '.claude-scratch' at launch. The clone's recorded base tree OID is 4b825dc642cb6eb9a060e54bf8d69288fbee4904, which is git's canonical empty-tree object, confirming the workspace was materialized from an empty tree rather than from a tree containing the audit inputs. The launch manifest also listed zero retained-output input artifacts ('.shepherd-inputs/' was empty and absent). With no reference records available, there are zero input ids, so 'results' is necessarily empty. No results were synthesized: producing entries without input references would require fabricating reference metadata, retrievals and URLs, which the task contract forbids.",
+  "verification_performed": [
+    {
+      "check": "Directory listing of the working directory, including hidden entries.",
+      "outcome": "Only '.claude-scratch' present; no input.json, policy.md, evidence/, or .shepherd-inputs/."
+    },
+    {
+      "check": "Recursive listing of the working directory to depth 3, excluding the agent scratch tree.",
+      "outcome": "No files found beyond '.claude-scratch'."
+    },
+    {
+      "check": "Filesystem-wide search (find / -maxdepth 7) for files named 'input.json' or 'policy.md'.",
+      "outcome": "No 'input.json' found anywhere. A 'policy.md' exists only at <evaluation-workspace>/examples/citation-checker/policy.md, which is outside the working directory and belongs to the harness source repository, not to this run's workspace."
+    },
+    {
+      "check": "Inspection of the workspace overlay metadata (base-tree-oid) and the sibling 'ground' clone.",
+      "outcome": "base-tree-oid is the git empty-tree hash 4b825dc642cb6eb9a060e54bf8d69288fbee4904; the 'ground' clone directory is empty. The absence of inputs is a property of the materialized workspace, not a search failure."
+    }
+  ],
+  "excluded_sources": [
+    {
+      "path": "<evaluation-workspace>/examples/citation-checker/seed.json",
+      "reason": "Outside the working directory and not the declared input. The run instructions direct auditing of 'input.json' only and prohibit auditing unrelated files."
+    },
+    {
+      "path": "<evaluation-workspace>/examples/citation-checker/seed-labels.json",
+      "reason": "Contains expected labels. The run instructions require auditing without access to expected labels, so this file was deliberately not read."
+    }
+  ],
+  "searches": [],
+  "evidence": [],
+  "meta_review_note": "This report records a blocked run rather than an audit. No web searches or fetches were performed and no files were written under evidence/extra/, because there were no references to check; recording searches or evidence here would misrepresent work that was not done. To obtain a real audit, re-run the task with a workspace that contains input.json, policy.md and the prefetched evidence/ directory. Reviewers should treat the empty 'results' array as 'no input supplied', not as 'all references valid'."
+}

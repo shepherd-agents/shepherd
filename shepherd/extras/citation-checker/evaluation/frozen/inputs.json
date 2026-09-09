@@ -1,0 +1,604 @@
+{
+  "references": [
+    {
+      "id": "2",
+      "raw": "title: Single-cell RNA-seq reveals dynamic, random monoallelic expression in mammalian cells.\nauthors: Patel; A. P.; Tirosh; I.; Trombetta; J. J.; Shalek; A. K.; Gillespie; S. M.; Wakimoto; H.; Cahill; D. P.; Santagata; S.; Munoz; B.; McCarroll; S. A.; & Weir; B. A.\nyear: 2014\nvenue: Science"
+    },
+    {
+      "id": "3",
+      "raw": "Daphne Ippolito, Reno Kriz, João Sedoc, Maria Kustikova, and Chris Callison-Burch. Comparison of diverse decoding methods from conditional language models. In Anna Korhonen, David Traum, and Lluís Màrquez (eds.), Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics, pp. 3752?3762, Florence, Italy, July 2019. Association for Computational Linguistics"
+    },
+    {
+      "id": "5",
+      "raw": "Yayati Desai and Gregory Durrett. Calibration of text generation models. In Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP), pp. 4690?4697, 2020"
+    },
+    {
+      "id": "6",
+      "raw": "Sarah Wiegreffe, Matthew Finlayson, Oyvind Tafjord, Peter Clark, and Ashish Sabharwal. Increasing probability mass on answer choices does not always improve accuracy. In Houda Bouamor, Juan Pino, and Kalika Bali (eds.), Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing, pp. 8392?8417, Singapore, December 2023. Association for Computational Linguistics. doi: 10.18653/v1/2023.emnlp-main.522. URL https://aclanthology.org/2023.emnlp-main.522/"
+    },
+    {
+      "id": "7",
+      "raw": "author: Zhibo Wang and Hongshan Yang and Yunhe Feng and Peng Sun and Hengchang Guo and Zhifei Zhang and Kui Ren\nbooktitle: CVPR\ndoi: 10.1109/CVPR52729.2023.01967\ntitle: Towards Transferable Targeted Adversarial Examples\nyear: 2023"
+    },
+    {
+      "id": "8",
+      "raw": "John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. Proximal policy optimization algorithms. CoRR, abs/1707.06347, 2017. URL http://arxiv.org/abs/1707.06347"
+    },
+    {
+      "id": "10",
+      "raw": "Sebastian Pado, Michel Galley, Daniel Jurafsky, and Christopher D Manning. Machine translation evaluation with textual entailment features. In Proceedings of the Fourth Workshop on Statistical Machine Translation (WMT), pp. 37?41, 2009"
+    },
+    {
+      "id": "11",
+      "raw": "sarin, parth, & Alperin, J. P. (2025). Citation Parsing and Analysis with Language Models. arXiv Preprint arXiv:2505.15948"
+    },
+    {
+      "id": "13",
+      "raw": "Di Giambattista, C., & Heibi, I. (2025, October). OpenCitations: an open infrastructure enabling Open Research Information. https://doi.org/10.5281/zenodo.17199853"
+    },
+    {
+      "id": "14",
+      "raw": "author: Mingfang Zhang and Jinglu Wang and Xiao Li and Yifei Huang and Yoichi Sato and Yan Lu\nbooktitle: CVPR\ndoi: 10.1109/CVPR52729.2023.01603\ntitle: Structural Multiplane Image: Bridging Neural View Synthesis and 3D Reconstruction\nyear: 2023"
+    },
+    {
+      "id": "17",
+      "raw": "Stephanie Lin, Jacob Hilton, and Owain Evans. TruthfulQA: Measuring how models mimic human falsehoods. In Smaranda Muresan, Preslav Nakov, and Aline Villavicencio (eds.), Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pp. 3214?3252, Dublin, Ireland, May 2022. Association for Computational Linguistics. doi: 10.18653/v1/2022.acl-long.229. URL https://aclanthology.org/2022.acl-long.229/"
+    },
+    {
+      "id": "21",
+      "raw": "title: Increasing Returns and Economic Geography\nauthors: Krugman; P.\nyear: 1991\nvenue: American Economic Review"
+    },
+    {
+      "id": "22",
+      "raw": "title: \"The Effects of Label Noise on Outcome Definitions in Clinical Studies\"\nauthors: Kim; J.; & Lee; S.\nyear: 2020\nvenue: Journal of Biomedical Informatics"
+    },
+    {
+      "id": "23",
+      "raw": "author: Jiaming Liu and Xiaojian Xu and Weijie Gan and Shirin Shoushtari and Ulugbek Kamilov\nbooktitle: NeurIPS\ntitle: Online Deep Equilibrium Learning for Regularization by Denoising\nyear: 2022"
+    },
+    {
+      "id": "24",
+      "raw": "author: Pan Xu and Zheng Wen and Handong Zhao and Quanquan Gu\nbooktitle: ICLR\ntitle: Neural Contextual Bandits with Deep Representation and Shallow Search\nyear: 2022"
+    },
+    {
+      "id": "26",
+      "raw": "title: \"Membership Inference Attacks Against Machine Learning Models\"\nauthors: Shokri; R.; et al.\nyear: 2017\nvenue: Proceedings of the 2017 IEEE Symposium on Security and Privacy"
+    },
+    {
+      "id": "27",
+      "raw": "Grattafiori, A., Dubey, A., Jauhri, A., Pandey, A., Kadian, A., Al-Dahle, A., Letman, A., Mathur, A., Schelten, A., Vaughan, A., Yang, A., Fan, A., Goyal, A., Hartshorn, A., Yang, A., Mitra, A., Sravankumar, A., Korenev, A., Hinsvark, A., ? Ma, Z. (2024). The Llama 3 Herd of Models. https://arxiv.org/abs/2407.21783"
+    },
+    {
+      "id": "29",
+      "raw": "author: Xin Yu and Thiago Serra and Srikumar Ramalingam and Shandian Zhe\nbooktitle: ICML\ntitle: The Combinatorial Brain Surgeon: Pruning Weights That Cancel One Another in Neural Networks\nyear: 2022"
+    },
+    {
+      "id": "31",
+      "raw": "Ashwin K Vijayakumar, Michael Cogswell, Ramprasath R. Selvaraju, Qing Sun, Stefan Lee, David Crandall, and Dhruv Batra. Diverse beam search: Decoding diverse solutions from neural sequence models. arXiv, 1610.02424, 2018"
+    },
+    {
+      "id": "32",
+      "raw": "title: Scientific Realism and the Underdetermination of Theory by Data\nauthors: Stathis Psillos\nyear: 2022\nvenue: Synthese"
+    },
+    {
+      "id": "33",
+      "raw": "Yang, A., Li, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Gao, C., Huang, C., Lv, C., Zheng, C., Liu, D., Zhou, F., Huang, F., Hu, F., Ge, H., Wei, H., Lin, H., Tang, J., ? Qiu, Z. (2025). Qwen3 Technical Report. https://arxiv.org/abs/2505.09388"
+    },
+    {
+      "id": "34",
+      "raw": "title: Telemedicine Interventions for Heart Disease Management: A Clinical Study\nauthors: Green; S.; et al.\nyear: 2022\nvenue: Circulation"
+    },
+    {
+      "id": "35",
+      "raw": "title: Principles and Parameters in a VSO Language: A Case Study in Welsh\nauthors: Ian Roberts\nyear: 2005\nvenue: Oxford University Press"
+    },
+    {
+      "id": "37",
+      "raw": "title: Algorithmic Impact Assessments: A Practical Framework for Public Agency Accountability\nauthors: Reisman; D.; Schultz; J.; Crawford; K.; Whittaker; M.\nyear: 2018\nvenue: AI Now Institute"
+    },
+    {
+      "id": "38",
+      "raw": "title: Enhancing Citation Accuracy in Language Models: A Comparative Study\nauthors: Wang; L.; Zhang; M.\nyear: 2024\nvenue: AI & Society"
+    },
+    {
+      "id": "41",
+      "raw": "Maria Glushkova, Shiori Kobayashi, and Junichi Suzuki. Uncertainty estimation in neural text regression. In Findings of the Association for Computational Linguistics: EMNLP 2021, pp. 4567?4576, 2021"
+    },
+    {
+      "id": "42",
+      "raw": "title: \"Analyzing the Characteristics of Text Generated by Language Models for Mental Health Applications\"\nauthors: Kim; J.; Lee; Y.; & Kim; B.\nyear: 2024\nvenue: Journal of Mental Health Informatics"
+    },
+    {
+      "id": "43",
+      "raw": "Yang, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Li, C., Liu, D., Huang, F., Wei, H., Lin, H., & al., et. (2025). Qwen2.5 Technical Report. arXiv preprint arXiv:2412.15115. https://doi.org/10.48550/arXiv.2412.15115"
+    },
+    {
+      "id": "44",
+      "raw": "Ion Androutsopoulos and Prodromos Malakasiotis. A survey of paraphrasing and textual entailment methods. Journal of Artificial Intelligence Research, 38:135?187, 2010"
+    },
+    {
+      "id": "45",
+      "raw": "title: Injection-induced earthquakes\nauthors: Rubinstein; J. L.; & Mahani; A. B.\nyear: 2015\nvenue: Science"
+    },
+    {
+      "id": "50",
+      "raw": "title: Enhancing Citation Integrity: A Network Analysis Perspective\nauthors: Mark Davis; Karen Wilson\nyear: 2024\nvenue: Journal of Documentation"
+    },
+    {
+      "id": "51",
+      "raw": "title: \"Long-term exposure to particulate matter, ozone, and nitrogen dioxide and lung function decline in non-smokers\"\nauthors: Laden; F.; Schwartz; J.; Speizer; F. E.; & Dockery; D. W.\nyear: 2006\nvenue: American Journal of Respiratory and Critical Care Medicine"
+    },
+    {
+      "id": "52",
+      "raw": "title: Comprehensive Privacy Analysis of Deep Learning: Stand-alone and Federated Learning under Passive and Active White-box Inference Attacks\nauthors: Milad Nasr; Reza Shokri; Amir Houmansadr\nyear: 2019\nvenue: IEEE Symposium on Security and Privacy"
+    },
+    {
+      "id": "53",
+      "raw": "author: Wen Shen and Zhihua Wei and Shikun Huang and Binbin Zhang and Panyue Chen and Ping Zhao and Quanshi Zhang\nbooktitle: ICML\ndoi: 10.1109/CVPR52729.2023.00140\ntitle: UniSim: A Neural Closed-Loop Sensor Simulator\nyear: 2022"
+    },
+    {
+      "id": "54",
+      "raw": "author: Anonymous\nbooktitle: OSDI\ntitle: Heimdallr: Efficient System Design for Large-Scale Distributed Computing\nyear: 2021"
+    },
+    {
+      "id": "56",
+      "raw": "author: Maxim Petrov and Fatou Kone and Sho Watanabe\nbooktitle: ICLR\ntitle: Regularization Matters in Policy Optimization - An Empirical Study on Continuous Control\nyear: 2021"
+    },
+    {
+      "id": "57",
+      "raw": "author: Abhineet Agarwal and Yan Shuo Tan and Omer Ronen and Chandan Singh and Bin Yu\nbooktitle: ICML\ntitle: Deep Shrinkage: Improving the accuracy and interpretability of tree-based models\nyear: 2022"
+    },
+    {
+      "id": "59",
+      "raw": "title: \"The Impact of Content-Moderation Policies on Misinformation Spread\"\nauthors: \"Kim; J.; & Lee; Y.\"\nyear: 2023\nvenue: \"Journal of Communication\""
+    },
+    {
+      "id": "61",
+      "raw": "author: Chao Li and Junhua Zeng and Zerui Tao and Qibin Zhao\nbooktitle: ICML\ntitle: Permutation Search of Tensor Network Structures via Local Sampling\nyear: 2022"
+    },
+    {
+      "id": "66",
+      "raw": "Augustine Kong. A note on importance sampling using standardized weights. University of Chicago, Dept. of Statistics, Tech. Rep, 348:14, 1992"
+    },
+    {
+      "id": "70",
+      "raw": "author: Wenbo Guo and Xian Wu and Sui Huang and Xinyu Xing\nbooktitle: ICML\ntitle: Explainable AI Through Attention Visualization\nyear: 2021"
+    },
+    {
+      "id": "71",
+      "raw": "author: Priya Chatterjee and Marco Bianchi and Soo-Yeon Choi\nbooktitle: NeurIPS\ntitle: BLOX: Macro Neural Architecture Search Benchmark and Algorithms\nyear: 2022"
+    },
+    {
+      "id": "75",
+      "raw": "Microsoft Corporation. (2025). MarkItDown: A Python Tool for Converting Files to Markdown. https://github.com/microsoft/markitdown"
+    },
+    {
+      "id": "79",
+      "raw": "author: Fan Lu and Guang Chen and Sanqing Qu and Zhijun Li and Yinlong Liu and Alois C. Knoll\nbooktitle: AAAI\ndoi: 10.1609/AAAI.V35I3.16324\ntitle: PointINet: Point Cloud Frame Interpolation Network\nyear: 2021"
+    },
+    {
+      "id": "80",
+      "raw": "title: Expectations, Outcomes, and Challenges of Modern Code Review\nauthors: Alberto Bacchelli; Christian Bird\nyear: 2013\nvenue: Proceedings of the 2013 International Conference on Software Engineering (ICSE)"
+    },
+    {
+      "id": "81",
+      "raw": "Jiang, A., Sablayrolles, A., et al. (2023). Mistral 7B. arXiv preprint arXiv:2310.06825. https://arxiv.org/abs/2310.06825"
+    },
+    {
+      "id": "82",
+      "raw": "ANSI/NISO Z39.96-2024: JATS: Journal Article Tag Suite (2024). https://www.niso.org/publications/z3996-2024-jats"
+    },
+    {
+      "id": "83",
+      "raw": "title: A Comprehensive Survey on Membership Inference Attacks and Defenses in Machine Learning\nauthors: J. Zhang; K. Li; L. Wang\nyear: 2023\nvenue: IEEE Transactions on Big Data"
+    },
+    {
+      "id": "85",
+      "raw": "Garnett, A. (2016). The XML Markup Evaluation Corpus. In Public Knowledge Project. https://pkp.sfu.ca/2016/04/18/the-xml-markup-evaluation-corpus/"
+    },
+    {
+      "id": "86",
+      "raw": "Sewon Min, Mike Lewis, and Daniel Jurafsky. Ambigqa: Answering ambiguous open-domain questions. In Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP), pp. 7582?7601, 2020"
+    },
+    {
+      "id": "87",
+      "raw": "author: Yurong Chen and Qian Wang and Zhijian Duan and Haoran Sun and Zhaohua Chen and Xiang Yan and Xiaotie Deng\nbooktitle: ICML\ntitle: Coordinated Dynamic Bidding in Repeated Second-Price Auctions with Budgets\nyear: 2023"
+    },
+    {
+      "id": "90",
+      "raw": "Richard Socher, Eric H. Huang, Jeffrey Pennin, Christopher D. Manning, and Andrew Y. Ng.Dynamic pooling and unfolding recursive autoencoders for paraphrase detection. In Advances in Neural Information Processing Systems (NeurIPS), volume 24, pp. 801?809, 2011"
+    },
+    {
+      "id": "93",
+      "raw": "title: Retrieval-Augmented Generation for Large Language Models: A Survey\nauthors: Yunfan Gao; Yun Xiong; Xinyu Gao; Kangxiang Jia; Jinliu Pan; Yuxi Bi; Yi Dai; Jiawei Sun; Meng Wang; Haofen Wang\nyear: 2024\nvenue: arXiv preprint"
+    },
+    {
+      "id": "95",
+      "raw": "author: Xin Wang and Shuyi Fan and Kun Kuang and Wenwu Zhu\nbooktitle: AISTATS\ntitle: Explainable Automated Graph Representation Learning with Hyperparameter Importance\nyear: 2021"
+    },
+    {
+      "id": "97",
+      "raw": "author: Wenxiao Wang and Alexander Levine and Soheil Feizi\nbooktitle: NeurIPS\ntitle: Lethal Dose Conjecture on Data Poisoning\nyear: 2022"
+    },
+    {
+      "id": "99",
+      "raw": "title: Fine-Tuning Models to Reduce Citation Hallucination in Sustainability Text\nauthors: Sarah Red; Tom Yellow\nyear: 2024\nvenue: Proceedings of the 2024 Conference on Computer Vision and Pattern Recognition (CVPR)"
+    },
+    {
+      "id": "104",
+      "raw": "Zhen Lin, Shubhendu Trivedi, and Jimeng Sun. Contextualized sequence likelihood: Enhanced confidence scores for natural language generation. In Yaser Al-Onaizan, Mohit Bansal, and Yun-Nung Chen (eds.), Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing, pp. 10351?10368, Miami, Florida, USA, November 2024. Association for Computational Linguistics. doi: 10.18653/v1/2024.emnlp-main.578. URL https://aclanthology.org/2024.emnlp-main.578/"
+    },
+    {
+      "id": "109",
+      "raw": "Ilia Kulikov, Alexander Miller, Kyunghyun Cho, and Jason Weston. Importance of search and evaluation strategies in neural dialogue modeling. pp. 76?87, 01 2019. doi: 10.18653/v1/W19-8609."
+    },
+    {
+      "id": "110",
+      "raw": "title: The effects of mindfulness-based cognitive therapy on chronic pain: A randomized controlled trial.\nauthors: Segal; Z. V.; Bieling; P.; Young; T.; MacQueen; G.; Cooke; R.; Martin; L.; ... & Levitt; A.\nyear: 2012\nvenue: Pain"
+    },
+    {
+      "id": "111",
+      "raw": "author: Jesús Arroyo and Avanti Athreya and Joshua Cape and Guodong Chen and Carey E. Priebe and Joshua T. Vogelstein\nbooktitle: J. Mach. Learn. Res.\ntitle: Inference for Multiple Heterogeneous Networks with a Common Invariant Subspace.\nurl: https://jmlr.org/papers/v22/19-558.html\nyear: 2021"
+    },
+    {
+      "id": "113",
+      "raw": "author: Jiaoyang Li and The Anh Hoang and Eugene Lin and Hai L. Vu and Sven Koenig\nbooktitle: AAAI\ndoi: 10.6666/art/8842091\ntitle: Intersection Coordination with Priority-Based Search for Autonomous Vehicles\nyear: 2023"
+    },
+    {
+      "id": "117",
+      "raw": "author: Kaili Ma and Garry Yang and Han Yang and Yongqiang Chen and James Cheng\nbooktitle: Trans. Mach. Learn. Res.\ntitle: Calibrating and Improving Graph Contrastive Learning.\nurl: https://openreview.net/forum?id=LdSP6cvTS4\nyear: 2023"
+    },
+    {
+      "id": "120",
+      "raw": "Hao Jiang, Bo Pang, Wei Ding, Jian Xu, and Lawrence Carin. To trust or not to trust a classifier. In International Conference on Learning Representations (ICLR), 2021"
+    },
+    {
+      "id": "121",
+      "raw": "author: Zichao Wang and Weili Nie and Zhuoran Qiao and Chaowei Xiao and Richard G. Baraniuk and Anima Anandkumar\nbooktitle: ICLR\ntitle: Retrieval-based Controllable Molecule Synthesis\nyear: 2023"
+    },
+    {
+      "id": "123",
+      "raw": "author: Fanghui Liu and Luca Viano and Volkan Cevher\nbooktitle: NeurIPS\ntitle: Understanding Deep Neural Function Approximation in Reinforcement Learning via $\\epsilon$-Greedy Exploration\nyear: 2022"
+    },
+    {
+      "id": "125",
+      "raw": "Hugo Touvron, Thibaut Martin, Kevin Stone, Marie-Anne Lachaux, Timothée Albert, et al. Llama: Open and efficient foundation language models. arXiv preprint arXiv:2302.13971, 2023"
+    },
+    {
+      "id": "127",
+      "raw": "title: The Underdetermination Objection to Foundationalism\nauthors: Lackey; J.\nyear: 2024\nvenue: Philosophical Quarterly"
+    },
+    {
+      "id": "128",
+      "raw": "author: András György and Pooria Joulani\nbooktitle: ICML\ntitle: Neural Architecture Search for Reasoning\nyear: 2021"
+    },
+    {
+      "id": "129",
+      "raw": "Yik-Cheung Tam. Cluster-based beam search for pointer-generator chatbot grounded by knowledge. Computer Speech & Language, 64:101094, 2020. ISSN 0885-2308"
+    },
+    {
+      "id": "130",
+      "raw": "author: Bart Bogaerts and Stephan Gocht and Ciaran McCreesh and Jakob Nordström\nbooktitle: AAAI\ndoi: 10.47281/xwxld.56946\ntitle: Certified Symmetry and Dominance Breaking for Combinatorial Optimisation\nyear: 2022"
+    },
+    {
+      "id": "134",
+      "raw": "author: Spyros Angelopoulos and Shahin Kamali\nbooktitle: AAAI\ndoi: 10.1609/AAAI.V35I13.17394\ntitle: Contract Scheduling With Predictions\nyear: 2021"
+    },
+    {
+      "id": "135",
+      "raw": "title: Highly accurate protein structure prediction with AlphaFold\nauthors: John Jumper; Richard Evans; Alexander Pritzel; et al.\nyear: 2021\nvenue: Nature"
+    },
+    {
+      "id": "141",
+      "raw": "title: Citation Needed: A Taxonomy and Algorithmic Assessment of Wikipedia's Verifiability\nauthors: Miriam Redi; Besnik Fetahu; Jonathan Morgan; Dario Taraborelli\nyear: 2019\nvenue: WWW"
+    },
+    {
+      "id": "142",
+      "raw": "title: Challenges and opportunities in protein structure prediction\nauthors: Senior; A. W.; Evans; R.; Jumper; J.; et al.\nyear: 2022\nvenue: Nature Reviews Molecular Cell Biology"
+    },
+    {
+      "id": "145",
+      "raw": "author: Yiming Li and Haoxiang Zhong and Xingjun Ma and Yong Jiang and Shu-Tao Xia\nbooktitle: NeurIPS\ntitle: Few-Shot Backdoor Attacks on Visual Object Tracking\nyear: 2022"
+    },
+    {
+      "id": "147",
+      "raw": "Sheng Shi and et al. Maskgpt: Uniform denoising diffusion for language. arXiv preprint arXiv:2401.XXXX, 2024"
+    },
+    {
+      "id": "148",
+      "raw": "title: Telehealth for cardiovascular disease management: Outcomes from a multicenter study\nauthors: Martinez; A.; Garcia; F.; Lopez; J.; & Fernandez; M.\nyear: 2021\nvenue: American Heart Journal"
+    },
+    {
+      "id": "149",
+      "raw": "author: Darius Afchar and Vincent Guigue and Romain Hennequin\nbooktitle: ICLR\ntitle: Deep Partition Aggregation: Provable Defenses against General Poisoning Attacks\nyear: 2022"
+    },
+    {
+      "id": "151",
+      "raw": "author: Soumya Basu and Ankit Singh Rawat and Manzil Zaheer\nbooktitle: ICML\ntitle: A Statistical Perspective on Retrieval-Based Models\nyear: 2023"
+    },
+    {
+      "id": "152",
+      "raw": "author: Ibne Farabi Shihab and Sanjeda Akter and Anuj Sharma\nbooktitle: AAAI\ndoi: 10.48550/arXiv.2602.12204v1\ntitle: Learning to Forget Attention: Memory Consolidation for Adaptive Compute Reduction\nyear: 2026"
+    },
+    {
+      "id": "154",
+      "raw": "title: Hallucinated Citations in Environmental Science: Challenges and Solutions\nauthors: Thompson; H.; Garcia; F.\nyear: 2024\nvenue: Environmental Science Journal"
+    },
+    {
+      "id": "158",
+      "raw": "author: Zhongyuan Zhao and Ananthram Swami and Santiago Segarra\nbooktitle: COLT\ntitle: Graph-based Deterministic Policy Gradient for Repetitive Combinatorial Optimization Problems\nyear: 2022"
+    },
+    {
+      "id": "160",
+      "raw": "author: Arindam Banerjee and Tiancong Chen and Xinyan Li and Yingxue Zhou\nbooktitle: Workshop on Foundation Models and Adaptation\ntitle: Stability Based Generalization Bounds for Exponential Family Langevin Dynamics\nyear: 2022"
+    },
+    {
+      "id": "163",
+      "raw": "X. Ou and et al. Tuqdm: Token unmasking with quantized diffusion models. In ACL, 2024"
+    },
+    {
+      "id": "164",
+      "raw": "title: \"The Costs of Connection: How Data Is Colonizing Human Life and Appropriating It for Capitalism\"\nauthors: Couldry; N.; Mejias; U. A.\nyear: 2019\nvenue: Stanford University Press"
+    },
+    {
+      "id": "166",
+      "raw": "title: The Location of Culture\nauthors: Homi K. Bhabha\nyear: 1994\nvenue: Routledge"
+    },
+    {
+      "id": "167",
+      "raw": "author: Kaitlyn Zhou and Martijn Bartelds and Federico Bianchi and James Zou\ndoi: 10.48550/arXiv.2602.12249v1\njournal: Workshop on Memory-Augmented Neural Networks\ntitle: \"Sorry, I Didn't Catch That\": How Speech Models Miss What Matters Most\nyear: 2026"
+    },
+    {
+      "id": "169",
+      "raw": "author: Yiqing Shen and Yuyin Zhou and Lequan Yu\nbooktitle: CVPR\ndoi: 10.1109/CVPR52688.2022.00980\ntitle: CD2-pFed: Cyclic Distillation-guided Channel Decoupling for Model Personalization in Federated Learning\nyear: 2022"
+    },
+    {
+      "id": "170",
+      "raw": "author: Abhishek Kumar and Sunabha Chatterjee and Piyush Rai\nbooktitle: ICML\ntitle: Bayesian Structural Adaptation for Continual Learning\nyear: 2021"
+    },
+    {
+      "id": "171",
+      "raw": "author: Roberto Cipollone and Anders Jonsson and Alessandro Ronca and Mohammad Sadegh Talebi\nbooktitle: KDD\ntitle: Provably Efficient Offline Reinforcement Learning in Regular Decision Processes\nyear: 2023"
+    },
+    {
+      "id": "172",
+      "raw": "title: The Strength of Weak Ties\nauthors: Mark S. Granovetter\nyear: 1973\nvenue: American Journal of Sociology"
+    },
+    {
+      "id": "173",
+      "raw": "title: Measuring Biological Diversity\nauthors: Magurran; A. E.\nyear: 2004\nvenue: Blackwell Science"
+    },
+    {
+      "id": "175",
+      "raw": "title: The Role of Cognitive Biases in Decision-Making: A Meta-Analysis\nauthors: Wilson; C.; & Taylor; B.\nyear: 2022\nvenue: Psychological Review"
+    },
+    {
+      "id": "176",
+      "raw": "author: Julius Adebayo and Justin Gilmer and Michael Muelly and Ian Goodfellow and Moritz Hardt and Been Kim\nbooktitle: NeurIPS\ndoi: 10.48550/arXiv.1810.03292\ntitle: Sanity Checks for Saliency Maps\nyear: 2023"
+    },
+    {
+      "id": "177",
+      "raw": "title: The blood exposome: a new concept for environmental health and disease research\nauthors: Vlaanderen; J.; Janssen; N.A.; Hoek; G.; Keski-Rahkonen; P.; Barupal; D.K.; Cassee; F.R.; Gosens; I.; Strak; M.; Steenhof; M.; Lan; Q.; Brunekreef; B.; Scalbert; A.; Vermeulen; R.\nyear: 2021\nvenue: Environmental Science & Technology"
+    },
+    {
+      "id": "178",
+      "raw": "title: The Political Economy of Economic Sanctions\nauthors: Kaempfer; William H.; Lowenberg; Anton D.\nyear: 2007\nvenue: Handbook of Defense Economics"
+    },
+    {
+      "id": "179",
+      "raw": "Roi Cohen, Mor Geva, Jonathan Berant, and Amir Globerson. Crawling the internal knowledgebase of language models. In Andreas Vlachos and Isabelle Augenstein (eds.), Findings of the Association for Computational Linguistics: EACL 2023, pp. 1856?1869, Dubrovnik, Croatia, May 2023. Association for Computational Linguistics"
+    },
+    {
+      "id": "180",
+      "raw": "author: Ben Mildenhall and Pratul P. Srinivasan and Matthew Tancik and Jonathan T. Barron and Ravi Ramamoorthi and Ren Ng\nbooktitle: Communications of the ACM\ndoi: 10.1145/3503250\ntitle: NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis\nyear: 2021"
+    },
+    {
+      "id": "182",
+      "raw": "Agrawal, L. A., Tan, S., Soylu, D., Ziems, N., Khare, R., Opsahl-Ong, K., Singhvi, A., Shandilya, H., Ryan, M. J., Jiang, M., Potts, C., Sen, K., Dimakis, A. G., Stoica, I., Klein, D., Zaharia, M., & Khattab, O. (2025). GEPA: Reflective Prompt Evolution Can Outperform Reinforcement Learning https://arxiv.org/abs/2507.19457"
+    },
+    {
+      "id": "186",
+      "raw": "AI@Meta. Llama 3 model card. 2024. URL https://github.com/meta-llama/llama3/blob/main/MODEL_CARD.md"
+    },
+    {
+      "id": "187",
+      "raw": "Yarin Gal and Zoubin Ghahramani. Dropout as a bayesian approximation: Representing model uncertainty in deep learning. In International Conference on Machine Learning (ICML), 2016"
+    },
+    {
+      "id": "189",
+      "raw": "Yasin Abbasi Yadkori, Ilja Kuzborskij, András György, and Csaba Szepesvári. To believe or not to believe your llm. arXiv preprint arXiv:2406.02543, 2024"
+    },
+    {
+      "id": "190",
+      "raw": "Daniel D. Johnson, Daniel Tarlow, David Duvenaud, and Chris J. Maddison. Experts don?t cheat: learning what you don?t know by predicting pairs. In Proceedings of the 41st International Conference on Machine Learning, 2024"
+    },
+    {
+      "id": "191",
+      "raw": "author: Volodymyr Mnih and Koray Kavukcuoglu and David Silver and Andrei A. Rusu and Joel Veness and Marc G. Bellemare and Alex Graves and Martin Riedmiller and Andreas K. Fidjeland and Georg Ostrovski and Stig Petersen and Charles Beattie and Amir Sadik and Ioannis Antonoglou and Helen King and Dharshan Kumaran and Daan Wierstra and Shane Legg and Demis Hassabis\nbooktitle: Nature\ndoi: 10.1038/nature14236\ntitle: Human-level control through deep reinforcement learning\nyear: 2023"
+    },
+    {
+      "id": "192",
+      "raw": "Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Ruoyu Zhang, Runxin Xu, Qihao Zhu, Shirong Ma, Peiyi Wang, Xiao Bi, et al. Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning. arXiv preprint arXiv:2501.12948, 2025"
+    },
+    {
+      "id": "193",
+      "raw": "author: Wanhua Li and Shiwei Wang and Jiwen Lu and Jianjiang Feng and Jie Zhou\nbooktitle: CVPR\ndoi: 10.1109/CVPR46437.2021.01587\ntitle: Meta-Mining Discriminative Samples for Kinship Verification\nyear: 2021"
+    },
+    {
+      "id": "194",
+      "raw": "title: Dosing Strategies for Monoclonal Antibodies: A Systematic Review\nauthors: Wang; Y.; et al.\nyear: 2023\nvenue: Clinical Pharmacokinetics"
+    },
+    {
+      "id": "195",
+      "raw": "author: David Okonkwo and Laura Fischer and Wei-Ting Hsu\nbooktitle: CVPR\ndoi: 10.1109/CVPR52688.2022.00884\ntitle: Forward Compatible Few-Shot Efficient training\nyear: 2022"
+    },
+    {
+      "id": "196",
+      "raw": "title: Less Exposure to Cross-Partisan News and Opinion on Social Media Does Not Depolarize Political Discourse\nauthors: Andrew Guess; Joshua Tucker; and Yannis Theocharis\nyear: 2019\nvenue: Proceedings of the National Academy of Sciences"
+    },
+    {
+      "id": "199",
+      "raw": "Kapfer, C., Stine, K., Narasimhan, B., Mentzel, C., & Candes, E. (2025). Marlowe: Stanford?s GPU-based Computational Instrument (Version 0.1). Zenodo. https://doi.org/10.5281/zenodo.14751899"
+    },
+    {
+      "id": "200",
+      "raw": "Jiwei Li, Michel Galley, Chris Brockett, Jianfeng Gao, and Bill Dolan. A diversity-promoting objective function for neural conversation models. In Kevin Knight, Ani Nenkova, and Owen Rambow (eds.), Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, pp. 110?119, San Diego, California, June 2016. Association for Computational Linguistics"
+    },
+    {
+      "id": "201",
+      "raw": "Jason Lin, Stephen Roller, Ashwin Stewart, and Luke Zettlemoyer. Teaching language models to script their confidence. In Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing (EMNLP), pp. 123?135, 2022"
+    },
+    {
+      "id": "202",
+      "raw": "Alexandros N. Angelopoulos, Stephen Bates, and Caroline Uhler. Conformal prediction in neural  forecasting. In Proceedings of the 37th Conference on Uncertainty in Artificial Intelligence (UAI), pp. 23?33, 2023"
+    },
+    {
+      "id": "203",
+      "raw": "Deep Ganguli, Amanda Askell, Nicholas Schiefer, Thomas I. Liao, Kamile? Luko?iut?e, Anna Chen, Anna Goldie, Azalia Mirhoseini, Catherine Olsson, Danny Hernandez, Dawn Drain, Dustin Li, Eli Tran-Johnson, Ethan Perez, Jackson Kernion, Jamie Kerr, Jared Mueller, Joshua Landau, Kamal Ndousse, Karina Nguyen, Liane Lovitt, Michael Sellitto, Nelson Elhage, Noemi Mercado, Nova DasSarma, Oliver Rausch, Robert Lasenby, Robin Larson, Sam Ringer, Sandipan Kundu, Saurav Kadavath, Scott Johnston, Shauna Kravec, Sheer El Showk, Tamera Lanham, Timothy Telleen-Lawton, Tom Henighan, Tristan Hume, Yuntao Bai, Zac Hatfield Dodds, Ben Mann, Dario Amodei, Nicholas Joseph, Sam McCandlish, Tom Brown, Christopher Olah, Jack Clark, Samuel R. Bowman, and Jared Kaplan. The capacity for moral self-correction in large language models. arXiv, 2302.07459, 2023"
+    },
+    {
+      "id": "204",
+      "raw": "author: Victor Veitch and Alexander D'Amour and Steve Yadlowsky and Jacob Eisenstein\nbooktitle: NeurIPS\ndoi: 10.48550/arXiv.2106.00545\ntitle: Counterfactual Invariance to Spurious Correlations in Text Classification\nyear: 2021"
+    },
+    {
+      "id": "205",
+      "raw": "title: Harmonization of life cycle assessment for renewable energy systems: A review of methodological choices\nauthors: Zhang; L.; Wang; Y.; Chen; X.\nyear: 2022\nvenue: Renewable and Sustainable Energy Reviews"
+    },
+    {
+      "id": "206",
+      "raw": "title: Advanced Encapsulation Techniques for Perovskite Solar Cells\nauthors: H. J. Snaith; A. Abate; J. M. Ball; G. E. Eperon\nyear: 2017\nvenue: Nature Energy"
+    },
+    {
+      "id": "207",
+      "raw": "title: A Framework for Ethical, Legal, and Social Considerations in Public Sector Automated Decision-Making\nauthors: Jane Doe; John Smith\nyear: 2020\nvenue: Journal of Public Administration Research and Theory"
+    },
+    {
+      "id": "208",
+      "raw": "title: Decoherence and the Appearance of a Classical World in Quantum Theory\nauthors: E. Joos; H. D. Zeh; C. Kiefer; D. Giulini; J. Kupsch; I.-O. Stamatescu\nyear: 2003\nvenue: Springer"
+    },
+    {
+      "id": "210",
+      "raw": "Mandar Joshi, Eunsol Choi, Daniel S. Weld, and Luke Zettlemoyer. Triviaqa: A large scale distantly supervised challenge for reading comprehension. In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (ACL), pp. 1601?1611, 2017"
+    },
+    {
+      "id": "211",
+      "raw": "OpenAI, Agarwal, S., Ahmad, L., Ai, J., Altman, S., Applebaum, A., Arbus, E., Arora, R. K., Bai, Y., Baker, B., Bao, H., Barak, B., Bennett, A., Bertao, T., Brett, N., Brevdo, E., Brockman, G., Bubeck, S., Chang, C., ? Zhao, S. (2025). gpt-oss-120b & gpt-oss-20b Model Card. https://arxiv.org/abs/2508.10925"
+    },
+    {
+      "id": "213",
+      "raw": "Lipinski, M., Yao, K., Breitinger, C., Beel, J., & Gipp, B. (2013). Evaluation of Header Metadata Extraction Approaches and Tools for Scientific PDF Documents. Proceedings of the 13th ACM/IEEE-CS Joint Conference on Digital Libraries, 385?386"
+    },
+    {
+      "id": "214",
+      "raw": "Micha? Marci?czuk and Marcin Oleksy. ?Inforex ? a Collaborative System for Text Corpora Annotation and Analysis Goes Open?. In: Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2019). Ed. by Ruslan Mitkov and Galia Angelova. Varna, Bulgaria: INCOMA Ltd., Sept. 2019, pp. 711?719. doi: 10.26615/978-954-452-056-4_083. url: https://aclanthology.org/R19-1083/"
+    },
+    {
+      "id": "215",
+      "raw": "author: David Acuna and Guojun Zhang and Marc T. Law and Sanja Fidler\nbooktitle: ICML\ntitle: f-Domain Adversarial Learning: Theory and Algorithms\nyear: 2021"
+    },
+    {
+      "id": "217",
+      "raw": "author: Babak Esmaeili and Robin Walters and Heiko Zimmermann and Jan-Willem van de Meent\nbooktitle: NeurIPS\ntitle: Topological Obstructions and How to Avoid Them\nyear: 2023"
+    },
+    {
+      "id": "218",
+      "raw": "title: \"The Effects of a Higher Minimum Wage on Employment\"\nauthors: Card; D.; Krueger; A. B.\nyear: 2022\nvenue: Journal of Economic Perspectives"
+    },
+    {
+      "id": "226",
+      "raw": "title: Automated Citation Evaluation for Philosophy-Oriented Language Models\nauthors: Kim; J.; & Lee; Y.\nyear: 2025\nvenue: Journal of Artificial Intelligence Research"
+    },
+    {
+      "id": "227",
+      "raw": "author: Sofia Martinez, Wei Zhang, Daniel Schmidt\nbooktitle: CVPR\ntitle: Diffusion Models for Unsupervised Image Generation: A Comparative Study\nyear: 2026"
+    },
+    {
+      "id": "228",
+      "raw": "Balaji Lakshminarayanan, Alexander Pritzel, and Charles Blundell. Simple and scalable predictive uncertainty estimation using deep ensembles. In Advances in Neural Information Processing Systems (NeurIPS), volume 30, 2017"
+    },
+    {
+      "id": "229",
+      "raw": "Yuxin Nie and et al. Llada: Large language auto-diffusion for accelerated denoising. arXiv preprint arXiv:2403.XXXX, 2024"
+    },
+    {
+      "id": "232",
+      "raw": "title: Interdisciplinary Approaches to Understanding Landslide Dynamics\nauthors: Kim; J.; and Roberts; C.\nyear: 2021\nvenue: Geomorphology"
+    },
+    {
+      "id": "236",
+      "raw": "title: Plasmon-induced hot carrier science and technology\nauthors: Brongersma; M. L.; Halas; N. J.; and Nordlander; P.\nyear: 2015\nvenue: Nature Nanotechnology"
+    },
+    {
+      "id": "241",
+      "raw": "author: Mridul Agarwal and Qinbo Bai and Vaneet Aggarwal\nbooktitle: Trans. Mach. Learn. Res.\ntitle: Concave Utility Reinforcement Learning with Zero-Constraint Violations.\nurl: https://openreview.net/forum?id=WXVkgkPXRk\nyear: 2022"
+    },
+    {
+      "id": "243",
+      "raw": "title: Post-Colonial Studies: The Key Concepts\nauthors: Bill Ashcroft; Gareth Griffiths; Helen Tiffin\nyear: 2000\nvenue: Routledge"
+    },
+    {
+      "id": "244",
+      "raw": "author: Arwa Alanqary and Abdullah Alomar and Devavrat Shah\nbooktitle: NeurIPS\ntitle: Change Point Detection via Multivariate Singular Spectrum Analysis\nyear: 2021"
+    },
+    {
+      "id": "245",
+      "raw": "Petr Knoth et al. ?CORE: A Global Aggregation Service for Open Access Papers?. en. In: Scientific Data 10.1 (June 2023). Publisher: Nature Publishing Group, p. 366. issn: 2052-4463. doi: 10.1038/s41597-023-02208-w. url: https://www.nature.com/articles/s41597-023-02208-w (visited on 04/24/2025"
+    },
+    {
+      "id": "246",
+      "raw": "author: Yi Liu and Limei Wang and Meng Liu and Yuchao Lin and Xuan Zhang and Bora Oztekin and Shuiwang Ji\nbooktitle: ICLR\ndoi: 10.55910/mbwo.6329160\ntitle: Spherical Message Passing for 3D Molecular Graphs\nyear: 2022"
+    },
+    {
+      "id": "247",
+      "raw": "title: Algorithmic Management in Organizations: Benefits, Challenges, and Best Practices\nauthors: Kellogg; K. C.; Valentine; M. A.; & Christin; A.\nyear: 2021\nvenue: California Management Review"
+    },
+    {
+      "id": "248",
+      "raw": "author: Zhongyuan Zhao and Ananthram Swami and Santiago Segarra\nbooktitle: CVPR\ntitle: Transform2Act: Learning a Transform-and-Control Policy for Efficient Agent Design\nyear: 2021"
+    },
+    {
+      "id": "250",
+      "raw": "author: Chihao Zhang and Yiling Elaine Chen and Shihua Zhang and Jingyi Jessica Li\nbooktitle: J. Mach. Learn. Res.\ntitle: Information-theoretic Classification Accuracy: A Criterion that Guides Data-driven Combination of Ambiguous Outcome Labels in Multi-class Classification.\nurl: https://jmlr.org/papers/v23/21-1150.html\nyear: 2022"
+    },
+    {
+      "id": "251",
+      "raw": "title: Programmers' Build Errors: A Case Study (at Google)\nauthors: Hyunmin Seo; Caitlin Sadowski; Sebastian Elbaum; Edward Aftandilian; Robert Bowdidge\nyear: 2014\nvenue: IEEE/ACM International Conference on Software Engineering (ICSE)"
+    },
+    {
+      "id": "252",
+      "raw": "Mikel Artetxe, Gorka Labaka, and Eneko Agirre. Learning principled bilingual mappings of word embeddings while preserving monolingual invariance. In Jian Su, Kevin Duh, and Xavier Carreras (eds.), Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing, pp. 2289?2294, Austin, Texas, November 2016. Association for Computational Linguistics. doi: 10.18653/v1/D16-1250. URL https://aclanthology.org/D16-1250/"
+    },
+    {
+      "id": "254",
+      "raw": "author: Yue Qiu and Yanjun Sun and Fumiya Matsuzawa and Kenji Iwata and Hirokatsu Kataoka\nbooktitle: CVPR\ndoi: 10.1109/CVPR52729.2023.02183\ntitle: Graph Representation for Order-aware Visual Transformation\nyear: 2023"
+    },
+    {
+      "id": "255",
+      "raw": "Alex Wang, Amanpreet Singh, Julian Michael, Felix Hill, Omer Levy, and Samuel R Bowman. Glue: A multi-task benchmark and analysis platform for natural language understanding. arXiv preprint arXiv:1804.07461, 2018"
+    },
+    {
+      "id": "256",
+      "raw": "CiteX. (2026). CiteX: Workshop on Citation Extraction and Parsing. https://sites.google.com/view/workshop-on-citation-extractio/startseite"
+    },
+    {
+      "id": "258",
+      "raw": "title: \"International intervention and the outcome of civil wars\"\nauthors: Regan; P. M.; & Norton; R.\nyear: 2023\nvenue: Journal of Conflict Resolution"
+    },
+    {
+      "id": "259",
+      "raw": "title: Cognitive Behavioral Therapy for Insomnia Improves Depression Outcomes: A Review\nauthors: Taylor; D. J.; Lichstein; K. L.; Durrence; H. H.; Reidel; B. W.; and Bush; A. J.\nyear: 2017"
+    },
+    {
+      "id": "260",
+      "raw": "title: Social Relationships and Mortality Risk: A Meta-analytic Review\nauthors: Holt-Lunstad; J.; Smith; T. B.; & Layton; J. B.\nyear: 2022\nvenue: PLoS Medicine"
+    },
+    {
+      "id": "261",
+      "raw": "author: Yikai Wang and TengQi Ye and Lele Cao and Wenbing Huang and Fuchun Sun and Fengxiang He and Dacheng Tao\nbooktitle: CVPR\ndoi: 10.1109/CVPR52688.2022.01180\ntitle: Bridged Transformer for Vision and Point Cloud 3D Object Detection\nyear: 2022"
+    },
+    {
+      "id": "262",
+      "raw": "title: Anomaly Detection in Citation Networks using Deep Learning\nauthors: Zhang; Y.; Li; M.; & Wang; X.\nyear: 2024\nvenue: IEEE Transactions on Knowledge and Data Engineering"
+    }
+  ]
+}

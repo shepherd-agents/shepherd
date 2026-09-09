@@ -1,6 +1,6 @@
 [project]
 name = "shepherd-workspace"
-version = "0.3.0"
+version = "0.3.1"
 description = "Shepherd framework workspace"
 requires-python = ">=3.11"
 dependencies = [
@@ -15,6 +15,7 @@ dependencies = [
     "shepherd-authoring",
     "shepherd-banking",
     "shepherd-coding",
+    "shepherd-citation-checker",
     "shepherd-tests",
     "shepherd-kernel-v3-reference",
     "vcs-core",
@@ -61,6 +62,7 @@ shepherd-contexts = { workspace = true }
 shepherd-authoring = { workspace = true }
 shepherd-banking = { workspace = true }
 shepherd-coding = { workspace = true }
+shepherd-citation-checker = { workspace = true }
 shepherd-tests = { workspace = true }
 shepherd-kernel-v3-reference = { workspace = true }
 shepherd-dialect = { workspace = true }

@@ -1,0 +1,198 @@
+{
+  "url": "https://api.crossref.org/works?query.bibliographic=Diederik+P.+Kingma+and+Jimmy+Ba.+Deepfm%3A+a+factorization-machine+based+neural+network+for+ctr+prediction.+In+International+Conference+on+Learning+Representations%2C+2015.&rows=3",
+  "retrieved_at": "2026-09-05T09:18:03.756940+00:00",
+  "evidence_file": "evidence/e397a39c5042cfb3deda.json",
+  "http_status": 200,
+  "resolved_url": "https://api.crossref.org/works?query.bibliographic=Diederik+P.+Kingma+and+Jimmy+Ba.+Deepfm%3A+a+factorization-machine+based+neural+network+for+ctr+prediction.+In+International+Conference+on+Learning+Representations%2C+2015.&rows=3",
+  "body": "{\"status\":\"ok\",\"message-type\":\"work-list\",\"message-version\":\"1.0.0\",\"message\":{\"facets\":{},\"total-results\":1992269,\"items\":[{\"indexed\":{\"date-parts\":[[2026,9,3]],\"date-time\":\"2026-09-03T17:20:43Z\",\"timestamp\":1788456043207,\"version\":\"build-2803163510\"},\"publisher-location\":\"California\",\"reference-count\":0,\"publisher\":\"International Joint Conferences on Artificial Intelligence Organization\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"published-print\":{\"date-parts\":[[2017,8]]},\"abstract\":\"<jats:p>Learning sophisticated feature interactions behind user behaviors is critical in maximizing CTR for recommender systems. Despite great progress, existing methods seem to have a strong bias towards low- or high-order interactions, or require expertise feature engineering. In this paper, we show that it is possible to derive an end-to-end learning model that emphasizes both low- and high-order feature interactions. The proposed model, DeepFM, combines the power of factorization machines for recommendation and deep learning for feature learning in a new neural network architecture. Compared to the latest Wide &amp; Deep model from Google, DeepFM has a shared input to its \\\"wide\\\" and \\\"deep\\\" parts, with no need of feature engineering besides raw features. Comprehensive experiments are conducted to demonstrate the effectiveness and efficiency of DeepFM over the existing models for CTR prediction, on both benchmark data and commercial data.<\\/jats:p>\",\"DOI\":\"10.24963\\/ijcai.2017\\/239\",\"type\":\"proceedings-article\",\"created\":{\"date-parts\":[[2017,7,28]],\"date-time\":\"2017-07-28T05:14:07Z\",\"timestamp\":1501218847000},\"page\":\"1725-1731\",\"source\":\"Crossref\",\"is-referenced-by-count\":1804,\"title\":[\"DeepFM: A Factorization-Machine based Neural Network for CTR Prediction\"],\"prefix\":\"10.24963\",\"author\":[{\"given\":\"Huifeng\",\"family\":\"Guo\",\"sequence\":\"first\",\"affiliation\":[{\"name\":\"Shenzhen Graduate School, Harbin Institute of Technology\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Ruiming\",\"family\":\"TANG\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Huawei Noah's Ark Lab\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Yunming\",\"family\":\"Ye\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Shenzhen Graduate School, Harbin Institute of Technology\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Zhenguo\",\"family\":\"Li\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Huawei Noah's Ark Lab\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Xiuqiang\",\"family\":\"He\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Huawei Noah's Ark Lab\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]}],\"member\":\"10584\",\"event\":{\"name\":\"Twenty-Sixth International Joint Conference on Artificial Intelligence\",\"theme\":\"Artificial Intelligence\",\"location\":\"Melbourne, Australia\",\"acronym\":\"IJCAI-2017\",\"number\":\"26\",\"sponsor\":[\"International Joint Conferences on Artificial Intelligence Organization (IJCAI)\",\"University of Technology Sydney (UTS)\",\"Australian Computer Society (ACS)\"],\"start\":{\"date-parts\":[[2017,8,19]]},\"end\":{\"date-parts\":[[2017,8,26]]}},\"container-title\":[\"Proceedings of the Twenty-Sixth International Joint Conference on Artificial Intelligence\"],\"deposited\":{\"date-parts\":[[2017,7,28]],\"date-time\":\"2017-07-28T07:52:57Z\",\"timestamp\":1501228377000},\"score\":63.21494,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/www.ijcai.org\\/proceedings\\/2017\\/239\"}},\"proceedings-subject\":\"Artificial Intelligence Research Articles\",\"issued\":{\"date-parts\":[[2017,8]]},\"references-count\":0,\"URL\":\"https:\\/\\/doi.org\\/10.24963\\/ijcai.2017\\/239\",\"published\":{\"date-parts\":[[2017,8]]}},{\"indexed\":{\"date-parts\":[[2025,7,25]],\"date-time\":\"2025-07-25T10:00:39Z\",\"timestamp\":1753437639608},\"reference-count\":10,\"publisher\":\"IEEE\",\"license\":[{\"start\":{\"date-parts\":[[2020,6,1]],\"date-time\":\"2020-06-01T00:00:00Z\",\"timestamp\":1590969600000},\"content-version\":\"vor\",\"delay-in-days\":0,\"URL\":\"https:\\/\\/ieeexplore.ieee.org\\/Xplorehelp\\/downloads\\/license-information\\/IEEE.html\"},{\"start\":{\"date-parts\":[[2020,6,1]],\"date-time\":\"2020-06-01T00:00:00Z\",\"timestamp\":1590969600000},\"content-version\":\"stm-asf\",\"delay-in-days\":0,\"URL\":\"https:\\/\\/doi.org\\/10.15223\\/policy-029\"},{\"start\":{\"date-parts\":[[2020,6,1]],\"date-time\":\"2020-06-01T00:00:00Z\",\"timestamp\":1590969600000},\"content-version\":\"stm-asf\",\"delay-in-days\":0,\"URL\":\"https:\\/\\/doi.org\\/10.15223\\/policy-037\"}],\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"published-print\":{\"date-parts\":[[2020,6]]},\"DOI\":\"10.1109\\/itnec48623.2020.9084654\",\"type\":\"proceedings-article\",\"created\":{\"date-parts\":[[2020,5,5]],\"date-time\":\"2020-05-05T01:26:54Z\",\"timestamp\":1588642014000},\"page\":\"2559-2563\",\"source\":\"Crossref\",\"is-referenced-by-count\":3,\"title\":[\"DeepFaFM :A Field-array Factorization Machine based Neural Network for CTR Prediction\"],\"prefix\":\"10.1109\",\"author\":[{\"given\":\"Xiaowan\",\"family\":\"Zhou\",\"sequence\":\"first\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"given\":\"Yuliang\",\"family\":\"Shi\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]}],\"member\":\"263\",\"reference\":[{\"key\":\"ref4\",\"doi-asserted-by\":\"publisher\",\"DOI\":\"10.1145\\/2959100.2959134\"},{\"journal-title\":\"Product-based Neural Networks for User Response Prediction over Multi-field Categorical Data[J]\",\"year\":\"2018\",\"author\":\"qu\",\"key\":\"ref3\"},{\"journal-title\":\"Field-aware Factorization Machines in a Real-world Online Advertising System[J]\",\"year\":\"2017\",\"author\":\"juan\",\"key\":\"ref10\"},{\"key\":\"ref6\",\"doi-asserted-by\":\"publisher\",\"DOI\":\"10.1145\\/3178876.3186040\"},{\"journal-title\":\"FAT-Deep FFM Field Attentive Deep Field-aware Factorization Machine[J]\",\"year\":\"2019\",\"author\":\"zhang\",\"key\":\"ref5\"},{\"journal-title\":\"Product-based Neural Networks for User Response Prediction over Multi-field Categorical Data[J]\",\"year\":\"2018\",\"author\":\"qu\",\"key\":\"ref8\"},{\"key\":\"ref7\",\"doi-asserted-by\":\"publisher\",\"DOI\":\"10.1145\\/2487575.2488200\"},{\"journal-title\":\"Deepfm A factorization-machine based neural network for CTR prediction\",\"year\":\"2017\",\"author\":\"guo\",\"key\":\"ref2\"},{\"journal-title\":\"Wide & Deep Learning for Recommender Systems[J]\",\"year\":\"2016\",\"author\":\"cheng\",\"key\":\"ref9\"},{\"key\":\"ref1\",\"doi-asserted-by\":\"publisher\",\"DOI\":\"10.1109\\/ICDM.2010.127\"}],\"event\":{\"name\":\"2020 IEEE 4th Information Technology, Networking, Electronic and Automation Control Conference (ITNEC)\",\"start\":{\"date-parts\":[[2020,6,12]]},\"location\":\"Chongqing, China\",\"end\":{\"date-parts\":[[2020,6,14]]}},\"container-title\":[\"2020 IEEE 4th Information Technology, Networking, Electronic and Automation Control Conference (ITNEC)\"],\"link\":[{\"URL\":\"http:\\/\\/xplorestaging.ieee.org\\/ielx7\\/9070013\\/9084648\\/09084654.pdf?arnumber=9084654\",\"content-type\":\"unspecified\",\"content-version\":\"vor\",\"intended-application\":\"similarity-checking\"}],\"deposited\":{\"date-parts\":[[2022,6,28]],\"date-time\":\"2022-06-28T21:55:13Z\",\"timestamp\":1656453313000},\"score\":48.917152,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/ieeexplore.ieee.org\\/document\\/9084654\\/\"}},\"issued\":{\"date-parts\":[[2020,6]]},\"references-count\":10,\"URL\":\"https:\\/\\/doi.org\\/10.1109\\/itnec48623.2020.9084654\",\"published\":{\"date-parts\":[[2020,6]]}},{\"indexed\":{\"date-parts\":[[2023,5,10]],\"date-time\":\"2023-05-10T04:46:41Z\",\"timestamp\":1683694001980},\"posted\":{\"date-parts\":[[2023]]},\"group-title\":\"SSRN\",\"reference-count\":0,\"publisher\":\"Elsevier BV\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"DOI\":\"10.2139\\/ssrn.4442847\",\"type\":\"posted-content\",\"created\":{\"date-parts\":[[2023,5,9]],\"date-time\":\"2023-05-09T19:26:54Z\",\"timestamp\":1683660414000},\"source\":\"Crossref\",\"is-referenced-by-count\":0,\"title\":[\"Self-Attention Based Optimal Factorization Machine for Ctr Prediction\"],\"prefix\":\"10.2139\",\"author\":[{\"given\":\"Zhenguo\",\"family\":\"Gao\",\"sequence\":\"first\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"given\":\"Shuang\",\"family\":\"Wu\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]}],\"member\":\"78\",\"deposited\":{\"date-parts\":[[2023,5,9]],\"date-time\":\"2023-05-09T19:26:55Z\",\"timestamp\":1683660415000},\"score\":44.02579,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/www.ssrn.com\\/abstract=4442847\"}},\"issued\":{\"date-parts\":[[2023]]},\"references-count\":0,\"URL\":\"https:\\/\\/doi.org\\/10.2139\\/ssrn.4442847\",\"published\":{\"date-parts\":[[2023]]},\"subtype\":\"preprint\"}],\"items-per-page\":3,\"query\":{\"start-index\":0,\"search-terms\":null}}}",
+  "candidates": [
+    {
+      "title": [
+        "DeepFM: A Factorization-Machine based Neural Network for CTR Prediction"
+      ],
+      "author": [
+        {
+          "given": "Huifeng",
+          "family": "Guo",
+          "sequence": "first",
+          "affiliation": [
+            {
+              "name": "Shenzhen Graduate School, Harbin Institute of Technology"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Ruiming",
+          "family": "TANG",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Huawei Noah's Ark Lab"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Yunming",
+          "family": "Ye",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Shenzhen Graduate School, Harbin Institute of Technology"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Zhenguo",
+          "family": "Li",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Huawei Noah's Ark Lab"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Xiuqiang",
+          "family": "He",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Huawei Noah's Ark Lab"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Proceedings of the Twenty-Sixth International Joint Conference on Artificial Intelligence"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2017,
+            8
+          ]
+        ]
+      },
+      "DOI": "10.24963/ijcai.2017/239",
+      "URL": "https://doi.org/10.24963/ijcai.2017/239",
+      "type": "proceedings-article"
+    },
+    {
+      "title": [
+        "DeepFaFM :A Field-array Factorization Machine based Neural Network for CTR Prediction"
+      ],
+      "author": [
+        {
+          "given": "Xiaowan",
+          "family": "Zhou",
+          "sequence": "first",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "given": "Yuliang",
+          "family": "Shi",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "2020 IEEE 4th Information Technology, Networking, Electronic and Automation Control Conference (ITNEC)"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2020,
+            6
+          ]
+        ]
+      },
+      "DOI": "10.1109/itnec48623.2020.9084654",
+      "URL": "https://doi.org/10.1109/itnec48623.2020.9084654",
+      "type": "proceedings-article"
+    },
+    {
+      "title": [
+        "Self-Attention Based Optimal Factorization Machine for Ctr Prediction"
+      ],
+      "author": [
+        {
+          "given": "Zhenguo",
+          "family": "Gao",
+          "sequence": "first",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "given": "Shuang",
+          "family": "Wu",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        }
+      ],
+      "container-title": null,
+      "published": {
+        "date-parts": [
+          [
+            2023
+          ]
+        ]
+      },
+      "DOI": "10.2139/ssrn.4442847",
+      "URL": "https://doi.org/10.2139/ssrn.4442847",
+      "type": "posted-content"
+    }
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "url": "https://api.crossref.org/works?query.bibliographic=Huifeng+Guo%2C+Ruiming+Tang%2C+Yunming+Ye%2C+Zhenguo+Li%2C+and+Xiuqiang+He.+Deepfm%3A+a+factorization-machine+based+neural+network+for+ctr+prediction.+In+Proceedings+of+the+26th+International+Joint+Conference+on+Artificial+Intelligence%2C+2017.&rows=3",
+  "retrieved_at": "2026-09-05T09:18:05.286792+00:00",
+  "evidence_file": "evidence/a738133f0b741c980fe6.json",
+  "http_status": 200,
+  "resolved_url": "https://api.crossref.org/works?query.bibliographic=Huifeng+Guo%2C+Ruiming+Tang%2C+Yunming+Ye%2C+Zhenguo+Li%2C+and+Xiuqiang+He.+Deepfm%3A+a+factorization-machine+based+neural+network+for+ctr+prediction.+In+Proceedings+of+the+26th+International+Joint+Conference+on+Artificial+Intelligence%2C+2017.&rows=3",
+  "body": "{\"status\":\"ok\",\"message-type\":\"work-list\",\"message-version\":\"1.0.0\",\"message\":{\"facets\":{},\"total-results\":232167,\"items\":[{\"indexed\":{\"date-parts\":[[2026,9,3]],\"date-time\":\"2026-09-03T17:20:43Z\",\"timestamp\":1788456043207,\"version\":\"build-2803163510\"},\"publisher-location\":\"California\",\"reference-count\":0,\"publisher\":\"International Joint Conferences on Artificial Intelligence Organization\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"published-print\":{\"date-parts\":[[2017,8]]},\"abstract\":\"<jats:p>Learning sophisticated feature interactions behind user behaviors is critical in maximizing CTR for recommender systems. Despite great progress, existing methods seem to have a strong bias towards low- or high-order interactions, or require expertise feature engineering. In this paper, we show that it is possible to derive an end-to-end learning model that emphasizes both low- and high-order feature interactions. The proposed model, DeepFM, combines the power of factorization machines for recommendation and deep learning for feature learning in a new neural network architecture. Compared to the latest Wide &amp; Deep model from Google, DeepFM has a shared input to its \\\"wide\\\" and \\\"deep\\\" parts, with no need of feature engineering besides raw features. Comprehensive experiments are conducted to demonstrate the effectiveness and efficiency of DeepFM over the existing models for CTR prediction, on both benchmark data and commercial data.<\\/jats:p>\",\"DOI\":\"10.24963\\/ijcai.2017\\/239\",\"type\":\"proceedings-article\",\"created\":{\"date-parts\":[[2017,7,28]],\"date-time\":\"2017-07-28T05:14:07Z\",\"timestamp\":1501218847000},\"page\":\"1725-1731\",\"source\":\"Crossref\",\"is-referenced-by-count\":1804,\"title\":[\"DeepFM: A Factorization-Machine based Neural Network for CTR Prediction\"],\"prefix\":\"10.24963\",\"author\":[{\"given\":\"Huifeng\",\"family\":\"Guo\",\"sequence\":\"first\",\"affiliation\":[{\"name\":\"Shenzhen Graduate School, Harbin Institute of Technology\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Ruiming\",\"family\":\"TANG\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Huawei Noah's Ark Lab\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Yunming\",\"family\":\"Ye\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Shenzhen Graduate School, Harbin Institute of Technology\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Zhenguo\",\"family\":\"Li\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Huawei Noah's Ark Lab\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Xiuqiang\",\"family\":\"He\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Huawei Noah's Ark Lab\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]}],\"member\":\"10584\",\"event\":{\"name\":\"Twenty-Sixth International Joint Conference on Artificial Intelligence\",\"theme\":\"Artificial Intelligence\",\"location\":\"Melbourne, Australia\",\"acronym\":\"IJCAI-2017\",\"number\":\"26\",\"sponsor\":[\"International Joint Conferences on Artificial Intelligence Organization (IJCAI)\",\"University of Technology Sydney (UTS)\",\"Australian Computer Society (ACS)\"],\"start\":{\"date-parts\":[[2017,8,19]]},\"end\":{\"date-parts\":[[2017,8,26]]}},\"container-title\":[\"Proceedings of the Twenty-Sixth International Joint Conference on Artificial Intelligence\"],\"deposited\":{\"date-parts\":[[2017,7,28]],\"date-time\":\"2017-07-28T07:52:57Z\",\"timestamp\":1501228377000},\"score\":107.35421,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/www.ijcai.org\\/proceedings\\/2017\\/239\"}},\"proceedings-subject\":\"Artificial Intelligence Research Articles\",\"issued\":{\"date-parts\":[[2017,8]]},\"references-count\":0,\"URL\":\"https:\\/\\/doi.org\\/10.24963\\/ijcai.2017\\/239\",\"published\":{\"date-parts\":[[2017,8]]}},{\"indexed\":{\"date-parts\":[[2025,10,16]],\"date-time\":\"2025-10-16T06:31:41Z\",\"timestamp\":1760596301883,\"version\":\"3.41.0\"},\"publisher-location\":\"New York, New York, USA\",\"reference-count\":6,\"publisher\":\"ACM Press\",\"license\":[{\"start\":{\"date-parts\":[[2017,1,1]],\"date-time\":\"2017-01-01T00:00:00Z\",\"timestamp\":1483228800000},\"content-version\":\"vor\",\"delay-in-days\":0,\"URL\":\"https:\\/\\/creativecommons.org\\/licenses\\/by\\/4.0\\/\"}],\"funder\":[{\"name\":\"Shenzhen Science and Technology Program under Grant\",\"award\":[\"JCYJ20160330163900579\",\"JSGG20150512145714247\"],\"award-info\":[{\"award-number\":[\"JCYJ20160330163900579\",\"JSGG20150512145714247\"]}]},{\"name\":\"National Key Technology R&#38;D Program of MOST China under Grant\",\"award\":[\"2014BAL05B06\"],\"award-info\":[{\"award-number\":[\"2014BAL05B06\"]}]},{\"name\":\"NSFC under Grant\",\"award\":[\"61572158\"],\"award-info\":[{\"award-number\":[\"61572158\"]}]}],\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"published-print\":{\"date-parts\":[[2017]]},\"DOI\":\"10.1145\\/3041021.3054208\",\"type\":\"proceedings-article\",\"created\":{\"date-parts\":[[2018,1,11]],\"date-time\":\"2018-01-11T18:39:25Z\",\"timestamp\":1515695965000},\"page\":\"787-788\",\"source\":\"Crossref\",\"is-referenced-by-count\":3,\"title\":[\"Holistic Neural Network for CTR Prediction\"],\"prefix\":\"10.1145\",\"author\":[{\"given\":\"Huifeng\",\"family\":\"Guo\",\"sequence\":\"first\",\"affiliation\":[{\"name\":\"Harbin Institute of Technology, Shenzhen, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"given\":\"Ruiming\",\"family\":\"Tang\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Noah's Ark Lab, Shenzhen, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"given\":\"Yunming\",\"family\":\"Ye\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Harbin Institute of Technology, Shenzhen, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]},{\"given\":\"Xiuqiang\",\"family\":\"He\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Noah's Ark Lab, Shenzhen, China\"}],\"role\":[{\"role\":\"author\",\"vocabulary\":\"crossref\"}]}],\"member\":\"320\",\"reference\":[{\"key\":\"key-10.1145\\/3041021.3054208-1\",\"unstructured\":\"H. Cheng et al. Wide &#38; deep learning for recommender systems. CoRR, abs\\/1606.07792, 2016.\"},{\"key\":\"key-10.1145\\/3041021.3054208-2\",\"doi-asserted-by\":\"crossref\",\"unstructured\":\"H. B. McMahan et al. Ad click prediction: a view from the trenches. In KDD 2013.\",\"DOI\":\"10.1145\\/2487575.2488200\"},{\"key\":\"key-10.1145\\/3041021.3054208-3\",\"doi-asserted-by\":\"crossref\",\"unstructured\":\"Y. Qu et al. Product-based neural networks for user response prediction. CoRR, abs\\/1611.00144, 2016.\",\"DOI\":\"10.1109\\/ICDM.2016.0151\"},{\"key\":\"key-10.1145\\/3041021.3054208-4\",\"doi-asserted-by\":\"crossref\",\"unstructured\":\"S. Rendle. Factorization machines. In ICDM 2010.\",\"DOI\":\"10.1109\\/ICDM.2010.127\"},{\"key\":\"key-10.1145\\/3041021.3054208-5\",\"doi-asserted-by\":\"crossref\",\"unstructured\":\"W. Zhang et al. Deep learning over multi-field categorical data. In ECIR 2016.\",\"DOI\":\"10.1007\\/978-3-319-30671-1_4\"},{\"key\":\"key-10.1145\\/3041021.3054208-6\",\"doi-asserted-by\":\"crossref\",\"unstructured\":\"Y. Zhang et al. Sequential click prediction for sponsored search with recurrent neural networks. In AAAI 2014.\",\"DOI\":\"10.1609\\/aaai.v28i1.8917\"}],\"event\":{\"number\":\"26\",\"sponsor\":[\"SIGWEB, ACM Special Interest Group on Hypertext, Hypermedia, and Web\",\"IW3C2, International World Wide Web Conference Committee\"],\"acronym\":\"WWW '17 Companion\",\"name\":\"the 26th International Conference\",\"start\":{\"date-parts\":[[2017,4,3]]},\"location\":\"Perth, Australia\",\"end\":{\"date-parts\":[[2017,4,7]]}},\"container-title\":[\"Proceedings of the 26th International Conference on World Wide Web Companion - WWW '17 Companion\"],\"link\":[{\"URL\":\"https:\\/\\/dl.acm.org\\/doi\\/10.1145\\/3041021.3054208\",\"content-type\":\"unspecified\",\"content-version\":\"vor\",\"intended-application\":\"text-mining\"},{\"URL\":\"http:\\/\\/dl.acm.org\\/ft_gateway.cfm?id=3054208&ftid=1865154&dwn=1\",\"content-type\":\"unspecified\",\"content-version\":\"vor\",\"intended-application\":\"similarity-checking\"}],\"deposited\":{\"date-parts\":[[2025,6,18]],\"date-time\":\"2025-06-18T03:03:19Z\",\"timestamp\":1750215799000},\"score\":68.367645,\"resource\":{\"primary\":{\"URL\":\"http:\\/\\/dl.acm.org\\/citation.cfm?doid=3041021.3054208\"}},\"proceedings-subject\":\"World Wide Web Companion\",\"issued\":{\"date-parts\":[[2017]]},\"references-count\":6,\"URL\":\"https:\\/\\/doi.org\\/10.1145\\/3041021.3054208\",\"published\":{\"date-parts\":[[2017]]}},{\"indexed\":{\"date-parts\":[[2026,9,2]],\"date-time\":\"2026-09-02T04:51:50Z\",\"timestamp\":1788324710888,\"version\":\"build-2803163510\"},\"publisher-location\":\"California\",\"reference-count\":0,\"publisher\":\"International Joint Conferences on Artificial Intelligence Organization\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"published-print\":{\"date-parts\":[[2020,7]]},\"abstract\":\"<jats:p>Factorization Machines (FMs) refer to a class of general predictors working with real valued feature vectors, which are well-known for their ability to estimate model parameters under significant sparsity and have found successful applications in many areas such as the click-through rate (CTR) prediction. However, standard FMs only produce a single fixed representation for each feature across different input instances, which may limit the CTR model\\u2019s expressive and predictive power. Inspired by the success of Input-aware Factorization Machines (IFMs), which aim to learn more flexible and informative representations of a given feature according to different input instances, we propose a novel model named Dual Input-aware Factorization Machines (DIFMs) that can adaptively reweight the original feature representations at the bit-wise and vector-wise levels simultaneously. Furthermore, DIFMs strategically integrate various components including Multi-Head Self-Attention, Residual Networks and DNNs into a unified end-to-end model. Comprehensive experiments on two real-world CTR prediction datasets show that the DIFM model can outperform several state-of-the-art models consistently.<\\/jats:p>\",\"DOI\":\"10.24963\\/ijcai.2020\\/434\",\"type\":\"proceedings-article\",\"created\":{\"date-parts\":[[2020,7,8]],\"date-time\":\"2020-07-08T08:12:10Z\",\"timestamp\":1594195930000},\"page\":\"3139-3145\",\"source\":\"Crossref\",\"is-referenced-by-count\":62,\"title\":[\"A Dual Input-aware Factorization Machine for CTR Prediction\"],\"prefix\":\"10.24963\",\"author\":[{\"given\":\"Wantong\",\"family\":\"Lu\",\"sequence\":\"first\",\"affiliation\":[{\"name\":\"Shenzhen International Graduate School, Tsinghua University\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Yantao\",\"family\":\"Yu\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Shenzhen International Graduate School, Tsinghua University\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Yongzhe\",\"family\":\"Chang\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Shenzhen International Graduate School, Tsinghua University\"},{\"name\":\"Data 61 CSIRO, Sydney, Australia\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Zhen\",\"family\":\"Wang\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"UBTECH Sydney AI Centre, The University of Sydney, Australia\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Chenhui\",\"family\":\"Li\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Shenzhen International Graduate School, Tsinghua University\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Bo\",\"family\":\"Yuan\",\"sequence\":\"additional\",\"affiliation\":[{\"name\":\"Shenzhen International Graduate School, Tsinghua University\"}],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]}],\"member\":\"10584\",\"event\":{\"name\":\"Twenty-Ninth International Joint Conference on Artificial Intelligence and Seventeenth Pacific Rim International Conference on Artificial Intelligence {IJCAI-PRICAI-20}\",\"theme\":\"Artificial Intelligence\",\"location\":\"Yokohama, Japan\",\"acronym\":\"IJCAI-PRICAI-2020\",\"number\":\"28\",\"sponsor\":[\"International Joint Conferences on Artificial Intelligence Organization (IJCAI)\"],\"start\":{\"date-parts\":[[2020,7,11]]},\"end\":{\"date-parts\":[[2020,7,17]]}},\"container-title\":[\"Proceedings of the Twenty-Ninth International Joint Conference on Artificial Intelligence\"],\"deposited\":{\"date-parts\":[[2020,7,8]],\"date-time\":\"2020-07-08T22:15:08Z\",\"timestamp\":1594246508000},\"score\":55.144123,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/www.ijcai.org\\/proceedings\\/2020\\/434\"}},\"proceedings-subject\":\"Artificial Intelligence Research Articles\",\"issued\":{\"date-parts\":[[2020,7]]},\"references-count\":0,\"URL\":\"https:\\/\\/doi.org\\/10.24963\\/ijcai.2020\\/434\",\"published\":{\"date-parts\":[[2020,7]]}}],\"items-per-page\":3,\"query\":{\"start-index\":0,\"search-terms\":null}}}",
+  "candidates": [
+    {
+      "title": [
+        "DeepFM: A Factorization-Machine based Neural Network for CTR Prediction"
+      ],
+      "author": [
+        {
+          "given": "Huifeng",
+          "family": "Guo",
+          "sequence": "first",
+          "affiliation": [
+            {
+              "name": "Shenzhen Graduate School, Harbin Institute of Technology"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Ruiming",
+          "family": "TANG",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Huawei Noah's Ark Lab"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Yunming",
+          "family": "Ye",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Shenzhen Graduate School, Harbin Institute of Technology"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Zhenguo",
+          "family": "Li",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Huawei Noah's Ark Lab"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Xiuqiang",
+          "family": "He",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Huawei Noah's Ark Lab"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Proceedings of the Twenty-Sixth International Joint Conference on Artificial Intelligence"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2017,
+            8
+          ]
+        ]
+      },
+      "DOI": "10.24963/ijcai.2017/239",
+      "URL": "https://doi.org/10.24963/ijcai.2017/239",
+      "type": "proceedings-article"
+    },
+    {
+      "title": [
+        "Holistic Neural Network for CTR Prediction"
+      ],
+      "author": [
+        {
+          "given": "Huifeng",
+          "family": "Guo",
+          "sequence": "first",
+          "affiliation": [
+            {
+              "name": "Harbin Institute of Technology, Shenzhen, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "given": "Ruiming",
+          "family": "Tang",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Noah's Ark Lab, Shenzhen, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "given": "Yunming",
+          "family": "Ye",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Harbin Institute of Technology, Shenzhen, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        },
+        {
+          "given": "Xiuqiang",
+          "family": "He",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Noah's Ark Lab, Shenzhen, China"
+            }
+          ],
+          "role": [
+            {
+              "role": "author",
+              "vocabulary": "crossref"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Proceedings of the 26th International Conference on World Wide Web Companion - WWW '17 Companion"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2017
+          ]
+        ]
+      },
+      "DOI": "10.1145/3041021.3054208",
+      "URL": "https://doi.org/10.1145/3041021.3054208",
+      "type": "proceedings-article"
+    },
+    {
+      "title": [
+        "A Dual Input-aware Factorization Machine for CTR Prediction"
+      ],
+      "author": [
+        {
+          "given": "Wantong",
+          "family": "Lu",
+          "sequence": "first",
+          "affiliation": [
+            {
+              "name": "Shenzhen International Graduate School, Tsinghua University"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Yantao",
+          "family": "Yu",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Shenzhen International Graduate School, Tsinghua University"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Yongzhe",
+          "family": "Chang",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Shenzhen International Graduate School, Tsinghua University"
+            },
+            {
+              "name": "Data 61 CSIRO, Sydney, Australia"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Zhen",
+          "family": "Wang",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "UBTECH Sydney AI Centre, The University of Sydney, Australia"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Chenhui",
+          "family": "Li",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Shenzhen International Graduate School, Tsinghua University"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Bo",
+          "family": "Yuan",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Shenzhen International Graduate School, Tsinghua University"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Proceedings of the Twenty-Ninth International Joint Conference on Artificial Intelligence"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2020,
+            7
+          ]
+        ]
+      },
+      "DOI": "10.24963/ijcai.2020/434",
+      "URL": "https://doi.org/10.24963/ijcai.2020/434",
+      "type": "proceedings-article"
+    }
+  ]
+}

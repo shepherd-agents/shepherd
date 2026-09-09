@@ -3,7 +3,7 @@
 	lint lint-report lint-active lint-active-report lint-packages \
 	format format-active format-active-report format-packages clean help typecheck typecheck-runtime \
 	typecheck-shepherd2 typecheck-commons-vcs typecheck-vcs-core lock-check verify \
-	test-core test-providers test-contexts test-banking test-coding test-meta test-vcs-core \
+	test-core test-providers test-contexts test-banking test-coding test-citation-checker test-meta test-vcs-core \
 	test-shepherd2 test-commons-vcs test-kernel-v3-reference \
 	build-dist check-dist publish-test publish
 
@@ -26,7 +26,7 @@ UV_CACHE_DIR ?= .cache/uv
 export UV_CACHE_DIR
 VERIFY_IMPORTS := shepherd_core shepherd_providers shepherd_contexts shepherd_runtime \
 	shepherd_export shepherd_transform shepherd_sandboxes shepherd_authoring \
-	shepherd_tests shepherd_banking shepherd_coding shepherd \
+	shepherd_tests shepherd_banking shepherd_coding shepherd_citation_checker shepherd \
 	shepherd_kernel_v3_reference vcs_core commons_vcs
 
 # Default target
@@ -67,6 +67,7 @@ help:
 	@echo "  make test-contexts    - Run tests for shepherd-contexts"
 	@echo "  make test-banking     - Run tests for shepherd-banking"
 	@echo "  make test-coding      - Run tests for shepherd-coding"
+	@echo "  make test-citation-checker - Run citation-checker package tests"
 	@echo "  make test-meta        - Run tests for shepherd (meta-package)"
 	@echo "  make test-vcs-core    - Run tests for vcs-core"
 	@echo "  make test-shepherd2    - Run shepherd2 package-local tests"
@@ -111,6 +112,7 @@ notebooks-preflight:
 # run serially via `make test_e2e`.
 test:
 	uv run --with openai --with pytest-xdist pytest shepherd/packages/ -m "not e2e and not vm_overlay and not container" -n auto --dist worksteal -q
+	$(MAKE) test-citation-checker
 	uv run --with openai pytest shepherd/integration-tests/ -q
 	uv run --directory shepherd2 --group test pytest -q
 	uv run --directory commons-vcs --group test pytest -q
@@ -237,6 +239,9 @@ test-banking:
 
 test-coding:
 	$(MAKE) -C shepherd/extras/coding test
+
+test-citation-checker:
+	UV_FROZEN=true uv run --project shepherd/extras/citation-checker --group test pytest shepherd/extras/citation-checker/tests
 
 test-meta:
 	$(MAKE) -C shepherd/packages/meta test

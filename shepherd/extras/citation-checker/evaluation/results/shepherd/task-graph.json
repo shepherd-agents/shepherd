@@ -1,0 +1,322 @@
+{
+  "root": "check_citations",
+  "stages": [
+    "extract_references",
+    "collect_evidence",
+    "match_claims",
+    "review_citation_batch",
+    "build_report"
+  ],
+  "orchestrator_run_ref": "run-2012688f6ed04fefae06d58f6eb6e3b9",
+  "stage_runs": [
+    {
+      "task": "build_report",
+      "run_ref": "run-001c73d18fa64602abdbf738ac38942a",
+      "elapsed_seconds": 1.674,
+      "trace": {
+        "schema_version": 1,
+        "run_ref": {
+          "id": "run-001c73d18fa64602abdbf738ac38942a"
+        },
+        "kernel": [],
+        "surface": []
+      }
+    },
+    {
+      "task": "collect_evidence",
+      "run_ref": "run-dc42958029ee4bc5bcca9f17aa760143",
+      "elapsed_seconds": 0.064,
+      "trace": {
+        "schema_version": 1,
+        "run_ref": {
+          "id": "run-dc42958029ee4bc5bcca9f17aa760143"
+        },
+        "kernel": [],
+        "surface": []
+      }
+    },
+    {
+      "task": "extract_references",
+      "run_ref": "run-0e50f61c63d44f8ea973a0e80a35e2db",
+      "elapsed_seconds": 0.054,
+      "trace": {
+        "schema_version": 1,
+        "run_ref": {
+          "id": "run-0e50f61c63d44f8ea973a0e80a35e2db"
+        },
+        "kernel": [],
+        "surface": []
+      }
+    },
+    {
+      "task": "match_claims",
+      "run_ref": "run-61e5e668eebe4d19a5fe47b6acd0d490",
+      "elapsed_seconds": 2.974,
+      "trace": {
+        "schema_version": 1,
+        "run_ref": {
+          "id": "run-61e5e668eebe4d19a5fe47b6acd0d490"
+        },
+        "kernel": [],
+        "surface": []
+      }
+    },
+    {
+      "task": "review_citation_batch",
+      "run_ref": "run-0761b473c42d457f916f46813bba4277",
+      "elapsed_seconds": 109.363,
+      "trace": {
+        "schema_version": 1,
+        "run_ref": {
+          "id": "run-0761b473c42d457f916f46813bba4277"
+        },
+        "kernel": [],
+        "surface": [
+          {
+            "type": "ArtifactEmitted",
+            "fields": {
+              "ref": "surface:phase1-runtime:run-0761b473c42d457f916f46813bba4277:1",
+              "sub_tag": "artifact",
+              "timestamp_us": 1788945617773416,
+              "run_ref": {
+                "id": "run-0761b473c42d457f916f46813bba4277"
+              },
+              "branch_scope_ref": null,
+              "citing": [],
+              "sequence": 1,
+              "family": "artifact",
+              "phase": "emitted",
+              "kind": "artifact_emitted",
+              "status": "emitted",
+              "effect_key": null,
+              "handler_key": null,
+              "claim_level": "phase1-runtime",
+              "proof_profile": "runtime_only",
+              "payload": {
+                "artifact_kind": "json",
+                "name": "batch-004-receipt.json",
+                "metadata_summary": {
+                  "content_type": "str",
+                  "content_length": 22492,
+                  "metadata_keys": []
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "task": "review_citation_batch",
+      "run_ref": "run-0b69856ff579415f86fb6d44645bf3a2",
+      "elapsed_seconds": 134.629,
+      "trace": {
+        "schema_version": 1,
+        "run_ref": {
+          "id": "run-0b69856ff579415f86fb6d44645bf3a2"
+        },
+        "kernel": [],
+        "surface": [
+          {
+            "type": "ArtifactEmitted",
+            "fields": {
+              "ref": "surface:phase1-runtime:run-0b69856ff579415f86fb6d44645bf3a2:1",
+              "sub_tag": "artifact",
+              "timestamp_us": 1788945643036612,
+              "run_ref": {
+                "id": "run-0b69856ff579415f86fb6d44645bf3a2"
+              },
+              "branch_scope_ref": null,
+              "citing": [],
+              "sequence": 1,
+              "family": "artifact",
+              "phase": "emitted",
+              "kind": "artifact_emitted",
+              "status": "emitted",
+              "effect_key": null,
+              "handler_key": null,
+              "claim_level": "phase1-runtime",
+              "proof_profile": "runtime_only",
+              "payload": {
+                "artifact_kind": "json",
+                "name": "batch-005-receipt.json",
+                "metadata_summary": {
+                  "content_type": "str",
+                  "content_length": 14594,
+                  "metadata_keys": []
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "task": "review_citation_batch",
+      "run_ref": "run-5d69cf4bced644d9b60750144e23a600",
+      "elapsed_seconds": 98.216,
+      "trace": {
+        "schema_version": 1,
+        "run_ref": {
+          "id": "run-5d69cf4bced644d9b60750144e23a600"
+        },
+        "kernel": [],
+        "surface": [
+          {
+            "type": "ArtifactEmitted",
+            "fields": {
+              "ref": "surface:phase1-runtime:run-5d69cf4bced644d9b60750144e23a600:1",
+              "sub_tag": "artifact",
+              "timestamp_us": 1788945606625023,
+              "run_ref": {
+                "id": "run-5d69cf4bced644d9b60750144e23a600"
+              },
+              "branch_scope_ref": null,
+              "citing": [],
+              "sequence": 1,
+              "family": "artifact",
+              "phase": "emitted",
+              "kind": "artifact_emitted",
+              "status": "emitted",
+              "effect_key": null,
+              "handler_key": null,
+              "claim_level": "phase1-runtime",
+              "proof_profile": "runtime_only",
+              "payload": {
+                "artifact_kind": "json",
+                "name": "batch-003-receipt.json",
+                "metadata_summary": {
+                  "content_type": "str",
+                  "content_length": 25568,
+                  "metadata_keys": []
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "task": "review_citation_batch",
+      "run_ref": "run-cc19b59599f945548fac76c8aa4c4640",
+      "elapsed_seconds": 118.285,
+      "trace": {
+        "schema_version": 1,
+        "run_ref": {
+          "id": "run-cc19b59599f945548fac76c8aa4c4640"
+        },
+        "kernel": [],
+        "surface": [
+          {
+            "type": "ArtifactEmitted",
+            "fields": {
+              "ref": "surface:phase1-runtime:run-cc19b59599f945548fac76c8aa4c4640:1",
+              "sub_tag": "artifact",
+              "timestamp_us": 1788945626694900,
+              "run_ref": {
+                "id": "run-cc19b59599f945548fac76c8aa4c4640"
+              },
+              "branch_scope_ref": null,
+              "citing": [],
+              "sequence": 1,
+              "family": "artifact",
+              "phase": "emitted",
+              "kind": "artifact_emitted",
+              "status": "emitted",
+              "effect_key": null,
+              "handler_key": null,
+              "claim_level": "phase1-runtime",
+              "proof_profile": "runtime_only",
+              "payload": {
+                "artifact_kind": "json",
+                "name": "batch-002-receipt.json",
+                "metadata_summary": {
+                  "content_type": "str",
+                  "content_length": 23044,
+                  "metadata_keys": []
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "task": "review_citation_batch",
+      "run_ref": "run-d14568361e4e4c9e994b49887a2b707e",
+      "elapsed_seconds": 117.885,
+      "trace": {
+        "schema_version": 1,
+        "run_ref": {
+          "id": "run-d14568361e4e4c9e994b49887a2b707e"
+        },
+        "kernel": [],
+        "surface": [
+          {
+            "type": "ArtifactEmitted",
+            "fields": {
+              "ref": "surface:phase1-runtime:run-d14568361e4e4c9e994b49887a2b707e:1",
+              "sub_tag": "artifact",
+              "timestamp_us": 1788945626294991,
+              "run_ref": {
+                "id": "run-d14568361e4e4c9e994b49887a2b707e"
+              },
+              "branch_scope_ref": null,
+              "citing": [],
+              "sequence": 1,
+              "family": "artifact",
+              "phase": "emitted",
+              "kind": "artifact_emitted",
+              "status": "emitted",
+              "effect_key": null,
+              "handler_key": null,
+              "claim_level": "phase1-runtime",
+              "proof_profile": "runtime_only",
+              "payload": {
+                "artifact_kind": "json",
+                "name": "batch-001-receipt.json",
+                "metadata_summary": {
+                  "content_type": "str",
+                  "content_length": 20391,
+                  "metadata_keys": []
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "review_runs": [
+    {
+      "batch": "batch-001",
+      "run_ref": "run-a3a98a55757a",
+      "trace": "<evaluation-workspace>/.runs/citation-package-full-v2-shepherd/jobs/batch-001/trace.json",
+      "receipt": "<evaluation-workspace>/.runs/citation-package-full-v2-shepherd/jobs/batch-001/receipt.json"
+    },
+    {
+      "batch": "batch-002",
+      "run_ref": "run-c1ac2d6e136a",
+      "trace": "<evaluation-workspace>/.runs/citation-package-full-v2-shepherd/jobs/batch-002/trace.json",
+      "receipt": "<evaluation-workspace>/.runs/citation-package-full-v2-shepherd/jobs/batch-002/receipt.json"
+    },
+    {
+      "batch": "batch-003",
+      "run_ref": "run-7cdce12a7113",
+      "trace": "<evaluation-workspace>/.runs/citation-package-full-v2-shepherd/jobs/batch-003/trace.json",
+      "receipt": "<evaluation-workspace>/.runs/citation-package-full-v2-shepherd/jobs/batch-003/receipt.json"
+    },
+    {
+      "batch": "batch-004",
+      "run_ref": "run-81101e23c218",
+      "trace": "<evaluation-workspace>/.runs/citation-package-full-v2-shepherd/jobs/batch-004/trace.json",
+      "receipt": "<evaluation-workspace>/.runs/citation-package-full-v2-shepherd/jobs/batch-004/receipt.json"
+    },
+    {
+      "batch": "batch-005",
+      "run_ref": "run-832b025273c5",
+      "trace": "<evaluation-workspace>/.runs/citation-package-full-v2-shepherd/jobs/batch-005/trace.json",
+      "receipt": "<evaluation-workspace>/.runs/citation-package-full-v2-shepherd/jobs/batch-005/receipt.json"
+    }
+  ]
+}

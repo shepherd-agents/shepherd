@@ -1,0 +1,12 @@
+{
+  "citation-fixed-evidence-v2-manual": {
+    "references": 11,
+    "validation_errors": {},
+    "semantic_changes": []
+  },
+  "citation-fixed-evidence-v2-shepherd": {
+    "references": 5,
+    "validation_errors": {},
+    "semantic_changes": []
+  }
+}

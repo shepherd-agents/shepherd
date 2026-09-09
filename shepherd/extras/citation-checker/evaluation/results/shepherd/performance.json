@@ -1,0 +1,16 @@
+{
+  "references": 58,
+  "execution_counts": {
+    "completed": 58
+  },
+  "timing": {
+    "wall_seconds": 139.414,
+    "complete": true,
+    "run_ref": "run-2012688f6ed04fefae06d58f6eb6e3b9"
+  },
+  "model_jobs": 5,
+  "usage_reports": 5,
+  "reported_usd_equivalent": 4.8475585,
+  "note": "Fresh packaged workflow; cached extraction and initial evidence. Native scoring unchanged. Selected development sample, not held-out accuracy. CLI costs are list-price equivalents, not subscription charges.",
+  "including_preparation_seconds": 141.487
+}

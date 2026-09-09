@@ -1,0 +1,39 @@
+{
+  "suite": "citation-iteration-50-v3",
+  "parent_suite": "citation-iteration-50-v2",
+  "reference_count": 150,
+  "per_dataset": 50,
+  "counts": {
+    "delta_human_audit/AMBIGUOUS": 10,
+    "manual_reference_verification/verified": 40,
+    "manual_reference_verification/problematic": 10,
+    "hallmark_test_public/VALID": 25,
+    "delta_human_audit/EXISTS": 20,
+    "delta_human_audit/FABRICATED": 20,
+    "hallmark_test_public/HALLUCINATED": 25
+  },
+  "screened_candidates": 26,
+  "selected_replacement_ids": [
+    "3",
+    "6",
+    "17",
+    "29",
+    "51",
+    "82",
+    "97",
+    "120",
+    "121",
+    "147",
+    "182",
+    "194",
+    "215",
+    "227",
+    "256"
+  ],
+  "retained_parent_results": 135,
+  "results_merged": false,
+  "runtime_filter": true,
+  "label_screen": true,
+  "native_label_deviations": [],
+  "note": "Runtime- and label-screened development subset. Original evaluation remains unchanged. Screening outcomes are not held-out accuracy. User requested replacement-only execution; merge deferred."
+}

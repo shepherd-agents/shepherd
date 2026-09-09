@@ -1,0 +1,498 @@
+{
+  "note": "Retained-source label screening. Model disagreement alone is not evidence of a label error. No native gold or model output is changed.",
+  "cases": {
+    "1": {
+      "eligible": true,
+      "finding": "No apparent AMBIGUOUS-gold label error. Crossref alternatives and Europe PMC author/year search show related but differently titled works. Exact-title Europe PMC query returns zero; the 1999 matching-author/journal record concerns hepatic clearance. Bounded not_found does not establish fabricated ground truth.",
+      "limitations": [
+        "Ambiguous native gold remains excluded from decisive accuracy. Negative search evidence does not resolve author intent or establish global nonexistence."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-1/review/evidence/7f0e1f55919b2fa7a726.json",
+          "sha256": "40b7e933ba167f49a3be5c41c6165e6ccaec9a6f893b40cdb8318f5a8d15d43b"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-1/review/evidence/extra/64b3905f72e3aa5fe489.json",
+          "sha256": "4b32bd620c6abaf8ef86abf5b4748fb5c9dd8eab25b34529f0d5ea03ab5955ea"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-1/review/evidence/extra/7f3ea0cd36eb8921ccf3.json",
+          "sha256": "9150fe72ad2ef918b04dff506c3f4aaf6f7615f5f2e5d388a23649e8f429b7f2"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-1/review/evidence/extra/ecb18e40903e261615ac.json",
+          "sha256": "a104a967b6a6194cdaa6a7e8173bee2d4f2b0b10efd190acc9e14f566bdd1d0f"
+        }
+      ],
+      "receipt_sha256": "5224c2eb7361336f2024addea8acecc82a4b5eac992ff5dce404eb60aeea34b8"
+    },
+    "3": {
+      "eligible": true,
+      "finding": "Crossref supports exact title, five ordered authors, ACL 2019, Florence/July and pages 3752-3762. The volume-front-matter record corroborates the three named editors. No apparent verified-label conflict.",
+      "limitations": [
+        "Authors and venue are discussed in identity/prose rather than separate structured field checks; the retained source itself supports them."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-3/review/evidence/3d89c62a2e2982ad47be.json",
+          "sha256": "028b905afd33457215bab67b50ad0f1820d8e1d987ad77edfda7e1d3be066da8"
+        }
+      ],
+      "receipt_sha256": "b04d7bca1bbb9d581cf6673a6eb961ad9348482e26d3858cab0e11d0f8044c5c"
+    },
+    "6": {
+      "eligible": true,
+      "finding": "ACL Anthology and Crossref agree on title, five ordered authors, EMNLP 2023 in Singapore/December, pages 8392-8417 and the supplied DOI. No apparent verified-label conflict.",
+      "limitations": [
+        "Authors and venue are discussed in identity/prose rather than separate structured field checks; the retained source itself supports them."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-6/review/evidence/9460b778463356ab41ec.json",
+          "sha256": "c013ad8745b4178b6db413b25994e46b478beb60d63f9a332701027544d97a23"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-6/review/evidence/3f0bede189c409c2e6d9.json",
+          "sha256": "c192173bcc49f6965336def01eda436f73e93655e5bfab8bbb67f4b75c2fa242"
+        }
+      ],
+      "receipt_sha256": "591b882d258db8636513ca44c5b411107d41f3db3978c568e6cb628e943aa156"
+    },
+    "17": {
+      "eligible": true,
+      "finding": "ACL Anthology and Crossref support TruthfulQA title, Lin/Hilton/Evans author order, ACL 2022 Long Papers, May/Dublin, pages 3214-3252 and supplied DOI. No apparent verified-label conflict.",
+      "limitations": [
+        "Registry and publisher metadata checked; paper PDF not needed for this label screen."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-17/review/evidence/1d7b0206c7ef599d3da6.json",
+          "sha256": "fa1c735c0c07e72f632435be067393f4773bb3f57d711c717dceedf58a0de624"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-17/review/evidence/8e21f24eb6b80d2c0e8b.json",
+          "sha256": "08582df0cc9df91134faff4b2e0c0b5cef887e063ea636cb5a3ddbaac45d2a03"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-17/review/evidence/d0c922e4da110e8ca199.json",
+          "sha256": "68385048abe1c93c6c1d0e7bdab635850de7eb1dfc14bc5cddb9cb50adfde839"
+        }
+      ],
+      "receipt_sha256": "201d15d9629387c4ba4caba3bd02e79209b30fb50d72e57381990c434a8fd964"
+    },
+    "29": {
+      "eligible": true,
+      "finding": "Official PMLR v162 yu22f record confirms exact title, all four ordered authors, ICML and 2022. No apparent VALID-label error.",
+      "limitations": [
+        "General statement about PMLR DOI deposits is unnecessary and not established by this one record; it does not affect the supported verification."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-29/review/evidence/extra/365c9f8b213e8307dfd5.json",
+          "sha256": "802c95bf6ee1337c4fad21166dea03159a583f2fff5bb78d507e108b879fb42c"
+        }
+      ],
+      "receipt_sha256": "5344ff8f2267aa59743ece4d30a29e6fc468eb8a541549105708425c824eb3c2"
+    },
+    "36": {
+      "eligible": false,
+      "exclusion": "provider_timeout",
+      "finding": "Provider budget exceeded at 240 seconds; worker receipt elapsed 250.33 seconds. No completed report, so no label-error judgment is made.",
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-36/receipt.json",
+          "sha256": "8f47e129f2b6aad511ea2d6b1b007f7f6e7acd3bbd7b42975d25c1f4e4f2023c"
+        }
+      ],
+      "receipt_sha256": "8f47e129f2b6aad511ea2d6b1b007f7f6e7acd3bbd7b42975d25c1f4e4f2023c"
+    },
+    "51": {
+      "eligible": true,
+      "finding": "No established AMBIGUOUS-gold label error. Crossref confirms the proposed Laden et al. mortality paper with matching four authors, venue and 2006 year, but its title/outcome differs substantially. Another retained 2006 comment also has the same four authors. These records leave intent uncertain, consistent with ambiguous native gold.",
+      "limitations": [
+        "Model selected a real candidate and gave a full title correction, but metadata overlap alone does not prove that this is the intended work. Identity confidence is an explanation/adjudication concern, not grounds to call the ambiguous gold erroneous.",
+        "Remains outside decisive native accuracy."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-51/review/evidence/5282da1a6e65da83f17f.json",
+          "sha256": "55f49c8adf7d6a526a8816d27e9e79494f9b119bdae3b09606f32c392b217eaa"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-51/review/evidence/extra/021244a72803a45d9077.json",
+          "sha256": "6e0289b04a87e56af67c222a2f3cb7444db2c6b15b8cc899acdf7145fb1af5da"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-51/review/evidence/extra/63bd2f24f2a219497240.json",
+          "sha256": "f342dfe24517c4d27cee00d92e155524ba500a6bb57739f5f0d9a046d52c4a2b"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-51/review/evidence/extra/6522b35e80f9a382a4f0.json",
+          "sha256": "dc4f6eefaecdc0ce8ad8dc164a77b4503900d5e6bd7f3b1ced7ea2a589100551"
+        }
+      ],
+      "receipt_sha256": "6890a7f639463c72201b5808e7e06a61252e42bcdd0411557905fb7e8f21fc2c"
+    },
+    "67": {
+      "eligible": true,
+      "finding": "Retained Crossref DOI 10.18653/v1/2023.emnlp-main.778 supports exact title, four ordered authors, EMNLP 2023, Singapore/December and pages 12621-12640. No apparent verified-label conflict.",
+      "limitations": [
+        "Only Crossref metadata was inspected. Authors and venue are covered in prose rather than structured checks."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-67/review/evidence/bf52b8aac6a98c6e325f.json",
+          "sha256": "5fbf16820b83c4125c92f8c37a8e72f87315f38340958b66d6a7889c154b5878"
+        }
+      ],
+      "receipt_sha256": "f8285d1c1ffbc5aa784d10b5222d212898a300c061261b25d0893455e6d26a37"
+    },
+    "82": {
+      "eligible": true,
+      "finding": "Official NISO publication page confirms ANSI/NISO Z39.96-2024 JATS version 1.4, approval October 9 and publication October 31, 2024. Crossref supplies matching title/edition. No apparent verified-label error.",
+      "limitations": [
+        "Crossref lacks an issued date; the year is affirmatively supported by the official NISO page."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-82/review/evidence/924185e52a4e1347fc76.json",
+          "sha256": "b7954fccbf8322be7ef6f2c831256f64670ff17e43634d1ad6dfbcc7984f0a2d"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-82/review/evidence/f2a7515c8c1bd0d8f156.json",
+          "sha256": "389c5e28d625e41de9afc270b629b0a36d291d91a4bbb52c8bd214ef5d188164"
+        }
+      ],
+      "receipt_sha256": "2e4068ce356c656d3df150108876875ff8fea52e4d3f46fabd7d750c26b1dc15"
+    },
+    "97": {
+      "eligible": true,
+      "finding": "Crossref DOI 10.52202/068431-0130 confirms exact title, Wang/Levine/Feizi ordered authors, NeurIPS 2022 and the 2022 publication year. No apparent VALID-label error.",
+      "limitations": [
+        "Only registry metadata needed for this citation; optional pages not separately corroborated."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-97/review/evidence/16a5576aa24ddd9a8963.json",
+          "sha256": "90f22e42620571309a5badad13d3803b76e43920fd668a2dc7854f2c02a21e37"
+        }
+      ],
+      "receipt_sha256": "b7895d6c9382d64bbf50c733a5f93ee573021edac4f06ee4feab23f76897926b"
+    },
+    "108": {
+      "eligible": true,
+      "finding": "Retained arXiv v1 page confirms exact title/2026 and five actual authors (Ju, Yao, Anandkumar, Benson, Wen), none of the three supplied names. Supplied version-suffixed DOI returns 404 at doi.org, DataCite and Crossref. Native HALLUCINATED (bibliographic issue) label is supported.",
+      "limitations": [
+        "No need to infer whole-work fabrication: the real work has corrupted author metadata."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-108/review/evidence/27ff6817632ee61ea6b7.json",
+          "sha256": "dcef891ad0ab77c198e0a94fad95ee47dec67912c283a150bc2bad269a94731e"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-108/review/evidence/d57e5bf0ab3e3d71ead7.json",
+          "sha256": "40b86c66c8589dca1bc3739003779715726129144798e1a9d6207a77d222800f"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-108/review/evidence/5eb0ef6c49866a8d73cd.json",
+          "sha256": "aae6505a5c16c5b94664d032affcac9652a972c5eacb9c16f7520f07ee97b26e"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-108/review/evidence/c94d7e1e9f72147b363f.json",
+          "sha256": "0e48f6e7f8360ddaf8f554daabcd26e09c3bd7e9024796843efd39001650e339"
+        }
+      ],
+      "receipt_sha256": "80ac704372deb536ea63ec18e50e625dfd8e4aee126073894b2b6262e9693ebd"
+    },
+    "120": {
+      "eligible": true,
+      "finding": "Official NeurIPS proceedings metadata supports the exact title with Heinrich Jiang, Been Kim, Melody Guan and Maya Gupta, NeurIPS volume 31, 2018. Supplied five authors, ICLR venue and 2021 year differ. Native problematic label is supported.",
+      "limitations": [
+        "Author intent remains inferred from the exact title; metadata discrepancy is clear."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-120/review/evidence/extra/3238e87fdec718b279a9.json",
+          "sha256": "8550a39d911a3449eda5c62ba27bc365135141d9735cc39fb58b397e9c45c20f"
+        }
+      ],
+      "receipt_sha256": "694f42289dd22655758e3e943f410c37130a2ff11e5442f0ed283dcd847ded38"
+    },
+    "121": {
+      "eligible": true,
+      "finding": "Retained arXiv title is Retrieval-based Controllable Molecule Generation, not the supplied Synthesis. Six authors agree, and ICLR 2023 is supported by the arXiv comment and embedded Crossref reference. A changed title is present; no established native-label error.",
+      "limitations": [
+        "The model categorical claim that synthesis and generation necessarily denote different tasks is not established by the retained abstract, which itself says synthesizing molecules. Canonical-title mismatch is supported; explanation severity is interpretive.",
+        "Official OpenReview record was not fetched."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-121/review/evidence/extra/d058f57b078262918662.json",
+          "sha256": "76eed5abe97286d5788e6e993f2621d72bbf42d946ebec9bb01bb8c1504ac39a"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-121/review/evidence/b87063b7f3ec5a7f5284.json",
+          "sha256": "b8b37a99799963c5def27fa1f81d336379d487233047f127825ad0f37af0a2e4"
+        }
+      ],
+      "receipt_sha256": "5fcf157bcc88dd69aea9c49eb98fc7aa7365cd762f1ab02b6b5a4f3f25c5b4f4"
+    },
+    "147": {
+      "eligible": true,
+      "finding": "Raw citation has unusable arXiv placeholder 2401.XXXX, affirmatively supporting the problematic label. Crossref shows unrelated records; retained arXiv MaskGPT query returns zero and author-plus-diffusion query returns only JoyVASA, a different work. No apparent label error.",
+      "limitations": [
+        "Bounded not_found is not proof of global nonexistence, but the supplied identifier is independently defective."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-147/review/evidence/4962a49ef3590ee8c891.json",
+          "sha256": "a562b80bac12171f08e9954f9b182b9ee5467df06f256d75eb9f9efecd9ca828"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-147/review/evidence/extra/808fd0b1c249abb6bb5c.json",
+          "sha256": "3d651572122db70d4ad18f679d3173145d89132838a5375cd1840d85b9f0ddb7"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-147/review/evidence/extra/e0f6b0cf1716e094239e.json",
+          "sha256": "e0f255383c23901876d3141222cab97ab34a35afd5f9b37166d22100b65c8bd1"
+        }
+      ],
+      "receipt_sha256": "a0013167850d06e0cd900d2d86e04debd3c5d1b7a3baf73ee7996bca87be10d2"
+    },
+    "153": {
+      "eligible": true,
+      "finding": "Retained arXiv page and successful DOI metadata support exact title, Ana-Maria Istrate as first author with colleagues, arXiv 2209.00693, September 2022 and supplied DOI. No apparent verified-label error.",
+      "limitations": [
+        "Crossref 404 is not a DOI failure: doi.org successfully returns DataCite metadata for this arXiv DOI."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-153/review/evidence/6cbf456a0cf3c38575c2.json",
+          "sha256": "9917695df015bd28f6915cffbf48c8eb0f23b754031017c8a2015b7afd0083a8"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-153/review/evidence/9f8562f2da690225a60f.json",
+          "sha256": "b74736d5737eec337aea8b16b798b4fa460b7fa8bc196358c933f12b2c772ca8"
+        }
+      ],
+      "receipt_sha256": "0a7093a9bb7e7d26db3b71b0a59cc41859ffde8c2568cdac99e8980121c05533"
+    },
+    "168": {
+      "eligible": true,
+      "finding": "Crossref DOI 10.52202/068431-1430 confirms exact title, Yihan Zhang and Nir Weinberger, NeurIPS proceedings and 2022. The later time-inhomogeneous work has a different title and author list. No apparent VALID-label error.",
+      "limitations": [
+        "One registry source."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-168/review/evidence/9f346ab7db2772b12fb8.json",
+          "sha256": "f55fd503e9e70ec1489fd2cc3de078462cac2da36c2ac0838b6c635b7f323e9c"
+        }
+      ],
+      "receipt_sha256": "a7d099df69776b32dd4371fe74bb1c7e8bebeaa9acea6dcc97dd23f28826a707"
+    },
+    "182": {
+      "eligible": true,
+      "finding": "Retained arXiv GEPA page confirms exact title, all seventeen supplied authors in order, arXiv 2507.19457 and initial submission July 25, 2025. Later 2026 revision does not contradict the unversioned preprint citation year. No apparent verified-label error.",
+      "limitations": [
+        "Authors are verified in prose rather than a separate structured check; retained metadata supports them."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-182/review/evidence/4765e8b2963c94eaaccc.json",
+          "sha256": "654fff289f74c20d9008ce7e3ea4360819f39b7f6d5a07936a7a302ab7bba504"
+        }
+      ],
+      "receipt_sha256": "2b7b5beb1860579866f964b3b84e820ca2628682e3590314eb84c40b78cd042b"
+    },
+    "188": {
+      "eligible": true,
+      "finding": "Crossref record and successful DOI resolution support exact title, Verma/Marpally/Srivastava ordered authors, AAAI and 2021. DOI case normalization preserves identity. No apparent VALID-label error.",
+      "limitations": [
+        "The DOI response and registry query derive from Crossref rather than independent evidence."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-188/review/evidence/18c41656c27c73feb840.json",
+          "sha256": "3d7f077f3648519c9d730144a027d5f9226b78363d0540ccba2d0ed88b843891"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-188/review/evidence/44499c629ba28bacd5d3.json",
+          "sha256": "8f4a3ad7d13f282ab230d580800a856726e69c8953a683c41f4b0c4e2b751bd4"
+        }
+      ],
+      "receipt_sha256": "069f725fa3fd71b128c0c8da601e121027e76769f0f53bd596be995fe5a45445"
+    },
+    "194": {
+      "eligible": true,
+      "finding": "Inspected Crossref, OpenAlex and Europe PMC candidates do not match the supplied 2023 Wang systematic review in Clinical Pharmacokinetics. The named rational-dosing alternative is Bai et al. 2012, not Wang 2023. No evidence-supported conflict with native FABRICATED gold; bounded not_found is the unchanged policy prediction.",
+      "limitations": [
+        "Finite ranked searches are not proof of nonexistence. No direct 2023 publisher table of contents was inspected."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-194/review/evidence/4ff95483b7699048d715.json",
+          "sha256": "0fe2862a864eb5ab6fd4b6343c547f65192edf921414ed05c28dc0843d4cb389"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-194/review/evidence/extra/1603736b251f052f8b38.json",
+          "sha256": "bd1498e96e1971a57a91411c7a65847d71fdee8e4d9f9bf4aac3e24a107db722"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-194/review/evidence/extra/84e6fdea5d96e7f8f6f5.json",
+          "sha256": "3fe72a4d0ba0e6d1c6f7f003bfc9b3d2974a860985a3e31b2fa3fd905dc83972"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-194/review/evidence/extra/98625c0247f8d30b2368.json",
+          "sha256": "4f5401ade0519a0f39f45fdc6696608925d819cb3667f9b0737022fe9c54626f"
+        }
+      ],
+      "receipt_sha256": "5f407bd9c57c7e808454c6211f5b078c254912a40c431267dc59b4ac1c212e2b"
+    },
+    "215": {
+      "eligible": true,
+      "finding": "Official PMLR v139 acuna21a record supports exact title, four supplied ordered authors, ICML and 2021. No apparent VALID-label error.",
+      "limitations": [
+        "Broad assertion that Crossref does not index any PMLR/ICML 2021 papers is not established by one ranked search and is unnecessary for the finding."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-215/review/evidence/extra/bd1742e0b3c122942528.json",
+          "sha256": "90cfeb0e71fd623ba2b61b0d6c974e08ef4f08cd49935299d8338ff034b47a7c"
+        }
+      ],
+      "receipt_sha256": "72a779716ec5b65514ce56c8fe146d21cb2662459bd8572b2b2429186c049be1"
+    },
+    "220": {
+      "eligible": true,
+      "finding": "arXiv v1 record confirms Kobanda/Radji and 2026, but canonical title says Joint Embedding rather than Joint Representation. Supplied version-suffixed DOI returns 404; source lists the unversioned DOI. Native HALLUCINATED bibliographic-issue label is supported.",
+      "limitations": [
+        "No claim of whole-work fabrication is needed: identity is established and field defects are supported."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-220/review/evidence/f56e74d9640bacca9b03.json",
+          "sha256": "fccfffe31a98a7eebc928793d74add5f02869e066e24cb482542b8b72817f7e3"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-220/review/evidence/c6e16279b90b5335cb23.json",
+          "sha256": "3021b862e1b262e86a45051e71284e1ebe7fb9b38fbe191a9baf850765c135f9"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-220/review/evidence/a3c8b9e83e9a351d10fc.json",
+          "sha256": "18884795727aa8be64227a42bf31a9c093e092d71f9d8300d3b13330131789c7"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-220/review/evidence/e0f0d20c6dac153af267.json",
+          "sha256": "d07d0452bdbe09bd003b9f1518c5f14f3aba48c94bbd81dc79c0b50869817bcf"
+        }
+      ],
+      "receipt_sha256": "bba31cc398643e5e82ef66bcad367d000acca6228c958f27b06dde858c1bf467"
+    },
+    "227": {
+      "eligible": true,
+      "finding": "Crossref and both OpenAlex result sets contain no matching title/three-author combination; the year-scoped title search returns a different EIT reconstruction paper. No evidence-supported native HALLUCINATED-label conflict. Bounded not_found matches unchanged scoring.",
+      "limitations": [
+        "DBLP returned a bot challenge; official CVF proceedings surfaced in search but were not fetched. Negative searches are finite and do not prove global nonexistence.",
+        "Two queries to OpenAlex are not independent bibliographic services; the report wording overstates independence."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-227/review/evidence/418cb4ef4fd82f20ac7c.json",
+          "sha256": "190b8d9d2e190c4387c109b1f32cfd422c37138096c03dc0b240f5ec098165c1"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-227/review/evidence/extra/83456ca270ff31780e09.json",
+          "sha256": "44a60ea37c848f8f2029dba76ccec37b4dd99660e52c3ae678f459291a88f349"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-227/review/evidence/extra/cdc8a7c235dfc6d7e5dc.json",
+          "sha256": "52c56b5d452fcf894420d754fe52046865a41c886f2e7284180eafb947b60367"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-227/review/evidence/extra/27b2b8221456632d7b02.json",
+          "sha256": "2a26abde4a8a1628e6e4ab568fda5e1b05d4446b68f951a6a65d93aa9e56a044"
+        }
+      ],
+      "receipt_sha256": "0151335c513cfb29d6b1694f79d6075e5fca6938d8966a91369fd6fc48fc9c81"
+    },
+    "235": {
+      "eligible": true,
+      "finding": "Official Hugging Face page confirms the exact repository and 2025 creation/modification timestamps. No affirmative evidence that native verified gold is wrong.",
+      "limitations": [
+        "COMET author attribution is not verified by the retained page, which identifies owner cometadata. Calling this attribution cosmetic and declaring the entire citation verified is stronger than the evidence; this is a checker coverage gap, not an established gold error."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-235/review/evidence/e32312347d4946a4fec2.json",
+          "sha256": "fafe3497a784b2637aaffa9198847b1ac13eb6a8e597b3d2a6ef20a6d379f8be"
+        }
+      ],
+      "receipt_sha256": "a1b1774fd8e1158f22da06ab6f6adb8661be75e7d962825367ef2623ee827fb5"
+    },
+    "249": {
+      "eligible": true,
+      "note": "Completed deterministic verification. Selection awaits earlier candidates in frozen order.",
+      "finding": "Retained Crossref record supports all seven ordered authors, title, DOI 10.1109/CVPR46437.2021.01195, CVPR and 2021. No apparent native VALID label conflict.",
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-suite-v2/prepared/evidence/2f64f62e9c629ff4b8e6.json",
+          "sha256": "a3dbf16406988e0f53140782d9b703504d9ae49f350e381f462fa16cbeb16d04"
+        }
+      ],
+      "receipt_sha256": "6857a943de291119db55364df4a243dbf6c7470d78e9e19860af940e1f6e3449"
+    },
+    "253": {
+      "eligible": false,
+      "exclusion": "apparent_label_or_scope_conflict",
+      "finding": "Citation names Smith, Katz and Niemeyer as a complete author list, without et al., but the retained Crossref record explicitly registers FORCE11 Software Citation Working Group as an additional author (name field; role=author). The DOI response repeats that author. This is an apparent omission conflicting with verified gold under complete-metadata checking, so it is conservatively excluded per the user requested label screen.",
+      "limitations": [
+        "The native model prediction agrees with verified gold; this exclusion comes from independent source audit, not model-label disagreement.",
+        "Publisher landing page is blocked by Cloudflare. Crossref and doi.org are the same metadata source, not independent confirmation. Whether a citation style permits omission of the group author is a scope question; this is not a definitive adjudication that the benchmark label is wrong.",
+        "The model mentions the group in prose but does not check authors structurally or assess the omission."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-253/review/evidence/eb5cb58646727308d109.json",
+          "sha256": "477bf510375e8c7616778e79ad44ff31c5fced6df3a665bd3051aeaead189529"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-253/review/evidence/4afd2ab217bad30c739e.json",
+          "sha256": "48b6585c12ed1a0f0f779a35f6bd574c42197e7565b796d8df7fdedca7184503"
+        },
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-253/review/evidence/ca683f6634c6ba080439.json",
+          "sha256": "3b39419019a8ead008c4c494f00f866cf9581d2a591d99f9d8e84442fa089b71"
+        }
+      ],
+      "receipt_sha256": "844e5ef488ad714f9bc328df3f9059ba30ac96d3c19a4afd99cc841ef0ed941a"
+    },
+    "256": {
+      "eligible": true,
+      "finding": "Official CiteX workshop site confirms Workshop on Citation Extraction and Parsing, CiteX 2026, Frankfurt and May 28-29, 2026. No apparent verified-label conflict for the cited workshop website.",
+      "limitations": [
+        "Single retained website snapshot. Workshop proceedings were not separately verified because the citation identifies the website."
+      ],
+      "evidence_checked": [
+        {
+          "path": ".runs/citation-iteration-50-v3-screen-v1/jobs/0-review-256/review/evidence/2bbcbaab42703ab5f072.json",
+          "sha256": "4646dc2b73172ad0a6a27d19b67cf40632d17449f89333235428513c7fd8a154"
+        }
+      ],
+      "receipt_sha256": "fb249098f465048c01e61736b68ef2adfd8c05634ddc6c6a70f2a437a97d83df"
+    }
+  },
+  "summary": {
+    "screened": 26,
+    "eligible": 24,
+    "excluded_timeout_ids": [
+      "36"
+    ],
+    "excluded_apparent_label_or_scope_ids": [
+      "253"
+    ],
+    "note": "Eligibility is a retained-source screen, not proof that every benchmark label or generated explanation is correct. Original gold and model reports remain unchanged."
+  }
+}

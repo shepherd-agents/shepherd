@@ -1,0 +1,202 @@
+{
+  "url": "https://api.crossref.org/works?query.bibliographic=Zayne+Sprague%2C+Xi+Ye%2C+Kyle+Richardson%2C+and+Greg+Durrett.+MuSR%3A+Testing+the+limits+of+chain-of-thought+with+multistep+soft+reasoning.+In+Findings+of+the+Association+for+Computational+Linguistics%3A+EMNLP+2023%2C+pages+10749%E2%80%9310763%2C+2023.&rows=3",
+  "retrieved_at": "2026-09-05T09:18:07.101910+00:00",
+  "evidence_file": "evidence/17412a6bd988442e1e12.json",
+  "http_status": 200,
+  "resolved_url": "https://api.crossref.org/works?query.bibliographic=Zayne+Sprague%2C+Xi+Ye%2C+Kyle+Richardson%2C+and+Greg+Durrett.+MuSR%3A+Testing+the+limits+of+chain-of-thought+with+multistep+soft+reasoning.+In+Findings+of+the+Association+for+Computational+Linguistics%3A+EMNLP+2023%2C+pages+10749%E2%80%9310763%2C+2023.&rows=3",
+  "body": "{\"status\":\"ok\",\"message-type\":\"work-list\",\"message-version\":\"1.0.0\",\"message\":{\"facets\":{},\"total-results\":9027,\"items\":[{\"indexed\":{\"date-parts\":[[2026,6,17]],\"date-time\":\"2026-06-17T14:27:51Z\",\"timestamp\":1781706471635,\"version\":\"3.54.5\"},\"publisher-location\":\"Stroudsburg, PA, USA\",\"reference-count\":0,\"publisher\":\"Association for Computational Linguistics\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"published-print\":{\"date-parts\":[[2023]]},\"DOI\":\"10.18653\\/v1\\/2023.findings-emnlp.1022\",\"type\":\"proceedings-article\",\"created\":{\"date-parts\":[[2023,12,10]],\"date-time\":\"2023-12-10T16:58:19Z\",\"timestamp\":1702227499000},\"page\":\"15299-15328\",\"source\":\"Crossref\",\"is-referenced-by-count\":7,\"title\":[\"GRACE: Discriminator-Guided Chain-of-Thought Reasoning\"],\"prefix\":\"10.18653\",\"author\":[{\"given\":\"Muhammad\",\"family\":\"Khalifa\",\"sequence\":\"first\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Lajanugen\",\"family\":\"Logeswaran\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Moontae\",\"family\":\"Lee\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Honglak\",\"family\":\"Lee\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Lu\",\"family\":\"Wang\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]}],\"member\":\"1643\",\"event\":{\"name\":\"Findings of the Association for Computational Linguistics: EMNLP 2023\",\"location\":\"Singapore\",\"start\":{\"date-parts\":[[2023,12]]},\"end\":{\"date-parts\":[[2023,12]]}},\"container-title\":[\"Findings of the Association for Computational Linguistics: EMNLP 2023\"],\"deposited\":{\"date-parts\":[[2023,12,10]],\"date-time\":\"2023-12-10T17:18:24Z\",\"timestamp\":1702228704000},\"score\":64.31285,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/aclanthology.org\\/2023.findings-emnlp.1022\"}},\"issued\":{\"date-parts\":[[2023]]},\"references-count\":0,\"URL\":\"https:\\/\\/doi.org\\/10.18653\\/v1\\/2023.findings-emnlp.1022\",\"published\":{\"date-parts\":[[2023]]}},{\"indexed\":{\"date-parts\":[[2026,8,20]],\"date-time\":\"2026-08-20T14:50:04Z\",\"timestamp\":1787237404680,\"version\":\"build-2736575974\"},\"publisher-location\":\"Stroudsburg, PA, USA\",\"reference-count\":0,\"publisher\":\"Association for Computational Linguistics\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"published-print\":{\"date-parts\":[[2023]]},\"DOI\":\"10.18653\\/v1\\/2023.findings-emnlp.153\",\"type\":\"proceedings-article\",\"created\":{\"date-parts\":[[2023,12,10]],\"date-time\":\"2023-12-10T16:58:19Z\",\"timestamp\":1702227499000},\"page\":\"2334-2352\",\"source\":\"Crossref\",\"is-referenced-by-count\":20,\"title\":[\"Chain of Thought with Explicit Evidence Reasoning for Few-shot Relation Extraction\"],\"prefix\":\"10.18653\",\"author\":[{\"given\":\"Xilai\",\"family\":\"Ma\",\"sequence\":\"first\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Jing\",\"family\":\"Li\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Min\",\"family\":\"Zhang\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]}],\"member\":\"1643\",\"event\":{\"name\":\"Findings of the Association for Computational Linguistics: EMNLP 2023\",\"location\":\"Singapore\",\"start\":{\"date-parts\":[[2023,12]]},\"end\":{\"date-parts\":[[2023,12]]}},\"container-title\":[\"Findings of the Association for Computational Linguistics: EMNLP 2023\"],\"deposited\":{\"date-parts\":[[2023,12,10]],\"date-time\":\"2023-12-10T17:11:30Z\",\"timestamp\":1702228290000},\"score\":63.452827,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/aclanthology.org\\/2023.findings-emnlp.153\"}},\"issued\":{\"date-parts\":[[2023]]},\"references-count\":0,\"URL\":\"https:\\/\\/doi.org\\/10.18653\\/v1\\/2023.findings-emnlp.153\",\"published\":{\"date-parts\":[[2023]]}},{\"indexed\":{\"date-parts\":[[2026,8,18]],\"date-time\":\"2026-08-18T03:28:32Z\",\"timestamp\":1787023712302,\"version\":\"build-2736575974\"},\"publisher-location\":\"Stroudsburg, PA, USA\",\"reference-count\":0,\"publisher\":\"Association for Computational Linguistics\",\"content-domain\":{\"domain\":[],\"crossmark-restriction\":false},\"published-print\":{\"date-parts\":[[2023]]},\"DOI\":\"10.18653\\/v1\\/2023.findings-emnlp.179\",\"type\":\"proceedings-article\",\"created\":{\"date-parts\":[[2023,12,10]],\"date-time\":\"2023-12-10T16:58:19Z\",\"timestamp\":1702227499000},\"page\":\"2717-2731\",\"source\":\"Crossref\",\"is-referenced-by-count\":8,\"title\":[\"Self-prompted Chain-of-Thought on Large Language Models for Open-domain Multi-hop Reasoning\"],\"prefix\":\"10.18653\",\"author\":[{\"given\":\"Jinyuan\",\"family\":\"Wang\",\"sequence\":\"first\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Junlong\",\"family\":\"Li\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]},{\"given\":\"Hai\",\"family\":\"Zhao\",\"sequence\":\"additional\",\"affiliation\":[],\"role\":[{\"vocabulary\":\"crossref\",\"role\":\"author\"}]}],\"member\":\"1643\",\"event\":{\"name\":\"Findings of the Association for Computational Linguistics: EMNLP 2023\",\"location\":\"Singapore\",\"start\":{\"date-parts\":[[2023,12]]},\"end\":{\"date-parts\":[[2023,12]]}},\"container-title\":[\"Findings of the Association for Computational Linguistics: EMNLP 2023\"],\"deposited\":{\"date-parts\":[[2023,12,10]],\"date-time\":\"2023-12-10T17:11:43Z\",\"timestamp\":1702228303000},\"score\":61.115456,\"resource\":{\"primary\":{\"URL\":\"https:\\/\\/aclanthology.org\\/2023.findings-emnlp.179\"}},\"issued\":{\"date-parts\":[[2023]]},\"references-count\":0,\"URL\":\"https:\\/\\/doi.org\\/10.18653\\/v1\\/2023.findings-emnlp.179\",\"published\":{\"date-parts\":[[2023]]}}],\"items-per-page\":3,\"query\":{\"start-index\":0,\"search-terms\":null}}}",
+  "candidates": [
+    {
+      "title": [
+        "GRACE: Discriminator-Guided Chain-of-Thought Reasoning"
+      ],
+      "author": [
+        {
+          "given": "Muhammad",
+          "family": "Khalifa",
+          "sequence": "first",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Lajanugen",
+          "family": "Logeswaran",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Moontae",
+          "family": "Lee",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Honglak",
+          "family": "Lee",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Lu",
+          "family": "Wang",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Findings of the Association for Computational Linguistics: EMNLP 2023"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2023
+          ]
+        ]
+      },
+      "DOI": "10.18653/v1/2023.findings-emnlp.1022",
+      "URL": "https://doi.org/10.18653/v1/2023.findings-emnlp.1022",
+      "type": "proceedings-article"
+    },
+    {
+      "title": [
+        "Chain of Thought with Explicit Evidence Reasoning for Few-shot Relation Extraction"
+      ],
+      "author": [
+        {
+          "given": "Xilai",
+          "family": "Ma",
+          "sequence": "first",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Jing",
+          "family": "Li",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Min",
+          "family": "Zhang",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Findings of the Association for Computational Linguistics: EMNLP 2023"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2023
+          ]
+        ]
+      },
+      "DOI": "10.18653/v1/2023.findings-emnlp.153",
+      "URL": "https://doi.org/10.18653/v1/2023.findings-emnlp.153",
+      "type": "proceedings-article"
+    },
+    {
+      "title": [
+        "Self-prompted Chain-of-Thought on Large Language Models for Open-domain Multi-hop Reasoning"
+      ],
+      "author": [
+        {
+          "given": "Jinyuan",
+          "family": "Wang",
+          "sequence": "first",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Junlong",
+          "family": "Li",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Hai",
+          "family": "Zhao",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        }
+      ],
+      "container-title": [
+        "Findings of the Association for Computational Linguistics: EMNLP 2023"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2023
+          ]
+        ]
+      },
+      "DOI": "10.18653/v1/2023.findings-emnlp.179",
+      "URL": "https://doi.org/10.18653/v1/2023.findings-emnlp.179",
+      "type": "proceedings-article"
+    }
+  ]
+}
