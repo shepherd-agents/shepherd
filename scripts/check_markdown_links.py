@@ -61,9 +61,7 @@ def _check_links(root: Path, excludes: tuple[str, ...]) -> list[str]:
             resolved = (md_path.parent / normalized).resolve()
             if resolved.exists():
                 continue
-            errors.append(
-                f"{md_path.relative_to(REPO_ROOT)}: broken local link '{target}'"
-            )
+            errors.append(f"{md_path.relative_to(REPO_ROOT)}: broken local link '{target}'")
     return errors
 
 
@@ -89,6 +87,10 @@ def _effective_excludes(*, includes_history: bool, excludes: list[str]) -> tuple
 def _resolve_default_root(project: str) -> Path:
     kind = "docs" if project == "shepherd" else "design"
     root = project_docs_dir(REPO_ROOT, project=project, kind=kind)
+    if root is None and project == "shepherd":
+        public_docs = REPO_ROOT / "docs" / "shepherd"
+        if public_docs.is_dir():
+            root = public_docs
     if root is None:
         raise SystemExit(
             f"Could not find an isolated {kind} root for project {project!r} in the current repo layout. "

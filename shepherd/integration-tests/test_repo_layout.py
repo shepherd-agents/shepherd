@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 import tomllib
+from packaging.requirements import Requirement
 
 from shepherd.cli import _workspace_layout as cli_layout
 
@@ -68,7 +69,9 @@ def test_runtime_kernel_dependency_metadata_is_workspace_installable() -> None:
 
     kernel_version = kernel["version"]
     assert isinstance(kernel_version, str)
-    assert f"shepherd-kernel-v3-reference>={kernel_version}," in kernel_dependency
+    # Workspace dependencies may intentionally have no version bound. Any
+    # declared bounds must accept the actual workspace kernel version.
+    assert kernel_version in Requirement(kernel_dependency).specifier
     assert _minimum_python_version(str(runtime["requires-python"])) >= _minimum_python_version(
         str(kernel["requires-python"])
     )
@@ -194,4 +197,4 @@ def test_markdown_link_script_accepts_shepherd_project_in_nested_layout() -> Non
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "shepherd/docs" in result.stdout
+    assert "docs/shepherd" in result.stdout
