@@ -193,6 +193,7 @@ def _substitute_template(
         "claude": "ANTHROPIC_API_KEY",
         "anthropic": "ANTHROPIC_API_KEY",
         "openai": "OPENAI_API_KEY",
+        "orcarouter": "ORCAROUTER_API_KEY",
     }
     api_key_var = api_key_vars.get(provider or "", "API_KEY")
     result = result.replace("${API_KEY_VAR}", api_key_var)

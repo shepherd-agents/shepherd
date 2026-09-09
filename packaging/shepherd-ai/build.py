@@ -63,6 +63,7 @@ citation_checker = "shepherd_citation_checker.registration"
 [project.entry-points."shepherd.providers"]
 claude = "shepherd_providers.claude:ClaudeProvider"
 openai = "shepherd_providers.openai:OpenAIProvider"
+orcarouter = "shepherd_providers.orcarouter:OrcaRouterProvider"
 
 [project.entry-points."shepherd.contexts"]
 workspace = "shepherd_contexts.workspace:WorkspaceRef"
