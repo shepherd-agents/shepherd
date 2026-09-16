@@ -60,6 +60,7 @@ __all__ = [
     "ClaudeHeadlessProvider",
     "CodexAgentProvider",
     "DeterministicFakeProvider",
+    "HermesAgentProvider",
 ]
 
 
@@ -1283,6 +1284,183 @@ class ClaudeHeadlessProvider:
         )
 
 
+
+@dataclass(frozen=True)
+class HermesAgentProvider:
+    """Hermes Agent headless CLI executor for the VcsCore-native run path.
+
+    This bounded integration mirrors the existing headless agent providers: the
+    Hermes CLI runs only via ``launch_confined`` inside the workspace jail, with
+    private HOME/TMPDIR state redirected into a scrubbed scratch directory. CI
+    pins the public command shape and parser without requiring a live Hermes
+    install or network credentials.
+    """
+
+    provider_id: str = "hermes-agent"
+    prompt: str = ""
+    model: str | None = None
+    cli_path: str = "hermes"
+    budget_seconds: int = 240
+
+    _SCRATCH = ".hermes-scratch"
+
+    @property
+    def capabilities(self) -> AgentProviderCapabilities:
+        return AgentProviderCapabilities(
+            provider_id=self.provider_id,
+            transport="headless_cli",
+            confined=True,
+            network_required=True,
+            structured_output=True,
+            session_resume=False,
+            workspace_tools=CANONICAL_WORKSPACE_TOOL_NAMES,
+            custom_tools=False,
+            mcp=False,
+        )
+
+    def command_argv(self, working_path: Path | str, cli: str, prompt: str | None = None) -> list[str]:
+        """The full jailed argv — pure, so keyless tests can pin the shape."""
+        prompt = self.prompt if prompt is None else prompt
+        scratch = Path(working_path) / self._SCRATCH
+        argv = [
+            "/usr/bin/perl",
+            "-e",
+            "alarm shift @ARGV; exec @ARGV or die qq{exec: $!}",
+            str(self.budget_seconds),
+            "/usr/bin/env",
+            f"HOME={scratch / 'home'}",
+            f"TMPDIR={scratch / 'tmp'}",
+            cli,
+            "-p",
+            prompt,
+            "--output-format",
+            "json",
+        ]
+        if self.model is not None:
+            argv += ["--model", self.model]
+        return argv
+
+    def execute(
+        self,
+        task_body: Callable[..., Any] | None,
+        stack: HandlerStack,
+        context: DriverContext,
+        args: Mapping[str, Any],
+        *,
+        execution: Any = None,
+        confinement: Any = None,
+    ) -> ExecutionProviderResult:
+        del stack, context
+        if execution is None or confinement is None:
+            raise ExecutionAuthorityRequired(
+                "the Hermes Agent provider runs only jailed: it needs the per-run "
+                "ExecutionCapability and a lowered ConfinementSpec."
+            )
+        prompt = _provider_prompt(self.prompt, task_body, args, "HermesAgentProvider")
+        cli = shutil.which(self.cli_path) if Path(self.cli_path).name == self.cli_path else self.cli_path
+        invocation_id = _invocation_id(self.provider_id, execution)
+        sequence = count()
+        model = self.model or "hermes-agent-cli"
+        started = ProviderEvent(
+            kind=PROVIDER_INVOCATION_STARTED,
+            provider_id=self.provider_id,
+            invocation_id=invocation_id,
+            sequence=next(sequence),
+            event_id=f"{invocation_id}:started",
+            model=model,
+            payload={
+                "prompt_digest": digest_jsonable({"prompt": prompt}),
+                "cli": Path(self.cli_path).name,
+                "output_format": "json",
+            },
+        )
+        if cli is None:
+            message = f"Hermes Agent CLI not found on PATH: {self.cli_path}"
+            failed = ProviderEvent(
+                kind=PROVIDER_INVOCATION_FAILED,
+                provider_id=self.provider_id,
+                invocation_id=invocation_id,
+                sequence=next(sequence),
+                event_id=f"{invocation_id}:failed",
+                model=model,
+                payload={"error_type": "HermesProviderError", **redacted_text_payload(message, field="error")},
+            )
+            raise ProviderInvocationError(message, provider_events=(started, failed))
+
+        scratch = Path(execution.working_path) / self._SCRATCH
+        for sub in ("home", "tmp"):
+            (scratch / sub).mkdir(parents=True, exist_ok=True)
+        try:
+            proc = execution.launch_confined(self.command_argv(execution.working_path, cli, prompt), confinement)
+        finally:
+            shutil.rmtree(scratch, ignore_errors=True)
+
+        if proc.returncode != 0:
+            if proc.returncode == -14:
+                from shepherd_dialect.nucleus import BudgetExhausted
+
+                raise BudgetExhausted(_budget_exhausted_message(self.budget_seconds, proc.stdout, proc.stderr))
+            signal = ((proc.stderr or "") + (proc.stdout or "")).strip()
+            message = f"Hermes Agent execution failed (rc={proc.returncode}): {signal[-300:]}"
+            failed = ProviderEvent(
+                kind=PROVIDER_INVOCATION_FAILED,
+                provider_id=self.provider_id,
+                invocation_id=invocation_id,
+                sequence=next(sequence),
+                event_id=f"{invocation_id}:failed",
+                model=model,
+                payload={
+                    "returncode": proc.returncode,
+                    "error_type": "HermesProviderError",
+                    **redacted_text_payload(message, field="error"),
+                    **redacted_text_payload(proc.stdout or "", field="stdout"),
+                    **redacted_text_payload(proc.stderr or "", field="stderr"),
+                },
+            )
+            raise ProviderInvocationError(message, provider_events=(started, failed))
+
+        parsed = _provider_result_from_hermes_stdout(proc.stdout or "", model=model)
+        completed = ProviderEvent(
+            kind=PROVIDER_INVOCATION_COMPLETED,
+            provider_id=self.provider_id,
+            invocation_id=invocation_id,
+            sequence=next(sequence),
+            event_id=f"{invocation_id}:completed",
+            model=str(parsed.metadata.get("model") or model),
+            payload={
+                "returncode": proc.returncode,
+                "session_id": parsed.session_id or "",
+                **redacted_text_payload(proc.stdout or "", field="stdout"),
+                **redacted_text_payload(proc.stderr or "", field="stderr"),
+            },
+        )
+        turn = ProviderEvent(
+            kind=MODEL_TURN,
+            provider_id=self.provider_id,
+            invocation_id=invocation_id,
+            sequence=next(sequence),
+            event_id=f"{invocation_id}:model-turn",
+            model=str(parsed.metadata.get("model") or model),
+            payload=redacted_text_payload(parsed.output_text, field="text"),
+        )
+        result = ProviderInvocationResult(
+            output_text=parsed.output_text,
+            structured_output=parsed.structured_output,
+            session_id=parsed.session_id,
+            usage=parsed.usage,
+            events=(started, completed, turn),
+            metadata=parsed.metadata,
+        )
+        return ExecutionProviderResult(
+            outcome=provider_invocation_outcome(
+                result,
+                provider_id=self.provider_id,
+                invocation_id=invocation_id,
+            ),
+            provider_events=result.events,
+        )
+
+
 @dataclass(frozen=True)
 class ClaudeApiProvider:
     """Claude API/SDK worker executor for the VcsCore-native run path.
@@ -1716,6 +1894,50 @@ def _number(value: object, default: float) -> float:
     return float(value) if isinstance(value, (int, float)) else default
 
 
+def _provider_result_from_hermes_stdout(stdout: str, *, model: str) -> ProviderInvocationResult:
+    text = stdout.strip()
+    if not text:
+        raise ClaudeProviderOutputError("Hermes Agent returned empty stdout")
+    structured_output: Mapping[str, Any] | None = None
+    output_text = text
+    session_id: str | None = None
+    usage: dict[str, Any] = {}
+    metadata: dict[str, object] = {"model": model}
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return ProviderInvocationResult(output_text=output_text, metadata=metadata)
+    if not isinstance(payload, Mapping):
+        return ProviderInvocationResult(output_text=output_text, structured_output=payload, metadata=metadata)
+
+    structured_output = dict(payload)
+    for key in ("result", "output", "response", "finalResponse", "message"):
+        value = payload.get(key)
+        if isinstance(value, str):
+            output_text = value
+            break
+    usage_value = payload.get("usage")
+    if isinstance(usage_value, Mapping):
+        usage = dict(usage_value)
+    session_value = payload.get("session_id") or payload.get("sessionId") or payload.get("thread_id")
+    if isinstance(session_value, str):
+        session_id = session_value
+    metadata_value = payload.get("metadata")
+    if isinstance(metadata_value, Mapping):
+        metadata.update({str(key): value for key, value in metadata_value.items()})
+    served_model = payload.get("model")
+    if isinstance(served_model, str) and served_model:
+        metadata["model"] = served_model
+    return ProviderInvocationResult(
+        output_text=output_text,
+        structured_output=structured_output,
+        session_id=session_id,
+        usage=usage,
+        metadata=metadata,
+    )
+
+
+def codex_provider_result_from_payload(
 def codex_provider_result_from_payload(
     raw: Mapping[str, Any],
     *,

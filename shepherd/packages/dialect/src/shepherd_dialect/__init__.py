@@ -21,6 +21,7 @@ _EXPORTS: dict[str, tuple[str, str]] = {
     "ClaudeApiProvider": ("shepherd_dialect.providers", "ClaudeApiProvider"),
     "ClaudeHeadlessProvider": ("shepherd_dialect.providers", "ClaudeHeadlessProvider"),
     "CodexAgentProvider": ("shepherd_dialect.providers", "CodexAgentProvider"),
+    "HermesAgentProvider": ("shepherd_dialect.providers", "HermesAgentProvider"),
     "CompletedTask": ("shepherd_dialect.task_meta", "CompletedTask"),
     "CarrierCheckAuthority": ("shepherd_dialect.permission_plan", "CarrierCheckAuthority"),
     "DeliveryFailed": ("shepherd_dialect.nucleus", "DeliveryFailed"),
