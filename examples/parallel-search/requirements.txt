@@ -1,0 +1,3 @@
+# Additional dependencies for this example, after syncing the Shepherd workspace.
+mcp>=1.26,<2
+httpx>=0.27,<1

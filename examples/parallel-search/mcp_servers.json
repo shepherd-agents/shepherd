@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "parallel_search": {
+      "type": "http",
+      "url": "https://search.parallel.ai/mcp",
+      "headers": {
+        "User-Agent": "shepherd-parallel-search-example/1.0"
+      },
+      "allowed_tools": ["web_search", "web_fetch"]
+    }
+  }
+}
