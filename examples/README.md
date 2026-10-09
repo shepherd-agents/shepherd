@@ -43,3 +43,10 @@ settlement.
 These notebooks demonstrate Shepherd workspace control, VcsCore retained-output
 custody, artifact refs, flow traces, and explicit settlement through a fully
 offline visual-artifact workflow.
+
+## Parallel Search MCP
+
+- [`parallel-search/`](parallel-search/README.md)
+
+Load an opt-in HTTP MCP context and call keyless web search and page fetch directly,
+without a model or agent loop.
